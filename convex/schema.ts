@@ -42,6 +42,14 @@ const DAYS_OF_WEEK = [
   "sun",
 ] as const;
 
+const GOALS = [
+  "weightLoss",
+  "muscleGain",
+  "endurance",
+  "flexibility",
+  "generalFitness",
+] as const;
+
 /* ======================================================
    ENUM → VALIDATOR HELPER
 ====================================================== */
@@ -59,6 +67,7 @@ const WorkoutStatusValidator = enumToValidator(WORKOUT_STATUSES);
 const WorkoutTypeValidator = enumToValidator(WORKOUT_TYPES);
 const MealTypeValidator = enumToValidator(MEAL_TYPES);
 const DayOfWeekValidator = enumToValidator(DAYS_OF_WEEK);
+const GoalValidator = enumToValidator(GOALS);
 
 /* ======================================================
    TABLES
@@ -73,6 +82,8 @@ const users = defineTable({
   pin: v.string(), // 6-digit, stored as-is (explicitly insecure)
 
   role: RoleValidator,
+
+  goal: GoalValidator,
 
   trainerId: v.optional(v.id("users")),
   trainingPlanId: v.optional(v.id("trainingPlans")),
