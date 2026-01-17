@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AppManagementRouteRouteImport } from './routes/app/management/route'
 import { Route as AppManagementIndexRouteImport } from './routes/app/management/index'
 import { Route as AppUserIndexRouteImport } from './routes/app/_user/index'
 
@@ -18,10 +19,15 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AppManagementIndexRoute = AppManagementIndexRouteImport.update({
-  id: '/app/management/',
-  path: '/app/management/',
+const AppManagementRouteRoute = AppManagementRouteRouteImport.update({
+  id: '/app/management',
+  path: '/app/management',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AppManagementIndexRoute = AppManagementIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppManagementRouteRoute,
 } as any)
 const AppUserIndexRoute = AppUserIndexRouteImport.update({
   id: '/app/_user/',
@@ -31,8 +37,9 @@ const AppUserIndexRoute = AppUserIndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/app/management': typeof AppManagementRouteRouteWithChildren
   '/app': typeof AppUserIndexRoute
-  '/app/management': typeof AppManagementIndexRoute
+  '/app/management/': typeof AppManagementIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -42,21 +49,22 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/app/management': typeof AppManagementRouteRouteWithChildren
   '/app/_user/': typeof AppUserIndexRoute
   '/app/management/': typeof AppManagementIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/app' | '/app/management'
+  fullPaths: '/' | '/app/management' | '/app' | '/app/management/'
   fileRoutesByTo: FileRoutesByTo
   to: '/' | '/app' | '/app/management'
-  id: '__root__' | '/' | '/app/_user/' | '/app/management/'
+  id: '__root__' | '/' | '/app/management' | '/app/_user/' | '/app/management/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AppManagementRouteRoute: typeof AppManagementRouteRouteWithChildren
   AppUserIndexRoute: typeof AppUserIndexRoute
-  AppManagementIndexRoute: typeof AppManagementIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -68,12 +76,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/app/management/': {
-      id: '/app/management/'
+    '/app/management': {
+      id: '/app/management'
       path: '/app/management'
       fullPath: '/app/management'
-      preLoaderRoute: typeof AppManagementIndexRouteImport
+      preLoaderRoute: typeof AppManagementRouteRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/app/management/': {
+      id: '/app/management/'
+      path: '/'
+      fullPath: '/app/management/'
+      preLoaderRoute: typeof AppManagementIndexRouteImport
+      parentRoute: typeof AppManagementRouteRoute
     }
     '/app/_user/': {
       id: '/app/_user/'
@@ -85,10 +100,21 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AppManagementRouteRouteChildren {
+  AppManagementIndexRoute: typeof AppManagementIndexRoute
+}
+
+const AppManagementRouteRouteChildren: AppManagementRouteRouteChildren = {
+  AppManagementIndexRoute: AppManagementIndexRoute,
+}
+
+const AppManagementRouteRouteWithChildren =
+  AppManagementRouteRoute._addFileChildren(AppManagementRouteRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AppManagementRouteRoute: AppManagementRouteRouteWithChildren,
   AppUserIndexRoute: AppUserIndexRoute,
-  AppManagementIndexRoute: AppManagementIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
