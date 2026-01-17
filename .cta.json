@@ -1,0 +1,28 @@
+{
+  "projectName": "master-gym0",
+  "mode": "file-router",
+  "typescript": true,
+  "packageManager": "pnpm",
+  "tailwind": true,
+  "addOnOptions": {
+    "drizzle": {
+      "database": "postgresql"
+    }
+  },
+  "git": true,
+  "version": 1,
+  "framework": "react-cra",
+  "chosenAddOns": [
+    "eslint",
+    "nitro",
+    "start",
+    "convex",
+    "shadcn",
+    "t3env",
+    "better-auth",
+    "compiler",
+    "tanstack-query",
+    "drizzle",
+    "mcp"
+  ]
+}
