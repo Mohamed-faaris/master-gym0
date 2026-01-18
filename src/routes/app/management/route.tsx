@@ -1,5 +1,5 @@
+import { Outlet, createFileRoute } from '@tanstack/react-router'
 import { BottomBarAdmin } from '@/components/bottom-bar-admin'
-import { createFileRoute, Outlet } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/app/management')({
   component: RouteComponent,

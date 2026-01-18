@@ -2,4 +2,15 @@
 
 import { tanstackConfig } from '@tanstack/eslint-config'
 
-export default [...tanstackConfig]
+export default [
+  ...tanstackConfig,
+  {
+    ignores: [
+      '.output/**',
+      'convex/_generated/**',
+      'dist/**',
+      'build/**',
+      'node_modules/**',
+    ],
+  },
+]

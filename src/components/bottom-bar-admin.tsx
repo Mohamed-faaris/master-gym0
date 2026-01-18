@@ -1,5 +1,5 @@
-import React from "react"
-import { Grid, Plus, User } from "lucide-react"
+import React from 'react'
+import { Grid, Plus, User } from 'lucide-react'
 
 type Props = {
   onContextClick?: () => void
@@ -60,6 +60,5 @@ export function BottomBarAdmin({
     </nav>
   )
 }
-
 
 export default BottomBarAdmin

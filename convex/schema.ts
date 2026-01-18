@@ -1,73 +1,51 @@
-import { defineSchema, defineTable } from "convex/server";
-import { v } from "convex/values";
+import { defineSchema, defineTable } from 'convex/server'
+import { v } from 'convex/values'
 
 /* ======================================================
    CONSTANTS (Single Source of Truth)
 ====================================================== */
 
 const ROLES = [
-  "trainer",
-  "trainerManagedCustomer",
-  "selfManagedCustomer",
-  "admin",
-] as const;
+  'trainer',
+  'trainerManagedCustomer',
+  'selfManagedCustomer',
+  'admin',
+] as const
 
-const WORKOUT_STATUSES = [
-  "ongoing",
-  "completed",
-  "cancelled",
-] as const;
+const WORKOUT_STATUSES = ['ongoing', 'completed', 'cancelled'] as const
 
-const WORKOUT_TYPES = [
-  "cardio",
-  "strength",
-  "flexibility",
-  "balance",
-] as const;
+const WORKOUT_TYPES = ['cardio', 'strength', 'flexibility', 'balance'] as const
 
-const MEAL_TYPES = [
-  "breakfast",
-  "lunch",
-  "dinner",
-  "snack",
-] as const;
+const MEAL_TYPES = ['breakfast', 'lunch', 'dinner', 'snack'] as const
 
-const DAYS_OF_WEEK = [
-  "mon",
-  "tue",
-  "wed",
-  "thu",
-  "fri",
-  "sat",
-  "sun",
-] as const;
+const DAYS_OF_WEEK = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'] as const
 
 const GOALS = [
-  "weightLoss",
-  "muscleGain",
-  "endurance",
-  "flexibility",
-  "generalFitness",
-] as const;
+  'weightLoss',
+  'muscleGain',
+  'endurance',
+  'flexibility',
+  'generalFitness',
+] as const
 
 /* ======================================================
    ENUM → VALIDATOR HELPER
 ====================================================== */
 
-function enumToValidator<T extends readonly string[]>(values: T) {
-  return v.union(...values.map(v.literal));
+function enumToValidator<T extends ReadonlyArray<string>>(values: T) {
+  return v.union(...values.map(v.literal))
 }
 
 /* ======================================================
    VALIDATORS
 ====================================================== */
 
-const RoleValidator = enumToValidator(ROLES);
-const WorkoutStatusValidator = enumToValidator(WORKOUT_STATUSES);
-const WorkoutTypeValidator = enumToValidator(WORKOUT_TYPES);
-const MealTypeValidator = enumToValidator(MEAL_TYPES);
-const DayOfWeekValidator = enumToValidator(DAYS_OF_WEEK);
-const GoalValidator = enumToValidator(GOALS);
+const RoleValidator = enumToValidator(ROLES)
+const WorkoutStatusValidator = enumToValidator(WORKOUT_STATUSES)
+const WorkoutTypeValidator = enumToValidator(WORKOUT_TYPES)
+const MealTypeValidator = enumToValidator(MEAL_TYPES)
+const DayOfWeekValidator = enumToValidator(DAYS_OF_WEEK)
+const GoalValidator = enumToValidator(GOALS)
 
 /* ======================================================
    TABLES
@@ -85,20 +63,20 @@ const users = defineTable({
 
   goal: GoalValidator,
 
-  trainerId: v.optional(v.id("users")),
-  trainingPlanId: v.optional(v.id("trainingPlans")),
+  trainerId: v.optional(v.id('users')),
+  trainingPlanId: v.optional(v.id('trainingPlans')),
 
   createdAt: v.number(),
   updatedAt: v.number(),
 })
-  .index("by_phone", ["phoneNumber"])
-  .index("by_trainer", ["trainerId"])
-  .index("by_training_plan", ["trainingPlanId"]);
+  .index('by_phone', ['phoneNumber'])
+  .index('by_trainer', ['trainerId'])
+  .index('by_training_plan', ['trainingPlanId'])
 
 /* -------------------- USER META -------------------- */
 
 const userMeta = defineTable({
-  userId: v.id("users"),
+  userId: v.id('users'),
 
   age: v.optional(v.number()),
   address: v.optional(v.string()),
@@ -110,13 +88,12 @@ const userMeta = defineTable({
 
   createdAt: v.number(),
   updatedAt: v.number(),
-})
-  .index("by_user", ["userId"]);
+}).index('by_user', ['userId'])
 
 /* -------------------- WORKOUT LOGS -------------------- */
 
 const workoutLogs = defineTable({
-  userId: v.id("users"),
+  userId: v.id('users'),
 
   startTime: v.number(),
   endTime: v.optional(v.number()),
@@ -129,13 +106,12 @@ const workoutLogs = defineTable({
 
   createdAt: v.number(),
   updatedAt: v.number(),
-})
-  .index("by_user", ["userId"]);
+}).index('by_user', ['userId'])
 
 /* -------------------- WORKOUT (EXERCISES) -------------------- */
 
 const workouts = defineTable({
-  workoutLogId: v.id("workoutLogs"),
+  workoutLogId: v.id('workoutLogs'),
 
   exercises: v.array(
     v.object({
@@ -145,35 +121,32 @@ const workouts = defineTable({
       reps: v.optional(v.number()),
       weight: v.optional(v.number()),
       notes: v.optional(v.string()),
-    })
+    }),
   ),
 
   createdAt: v.number(),
   updatedAt: v.number(),
-})
-  .index("by_workout_log", ["workoutLogId"]);
+}).index('by_workout_log', ['workoutLogId'])
 
 /* -------------------- DIET LOGS -------------------- */
 
 const dietLogs = defineTable({
-  userId: v.id("users"),
+  userId: v.id('users'),
 
   createdAt: v.number(),
   mealType: MealTypeValidator,
   description: v.string(),
   calories: v.number(),
-})
-  .index("by_user", ["userId"]);
+}).index('by_user', ['userId'])
 
 /* -------------------- WEIGHT LOGS -------------------- */
 
 const weightLogs = defineTable({
-  userId: v.id("users"),
+  userId: v.id('users'),
 
   createdAt: v.number(),
   weight: v.number(),
-})
-  .index("by_user", ["userId"]);
+}).index('by_user', ['userId'])
 
 /* -------------------- TRAINING PLANS -------------------- */
 
@@ -191,25 +164,23 @@ const trainingPlans = defineTable({
           reps: v.optional(v.number()),
           weight: v.optional(v.number()),
           notes: v.optional(v.string()),
-        })
+        }),
       ),
-    })
+    }),
   ),
 
   durationWeeks: v.number(),
-  createdBy: v.id("users"),
+  createdBy: v.id('users'),
 
   createdAt: v.number(),
   updatedAt: v.number(),
-})
-  .index("by_creator", ["createdBy"]);
+}).index('by_creator', ['createdBy'])
 
 /* -------------------- EXERCISE MASTER (CONST TABLE) -------------------- */
 
 const exerciseNames = defineTable({
   name: v.string(),
-})
-  .index("by_name", ["name"]);
+}).index('by_name', ['name'])
 
 /* ======================================================
    SCHEMA EXPORT
@@ -224,4 +195,4 @@ export default defineSchema({
   weightLogs,
   trainingPlans,
   exerciseNames,
-});
+})

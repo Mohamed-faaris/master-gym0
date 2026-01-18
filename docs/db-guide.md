@@ -1,4 +1,5 @@
 user
+
 - id
 - name
 - phone-number(unique)
@@ -12,9 +13,9 @@ user
   - address
   - gender
   - height
-	- emergency contact name
-	- emergency contact phone number
-	- ...other relevant personal details
+  - emergency contact name
+  - emergency contact phone number
+  - ...other relevant personal details
 - workout logs (as separate table)(one to many)
   - id
   - start time
@@ -45,6 +46,7 @@ user
   - timestamp(created at, updated at)
 
 training plan
+
 - id
 - name
 - description
@@ -60,6 +62,7 @@ training plan
 - timestamp(created at, updated at)
 
 consts (predefined list)
-- exercise names 
+
+- exercise names
 - meal types
 - workout types
