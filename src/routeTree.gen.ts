@@ -14,6 +14,10 @@ import { Route as ApiIndexRouteImport } from './routes/api/index'
 import { Route as AppManagementRouteRouteImport } from './routes/app/management/route'
 import { Route as AppManagementIndexRouteImport } from './routes/app/management/index'
 import { Route as AppUserIndexRouteImport } from './routes/app/_user/index'
+import { Route as AppUserSessionsRouteImport } from './routes/app/_user/sessions'
+import { Route as AppUserDietLogsRouteImport } from './routes/app/_user/diet-logs'
+import { Route as AppUserDashboardRouteImport } from './routes/app/_user/dashboard'
+import { Route as AppUserAboutRouteImport } from './routes/app/_user/about'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -40,17 +44,45 @@ const AppUserIndexRoute = AppUserIndexRouteImport.update({
   path: '/app/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppUserSessionsRoute = AppUserSessionsRouteImport.update({
+  id: '/app/_user/sessions',
+  path: '/app/sessions',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppUserDietLogsRoute = AppUserDietLogsRouteImport.update({
+  id: '/app/_user/diet-logs',
+  path: '/app/diet-logs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppUserDashboardRoute = AppUserDashboardRouteImport.update({
+  id: '/app/_user/dashboard',
+  path: '/app/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppUserAboutRoute = AppUserAboutRouteImport.update({
+  id: '/app/_user/about',
+  path: '/app/about',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/app/management': typeof AppManagementRouteRouteWithChildren
   '/api': typeof ApiIndexRoute
+  '/app/about': typeof AppUserAboutRoute
+  '/app/dashboard': typeof AppUserDashboardRoute
+  '/app/diet-logs': typeof AppUserDietLogsRoute
+  '/app/sessions': typeof AppUserSessionsRoute
   '/app': typeof AppUserIndexRoute
   '/app/management/': typeof AppManagementIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/api': typeof ApiIndexRoute
+  '/app/about': typeof AppUserAboutRoute
+  '/app/dashboard': typeof AppUserDashboardRoute
+  '/app/diet-logs': typeof AppUserDietLogsRoute
+  '/app/sessions': typeof AppUserSessionsRoute
   '/app': typeof AppUserIndexRoute
   '/app/management': typeof AppManagementIndexRoute
 }
@@ -59,19 +91,44 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/app/management': typeof AppManagementRouteRouteWithChildren
   '/api/': typeof ApiIndexRoute
+  '/app/_user/about': typeof AppUserAboutRoute
+  '/app/_user/dashboard': typeof AppUserDashboardRoute
+  '/app/_user/diet-logs': typeof AppUserDietLogsRoute
+  '/app/_user/sessions': typeof AppUserSessionsRoute
   '/app/_user/': typeof AppUserIndexRoute
   '/app/management/': typeof AppManagementIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/app/management' | '/api' | '/app' | '/app/management/'
+  fullPaths:
+    | '/'
+    | '/app/management'
+    | '/api'
+    | '/app/about'
+    | '/app/dashboard'
+    | '/app/diet-logs'
+    | '/app/sessions'
+    | '/app'
+    | '/app/management/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/api' | '/app' | '/app/management'
+  to:
+    | '/'
+    | '/api'
+    | '/app/about'
+    | '/app/dashboard'
+    | '/app/diet-logs'
+    | '/app/sessions'
+    | '/app'
+    | '/app/management'
   id:
     | '__root__'
     | '/'
     | '/app/management'
     | '/api/'
+    | '/app/_user/about'
+    | '/app/_user/dashboard'
+    | '/app/_user/diet-logs'
+    | '/app/_user/sessions'
     | '/app/_user/'
     | '/app/management/'
   fileRoutesById: FileRoutesById
@@ -80,6 +137,10 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AppManagementRouteRoute: typeof AppManagementRouteRouteWithChildren
   ApiIndexRoute: typeof ApiIndexRoute
+  AppUserAboutRoute: typeof AppUserAboutRoute
+  AppUserDashboardRoute: typeof AppUserDashboardRoute
+  AppUserDietLogsRoute: typeof AppUserDietLogsRoute
+  AppUserSessionsRoute: typeof AppUserSessionsRoute
   AppUserIndexRoute: typeof AppUserIndexRoute
 }
 
@@ -120,6 +181,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppUserIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/app/_user/sessions': {
+      id: '/app/_user/sessions'
+      path: '/app/sessions'
+      fullPath: '/app/sessions'
+      preLoaderRoute: typeof AppUserSessionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/app/_user/diet-logs': {
+      id: '/app/_user/diet-logs'
+      path: '/app/diet-logs'
+      fullPath: '/app/diet-logs'
+      preLoaderRoute: typeof AppUserDietLogsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/app/_user/dashboard': {
+      id: '/app/_user/dashboard'
+      path: '/app/dashboard'
+      fullPath: '/app/dashboard'
+      preLoaderRoute: typeof AppUserDashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/app/_user/about': {
+      id: '/app/_user/about'
+      path: '/app/about'
+      fullPath: '/app/about'
+      preLoaderRoute: typeof AppUserAboutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -138,6 +227,10 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AppManagementRouteRoute: AppManagementRouteRouteWithChildren,
   ApiIndexRoute: ApiIndexRoute,
+  AppUserAboutRoute: AppUserAboutRoute,
+  AppUserDashboardRoute: AppUserDashboardRoute,
+  AppUserDietLogsRoute: AppUserDietLogsRoute,
+  AppUserSessionsRoute: AppUserSessionsRoute,
   AppUserIndexRoute: AppUserIndexRoute,
 }
 export const routeTree = rootRouteImport
