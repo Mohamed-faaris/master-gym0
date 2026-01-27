@@ -11,12 +11,16 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiIndexRouteImport } from './routes/api/index'
+import { Route as AppUserRouteImport } from './routes/app/_user'
 import { Route as AppManagementRouteRouteImport } from './routes/app/management/route'
 import { Route as AppManagementIndexRouteImport } from './routes/app/management/index'
 import { Route as AppUserIndexRouteImport } from './routes/app/_user/index'
+import { Route as AppUserWorkoutsRouteImport } from './routes/app/_user/workouts'
 import { Route as AppUserSessionsRouteImport } from './routes/app/_user/sessions'
+import { Route as AppUserLogsRouteImport } from './routes/app/_user/logs'
 import { Route as AppUserDietLogsRouteImport } from './routes/app/_user/diet-logs'
 import { Route as AppUserDashboardRouteImport } from './routes/app/_user/dashboard'
+import { Route as AppUserAccountRouteImport } from './routes/app/_user/account'
 import { Route as AppUserAboutRouteImport } from './routes/app/_user/about'
 
 const IndexRoute = IndexRouteImport.update({
@@ -27,6 +31,11 @@ const IndexRoute = IndexRouteImport.update({
 const ApiIndexRoute = ApiIndexRouteImport.update({
   id: '/api/',
   path: '/api/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppUserRoute = AppUserRouteImport.update({
+  id: '/app/_user',
+  path: '/app',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AppManagementRouteRoute = AppManagementRouteRouteImport.update({
@@ -40,39 +49,58 @@ const AppManagementIndexRoute = AppManagementIndexRouteImport.update({
   getParentRoute: () => AppManagementRouteRoute,
 } as any)
 const AppUserIndexRoute = AppUserIndexRouteImport.update({
-  id: '/app/_user/',
-  path: '/app/',
-  getParentRoute: () => rootRouteImport,
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppUserRoute,
+} as any)
+const AppUserWorkoutsRoute = AppUserWorkoutsRouteImport.update({
+  id: '/workouts',
+  path: '/workouts',
+  getParentRoute: () => AppUserRoute,
 } as any)
 const AppUserSessionsRoute = AppUserSessionsRouteImport.update({
-  id: '/app/_user/sessions',
-  path: '/app/sessions',
-  getParentRoute: () => rootRouteImport,
+  id: '/sessions',
+  path: '/sessions',
+  getParentRoute: () => AppUserRoute,
+} as any)
+const AppUserLogsRoute = AppUserLogsRouteImport.update({
+  id: '/logs',
+  path: '/logs',
+  getParentRoute: () => AppUserRoute,
 } as any)
 const AppUserDietLogsRoute = AppUserDietLogsRouteImport.update({
-  id: '/app/_user/diet-logs',
-  path: '/app/diet-logs',
-  getParentRoute: () => rootRouteImport,
+  id: '/diet-logs',
+  path: '/diet-logs',
+  getParentRoute: () => AppUserRoute,
 } as any)
 const AppUserDashboardRoute = AppUserDashboardRouteImport.update({
-  id: '/app/_user/dashboard',
-  path: '/app/dashboard',
-  getParentRoute: () => rootRouteImport,
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => AppUserRoute,
+} as any)
+const AppUserAccountRoute = AppUserAccountRouteImport.update({
+  id: '/account',
+  path: '/account',
+  getParentRoute: () => AppUserRoute,
 } as any)
 const AppUserAboutRoute = AppUserAboutRouteImport.update({
-  id: '/app/_user/about',
-  path: '/app/about',
-  getParentRoute: () => rootRouteImport,
+  id: '/about',
+  path: '/about',
+  getParentRoute: () => AppUserRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/app/management': typeof AppManagementRouteRouteWithChildren
+  '/app': typeof AppUserRouteWithChildren
   '/api/': typeof ApiIndexRoute
   '/app/about': typeof AppUserAboutRoute
+  '/app/account': typeof AppUserAccountRoute
   '/app/dashboard': typeof AppUserDashboardRoute
   '/app/diet-logs': typeof AppUserDietLogsRoute
+  '/app/logs': typeof AppUserLogsRoute
   '/app/sessions': typeof AppUserSessionsRoute
+  '/app/workouts': typeof AppUserWorkoutsRoute
   '/app/': typeof AppUserIndexRoute
   '/app/management/': typeof AppManagementIndexRoute
 }
@@ -80,9 +108,12 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/api': typeof ApiIndexRoute
   '/app/about': typeof AppUserAboutRoute
+  '/app/account': typeof AppUserAccountRoute
   '/app/dashboard': typeof AppUserDashboardRoute
   '/app/diet-logs': typeof AppUserDietLogsRoute
+  '/app/logs': typeof AppUserLogsRoute
   '/app/sessions': typeof AppUserSessionsRoute
+  '/app/workouts': typeof AppUserWorkoutsRoute
   '/app': typeof AppUserIndexRoute
   '/app/management': typeof AppManagementIndexRoute
 }
@@ -90,11 +121,15 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/app/management': typeof AppManagementRouteRouteWithChildren
+  '/app/_user': typeof AppUserRouteWithChildren
   '/api/': typeof ApiIndexRoute
   '/app/_user/about': typeof AppUserAboutRoute
+  '/app/_user/account': typeof AppUserAccountRoute
   '/app/_user/dashboard': typeof AppUserDashboardRoute
   '/app/_user/diet-logs': typeof AppUserDietLogsRoute
+  '/app/_user/logs': typeof AppUserLogsRoute
   '/app/_user/sessions': typeof AppUserSessionsRoute
+  '/app/_user/workouts': typeof AppUserWorkoutsRoute
   '/app/_user/': typeof AppUserIndexRoute
   '/app/management/': typeof AppManagementIndexRoute
 }
@@ -103,11 +138,15 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/app/management'
+    | '/app'
     | '/api/'
     | '/app/about'
+    | '/app/account'
     | '/app/dashboard'
     | '/app/diet-logs'
+    | '/app/logs'
     | '/app/sessions'
+    | '/app/workouts'
     | '/app/'
     | '/app/management/'
   fileRoutesByTo: FileRoutesByTo
@@ -115,20 +154,27 @@ export interface FileRouteTypes {
     | '/'
     | '/api'
     | '/app/about'
+    | '/app/account'
     | '/app/dashboard'
     | '/app/diet-logs'
+    | '/app/logs'
     | '/app/sessions'
+    | '/app/workouts'
     | '/app'
     | '/app/management'
   id:
     | '__root__'
     | '/'
     | '/app/management'
+    | '/app/_user'
     | '/api/'
     | '/app/_user/about'
+    | '/app/_user/account'
     | '/app/_user/dashboard'
     | '/app/_user/diet-logs'
+    | '/app/_user/logs'
     | '/app/_user/sessions'
+    | '/app/_user/workouts'
     | '/app/_user/'
     | '/app/management/'
   fileRoutesById: FileRoutesById
@@ -136,12 +182,8 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AppManagementRouteRoute: typeof AppManagementRouteRouteWithChildren
+  AppUserRoute: typeof AppUserRouteWithChildren
   ApiIndexRoute: typeof ApiIndexRoute
-  AppUserAboutRoute: typeof AppUserAboutRoute
-  AppUserDashboardRoute: typeof AppUserDashboardRoute
-  AppUserDietLogsRoute: typeof AppUserDietLogsRoute
-  AppUserSessionsRoute: typeof AppUserSessionsRoute
-  AppUserIndexRoute: typeof AppUserIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -160,6 +202,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/app/_user': {
+      id: '/app/_user'
+      path: '/app'
+      fullPath: '/app'
+      preLoaderRoute: typeof AppUserRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/app/management': {
       id: '/app/management'
       path: '/app/management'
@@ -176,38 +225,59 @@ declare module '@tanstack/react-router' {
     }
     '/app/_user/': {
       id: '/app/_user/'
-      path: '/app'
+      path: '/'
       fullPath: '/app/'
       preLoaderRoute: typeof AppUserIndexRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof AppUserRoute
+    }
+    '/app/_user/workouts': {
+      id: '/app/_user/workouts'
+      path: '/workouts'
+      fullPath: '/app/workouts'
+      preLoaderRoute: typeof AppUserWorkoutsRouteImport
+      parentRoute: typeof AppUserRoute
     }
     '/app/_user/sessions': {
       id: '/app/_user/sessions'
-      path: '/app/sessions'
+      path: '/sessions'
       fullPath: '/app/sessions'
       preLoaderRoute: typeof AppUserSessionsRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof AppUserRoute
+    }
+    '/app/_user/logs': {
+      id: '/app/_user/logs'
+      path: '/logs'
+      fullPath: '/app/logs'
+      preLoaderRoute: typeof AppUserLogsRouteImport
+      parentRoute: typeof AppUserRoute
     }
     '/app/_user/diet-logs': {
       id: '/app/_user/diet-logs'
-      path: '/app/diet-logs'
+      path: '/diet-logs'
       fullPath: '/app/diet-logs'
       preLoaderRoute: typeof AppUserDietLogsRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof AppUserRoute
     }
     '/app/_user/dashboard': {
       id: '/app/_user/dashboard'
-      path: '/app/dashboard'
+      path: '/dashboard'
       fullPath: '/app/dashboard'
       preLoaderRoute: typeof AppUserDashboardRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof AppUserRoute
+    }
+    '/app/_user/account': {
+      id: '/app/_user/account'
+      path: '/account'
+      fullPath: '/app/account'
+      preLoaderRoute: typeof AppUserAccountRouteImport
+      parentRoute: typeof AppUserRoute
     }
     '/app/_user/about': {
       id: '/app/_user/about'
-      path: '/app/about'
+      path: '/about'
       fullPath: '/app/about'
       preLoaderRoute: typeof AppUserAboutRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof AppUserRoute
     }
   }
 }
@@ -223,15 +293,36 @@ const AppManagementRouteRouteChildren: AppManagementRouteRouteChildren = {
 const AppManagementRouteRouteWithChildren =
   AppManagementRouteRoute._addFileChildren(AppManagementRouteRouteChildren)
 
+interface AppUserRouteChildren {
+  AppUserAboutRoute: typeof AppUserAboutRoute
+  AppUserAccountRoute: typeof AppUserAccountRoute
+  AppUserDashboardRoute: typeof AppUserDashboardRoute
+  AppUserDietLogsRoute: typeof AppUserDietLogsRoute
+  AppUserLogsRoute: typeof AppUserLogsRoute
+  AppUserSessionsRoute: typeof AppUserSessionsRoute
+  AppUserWorkoutsRoute: typeof AppUserWorkoutsRoute
+  AppUserIndexRoute: typeof AppUserIndexRoute
+}
+
+const AppUserRouteChildren: AppUserRouteChildren = {
+  AppUserAboutRoute: AppUserAboutRoute,
+  AppUserAccountRoute: AppUserAccountRoute,
+  AppUserDashboardRoute: AppUserDashboardRoute,
+  AppUserDietLogsRoute: AppUserDietLogsRoute,
+  AppUserLogsRoute: AppUserLogsRoute,
+  AppUserSessionsRoute: AppUserSessionsRoute,
+  AppUserWorkoutsRoute: AppUserWorkoutsRoute,
+  AppUserIndexRoute: AppUserIndexRoute,
+}
+
+const AppUserRouteWithChildren =
+  AppUserRoute._addFileChildren(AppUserRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AppManagementRouteRoute: AppManagementRouteRouteWithChildren,
+  AppUserRoute: AppUserRouteWithChildren,
   ApiIndexRoute: ApiIndexRoute,
-  AppUserAboutRoute: AppUserAboutRoute,
-  AppUserDashboardRoute: AppUserDashboardRoute,
-  AppUserDietLogsRoute: AppUserDietLogsRoute,
-  AppUserSessionsRoute: AppUserSessionsRoute,
-  AppUserIndexRoute: AppUserIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
