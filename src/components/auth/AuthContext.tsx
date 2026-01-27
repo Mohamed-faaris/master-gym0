@@ -1,7 +1,6 @@
-import { Doc } from 'convex/_generated/dataModel'
 import { createContext } from 'react'
 
-
+import type { Doc } from 'convex/_generated/dataModel'
 
 export interface AuthContextType {
   user: Doc<'users'> | null

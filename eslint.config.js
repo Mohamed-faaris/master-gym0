@@ -11,6 +11,8 @@ export default [
       'dist/**',
       'build/**',
       'node_modules/**',
+      'eslint.config.js',
+      'prettier.config.js',
     ],
   },
 ]

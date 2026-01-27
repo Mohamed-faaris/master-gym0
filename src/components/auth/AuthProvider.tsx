@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react'
-import { AuthContext } from './AuthContext'
 import { useConvex } from 'convex/react'
 import { api } from 'convex/_generated/api'
-import { Doc } from 'convex/_generated/dataModel'
+import { useEffect, useState } from 'react'
+
+import { AuthContext } from './AuthContext'
+import type { Doc } from 'convex/_generated/dataModel'
 import { env } from '@/env'
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
