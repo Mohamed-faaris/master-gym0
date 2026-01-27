@@ -45,24 +45,24 @@ const AppUserIndexRoute = AppUserIndexRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const AppUserSessionsRoute = AppUserSessionsRouteImport.update({
-  id: '/sessions',
-  path: '/sessions',
-  getParentRoute: () => AppUserRoute,
+  id: '/app/_user/sessions',
+  path: '/app/sessions',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AppUserDietLogsRoute = AppUserDietLogsRouteImport.update({
-  id: '/diet-logs',
-  path: '/diet-logs',
-  getParentRoute: () => AppUserRoute,
+  id: '/app/_user/diet-logs',
+  path: '/app/diet-logs',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AppUserDashboardRoute = AppUserDashboardRouteImport.update({
-  id: '/dashboard',
-  path: '/dashboard',
-  getParentRoute: () => AppUserRoute,
+  id: '/app/_user/dashboard',
+  path: '/app/dashboard',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AppUserAboutRoute = AppUserAboutRouteImport.update({
-  id: '/about',
-  path: '/about',
-  getParentRoute: () => AppUserRoute,
+  id: '/app/_user/about',
+  path: '/app/about',
+  getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -137,6 +137,10 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AppManagementRouteRoute: typeof AppManagementRouteRouteWithChildren
   ApiIndexRoute: typeof ApiIndexRoute
+  AppUserAboutRoute: typeof AppUserAboutRoute
+  AppUserDashboardRoute: typeof AppUserDashboardRoute
+  AppUserDietLogsRoute: typeof AppUserDietLogsRoute
+  AppUserSessionsRoute: typeof AppUserSessionsRoute
   AppUserIndexRoute: typeof AppUserIndexRoute
 }
 
@@ -179,31 +183,31 @@ declare module '@tanstack/react-router' {
     }
     '/app/_user/sessions': {
       id: '/app/_user/sessions'
-      path: '/sessions'
+      path: '/app/sessions'
       fullPath: '/app/sessions'
       preLoaderRoute: typeof AppUserSessionsRouteImport
-      parentRoute: typeof AppUserRoute
+      parentRoute: typeof rootRouteImport
     }
     '/app/_user/diet-logs': {
       id: '/app/_user/diet-logs'
-      path: '/diet-logs'
+      path: '/app/diet-logs'
       fullPath: '/app/diet-logs'
       preLoaderRoute: typeof AppUserDietLogsRouteImport
-      parentRoute: typeof AppUserRoute
+      parentRoute: typeof rootRouteImport
     }
     '/app/_user/dashboard': {
       id: '/app/_user/dashboard'
-      path: '/dashboard'
+      path: '/app/dashboard'
       fullPath: '/app/dashboard'
       preLoaderRoute: typeof AppUserDashboardRouteImport
-      parentRoute: typeof AppUserRoute
+      parentRoute: typeof rootRouteImport
     }
     '/app/_user/about': {
       id: '/app/_user/about'
-      path: '/about'
+      path: '/app/about'
       fullPath: '/app/about'
       preLoaderRoute: typeof AppUserAboutRouteImport
-      parentRoute: typeof AppUserRoute
+      parentRoute: typeof rootRouteImport
     }
   }
 }
@@ -223,6 +227,10 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AppManagementRouteRoute: AppManagementRouteRouteWithChildren,
   ApiIndexRoute: ApiIndexRoute,
+  AppUserAboutRoute: AppUserAboutRoute,
+  AppUserDashboardRoute: AppUserDashboardRoute,
+  AppUserDietLogsRoute: AppUserDietLogsRoute,
+  AppUserSessionsRoute: AppUserSessionsRoute,
   AppUserIndexRoute: AppUserIndexRoute,
 }
 export const routeTree = rootRouteImport
