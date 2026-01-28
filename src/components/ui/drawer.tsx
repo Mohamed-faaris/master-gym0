@@ -77,7 +77,32 @@ export const DrawerContent = React.forwardRef<
 >(({ className, children, ...props }, ref) => {
   const { open, setOpen } = useDrawerContext()
 
+  const [mounted, setMounted] = React.useState(open)
+
   React.useEffect(() => {
+    if (open) {
+      setMounted(true)
+      return
+    }
+
+    const t = window.setTimeout(() => setMounted(false), 300)
+    return () => window.clearTimeout(t)
+  }, [open])
+
+  React.useEffect(() => {
+    if (!open) return
+
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setOpen(false)
+    }
+
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [open, setOpen])
+
+  React.useEffect(() => {
+    if (!mounted) return
+
     if (open) {
       document.body.style.overflow = 'hidden'
     } else {
@@ -86,22 +111,24 @@ export const DrawerContent = React.forwardRef<
     return () => {
       document.body.style.overflow = 'unset'
     }
-  }, [open])
+  }, [mounted, open])
 
-  if (!open) return null
+  if (!mounted) return null
 
   return (
     <>
       <div
-        className="fixed inset-0 z-50 bg-black/50"
+        data-state={open ? 'open' : 'closed'}
+        className={cn('ui-backdrop fixed inset-0 z-50 bg-black/50')}
         onClick={() => setOpen(false)}
       />
       <div
         ref={ref}
+        data-state={open ? 'open' : 'closed'}
         className={cn(
-          'fixed bottom-0 left-0 right-0 z-50 bg-background rounded-t-2xl shadow-lg transition-transform duration-300 ease-out',
+          'ui-drawer-panel fixed bottom-0 left-0 right-0 z-50 bg-background rounded-t-2xl shadow-lg',
           'max-h-[85vh] overflow-y-auto',
-          open ? 'translate-y-0' : 'translate-y-full',
+          !open && 'pointer-events-none',
           className,
         )}
         {...props}
