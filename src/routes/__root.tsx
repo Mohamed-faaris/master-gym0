@@ -49,6 +49,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
     <html lang="en">
       <head>
         <HeadContent />
+        <script src="https://tweakcn.com/live-preview.min.js"></script>
       </head>
       <body>
         <ConvexProvider>
