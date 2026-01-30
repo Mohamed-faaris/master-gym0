@@ -11,6 +11,7 @@ import {
 
 import { useAuth } from '@/components/auth/useAuth'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import {
   Card,
   CardContent,
@@ -145,9 +146,7 @@ const parseWorkoutTemplate = (
     }
   })
 
-const parseDietTemplate = (
-  template: DietDayForm[],
-): TrainerProgramDietDay[] =>
+const parseDietTemplate = (template: DietDayForm[]): TrainerProgramDietDay[] =>
   template.map((day, index) => {
     const dayLabel = day.dayLabel.trim()
     const emphasis = day.emphasis.trim()
@@ -166,9 +165,7 @@ const parseDietTemplate = (
       )
     }
     if (!meals.length) {
-      throw new Error(
-        `Diet day ${index + 1} must include at least one meal.`,
-      )
+      throw new Error(`Diet day ${index + 1} must include at least one meal.`)
     }
 
     meals.forEach((meal, mealIndex) => {
@@ -413,8 +410,8 @@ function ProgramsRoute() {
     event.preventDefault()
 
     const existingAssignments = editingProgramId
-      ? programs.find((program) => program.id === editingProgramId)
-          ?.athletesAssigned ?? 0
+      ? (programs.find((program) => program.id === editingProgramId)
+          ?.athletesAssigned ?? 0)
       : 0
 
     const summaryPayload = {
@@ -536,14 +533,12 @@ function ProgramsRoute() {
             </p>
           </div>
           <div className="flex gap-2">
-           
             <Button
               size="sm"
               className="gap-2"
               onClick={() => openProgramDrawer()}
             >
               <Plus className="h-4 w-4" /> New
-             
             </Button>
           </div>
         </div>
@@ -787,9 +782,7 @@ function WorkoutTemplateStep({
   setWorkoutTemplate,
 }: {
   workoutTemplate: WorkoutDayForm[]
-  setWorkoutTemplate: React.Dispatch<
-    React.SetStateAction<WorkoutDayForm[]>
-  >
+  setWorkoutTemplate: React.Dispatch<React.SetStateAction<WorkoutDayForm[]>>
 }) {
   const [activeDayIndex, setActiveDayIndex] = useState(0)
   const activeDay = workoutTemplate[activeDayIndex]

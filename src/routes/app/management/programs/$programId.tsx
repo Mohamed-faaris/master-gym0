@@ -300,7 +300,7 @@ function ProgramDetailRoute() {
               })
             }
           >
-            <Edit3 className="h-4 w-4" /> 
+            <Edit3 className="h-4 w-4" />
           </Button>
           {/* <Button
             variant="outline"
@@ -316,7 +316,7 @@ function ProgramDetailRoute() {
             className="gap-1 text-destructive"
             onClick={handleDelete}
           >
-            <Trash2 className="h-4 w-4" /> 
+            <Trash2 className="h-4 w-4" />
           </Button>
         </div>
       </header>
@@ -365,11 +365,11 @@ function ProgramDetailRoute() {
 
       <Card>
         <CardHeader className="space-y-2">
-            <div className="pb-4 flex items-center justify-between">
-          <CardDescription className="uppercase text-[11px] tracking-wide">
-            Program
-          </CardDescription>
-           <Button
+          <div className="pb-4 flex items-center justify-between">
+            <CardDescription className="uppercase text-[11px] tracking-wide">
+              Program
+            </CardDescription>
+            <Button
               variant={isAssigning ? 'default' : 'outline'}
               size="sm"
               className="gap-2"
@@ -380,7 +380,7 @@ function ProgramDetailRoute() {
             >
               <ArrowRight className="h-4 w-4" /> Assign
             </Button>
-            </div>
+          </div>
           <CardTitle className="text-2xl">{detailEntry.headline}</CardTitle>
           {/* <p className="text-sm text-muted-foreground">
             {detailEntry.overview}
@@ -409,7 +409,9 @@ function ProgramDetailRoute() {
                     <select
                       className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
                       value={assignClientId}
-                      onChange={(event) => setAssignClientId(event.target.value)}
+                      onChange={(event) =>
+                        setAssignClientId(event.target.value)
+                      }
                     >
                       <option value="" disabled>
                         Select client
@@ -631,7 +633,8 @@ function ProgramDetailRoute() {
                       onChange={(event) =>
                         setResourceForm((prev) => ({
                           ...prev,
-                          type: event.target.value as TrainerProgramResource['type'],
+                          type: event.target
+                            .value as TrainerProgramResource['type'],
                         }))
                       }
                     >
@@ -706,7 +709,7 @@ function ProgramDetailRoute() {
                         }}
                         aria-label={`Delete ${resource.label}`}
                       >
-                        <Trash2 className="h-4 w-4" /> 
+                        <Trash2 className="h-4 w-4" />
                       </Button>
                     )}
                     <ArrowRight className="h-4 w-4 text-muted-foreground" />
