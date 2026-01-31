@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiIndexRouteImport } from './routes/api/index'
+import { Route as AppSignInRouteImport } from './routes/app/sign-in'
 import { Route as AppUserRouteImport } from './routes/app/_user'
 import { Route as AppManagementRouteRouteImport } from './routes/app/management/route'
 import { Route as AppManagementIndexRouteImport } from './routes/app/management/index'
@@ -36,6 +37,11 @@ const IndexRoute = IndexRouteImport.update({
 const ApiIndexRoute = ApiIndexRouteImport.update({
   id: '/api/',
   path: '/api/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppSignInRoute = AppSignInRouteImport.update({
+  id: '/app/sign-in',
+  path: '/app/sign-in',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AppUserRoute = AppUserRouteImport.update({
@@ -127,6 +133,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/app/management': typeof AppManagementRouteRouteWithChildren
   '/app': typeof AppUserRouteWithChildren
+  '/app/sign-in': typeof AppSignInRoute
   '/api/': typeof ApiIndexRoute
   '/app/about': typeof AppUserAboutRoute
   '/app/account': typeof AppUserAccountRoute
@@ -145,6 +152,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/app/sign-in': typeof AppSignInRoute
   '/api': typeof ApiIndexRoute
   '/app/about': typeof AppUserAboutRoute
   '/app/account': typeof AppUserAccountRoute
@@ -166,6 +174,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/app/management': typeof AppManagementRouteRouteWithChildren
   '/app/_user': typeof AppUserRouteWithChildren
+  '/app/sign-in': typeof AppSignInRoute
   '/api/': typeof ApiIndexRoute
   '/app/_user/about': typeof AppUserAboutRoute
   '/app/_user/account': typeof AppUserAccountRoute
@@ -188,6 +197,7 @@ export interface FileRouteTypes {
     | '/'
     | '/app/management'
     | '/app'
+    | '/app/sign-in'
     | '/api/'
     | '/app/about'
     | '/app/account'
@@ -206,6 +216,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/app/sign-in'
     | '/api'
     | '/app/about'
     | '/app/account'
@@ -226,6 +237,7 @@ export interface FileRouteTypes {
     | '/'
     | '/app/management'
     | '/app/_user'
+    | '/app/sign-in'
     | '/api/'
     | '/app/_user/about'
     | '/app/_user/account'
@@ -247,6 +259,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AppManagementRouteRoute: typeof AppManagementRouteRouteWithChildren
   AppUserRoute: typeof AppUserRouteWithChildren
+  AppSignInRoute: typeof AppSignInRoute
   ApiIndexRoute: typeof ApiIndexRoute
 }
 
@@ -264,6 +277,13 @@ declare module '@tanstack/react-router' {
       path: '/api'
       fullPath: '/api/'
       preLoaderRoute: typeof ApiIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/app/sign-in': {
+      id: '/app/sign-in'
+      path: '/app/sign-in'
+      fullPath: '/app/sign-in'
+      preLoaderRoute: typeof AppSignInRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/app/_user': {
@@ -431,6 +451,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AppManagementRouteRoute: AppManagementRouteRouteWithChildren,
   AppUserRoute: AppUserRouteWithChildren,
+  AppSignInRoute: AppSignInRoute,
   ApiIndexRoute: ApiIndexRoute,
 }
 export const routeTree = rootRouteImport
