@@ -16,6 +16,7 @@ import { Route as AppUserRouteImport } from './routes/app/_user'
 import { Route as AppManagementRouteRouteImport } from './routes/app/management/route'
 import { Route as AppManagementIndexRouteImport } from './routes/app/management/index'
 import { Route as AppUserIndexRouteImport } from './routes/app/_user/index'
+import { Route as AppManagementTestIntegrationRouteImport } from './routes/app/management/test-integration'
 import { Route as AppUserWorkoutsRouteImport } from './routes/app/_user/workouts'
 import { Route as AppUserWorkoutSessionRouteImport } from './routes/app/_user/workout-session'
 import { Route as AppUserSessionsRouteImport } from './routes/app/_user/sessions'
@@ -68,6 +69,12 @@ const AppUserIndexRoute = AppUserIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AppUserRoute,
 } as any)
+const AppManagementTestIntegrationRoute =
+  AppManagementTestIntegrationRouteImport.update({
+    id: '/test-integration',
+    path: '/test-integration',
+    getParentRoute: () => AppManagementRouteRoute,
+  } as any)
 const AppUserWorkoutsRoute = AppUserWorkoutsRouteImport.update({
   id: '/workouts',
   path: '/workouts',
@@ -171,6 +178,7 @@ export interface FileRoutesByFullPath {
   '/app/sessions': typeof AppUserSessionsRoute
   '/app/workout-session': typeof AppUserWorkoutSessionRoute
   '/app/workouts': typeof AppUserWorkoutsRoute
+  '/app/management/test-integration': typeof AppManagementTestIntegrationRoute
   '/app/': typeof AppUserIndexRoute
   '/app/management/': typeof AppManagementIndexRoute
   '/app/management/clients/$clientId': typeof AppManagementClientsClientIdRoute
@@ -194,6 +202,7 @@ export interface FileRoutesByTo {
   '/app/sessions': typeof AppUserSessionsRoute
   '/app/workout-session': typeof AppUserWorkoutSessionRoute
   '/app/workouts': typeof AppUserWorkoutsRoute
+  '/app/management/test-integration': typeof AppManagementTestIntegrationRoute
   '/app': typeof AppUserIndexRoute
   '/app/management': typeof AppManagementIndexRoute
   '/app/management/clients/$clientId': typeof AppManagementClientsClientIdRoute
@@ -220,6 +229,7 @@ export interface FileRoutesById {
   '/app/_user/sessions': typeof AppUserSessionsRoute
   '/app/_user/workout-session': typeof AppUserWorkoutSessionRoute
   '/app/_user/workouts': typeof AppUserWorkoutsRoute
+  '/app/management/test-integration': typeof AppManagementTestIntegrationRoute
   '/app/_user/': typeof AppUserIndexRoute
   '/app/management/': typeof AppManagementIndexRoute
   '/app/management/clients/$clientId': typeof AppManagementClientsClientIdRoute
@@ -247,6 +257,7 @@ export interface FileRouteTypes {
     | '/app/sessions'
     | '/app/workout-session'
     | '/app/workouts'
+    | '/app/management/test-integration'
     | '/app/'
     | '/app/management/'
     | '/app/management/clients/$clientId'
@@ -270,6 +281,7 @@ export interface FileRouteTypes {
     | '/app/sessions'
     | '/app/workout-session'
     | '/app/workouts'
+    | '/app/management/test-integration'
     | '/app'
     | '/app/management'
     | '/app/management/clients/$clientId'
@@ -295,6 +307,7 @@ export interface FileRouteTypes {
     | '/app/_user/sessions'
     | '/app/_user/workout-session'
     | '/app/_user/workouts'
+    | '/app/management/test-integration'
     | '/app/_user/'
     | '/app/management/'
     | '/app/management/clients/$clientId'
@@ -365,6 +378,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/app/'
       preLoaderRoute: typeof AppUserIndexRouteImport
       parentRoute: typeof AppUserRoute
+    }
+    '/app/management/test-integration': {
+      id: '/app/management/test-integration'
+      path: '/test-integration'
+      fullPath: '/app/management/test-integration'
+      preLoaderRoute: typeof AppManagementTestIntegrationRouteImport
+      parentRoute: typeof AppManagementRouteRoute
     }
     '/app/_user/workouts': {
       id: '/app/_user/workouts'
@@ -482,6 +502,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface AppManagementRouteRouteChildren {
+  AppManagementTestIntegrationRoute: typeof AppManagementTestIntegrationRoute
   AppManagementIndexRoute: typeof AppManagementIndexRoute
   AppManagementClientsClientIdRoute: typeof AppManagementClientsClientIdRoute
   AppManagementDietPlansPlanIdRoute: typeof AppManagementDietPlansPlanIdRoute
@@ -494,6 +515,7 @@ interface AppManagementRouteRouteChildren {
 }
 
 const AppManagementRouteRouteChildren: AppManagementRouteRouteChildren = {
+  AppManagementTestIntegrationRoute: AppManagementTestIntegrationRoute,
   AppManagementIndexRoute: AppManagementIndexRoute,
   AppManagementClientsClientIdRoute: AppManagementClientsClientIdRoute,
   AppManagementDietPlansPlanIdRoute: AppManagementDietPlansPlanIdRoute,
