@@ -80,9 +80,10 @@ function ProgramDetailRoute() {
               <ClipboardList className="h-8 w-8 text-primary" />
             </div>
             <div className="space-y-2">
-              <h3 className="font-semibold">Program details coming soon</h3>
+              <h3 className="font-semibold">Program Details Coming Soon</h3>
               <p className="text-sm text-muted-foreground max-w-sm mx-auto">
                 Program management will be integrated with Convex backend.
+                View and edit program details, exercises, and assignments.
               </p>
             </div>
           </div>

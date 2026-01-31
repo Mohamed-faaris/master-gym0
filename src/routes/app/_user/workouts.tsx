@@ -45,9 +45,10 @@ function RouteComponent() {
                 <Dumbbell className="h-8 w-8 text-primary" />
               </div>
               <div className="space-y-2">
-                <h3 className="font-semibold">Workouts coming soon</h3>
+                <h3 className="font-semibold">Training Programs Coming Soon</h3>
                 <p className="text-sm text-muted-foreground max-w-sm mx-auto">
-                  Your training programs will be integrated with the backend.
+                  Your training programs will be integrated with Convex backend.
+                  View your assigned workouts and track your progress.
                 </p>
               </div>
             </div>

@@ -80,9 +80,10 @@ function RouteComponent() {
               <ClipboardList className="h-8 w-8 text-primary" />
             </div>
             <div className="space-y-2">
-              <h3 className="font-semibold">Program creation coming soon</h3>
+              <h3 className="font-semibold">Program Creation Coming Soon</h3>
               <p className="text-sm text-muted-foreground max-w-sm mx-auto">
                 Program builder will be integrated with Convex backend.
+                Design day-by-day workouts with exercises, sets, and reps.
               </p>
             </div>
           </div>

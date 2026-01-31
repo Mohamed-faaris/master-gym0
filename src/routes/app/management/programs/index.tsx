@@ -123,10 +123,10 @@ function ProgramsRoute() {
               <ClipboardList className="h-8 w-8 text-primary" />
             </div>
             <div className="space-y-2">
-              <h3 className="font-semibold">Training programs coming soon</h3>
+              <h3 className="font-semibold">Training Programs Coming Soon</h3>
               <p className="text-sm text-muted-foreground max-w-sm mx-auto">
-                Workout program management will be integrated with Convex
-                backend.
+                Workout program management will be integrated with Convex backend.
+                Create, edit, and assign custom training programs to your clients.
               </p>
             </div>
           </div>

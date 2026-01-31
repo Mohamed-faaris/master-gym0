@@ -1,4 +1,4 @@
-import { mutation, query } from './_generated/server'
+import { query, mutation } from './_generated/server'
 import { v } from 'convex/values'
 
 const WorkoutStatusValidator = v.union(
@@ -43,15 +43,14 @@ export const getWorkoutLogsByUser = query({
         limit: v.optional(v.number()),
     },
     handler: async (ctx, args) => {
-        let query = ctx.db
-            .query('workoutLogs')
-            .withIndex('by_user', (q) => q.eq('userId', args.userId))
-            .order('desc')
+    const workoutQuery = ctx.db
+      .query('workoutLogs')
+      .withIndex('by_user', (q) => q.eq('userId', args.userId))
+      .order('desc')
 
-        const workoutLogs = args.limit
-            ? await query.take(args.limit)
-            : await query.collect()
-
+    const workoutLogs = args.limit
+      ? await workoutQuery.take(args.limit)
+      : await workoutQuery.collect()
         return workoutLogs
     },
 })
