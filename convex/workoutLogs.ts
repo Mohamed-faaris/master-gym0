@@ -43,14 +43,14 @@ export const getWorkoutLogsByUser = query({
         limit: v.optional(v.number()),
     },
     handler: async (ctx, args) => {
-    const workoutQuery = ctx.db
-      .query('workoutLogs')
-      .withIndex('by_user', (q) => q.eq('userId', args.userId))
-      .order('desc')
+        const workoutQuery = ctx.db
+            .query('workoutLogs')
+            .withIndex('by_user', (q) => q.eq('userId', args.userId))
+            .order('desc')
 
-    const workoutLogs = args.limit
-      ? await workoutQuery.take(args.limit)
-      : await workoutQuery.collect()
+        const workoutLogs = args.limit
+            ? await workoutQuery.take(args.limit)
+            : await workoutQuery.collect()
         return workoutLogs
     },
 })
