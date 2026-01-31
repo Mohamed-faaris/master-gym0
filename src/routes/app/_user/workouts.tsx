@@ -37,7 +37,7 @@ function RouteComponent() {
     thu: 'Thu',
     fri: 'Fri',
     sat: 'Sat',
-    sun: 'Sunday',
+    sun: 'Sun',
   }
 
   const handleSwipeRight = (workout: WorkoutDay) => {
@@ -212,7 +212,8 @@ function RouteComponent() {
             <div className="flex flex-col items-start">
               <span className="text-sm font-bold">{todaysWorkout.name}</span>
               <span className="text-xs opacity-80">
-                {todaysWorkout.exercises.length} exercises • {todaysWorkout.duration} min
+                {todaysWorkout.exercises.length} exercises •{' '}
+                {todaysWorkout.duration} min
               </span>
             </div>
           </div>
