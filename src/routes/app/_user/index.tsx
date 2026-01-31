@@ -12,7 +12,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { MOCK_WORKOUT_LOGS } from '@/lib/mock-data'
+
 import { ChartRadialLabel } from '@/components/charts/chart-radial-label'
 import { TodayProgressChart } from '@/components/charts/today-progress-chart'
 import {
@@ -205,19 +205,15 @@ function RouteComponent() {
         <CardHeader>
           <CardTitle>Recent Activity</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-3">
-          {MOCK_WORKOUT_LOGS.slice(0, 3).map((log) => (
-            <div
-              key={log.id}
-              className="flex items-center justify-between p-3 rounded-lg bg-muted/50"
-            >
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                  <Activity className="w-5 h-5 text-primary" />
-                </div>
-                <div>
-                  <div className="font-medium capitalize">
-                    {log.workoutType} Workout
+        <CardContent>
+          <div className="text-center py-8 space-y-2">
+            <Activity className="h-8 w-8 text-muted-foreground mx-auto" />
+            <p className="text-sm text-muted-foreground">
+              Your recent workouts will appear here
+            </p>
+          </div>
+        </CardContent>
+      </Card>
                   </div>
                   <div className="text-sm text-muted-foreground">
                     {log.duration} min • {log.caloriesBurned} cal
