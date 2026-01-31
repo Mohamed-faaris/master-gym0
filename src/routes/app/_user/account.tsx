@@ -29,10 +29,6 @@ function RouteComponent() {
     api.workoutLogs.getWorkoutStats,
     user ? { userId: user._id } : 'skip',
   )
-  const userMeta = useQuery(
-    api.users.getUserWithMeta,
-    user ? { userId: user._id } : 'skip',
-  )
 
   const handleLogout = () => {
     signOut()

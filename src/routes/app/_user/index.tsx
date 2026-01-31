@@ -57,10 +57,6 @@ function RouteComponent() {
     api.workoutLogs.getWorkoutLogsByUser,
     user ? { userId: user._id, limit: 7 } : 'skip',
   )
-  const todayCalories = useQuery(
-    api.dietLogs.getTodayCalories,
-    user ? { userId: user._id } : 'skip',
-  )
 
   // Mutations
   const addWeightLog = useMutation(api.weightLogs.addWeightLog)
