@@ -4,7 +4,7 @@ import { useAuth } from '@/components/auth/useAuth'
 import { Plus, UtensilsCrossed, Calendar, Target } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { api } from '../../../../convex/_generated/api'
+import { api } from '../../../../../convex/_generated/api'
 
 export const Route = createFileRoute('/app/_user/diet-plans/')({
   component: RouteComponent,

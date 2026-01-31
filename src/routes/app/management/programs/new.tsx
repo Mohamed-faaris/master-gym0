@@ -1,6 +1,7 @@
-import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { useState } from 'react'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { useEffect } from 'react'
+import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
+import { ArrowLeft, ClipboardList } from 'lucide-react'
+import { useAuth } from '@/components/auth/useAuth'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -9,182 +10,87 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-import { StepBasicInfo } from './_components/-step-1-basic-info'
-import { StepSelectDays } from './_components/-step-2-select-days'
-import { StepAddExercises } from './_components/-step-3-add-exercises'
-import { StepReview } from './_components/-step-4-review'
+
+const privilegedRoles = new Set(['trainer', 'admin'])
 
 export const Route = createFileRoute('/app/management/programs/new')({
   component: RouteComponent,
 })
 
-export type DayOfWeek = 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun'
-
-export type ExerciseSet = {
-  reps?: number
-  weight?: number
-  notes?: string
-}
-
-export type Exercise = {
-  exerciseName: string
-  noOfSets: number
-  sets: ExerciseSet[]
-}
-
-export type DayWorkout = {
-  day: DayOfWeek
-  exercises: Exercise[]
-}
-
-export type ProgramFormData = {
-  name: string
-  description: string
-  durationWeeks: number
-  days: DayWorkout[]
-}
-
 function RouteComponent() {
   const navigate = useNavigate()
-  const [formStep, setFormStep] = useState(1)
-  const [programForm, setProgramForm] = useState<ProgramFormData>({
-    name: '',
-    description: '',
-    durationWeeks: 4,
-    days: [],
-  })
+  const { user, isLoading } = useAuth()
 
-  const handleProgramSubmit = () => {
-    console.log('Program created:', programForm)
-    // TODO: Save to convex
-    navigate({ to: '/app/management/programs' })
-  }
+  /* -------------------------------------------------------------------------- */
+  /*                                    Auth                                    */
+  /* -------------------------------------------------------------------------- */
 
-  const canProceed = () => {
-    switch (formStep) {
-      case 1:
-        return programForm.name.trim() !== ''
-      case 2:
-        return programForm.days.length > 0
-      case 3:
-        return programForm.days.every((d) => d.exercises.length > 0)
-      default:
-        return true
+  useEffect(() => {
+    if (isLoading) return
+    if (!user) {
+      navigate({ to: '/' })
+      return
     }
+    if (!privilegedRoles.has(user.role)) {
+      navigate({ to: '/app' })
+    }
+  }, [user, isLoading, navigate])
+
+  if (isLoading) {
+    return <div className="p-4">Loading...</div>
   }
+
+  if (!user || !privilegedRoles.has(user.role)) {
+    return null
+  }
+
+  /* -------------------------------------------------------------------------- */
+  /*                                   Render                                   */
+  /* -------------------------------------------------------------------------- */
 
   return (
-    <div className="min-h-screen bg-background p-4 md:p-6">
-      <div className="max-w-4xl mx-auto space-y-6">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold">Create Training Program</h1>
-            <p className="text-muted-foreground mt-1">
-              Step {formStep} of 4 - Build a comprehensive workout program
-            </p>
+    <div className="space-y-6 p-4">
+      {/* --------------------------- Header --------------------------- */}
+      <header className="space-y-3">
+        <Link
+          to="/app/management/programs"
+          className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Back to programs
+        </Link>
+        <div>
+          <h1 className="text-2xl font-semibold">Create Program</h1>
+          <p className="text-muted-foreground">
+            Design a new training program
+          </p>
+        </div>
+      </header>
+
+      {/* ----------------------------- Content ----------------------------- */}
+      <Card>
+        <CardHeader>
+          <CardTitle>New Program</CardTitle>
+          <CardDescription>
+            Create a custom training program for your athletes
+          </CardDescription>
+        </CardHeader>
+
+        <CardContent className="space-y-4">
+          <div className="text-center py-12 space-y-4">
+            <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
+              <ClipboardList className="h-8 w-8 text-primary" />
+            </div>
+            <div className="space-y-2">
+              <h3 className="font-semibold">Program creation coming soon</h3>
+              <p className="text-sm text-muted-foreground max-w-sm mx-auto">
+                Program builder will be integrated with Convex backend.
+              </p>
+            </div>
           </div>
-          <Button
-            variant="ghost"
-            onClick={() => navigate({ to: '/app/management/programs' })}
-          >
-            Cancel
-          </Button>
-        </div>
-
-        {/* Progress Steps */}
-        <div className="flex items-center justify-center">
-          <div className="flex items-center max-w-2xl w-full">
-            {[1, 2, 3, 4].map((step) => (
-              <div key={step} className="flex items-center flex-1">
-                <div
-                  className={`flex items-center justify-center w-10 h-10 rounded-full border-2 transition ${
-                    formStep >= step
-                      ? 'border-primary bg-primary text-primary-foreground'
-                      : 'border-muted bg-background text-muted-foreground'
-                  }`}
-                >
-                  {step}
-                </div>
-                {step < 4 && (
-                  <div
-                    className={`flex-1 h-0.5 mx-2 transition ${
-                      formStep > step ? 'bg-primary' : 'bg-muted'
-                    }`}
-                  />
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Form Content */}
-        <Card>
-          <CardHeader>
-            <CardTitle>
-              {formStep === 1 && 'Basic Information'}
-              {formStep === 2 && 'Select Training Days'}
-              {formStep === 3 && 'Add Exercises'}
-              {formStep === 4 && 'Review Program'}
-            </CardTitle>
-            <CardDescription>
-              {formStep === 1 &&
-                'Enter the program name, description, and duration'}
-              {formStep === 2 && 'Choose which days of the week to train'}
-              {formStep === 3 && 'Add exercises for each training day'}
-              {formStep === 4 && 'Review your program before creating'}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {formStep === 1 && (
-              <StepBasicInfo
-                programForm={programForm}
-                setProgramForm={setProgramForm}
-              />
-            )}
-            {formStep === 2 && (
-              <StepSelectDays
-                programForm={programForm}
-                setProgramForm={setProgramForm}
-              />
-            )}
-            {formStep === 3 && (
-              <StepAddExercises
-                programForm={programForm}
-                setProgramForm={setProgramForm}
-              />
-            )}
-            {formStep === 4 && <StepReview programForm={programForm} />}
-          </CardContent>
-        </Card>
-
-        {/* Navigation */}
-        <div className="flex justify-between">
-          <Button
-            variant="outline"
-            size="lg"
-            onClick={() => setFormStep(Math.max(1, formStep - 1))}
-            disabled={formStep === 1}
-          >
-            <ChevronLeft className="h-4 w-4 mr-2" />
-            Back
-          </Button>
-          {formStep < 4 ? (
-            <Button
-              size="lg"
-              onClick={() => setFormStep(formStep + 1)}
-              disabled={!canProceed()}
-            >
-              Next
-              <ChevronRight className="h-4 w-4 ml-2" />
-            </Button>
-          ) : (
-            <Button size="lg" onClick={handleProgramSubmit}>
-              Create Program
-            </Button>
-          )}
-        </div>
-      </div>
+        </CardContent>
+      </Card>
     </div>
   )
 }
+

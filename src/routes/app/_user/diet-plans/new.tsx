@@ -16,7 +16,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Progress } from '@/components/ui/progress'
 import { cn } from '@/lib/utils'
-import { api } from '../../../../convex/_generated/api'
+import { api } from '../../../../../convex/_generated/api'
 import { useMutation as useConvexMutation } from 'convex/react'
 
 export const Route = createFileRoute('/app/_user/diet-plans/new')({
