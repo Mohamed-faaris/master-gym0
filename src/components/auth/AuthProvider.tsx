@@ -9,7 +9,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [userSession, setUserSession] = useState<Doc<'users'> | null>(null)
   const convex = useConvex()
 
-  const signIn = async (phoneNumber: string, pin: string) => {
+  const signIn = async (
+    phoneNumber: string,
+    pin: string,
+  ): Promise<Doc<'users'> | null> => {
     const user = await convex.query(api.users.signInQuery, { phoneNumber, pin })
     if (user) {
       setUserSession(user)
@@ -20,7 +23,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           expiresAt: Date.now() + parseInt(env.VITE_AUTH_EXPIRY_TIME),
         }),
       )
+      return user
     }
+    return null
   }
 
   const signOut = () => {

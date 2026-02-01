@@ -3,6 +3,15 @@ import { useState } from 'react'
 import { Scale, Utensils, Plus, Trash2, TrendingDown } from 'lucide-react'
 import { useQuery, useMutation } from 'convex/react'
 import { toast } from 'sonner'
+import {
+  Area,
+  AreaChart,
+  Bar,
+  BarChart,
+  CartesianGrid,
+  XAxis,
+  YAxis,
+} from 'recharts'
 
 import {
   Card,
@@ -22,10 +31,30 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useAuth } from '@/components/auth/useAuth'
 import { api } from '../../../../convex/_generated/api'
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+  type ChartConfig,
+} from '@/components/ui/chart'
 
 export const Route = createFileRoute('/app/_user/logs')({
   component: RouteComponent,
 })
+
+const weightChartConfig = {
+  weight: {
+    label: 'Weight',
+    color: 'var(--chart-1)',
+  },
+} satisfies ChartConfig
+
+const caloriesChartConfig = {
+  calories: {
+    label: 'Calories',
+    color: 'var(--chart-2)',
+  },
+} satisfies ChartConfig
 
 function RouteComponent() {
   const { user } = useAuth()
@@ -45,6 +74,40 @@ function RouteComponent() {
   // Mutations
   const addWeightLog = useMutation(api.weightLogs.addWeightLog)
   const deleteDietLog = useMutation(api.dietLogs.deleteDietLog)
+
+  // Prepare weight chart data (reverse to show oldest first)
+  const weightChartData = weightLogs
+    ? [...weightLogs].reverse().map((log) => ({
+        date: new Date(log.createdAt).toLocaleDateString('en-US', {
+          month: 'short',
+          day: 'numeric',
+        }),
+        weight: log.weight,
+      }))
+    : []
+
+  // Prepare calories chart data - aggregate by day
+  const caloriesChartData = dietLogs
+    ? Object.values(
+        dietLogs.reduce(
+          (acc, log) => {
+            const dateKey = new Date(log.createdAt).toLocaleDateString(
+              'en-US',
+              {
+                month: 'short',
+                day: 'numeric',
+              },
+            )
+            if (!acc[dateKey]) {
+              acc[dateKey] = { date: dateKey, calories: 0 }
+            }
+            acc[dateKey].calories += log.calories
+            return acc
+          },
+          {} as Record<string, { date: string; calories: number }>,
+        ),
+      ).reverse()
+    : []
 
   const handleAddWeight = async () => {
     const weightValue = parseFloat(weight)
@@ -100,6 +163,48 @@ function RouteComponent() {
         <TabsContents className="mt-4">
           {/* Diet Tab */}
           <TabsContent value="diet" className="space-y-4">
+            {/* Calories Chart */}
+            {caloriesChartData.length > 1 && (
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-base">Daily Calories</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ChartContainer
+                    config={caloriesChartConfig}
+                    className="h-[180px] w-full"
+                  >
+                    <BarChart data={caloriesChartData} accessibilityLayer>
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                      <XAxis
+                        dataKey="date"
+                        tickLine={false}
+                        axisLine={false}
+                        tickMargin={8}
+                        fontSize={12}
+                      />
+                      <YAxis
+                        tickLine={false}
+                        axisLine={false}
+                        tickMargin={8}
+                        fontSize={12}
+                        width={40}
+                      />
+                      <ChartTooltip
+                        cursor={{ fill: 'var(--muted)', opacity: 0.3 }}
+                        content={<ChartTooltipContent />}
+                      />
+                      <Bar
+                        dataKey="calories"
+                        fill="var(--color-calories)"
+                        radius={[4, 4, 0, 0]}
+                      />
+                    </BarChart>
+                  </ChartContainer>
+                </CardContent>
+              </Card>
+            )}
+
             <Card>
               <CardHeader>
                 <CardTitle>Diet Logging</CardTitle>
@@ -169,6 +274,68 @@ function RouteComponent() {
 
           {/* Weight Tab */}
           <TabsContent value="weight" className="space-y-4">
+            {/* Weight Chart */}
+            {weightChartData.length > 1 && (
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-base">Weight Progress</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ChartContainer
+                    config={weightChartConfig}
+                    className="h-[180px] w-full"
+                  >
+                    <AreaChart data={weightChartData} accessibilityLayer>
+                      <defs>
+                        <linearGradient
+                          id="fillWeight"
+                          x1="0"
+                          y1="0"
+                          x2="0"
+                          y2="1"
+                        >
+                          <stop
+                            offset="5%"
+                            stopColor="var(--color-weight)"
+                            stopOpacity={0.8}
+                          />
+                          <stop
+                            offset="95%"
+                            stopColor="var(--color-weight)"
+                            stopOpacity={0.1}
+                          />
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                      <XAxis
+                        dataKey="date"
+                        tickLine={false}
+                        axisLine={false}
+                        tickMargin={8}
+                        fontSize={12}
+                      />
+                      <YAxis
+                        tickLine={false}
+                        axisLine={false}
+                        tickMargin={8}
+                        fontSize={12}
+                        width={40}
+                        domain={['dataMin - 1', 'dataMax + 1']}
+                      />
+                      <ChartTooltip content={<ChartTooltipContent />} />
+                      <Area
+                        dataKey="weight"
+                        type="monotone"
+                        fill="url(#fillWeight)"
+                        stroke="var(--color-weight)"
+                        strokeWidth={2}
+                      />
+                    </AreaChart>
+                  </ChartContainer>
+                </CardContent>
+              </Card>
+            )}
+
             <Card>
               <CardHeader>
                 <div className="flex items-center justify-between">

@@ -8,8 +8,10 @@ import {
   ChartTooltipContent,
   type ChartConfig,
 } from '@/components/ui/chart'
-import { TODAY_STATS } from '@/lib/mock-data'
-import { SlidingNumber } from '@/components/animate-ui/primitives/texts/sliding-number'
+import { useAuth } from '@/components/auth/useAuth'
+import { useQuery } from 'convex/react'
+import { api } from 'convex/_generated/api'
+import { Loader2 } from 'lucide-react'
 
 const chartConfig = {
   calories: {
@@ -20,28 +22,78 @@ const chartConfig = {
     label: 'Workout',
     color: 'var(--chart-2)',
   },
-  steps: {
-    label: 'Steps',
+  protein: {
+    label: 'Protein',
     color: 'var(--chart-4)',
   },
 } satisfies ChartConfig
 
+// Default targets - these could come from user settings
+const TARGETS = {
+  caloriesConsumed: 2000, // kcal
+  workoutTime: 60, // minutes
+  caloriesBurned: 500, // kcal
+}
+
 export function TodayProgressChart() {
-  const caloriesPercent = Math.round(
-    (TODAY_STATS.goals.calories.current / TODAY_STATS.goals.calories.target) *
-      100,
+  const { user } = useAuth()
+
+  // Get today's diet logs for calories consumed
+  const todayCalories = useQuery(
+    api.dietLogs.getTodayCalories,
+    user ? { userId: user._id } : 'skip',
   )
-  const workoutPercent = Math.round(
-    (TODAY_STATS.goals.workoutTime.current /
-      TODAY_STATS.goals.workoutTime.target) *
-      100,
+
+  // Get today's workout logs
+  const recentWorkouts = useQuery(
+    api.workoutLogs.getWorkoutLogsByUser,
+    user ? { userId: user._id, limit: 10 } : 'skip',
   )
-  const stepsPercent = Math.round(
-    (TODAY_STATS.goals.steps.current / TODAY_STATS.goals.steps.target) * 100,
+
+  // Calculate today's workout stats
+  const getTodayWorkoutStats = () => {
+    if (!recentWorkouts) return { duration: 0, caloriesBurned: 0 }
+
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    const todayTimestamp = today.getTime()
+
+    const todayWorkouts = recentWorkouts.filter(
+      (w) => w.startTime >= todayTimestamp && w.status === 'completed',
+    )
+
+    const duration = todayWorkouts.reduce(
+      (sum, w) => sum + (w.duration || 0),
+      0,
+    )
+    const caloriesBurned = todayWorkouts.reduce(
+      (sum, w) => sum + (w.caloriesBurned || 0),
+      0,
+    )
+
+    return { duration, caloriesBurned }
+  }
+
+  const todayWorkoutStats = getTodayWorkoutStats()
+  const caloriesConsumed = todayCalories?.totalCalories ?? 0
+
+  const caloriesPercent = Math.min(
+    100,
+    Math.round((caloriesConsumed / TARGETS.caloriesConsumed) * 100),
+  )
+  const workoutPercent = Math.min(
+    100,
+    Math.round((todayWorkoutStats.duration / TARGETS.workoutTime) * 100),
+  )
+  const burnedPercent = Math.min(
+    100,
+    Math.round(
+      (todayWorkoutStats.caloriesBurned / TARGETS.caloriesBurned) * 100,
+    ),
   )
 
   const chartData = [
-    { metric: 'steps', value: stepsPercent, fill: 'var(--color-steps)' },
+    { metric: 'protein', value: burnedPercent, fill: 'var(--color-protein)' },
     { metric: 'workout', value: workoutPercent, fill: 'var(--color-workout)' },
     {
       metric: 'calories',
@@ -49,6 +101,23 @@ export function TodayProgressChart() {
       fill: 'var(--color-calories)',
     },
   ]
+
+  if (!user) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Today's Progress</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-center py-8">
+            <p className="text-sm text-muted-foreground">
+              Sign in to see progress
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+    )
+  }
 
   return (
     <Card>
@@ -77,17 +146,6 @@ export function TodayProgressChart() {
                 <RadialBar dataKey="value" background cornerRadius={8} />
               </RadialBarChart>
             </ChartContainer>
-
-            {/* Center Text */}
-            {/* <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <div className="flex items-end gap-1 text-xl font-bold tabular-nums">
-                <SlidingNumber
-                  number={caloriesPercent}
-                  fromNumber={0}
-                />
-                <span>%</span>
-              </div>
-            </div> */}
           </div>
 
           {/* Legends */}
@@ -95,30 +153,28 @@ export function TodayProgressChart() {
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded-full bg-chart-1" />
               <div>
-                <div className="text-sm font-medium">Calories</div>
+                <div className="text-sm font-medium">Calories Eaten</div>
                 <div className="text-xs text-muted-foreground">
-                  {TODAY_STATS.goals.calories.current} /{' '}
-                  {TODAY_STATS.goals.calories.target} cal
+                  {caloriesConsumed} / {TARGETS.caloriesConsumed} kcal
                 </div>
               </div>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded-full bg-chart-2" />
               <div>
-                <div className="text-sm font-medium">fat</div>
+                <div className="text-sm font-medium">Workout Time</div>
                 <div className="text-xs text-muted-foreground">
-                  {TODAY_STATS.goals.workoutTime.current} /{' '}
-                  {TODAY_STATS.goals.workoutTime.target} min
+                  {todayWorkoutStats.duration} / {TARGETS.workoutTime} min
                 </div>
               </div>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded-full bg-chart-4" />
               <div>
-                <div className="text-sm font-medium">Workout</div>
+                <div className="text-sm font-medium">Calories Burned</div>
                 <div className="text-xs text-muted-foreground">
-                  {TODAY_STATS.goals.steps.current.toLocaleString()} /{' '}
-                  {TODAY_STATS.goals.steps.target.toLocaleString()}
+                  {todayWorkoutStats.caloriesBurned} / {TARGETS.caloriesBurned}{' '}
+                  kcal
                 </div>
               </div>
             </div>

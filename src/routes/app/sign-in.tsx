@@ -30,8 +30,26 @@ function SignInPage() {
     setIsLoading(true)
 
     try {
-      await signIn(phoneNumber, pin)
-      navigate({ to: '/app' })
+      const user = await signIn(phoneNumber, pin)
+      if (!user) {
+        setError('Invalid phone number or PIN')
+        return
+      }
+
+      // Redirect based on user role
+      switch (user.role) {
+        case 'admin':
+          navigate({ to: '/app/management/superadmin' })
+          break
+        case 'trainer':
+          navigate({ to: '/app/management' })
+          break
+        case 'trainerManagedCustomer':
+        case 'selfManagedCustomer':
+        default:
+          navigate({ to: '/app' })
+          break
+      }
     } catch (err) {
       setError('Invalid phone number or PIN')
     } finally {
