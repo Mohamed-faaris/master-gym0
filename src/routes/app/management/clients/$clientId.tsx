@@ -24,7 +24,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-import { api } from '@convex/_generated/api'
+import { api } from '../../../../../convex/_generated/api'
 import { toast } from 'sonner'
 
 const privilegedRoles = new Set(['trainer', 'admin'])
@@ -243,63 +243,40 @@ function ClientDetailRoute() {
         </Card>
       </div>
 
-      {/* Log Actions */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card
-          className="cursor-pointer hover:shadow-lg transition-shadow"
-          onClick={() => navigate({ to: `./logs/workout` })}
+      {/* Log Actions - Simple Buttons */}
+      <div className="space-y-3">
+        <Button
+          onClick={() =>
+            navigate({ to: `/app/management/clients/${clientId}/logs/workout` })
+          }
+          variant="outline"
+          className="h-12 w-full"
         >
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-base">
-              <Dumbbell className="w-5 h-5 text-chart-1" />
-              View Workouts
-            </CardTitle>
-            <CardDescription>
-              {workoutLogs?.length || 0} entries
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Button variant="outline" className="w-full">
-              View Logs
-            </Button>
-          </CardContent>
-        </Card>
+          <Dumbbell className="w-4 h-4 mr-2" />
+          View Workout Logs
+        </Button>
 
-        <Card
-          className="cursor-pointer hover:shadow-lg transition-shadow"
-          onClick={() => navigate({ to: `./logs/diet` })}
+        <Button
+          onClick={() =>
+            navigate({ to: `/app/management/clients/${clientId}/logs/diet` })
+          }
+          variant="outline"
+          className="h-12 w-full"
         >
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-base">
-              <UtensilsCrossed className="w-5 h-5 text-emerald-600" />
-              View Diet
-            </CardTitle>
-            <CardDescription>{dietLogs?.length || 0} entries</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Button variant="outline" className="w-full">
-              View Logs
-            </Button>
-          </CardContent>
-        </Card>
+          <UtensilsCrossed className="w-4 h-4 mr-2" />
+          View Diet Logs
+        </Button>
 
-        <Card
-          className="cursor-pointer hover:shadow-lg transition-shadow"
-          onClick={() => navigate({ to: `./logs/weight` })}
+        <Button
+          onClick={() =>
+            navigate({ to: `/app/management/clients/${clientId}/logs/weight` })
+          }
+          variant="outline"
+          className="h-12 w-full"
         >
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-base">
-              <BarChart3 className="w-5 h-5 text-chart-2" />
-              View Weight
-            </CardTitle>
-            <CardDescription>{weightLogs?.length || 0} entries</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Button variant="outline" className="w-full">
-              View Logs
-            </Button>
-          </CardContent>
-        </Card>
+          <BarChart3 className="w-4 h-4 mr-2" />
+          View Weight Logs
+        </Button>
       </div>
 
       {/* Log Workout Button */}
