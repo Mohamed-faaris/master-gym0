@@ -26,7 +26,7 @@ import {
   DrawerFooter,
 } from '@/components/ui/drawer'
 import { useMutation } from 'convex/react'
-import { api } from '../../../convex/_generated/api'
+import { api } from '@convex/_generated/api'
 import { useAuth } from '@/components/auth/useAuth'
 import { toast } from 'sonner'
 import { Input } from '@/components/ui/input'

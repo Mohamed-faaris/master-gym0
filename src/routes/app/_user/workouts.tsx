@@ -17,7 +17,7 @@ import {
   CardDescription,
 } from '@/components/ui/card'
 import { useAuth } from '@/components/auth/useAuth'
-import { api } from '../../../../convex/_generated/api'
+import { api } from '@convex/_generated/api'
 
 export const Route = createFileRoute('/app/_user/workouts')({
   component: RouteComponent,

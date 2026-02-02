@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { TRAINING_PLAN, type WorkoutDay } from '@/lib/mock-data'
 import { SlidingNumber } from '@/components/animate-ui/primitives/texts/sliding-number'
 import { useMutation } from 'convex/react'
-import { api } from '../../../../convex/_generated/api'
+import { api } from '@convex/_generated/api'
 import { useAuth } from '@/components/auth/useAuth'
 import { toast } from 'sonner'
 

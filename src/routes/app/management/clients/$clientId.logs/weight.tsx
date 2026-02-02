@@ -32,7 +32,7 @@ import {
   ChartTooltipContent,
   type ChartConfig,
 } from '@/components/ui/chart'
-import { api } from '../../../../../../convex/_generated/api'
+import { api } from '@convex/_generated/api'
 
 const privilegedRoles = new Set(['trainer', 'admin'])
 
@@ -43,7 +43,9 @@ const weightChartConfig = {
   },
 } satisfies ChartConfig
 
-export const Route = createFileRoute('/app/management/clients/logs/weight')({
+export const Route = createFileRoute(
+  '/app/management/clients/$clientId/logs/weight',
+)({
   component: WeightLogsRoute,
 })
 
