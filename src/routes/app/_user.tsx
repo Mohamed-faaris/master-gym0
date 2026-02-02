@@ -18,8 +18,8 @@ function RouteComponent() {
         // Not logged in, redirect to sign-in
         navigate({ to: '/app/sign-in' })
       } else if (user.role === 'admin') {
-        // Admin should go to superadmin
-        navigate({ to: '/app/management/superadmin' })
+        // Admin should go to /admin
+        navigate({ to: '/app/admin' })
       } else if (user.role === 'trainer') {
         // Trainer should go to management
         navigate({ to: '/app/management' })

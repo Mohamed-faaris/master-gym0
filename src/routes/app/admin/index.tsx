@@ -103,6 +103,9 @@ function SuperAdminDashboard() {
   // Fetch all users
   const allUsers = useQuery(api.users.getAllUsers)
 
+  // Update user mutation
+  const updateUserInfo = useMutation(api.users.updateUserInfo)
+
   // Create user mutation
   const createUser = useMutation(api.users.createUser)
   const updateUserPin = useMutation(api.users.updateUserPin)
@@ -235,6 +238,12 @@ function SuperAdminDashboard() {
                   arms: '',
                   thighs: '',
                   calves: '',
+                })
+              }}
+              onUpdateClient={async (clientId, updates) => {
+                await updateUserInfo({
+                  userId: clientId as any,
+                  updates,
                 })
               }}
             />
@@ -601,7 +610,7 @@ function SuperAdminDashboard() {
             <div className="space-y-2">
               <label className="text-sm font-medium">Role</label>
               <Select value={newClientRole} onValueChange={setNewClientRole}>
-                <SelectTrigger>
+                <SelectTrigger className="w-full">
                   <SelectValue placeholder="Select role" />
                 </SelectTrigger>
                 <SelectContent>
@@ -624,7 +633,7 @@ function SuperAdminDashboard() {
                 Fitness Goal
               </label>
               <Select value={newClientGoal} onValueChange={setNewClientGoal}>
-                <SelectTrigger>
+                <SelectTrigger className="w-full">
                   <SelectValue placeholder="Select goal" />
                 </SelectTrigger>
                 <SelectContent>
@@ -650,7 +659,7 @@ function SuperAdminDashboard() {
                   value={selectedFormTrainerId}
                   onValueChange={setSelectedFormTrainerId}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="w-full">
                     <SelectValue placeholder="Select trainer" />
                   </SelectTrigger>
                   <SelectContent>

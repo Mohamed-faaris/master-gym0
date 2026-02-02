@@ -17,7 +17,7 @@ function App() {
         // Redirect based on role
         switch (user.role) {
           case 'admin':
-            navigate({ to: '/app/management/superadmin' })
+            navigate({ to: '/app/admin' })
             break
           case 'trainer':
             navigate({ to: '/app/management' })
