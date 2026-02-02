@@ -113,6 +113,15 @@ const ExerciseNameValidator = enumToValidator(EXERCISE_NAMES)
    TABLES
 ====================================================== */
 
+/*
+For PT clients - 
+Name, Age, Measurement(Chest, Shoulder, Hip, Arms, Legs), Current Weight, Target Weight, Time Span. 
+
+For normal users(app purchasers) - 
+Name,Age,Current Weight, Target weight.
+*/
+
+
 /* -------------------- USERS -------------------- */
 
 const users = defineTable({
@@ -150,8 +159,27 @@ const userMeta = defineTable({
   readinessNote: v.optional(v.string()),
   accentColor: v.optional(v.string()),
 
+  currentWeight: v.number(),
+  targetWeight: v.number(),
+
   emergencyContactName: v.optional(v.string()),
   emergencyContactPhone: v.optional(v.string()),
+
+  createdAt: v.number(),
+  updatedAt: v.number(),
+}).index('by_user', ['userId'])
+
+const userMeasurement = defineTable({
+  userId: v.id('users'),
+
+  chest: v.optional(v.number()),
+  shoulder: v.optional(v.number()),
+  hip: v.optional(v.number()),
+  arms: v.optional(v.number()),
+  legs: v.optional(v.number()),
+
+
+  timeSpanWeeks: v.optional(v.number()),
 
   createdAt: v.number(),
   updatedAt: v.number(),

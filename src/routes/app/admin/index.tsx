@@ -5,6 +5,7 @@ import {
   Activity,
   ChevronRight,
   Dumbbell,
+  Edit2,
   Lock,
   Phone,
   Pin,
@@ -15,7 +16,7 @@ import {
   Users,
 } from 'lucide-react'
 
-import { api } from '../../../../../convex/_generated/api'
+import { api } from '../../../../convex/_generated/api'
 import { useAuth } from '@/components/auth/useAuth'
 import { Button } from '@/components/ui/button'
 import {
@@ -43,12 +44,13 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { cn } from '@/lib/utils'
+import { ClientDetailView, TrainerDetailView } from './detail-views'
 
 type Tab = 'clients' | 'trainers'
 
 const superAdminRoles = new Set(['admin'])
 
-export const Route = createFileRoute('/app/management/superadmin/')({
+export const Route = createFileRoute('/app/admin/')({
   component: SuperAdminDashboard,
 })
 
@@ -67,14 +69,44 @@ function SuperAdminDashboard() {
     'trainerManagedCustomer',
   )
   const [newClientGoal, setNewClientGoal] = useState<string>('generalFitness')
-  const [selectedTrainerId, setSelectedTrainerId] = useState<string>('')
+  const [selectedFormTrainerId, setSelectedFormTrainerId] = useState<string>('')
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  // PIN change state
+  const [changePinDrawerOpen, setChangePinDrawerOpen] = useState(false)
+  const [selectedUserId, setSelectedUserId] = useState<string>('')
+  const [newPin, setNewPin] = useState('')
+  const [confirmPin, setConfirmPin] = useState('')
+  const [isPinChanging, setIsPinChanging] = useState(false)
+
+  // Measurements state
+  const [measurementsDrawerOpen, setMeasurementsDrawerOpen] = useState(false)
+  const [selectedClientIdForMeasurements, setSelectedClientIdForMeasurements] =
+    useState<string>('')
+  const [measurements, setMeasurements] = useState({
+    weight: '',
+    chest: '',
+    waist: '',
+    hips: '',
+    arms: '',
+    thighs: '',
+    calves: '',
+  })
+  const [isSavingMeasurements, setIsSavingMeasurements] = useState(false)
+
+  // Detail view state
+  const [selectedClientId, setSelectedClientId] = useState<string | null>(null)
+  const [selectedTrainerId, setSelectedTrainerId] = useState<string | null>(
+    null,
+  )
 
   // Fetch all users
   const allUsers = useQuery(api.users.getAllUsers)
 
   // Create user mutation
   const createUser = useMutation(api.users.createUser)
+  const updateUserPin = useMutation(api.users.updateUserPin)
+  const saveMeasurements = useMutation(api.users.saveMeasurements)
 
   // Filter clients and trainers
   const clients =
@@ -144,7 +176,9 @@ function SuperAdminDashboard() {
           | 'endurance'
           | 'flexibility'
           | 'generalFitness',
-        trainerId: selectedTrainerId ? (selectedTrainerId as any) : undefined,
+        trainerId: selectedFormTrainerId
+          ? (selectedFormTrainerId as any)
+          : undefined,
       })
 
       // Reset form
@@ -153,7 +187,7 @@ function SuperAdminDashboard() {
       setNewClientPin('')
       setNewClientRole('trainerManagedCustomer')
       setNewClientGoal('generalFitness')
-      setSelectedTrainerId('')
+      setSelectedFormTrainerId('')
       setOnboardDrawerOpen(false)
     } catch (error) {
       console.error('Failed to create user:', error)
@@ -178,23 +212,74 @@ function SuperAdminDashboard() {
         <h1 className="text-xl font-semibold">Administration</h1>
       </header>
 
-      {/* Tab Navigation Bar */}
-      <nav className="flex items-center justify-between border-b border-border bg-muted/30">
+      {/* Content Area */}
+      <main className="flex-1 p-4 space-y-6 pb-24">
+        {activeTab === 'clients' &&
+          (selectedClientId ? (
+            <ClientDetailView
+              client={clients.find((c) => c._id === selectedClientId)!}
+              trainers={trainers}
+              onBack={() => setSelectedClientId(null)}
+              onChangePin={(userId) => {
+                setSelectedUserId(userId)
+                setChangePinDrawerOpen(true)
+              }}
+              onAssignMeasurements={(clientId) => {
+                setSelectedClientIdForMeasurements(clientId)
+                setMeasurementsDrawerOpen(true)
+                setMeasurements({
+                  weight: '',
+                  chest: '',
+                  waist: '',
+                  hips: '',
+                  arms: '',
+                  thighs: '',
+                  calves: '',
+                })
+              }}
+            />
+          ) : (
+            <ClientsView
+              clients={clients}
+              trainers={trainers}
+              onSelectClient={(clientId) => setSelectedClientId(clientId)}
+            />
+          ))}
+        {activeTab === 'trainers' &&
+          (selectedTrainerId ? (
+            <TrainerDetailView
+              trainer={trainers.find((t) => t._id === selectedTrainerId)!}
+              clientCount={clients.length}
+              onBack={() => setSelectedTrainerId(null)}
+              onChangePin={(userId) => {
+                setSelectedUserId(userId)
+                setChangePinDrawerOpen(true)
+              }}
+            />
+          ) : (
+            <TrainersView
+              trainers={trainers}
+              clientCount={clients.length}
+              onSelectTrainer={(trainerId) => setSelectedTrainerId(trainerId)}
+            />
+          ))}
+      </main>
+
+      {/* Tab Navigation Bar - Bottom */}
+      <nav className="fixed bottom-0 left-0 right-0 flex items-center justify-between border-t border-border bg-muted/30">
         <div className="flex flex-1">
           {/* Clients Tab */}
           <button
             type="button"
             onClick={() => setActiveTab('clients')}
             className={cn(
-              'flex-1 flex items-center justify-center gap-2 py-4 px-4 text-sm font-medium transition-colors border-b-2',
+              'flex-1 flex items-center justify-center gap-2 py-4 px-4 text-sm font-medium transition-colors border-t-2',
               activeTab === 'clients'
                 ? 'border-primary text-primary bg-background'
                 : 'border-transparent text-muted-foreground hover:text-foreground hover:bg-muted/50',
             )}
           >
             <Users className="w-4 h-4" />
-            <span>Clients</span>
-            <Pin className="w-3 h-3 text-amber-500" />
           </button>
 
           {/* Add Button */}
@@ -215,28 +300,250 @@ function SuperAdminDashboard() {
             type="button"
             onClick={() => setActiveTab('trainers')}
             className={cn(
-              'flex-1 flex items-center justify-center gap-2 py-4 px-4 text-sm font-medium transition-colors border-b-2',
+              'flex-1 flex items-center justify-center gap-2 py-4 px-4 text-sm font-medium transition-colors border-t-2',
               activeTab === 'trainers'
                 ? 'border-primary text-primary bg-background'
                 : 'border-transparent text-muted-foreground hover:text-foreground hover:bg-muted/50',
             )}
           >
             <Dumbbell className="w-4 h-4" />
-            <span>Trainers</span>
-            <Pin className="w-3 h-3 text-amber-500" />
           </button>
         </div>
       </nav>
 
-      {/* Content Area */}
-      <main className="flex-1 p-4 space-y-6 pb-24">
-        {activeTab === 'clients' && (
-          <ClientsView clients={clients} trainers={trainers} />
-        )}
-        {activeTab === 'trainers' && (
-          <TrainersView trainers={trainers} clientCount={clients.length} />
-        )}
-      </main>
+      {/* Assign Measurements Drawer */}
+      <Drawer
+        open={measurementsDrawerOpen}
+        onOpenChange={setMeasurementsDrawerOpen}
+      >
+        <DrawerContent>
+          <DrawerHeader>
+            <DrawerTitle>Assign Measurements</DrawerTitle>
+            <DrawerDescription>
+              Record client body measurements
+            </DrawerDescription>
+          </DrawerHeader>
+
+          <div className="flex flex-col gap-4 p-4 max-h-96 overflow-y-auto">
+            {/* Weight */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Weight (kg)</label>
+              <Input
+                type="number"
+                placeholder="70"
+                value={measurements.weight}
+                onChange={(e) =>
+                  setMeasurements({ ...measurements, weight: e.target.value })
+                }
+              />
+            </div>
+
+            {/* Chest */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Chest (cm)</label>
+              <Input
+                type="number"
+                placeholder="100"
+                value={measurements.chest}
+                onChange={(e) =>
+                  setMeasurements({ ...measurements, chest: e.target.value })
+                }
+              />
+            </div>
+
+            {/* Waist */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Waist (cm)</label>
+              <Input
+                type="number"
+                placeholder="80"
+                value={measurements.waist}
+                onChange={(e) =>
+                  setMeasurements({ ...measurements, waist: e.target.value })
+                }
+              />
+            </div>
+
+            {/* Hips */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Hips (cm)</label>
+              <Input
+                type="number"
+                placeholder="95"
+                value={measurements.hips}
+                onChange={(e) =>
+                  setMeasurements({ ...measurements, hips: e.target.value })
+                }
+              />
+            </div>
+
+            {/* Arms */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Arms (cm)</label>
+              <Input
+                type="number"
+                placeholder="35"
+                value={measurements.arms}
+                onChange={(e) =>
+                  setMeasurements({ ...measurements, arms: e.target.value })
+                }
+              />
+            </div>
+
+            {/* Thighs */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Thighs (cm)</label>
+              <Input
+                type="number"
+                placeholder="55"
+                value={measurements.thighs}
+                onChange={(e) =>
+                  setMeasurements({ ...measurements, thighs: e.target.value })
+                }
+              />
+            </div>
+
+            {/* Calves */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Calves (cm)</label>
+              <Input
+                type="number"
+                placeholder="38"
+                value={measurements.calves}
+                onChange={(e) =>
+                  setMeasurements({ ...measurements, calves: e.target.value })
+                }
+              />
+            </div>
+          </div>
+
+          <DrawerFooter>
+            <Button
+              onClick={async () => {
+                setIsSavingMeasurements(true)
+                try {
+                  await saveMeasurements({
+                    clientId: selectedClientIdForMeasurements as any,
+                    measurements: {
+                      weight: measurements.weight
+                        ? parseFloat(measurements.weight)
+                        : undefined,
+                      chest: measurements.chest
+                        ? parseFloat(measurements.chest)
+                        : undefined,
+                      waist: measurements.waist
+                        ? parseFloat(measurements.waist)
+                        : undefined,
+                      hips: measurements.hips
+                        ? parseFloat(measurements.hips)
+                        : undefined,
+                      arms: measurements.arms
+                        ? parseFloat(measurements.arms)
+                        : undefined,
+                      thighs: measurements.thighs
+                        ? parseFloat(measurements.thighs)
+                        : undefined,
+                      calves: measurements.calves
+                        ? parseFloat(measurements.calves)
+                        : undefined,
+                    },
+                  })
+                  setMeasurementsDrawerOpen(false)
+                } catch (error) {
+                  console.error('Failed to save measurements:', error)
+                } finally {
+                  setIsSavingMeasurements(false)
+                }
+              }}
+              disabled={isSavingMeasurements}
+            >
+              {isSavingMeasurements ? 'Saving...' : 'Save Measurements'}
+            </Button>
+            <DrawerClose asChild>
+              <Button variant="outline">Cancel</Button>
+            </DrawerClose>
+          </DrawerFooter>
+        </DrawerContent>
+      </Drawer>
+
+      {/* Change PIN Drawer */}
+      <Drawer open={changePinDrawerOpen} onOpenChange={setChangePinDrawerOpen}>
+        <DrawerContent>
+          <DrawerHeader>
+            <DrawerTitle>Change User PIN</DrawerTitle>
+            <DrawerDescription>
+              Update the PIN for the selected user
+            </DrawerDescription>
+          </DrawerHeader>
+
+          <div className="flex flex-col gap-4 p-4">
+            {/* New PIN */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium flex items-center gap-2">
+                <Lock className="w-4 h-4 text-muted-foreground" />
+                New PIN Code
+              </label>
+              <Input
+                placeholder="0000"
+                type="password"
+                maxLength={6}
+                value={newPin}
+                onChange={(e) => setNewPin(e.target.value)}
+              />
+            </div>
+
+            {/* Confirm PIN */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium flex items-center gap-2">
+                <Lock className="w-4 h-4 text-muted-foreground" />
+                Confirm PIN Code
+              </label>
+              <Input
+                placeholder="0000"
+                type="password"
+                maxLength={6}
+                value={confirmPin}
+                onChange={(e) => setConfirmPin(e.target.value)}
+              />
+            </div>
+          </div>
+
+          <DrawerFooter>
+            <Button
+              onClick={async () => {
+                if (!newPin || !confirmPin) return
+                if (newPin !== confirmPin) {
+                  alert('PINs do not match')
+                  return
+                }
+
+                setIsPinChanging(true)
+                try {
+                  await updateUserPin({
+                    userId: selectedUserId as any,
+                    newPin,
+                  })
+                  setNewPin('')
+                  setConfirmPin('')
+                  setChangePinDrawerOpen(false)
+                } catch (error) {
+                  console.error('Failed to change PIN:', error)
+                } finally {
+                  setIsPinChanging(false)
+                }
+              }}
+              disabled={
+                !newPin || !confirmPin || newPin !== confirmPin || isPinChanging
+              }
+            >
+              {isPinChanging ? 'Updating...' : 'Update PIN'}
+            </Button>
+            <DrawerClose asChild>
+              <Button variant="outline">Cancel</Button>
+            </DrawerClose>
+          </DrawerFooter>
+        </DrawerContent>
+      </Drawer>
 
       {/* Onboard Client Drawer */}
       <Drawer open={onboardDrawerOpen} onOpenChange={setOnboardDrawerOpen}>
@@ -340,8 +647,8 @@ function SuperAdminDashboard() {
                   Assign Trainer
                 </label>
                 <Select
-                  value={selectedTrainerId}
-                  onValueChange={setSelectedTrainerId}
+                  value={selectedFormTrainerId}
+                  onValueChange={setSelectedFormTrainerId}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select trainer" />
@@ -389,6 +696,7 @@ interface ClientsViewProps {
     _id: string
     name: string
     phoneNumber: string
+    pin: string
     role: string
     goal: string
     trainerId?: string
@@ -398,9 +706,10 @@ interface ClientsViewProps {
     _id: string
     name: string
   }>
+  onSelectClient?: (clientId: string) => void
 }
 
-function ClientsView({ clients, trainers }: ClientsViewProps) {
+function ClientsView({ clients, trainers, onSelectClient }: ClientsViewProps) {
   const trainerMap = new Map(trainers.map((t) => [t._id, t.name]))
 
   return (
@@ -439,7 +748,6 @@ function ClientsView({ clients, trainers }: ClientsViewProps) {
           </CardContent>
         </Card>
       </div>
-
       {/* Client List */}
       <Card>
         <CardHeader>
@@ -456,27 +764,23 @@ function ClientsView({ clients, trainers }: ClientsViewProps) {
             clients.map((client) => (
               <div
                 key={client._id}
+                onClick={() => onSelectClient?.(client._id)}
                 className="flex items-center justify-between p-3 rounded-lg border border-border hover:bg-muted/50 transition-colors cursor-pointer"
               >
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 flex-1">
                   <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
                     <User className="w-5 h-5 text-primary" />
                   </div>
-                  <div>
+                  <div className="flex-1">
                     <p className="font-medium">{client.name}</p>
                     <p className="text-xs text-muted-foreground">
-                      {client.trainerId
-                        ? `Trainer: ${trainerMap.get(client.trainerId) ?? 'Unknown'}`
-                        : 'Self-managed'}
+                      {client.role === 'trainerManagedCustomer'
+                        ? 'Trainer Managed'
+                        : 'Self Managed'}
                     </p>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs px-2 py-1 rounded-full bg-muted text-muted-foreground capitalize">
-                    {client.goal.replace(/([A-Z])/g, ' $1').trim()}
-                  </span>
-                  <ChevronRight className="w-4 h-4 text-muted-foreground" />
-                </div>
+                <ChevronRight className="w-4 h-4 text-muted-foreground" />
               </div>
             ))
           )}
@@ -495,13 +799,19 @@ interface TrainersViewProps {
     _id: string
     name: string
     phoneNumber: string
+    pin: string
     role: string
     createdAt: number
   }>
   clientCount: number
+  onSelectTrainer?: (trainerId: string) => void
 }
 
-function TrainersView({ trainers, clientCount }: TrainersViewProps) {
+function TrainersView({
+  trainers,
+  clientCount,
+  onSelectTrainer,
+}: TrainersViewProps) {
   return (
     <div className="space-y-4">
       {/* Stats Summary */}
@@ -556,32 +866,16 @@ function TrainersView({ trainers, clientCount }: TrainersViewProps) {
             trainers.map((trainer) => (
               <div
                 key={trainer._id}
+                onClick={() => onSelectTrainer?.(trainer._id)}
                 className="flex items-center justify-between p-3 rounded-lg border border-border hover:bg-muted/50 transition-colors cursor-pointer"
               >
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 flex-1">
                   <div className="w-10 h-10 rounded-full bg-purple-500/10 flex items-center justify-center">
                     <Dumbbell className="w-5 h-5 text-purple-600" />
                   </div>
-                  <div>
-                    <p className="font-medium">{trainer.name}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {trainer.phoneNumber}
-                    </p>
-                  </div>
+                  <p className="font-medium">{trainer.name}</p>
                 </div>
-                <div className="flex items-center gap-2">
-                  <span
-                    className={cn(
-                      'text-xs px-2 py-1 rounded-full capitalize',
-                      trainer.role === 'admin'
-                        ? 'bg-amber-500/10 text-amber-600'
-                        : 'bg-purple-500/10 text-purple-600',
-                    )}
-                  >
-                    {trainer.role}
-                  </span>
-                  <ChevronRight className="w-4 h-4 text-muted-foreground" />
-                </div>
+                <ChevronRight className="w-4 h-4 text-muted-foreground" />
               </div>
             ))
           )}

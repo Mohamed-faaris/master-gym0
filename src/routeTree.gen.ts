@@ -14,7 +14,9 @@ import { Route as ApiIndexRouteImport } from './routes/api/index'
 import { Route as AppSignInRouteImport } from './routes/app/sign-in'
 import { Route as AppUserRouteImport } from './routes/app/_user'
 import { Route as AppManagementRouteRouteImport } from './routes/app/management/route'
+import { Route as AppAdminRouteRouteImport } from './routes/app/admin/route'
 import { Route as AppManagementIndexRouteImport } from './routes/app/management/index'
+import { Route as AppAdminIndexRouteImport } from './routes/app/admin/index'
 import { Route as AppUserIndexRouteImport } from './routes/app/_user/index'
 import { Route as AppManagementTestIntegrationRouteImport } from './routes/app/management/test-integration'
 import { Route as AppUserWorkoutsRouteImport } from './routes/app/_user/workouts'
@@ -25,8 +27,6 @@ import { Route as AppUserGalleryRouteImport } from './routes/app/_user/gallery'
 import { Route as AppUserDietLogsRouteImport } from './routes/app/_user/diet-logs'
 import { Route as AppUserDashboardRouteImport } from './routes/app/_user/dashboard'
 import { Route as AppUserAccountRouteImport } from './routes/app/_user/account'
-import { Route as AppManagementSuperadminRouteRouteImport } from './routes/app/management/superadmin/route'
-import { Route as AppManagementSuperadminIndexRouteImport } from './routes/app/management/superadmin/index'
 import { Route as AppManagementProgramsIndexRouteImport } from './routes/app/management/programs/index'
 import { Route as AppManagementDietPlansIndexRouteImport } from './routes/app/management/diet-plans/index'
 import { Route as AppManagementClientsIndexRouteImport } from './routes/app/management/clients/index'
@@ -61,10 +61,20 @@ const AppManagementRouteRoute = AppManagementRouteRouteImport.update({
   path: '/app/management',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppAdminRouteRoute = AppAdminRouteRouteImport.update({
+  id: '/app/admin',
+  path: '/app/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AppManagementIndexRoute = AppManagementIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AppManagementRouteRoute,
+} as any)
+const AppAdminIndexRoute = AppAdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppAdminRouteRoute,
 } as any)
 const AppUserIndexRoute = AppUserIndexRouteImport.update({
   id: '/',
@@ -117,18 +127,6 @@ const AppUserAccountRoute = AppUserAccountRouteImport.update({
   path: '/account',
   getParentRoute: () => AppUserRoute,
 } as any)
-const AppManagementSuperadminRouteRoute =
-  AppManagementSuperadminRouteRouteImport.update({
-    id: '/superadmin',
-    path: '/superadmin',
-    getParentRoute: () => AppManagementRouteRoute,
-  } as any)
-const AppManagementSuperadminIndexRoute =
-  AppManagementSuperadminIndexRouteImport.update({
-    id: '/',
-    path: '/',
-    getParentRoute: () => AppManagementSuperadminRouteRoute,
-  } as any)
 const AppManagementProgramsIndexRoute =
   AppManagementProgramsIndexRouteImport.update({
     id: '/programs/',
@@ -180,11 +178,11 @@ const AppManagementClientsClientIdRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/app/admin': typeof AppAdminRouteRouteWithChildren
   '/app/management': typeof AppManagementRouteRouteWithChildren
   '/app': typeof AppUserRouteWithChildren
   '/app/sign-in': typeof AppSignInRoute
   '/api/': typeof ApiIndexRoute
-  '/app/management/superadmin': typeof AppManagementSuperadminRouteRouteWithChildren
   '/app/account': typeof AppUserAccountRoute
   '/app/dashboard': typeof AppUserDashboardRoute
   '/app/diet-logs': typeof AppUserDietLogsRoute
@@ -195,6 +193,7 @@ export interface FileRoutesByFullPath {
   '/app/workouts': typeof AppUserWorkoutsRoute
   '/app/management/test-integration': typeof AppManagementTestIntegrationRoute
   '/app/': typeof AppUserIndexRoute
+  '/app/admin/': typeof AppAdminIndexRoute
   '/app/management/': typeof AppManagementIndexRoute
   '/app/management/clients/$clientId': typeof AppManagementClientsClientIdRoute
   '/app/management/diet-plans/$planId': typeof AppManagementDietPlansPlanIdRoute
@@ -204,7 +203,6 @@ export interface FileRoutesByFullPath {
   '/app/management/clients/': typeof AppManagementClientsIndexRoute
   '/app/management/diet-plans/': typeof AppManagementDietPlansIndexRoute
   '/app/management/programs/': typeof AppManagementProgramsIndexRoute
-  '/app/management/superadmin/': typeof AppManagementSuperadminIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -220,6 +218,7 @@ export interface FileRoutesByTo {
   '/app/workouts': typeof AppUserWorkoutsRoute
   '/app/management/test-integration': typeof AppManagementTestIntegrationRoute
   '/app': typeof AppUserIndexRoute
+  '/app/admin': typeof AppAdminIndexRoute
   '/app/management': typeof AppManagementIndexRoute
   '/app/management/clients/$clientId': typeof AppManagementClientsClientIdRoute
   '/app/management/diet-plans/$planId': typeof AppManagementDietPlansPlanIdRoute
@@ -229,16 +228,15 @@ export interface FileRoutesByTo {
   '/app/management/clients': typeof AppManagementClientsIndexRoute
   '/app/management/diet-plans': typeof AppManagementDietPlansIndexRoute
   '/app/management/programs': typeof AppManagementProgramsIndexRoute
-  '/app/management/superadmin': typeof AppManagementSuperadminIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/app/admin': typeof AppAdminRouteRouteWithChildren
   '/app/management': typeof AppManagementRouteRouteWithChildren
   '/app/_user': typeof AppUserRouteWithChildren
   '/app/sign-in': typeof AppSignInRoute
   '/api/': typeof ApiIndexRoute
-  '/app/management/superadmin': typeof AppManagementSuperadminRouteRouteWithChildren
   '/app/_user/account': typeof AppUserAccountRoute
   '/app/_user/dashboard': typeof AppUserDashboardRoute
   '/app/_user/diet-logs': typeof AppUserDietLogsRoute
@@ -249,6 +247,7 @@ export interface FileRoutesById {
   '/app/_user/workouts': typeof AppUserWorkoutsRoute
   '/app/management/test-integration': typeof AppManagementTestIntegrationRoute
   '/app/_user/': typeof AppUserIndexRoute
+  '/app/admin/': typeof AppAdminIndexRoute
   '/app/management/': typeof AppManagementIndexRoute
   '/app/management/clients/$clientId': typeof AppManagementClientsClientIdRoute
   '/app/management/diet-plans/$planId': typeof AppManagementDietPlansPlanIdRoute
@@ -258,17 +257,16 @@ export interface FileRoutesById {
   '/app/management/clients/': typeof AppManagementClientsIndexRoute
   '/app/management/diet-plans/': typeof AppManagementDietPlansIndexRoute
   '/app/management/programs/': typeof AppManagementProgramsIndexRoute
-  '/app/management/superadmin/': typeof AppManagementSuperadminIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/app/admin'
     | '/app/management'
     | '/app'
     | '/app/sign-in'
     | '/api/'
-    | '/app/management/superadmin'
     | '/app/account'
     | '/app/dashboard'
     | '/app/diet-logs'
@@ -279,6 +277,7 @@ export interface FileRouteTypes {
     | '/app/workouts'
     | '/app/management/test-integration'
     | '/app/'
+    | '/app/admin/'
     | '/app/management/'
     | '/app/management/clients/$clientId'
     | '/app/management/diet-plans/$planId'
@@ -288,7 +287,6 @@ export interface FileRouteTypes {
     | '/app/management/clients/'
     | '/app/management/diet-plans/'
     | '/app/management/programs/'
-    | '/app/management/superadmin/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -304,6 +302,7 @@ export interface FileRouteTypes {
     | '/app/workouts'
     | '/app/management/test-integration'
     | '/app'
+    | '/app/admin'
     | '/app/management'
     | '/app/management/clients/$clientId'
     | '/app/management/diet-plans/$planId'
@@ -313,15 +312,14 @@ export interface FileRouteTypes {
     | '/app/management/clients'
     | '/app/management/diet-plans'
     | '/app/management/programs'
-    | '/app/management/superadmin'
   id:
     | '__root__'
     | '/'
+    | '/app/admin'
     | '/app/management'
     | '/app/_user'
     | '/app/sign-in'
     | '/api/'
-    | '/app/management/superadmin'
     | '/app/_user/account'
     | '/app/_user/dashboard'
     | '/app/_user/diet-logs'
@@ -332,6 +330,7 @@ export interface FileRouteTypes {
     | '/app/_user/workouts'
     | '/app/management/test-integration'
     | '/app/_user/'
+    | '/app/admin/'
     | '/app/management/'
     | '/app/management/clients/$clientId'
     | '/app/management/diet-plans/$planId'
@@ -341,11 +340,11 @@ export interface FileRouteTypes {
     | '/app/management/clients/'
     | '/app/management/diet-plans/'
     | '/app/management/programs/'
-    | '/app/management/superadmin/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AppAdminRouteRoute: typeof AppAdminRouteRouteWithChildren
   AppManagementRouteRoute: typeof AppManagementRouteRouteWithChildren
   AppUserRoute: typeof AppUserRouteWithChildren
   AppSignInRoute: typeof AppSignInRoute
@@ -389,12 +388,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppManagementRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/app/admin': {
+      id: '/app/admin'
+      path: '/app/admin'
+      fullPath: '/app/admin'
+      preLoaderRoute: typeof AppAdminRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/app/management/': {
       id: '/app/management/'
       path: '/'
       fullPath: '/app/management/'
       preLoaderRoute: typeof AppManagementIndexRouteImport
       parentRoute: typeof AppManagementRouteRoute
+    }
+    '/app/admin/': {
+      id: '/app/admin/'
+      path: '/'
+      fullPath: '/app/admin/'
+      preLoaderRoute: typeof AppAdminIndexRouteImport
+      parentRoute: typeof AppAdminRouteRoute
     }
     '/app/_user/': {
       id: '/app/_user/'
@@ -466,20 +479,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppUserAccountRouteImport
       parentRoute: typeof AppUserRoute
     }
-    '/app/management/superadmin': {
-      id: '/app/management/superadmin'
-      path: '/superadmin'
-      fullPath: '/app/management/superadmin'
-      preLoaderRoute: typeof AppManagementSuperadminRouteRouteImport
-      parentRoute: typeof AppManagementRouteRoute
-    }
-    '/app/management/superadmin/': {
-      id: '/app/management/superadmin/'
-      path: '/'
-      fullPath: '/app/management/superadmin/'
-      preLoaderRoute: typeof AppManagementSuperadminIndexRouteImport
-      parentRoute: typeof AppManagementSuperadminRouteRoute
-    }
     '/app/management/programs/': {
       id: '/app/management/programs/'
       path: '/programs'
@@ -539,22 +538,19 @@ declare module '@tanstack/react-router' {
   }
 }
 
-interface AppManagementSuperadminRouteRouteChildren {
-  AppManagementSuperadminIndexRoute: typeof AppManagementSuperadminIndexRoute
+interface AppAdminRouteRouteChildren {
+  AppAdminIndexRoute: typeof AppAdminIndexRoute
 }
 
-const AppManagementSuperadminRouteRouteChildren: AppManagementSuperadminRouteRouteChildren =
-  {
-    AppManagementSuperadminIndexRoute: AppManagementSuperadminIndexRoute,
-  }
+const AppAdminRouteRouteChildren: AppAdminRouteRouteChildren = {
+  AppAdminIndexRoute: AppAdminIndexRoute,
+}
 
-const AppManagementSuperadminRouteRouteWithChildren =
-  AppManagementSuperadminRouteRoute._addFileChildren(
-    AppManagementSuperadminRouteRouteChildren,
-  )
+const AppAdminRouteRouteWithChildren = AppAdminRouteRoute._addFileChildren(
+  AppAdminRouteRouteChildren,
+)
 
 interface AppManagementRouteRouteChildren {
-  AppManagementSuperadminRouteRoute: typeof AppManagementSuperadminRouteRouteWithChildren
   AppManagementTestIntegrationRoute: typeof AppManagementTestIntegrationRoute
   AppManagementIndexRoute: typeof AppManagementIndexRoute
   AppManagementClientsClientIdRoute: typeof AppManagementClientsClientIdRoute
@@ -568,8 +564,6 @@ interface AppManagementRouteRouteChildren {
 }
 
 const AppManagementRouteRouteChildren: AppManagementRouteRouteChildren = {
-  AppManagementSuperadminRouteRoute:
-    AppManagementSuperadminRouteRouteWithChildren,
   AppManagementTestIntegrationRoute: AppManagementTestIntegrationRoute,
   AppManagementIndexRoute: AppManagementIndexRoute,
   AppManagementClientsClientIdRoute: AppManagementClientsClientIdRoute,
@@ -614,6 +608,7 @@ const AppUserRouteWithChildren =
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AppAdminRouteRoute: AppAdminRouteRouteWithChildren,
   AppManagementRouteRoute: AppManagementRouteRouteWithChildren,
   AppUserRoute: AppUserRouteWithChildren,
   AppSignInRoute: AppSignInRoute,
