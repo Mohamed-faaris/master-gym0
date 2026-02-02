@@ -15,6 +15,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 
 import { TodayProgressChart } from '@/components/charts/today-progress-chart'
+import { ActivityTimeCard } from '@/components/activity-time-card'
 import {
   Drawer,
   DrawerContent,
@@ -185,15 +186,18 @@ function RouteComponent() {
         </p>
       </div>
 
-      {/* Weekly Summary */}
+      {/* Activity Time Card */}
+      <ActivityTimeCard />
 
+      {/* Weekly Summary */}
+      {/* 
       <Card>
         <CardHeader>
           <CardTitle>Weekly Summary</CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
           {/* Simple Bar Chart - Calories Burned */}
-          <div>
+          {/* <div>
             <h3 className="text-sm font-medium mb-3">Calories Burned</h3>
             <div className="flex items-end justify-between h-32 gap-2">
               {weeklyStats.days.map(({ day, calories }) => {
@@ -222,10 +226,10 @@ function RouteComponent() {
                 )
               })}
             </div>
-          </div>
+          </div> */}
 
           {/* Stats Grid */}
-          <div className="grid grid-cols-2 gap-4 pt-4">
+          {/* <div className="grid grid-cols-2 gap-4 pt-4">
             <div className="space-y-1">
               <div className="flex items-center gap-2 text-muted-foreground">
                 <Flame className="w-4 h-4" />
@@ -265,9 +269,10 @@ function RouteComponent() {
                 cal
               </div>
             </div>
-          </div>
+          </div> */}
         </CardContent>
       </Card>
+      */}
 
       {/* Today's Stats - Radial Chart */}
       <TodayProgressChart />

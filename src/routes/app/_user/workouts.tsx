@@ -1,5 +1,12 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { Calendar, Dumbbell, ClipboardList } from 'lucide-react'
+import {
+  Calendar,
+  Dumbbell,
+  ClipboardList,
+  Flame,
+  Clock,
+  CheckCircle2,
+} from 'lucide-react'
 import { useQuery } from 'convex/react'
 
 import {
@@ -33,6 +40,36 @@ function RouteComponent() {
       : 'skip',
   )
 
+  // Fetch today's ongoing session for stats
+  const todaySession = useQuery(
+    api.workoutSessions.getOngoingSession,
+    user ? { userId: user._id } : 'skip',
+  )
+
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60)
+    const secs = seconds % 60
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
+  }
+
+  const getTodayStats = () => {
+    let totalTime = 0
+    let totalCalories = 0
+    let completedSets = 0
+
+    if (todaySession) {
+      totalTime = todaySession.totalTime || 0
+      totalCalories = todaySession.totalCaloriesBurned || 0
+      completedSets = (todaySession.exercises || []).reduce((sum, ex) => {
+        return sum + (ex.sets?.filter((s) => s.completed).length || 0)
+      }, 0)
+    }
+
+    return { totalTime, totalCalories, completedSets }
+  }
+
+  const todayStats = getTodayStats()
+
   return (
     <div className="space-y-4">
       {/* Header with date and day */}
@@ -62,6 +99,50 @@ function RouteComponent() {
               Please sign in to view workouts
             </p>
           </div>
+        )}
+
+        {user && (
+          <>
+            {/* Today's Stats Card */}
+            {todayStats.totalTime > 0 && (
+              <Card className="border-primary/50 bg-primary/5">
+                <CardHeader>
+                  <CardTitle className="text-lg">Today's Workout</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-3 gap-4">
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2 text-muted-foreground">
+                        <Clock className="h-4 w-4" />
+                        <span className="text-xs">Total Time</span>
+                      </div>
+                      <div className="text-2xl font-bold">
+                        {formatTime(todayStats.totalTime)}
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2 text-muted-foreground">
+                        <Flame className="h-4 w-4" />
+                        <span className="text-xs">Calories</span>
+                      </div>
+                      <div className="text-2xl font-bold">
+                        {todayStats.totalCalories}
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2 text-muted-foreground">
+                        <CheckCircle2 className="h-4 w-4" />
+                        <span className="text-xs">Sets Done</span>
+                      </div>
+                      <div className="text-2xl font-bold">
+                        {todayStats.completedSets}
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </>
         )}
 
         {user && !trainingPlan && (

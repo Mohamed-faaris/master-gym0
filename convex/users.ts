@@ -30,6 +30,7 @@ export const signInQuery = query({
     },
 })
 
+
 // Create a new user
 export const createUser = mutation({
     args: {

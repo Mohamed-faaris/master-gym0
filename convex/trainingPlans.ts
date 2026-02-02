@@ -186,3 +186,14 @@ export const getUsersByTrainingPlan = query({
         return users
     },
 })
+
+// Get training plan by ID
+export const getTrainingPlan = query({
+    args: {
+        trainingPlanId: v.id('trainingPlans'),
+    },
+    handler: async (ctx, args) => {
+        const trainingPlan = await ctx.db.get(args.trainingPlanId)
+        return trainingPlan
+    },
+})

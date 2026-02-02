@@ -278,9 +278,46 @@ export const dietPlans = defineTable({
   updatedAt: v.number(),
 }).index('by_creator', ['createdBy'])
 
-/* ======================================================
-   SCHEMA EXPORT
-====================================================== */
+/* -------------------- WORKOUT SESSIONS -------------------- */
+
+const workoutSessions = defineTable({
+  userId: v.id('users'),
+  trainingPlanId: v.optional(v.id('trainingPlans')),
+
+  startTime: v.number(),
+  endTime: v.optional(v.number()),
+
+  status: WorkoutStatusValidator, // 'ongoing', 'completed', 'cancelled'
+  dayOfWeek: DayOfWeekValidator,
+
+  exercises: v.array(
+    v.object({
+      exerciseName: v.string(),
+      index: v.number(),
+      completed: v.boolean(),
+      timeSpent: v.number(), // in seconds
+      sets: v.array(
+        v.object({
+          setIndex: v.number(),
+          reps: v.number(),
+          weight: v.number(),
+          completed: v.boolean(),
+        })
+      ),
+      notes: v.optional(v.string()),
+    })
+  ),
+
+  totalTime: v.number(), // in seconds
+  totalCaloriesBurned: v.number(),
+
+  createdAt: v.number(),
+  updatedAt: v.number(),
+})
+  .index('by_user', ['userId'])
+  .index('by_user_status', ['userId', 'status'])
+
+/* ======================================================= */
 
 export default defineSchema({
   users,
@@ -291,4 +328,6 @@ export default defineSchema({
   weightLogs,
   trainingPlans,
   dietPlans,
+  workoutSessions,
 })
+
