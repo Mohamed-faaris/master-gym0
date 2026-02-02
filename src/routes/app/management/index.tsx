@@ -97,7 +97,7 @@ function RouteComponent() {
             <p className="text-muted-foreground">Management Dashboard</p>
           </div>
           {user.role === 'admin' && (
-            <Link to="/app/management/superadmin">
+            <Link to="/app/admin">
               <button className="px-4 py-2 rounded-lg bg-amber-500/10 text-amber-600 text-sm font-medium hover:bg-amber-500/20 transition-colors">
                 Super Admin
               </button>

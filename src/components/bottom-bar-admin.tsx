@@ -8,6 +8,7 @@ import {
   Plus,
   Users,
   UtensilsCrossed,
+  User,
 } from 'lucide-react'
 
 import { cn } from '@/lib/utils'
@@ -27,17 +28,11 @@ type AdminNavItem = {
 }
 
 const primaryNav: AdminNavItem[] = [
-  { to: '/app/management', label: 'Overview', icon: Activity },
   { to: '/app/management/clients', label: 'Clients', icon: Users },
 ]
 
 const secondaryNav: AdminNavItem[] = [
-  { to: '/app/management/programs', label: 'Programs', icon: ClipboardList },
-  {
-    to: '/app/management/diet-plans',
-    label: 'Diet Plans',
-    icon: UtensilsCrossed,
-  },
+  { to: '/app/management/profile', label: 'Profile', icon: User },
 ]
 
 interface BottomBarAdminProps {
@@ -125,28 +120,10 @@ export function BottomBarAdmin({
           <DrawerHeader>
             <DrawerTitle>Launch quick action</DrawerTitle>
             <DrawerDescription>
-              Spin up a workflow without leaving this view.
+              Create program or diet plan for your clients.
             </DrawerDescription>
           </DrawerHeader>
           <div className="flex flex-col gap-3 p-6">
-            <Link to="/app/management/clients">
-              <Button
-                variant="outline"
-                className="w-full h-16 justify-start gap-4"
-                onClick={() => setDrawerOpen(false)}
-              >
-                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                  <Users className="w-5 h-5 text-primary" />
-                </div>
-                <div className="text-left">
-                  <p className="font-semibold">Start roster check-in</p>
-                  <p className="text-sm text-muted-foreground">
-                    Jump into active clients list.
-                  </p>
-                </div>
-              </Button>
-            </Link>
-
             <Link to="/app/management/programs">
               <Button
                 variant="outline"
@@ -157,9 +134,9 @@ export function BottomBarAdmin({
                   <ClipboardList className="w-5 h-5 text-chart-2" />
                 </div>
                 <div className="text-left">
-                  <p className="font-semibold">Assign or edit program</p>
+                  <p className="font-semibold">Create training program</p>
                   <p className="text-sm text-muted-foreground">
-                    Open the program shelf.
+                    Design a new workout program.
                   </p>
                 </div>
               </Button>
@@ -175,29 +152,13 @@ export function BottomBarAdmin({
                   <UtensilsCrossed className="w-5 h-5 text-emerald-600" />
                 </div>
                 <div className="text-left">
-                  <p className="font-semibold">Manage diet plans</p>
+                  <p className="font-semibold">Create diet plan</p>
                   <p className="text-sm text-muted-foreground">
-                    Create or edit nutrition templates.
+                    Design a nutrition plan for clients.
                   </p>
                 </div>
               </Button>
             </Link>
-
-            <Button
-              variant="outline"
-              className="w-full h-16 justify-start gap-4"
-              onClick={() => setDrawerOpen(false)}
-            >
-              <div className="w-10 h-10 rounded-full bg-chart-4/10 flex items-center justify-center">
-                <NotebookPen className="w-5 h-5 text-chart-4" />
-              </div>
-              <div className="text-left">
-                <p className="font-semibold">Log internal note</p>
-                <p className="text-sm text-muted-foreground">
-                  Record ops updates for later.
-                </p>
-              </div>
-            </Button>
           </div>
         </DrawerContent>
       </Drawer>
