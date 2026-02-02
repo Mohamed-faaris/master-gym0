@@ -1,2 +1,8 @@
-// Re-export constants from convex schema for easier imports
-export { MEAL_TYPES } from '../../convex/schema'
+// Meal types for diet logs
+export const MEAL_TYPES = [
+  'breakfast',
+  'lunch',
+  'dinner',
+  'snack',
+  'postWorkout',
+] as const
