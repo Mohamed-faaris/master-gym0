@@ -81,6 +81,7 @@ export function ClientDetailView({
     phoneNumber: client.phoneNumber,
     pin: client.pin,
     goal: client.goal,
+    role: client.role,
     trainerId: client.trainerId || '',
   })
 
@@ -267,6 +268,29 @@ export function ClientDetailView({
               </Select>
             </div>
 
+            {/* Role */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Client Role</label>
+              <Select
+                value={editForm.role}
+                onValueChange={(value) =>
+                  setEditForm({ ...editForm, role: value })
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select role" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="trainerManagedCustomer">
+                    Trainer Managed
+                  </SelectItem>
+                  <SelectItem value="selfManagedCustomer">
+                    Self Managed
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
             {/* Assigned Trainer */}
             <div className="space-y-2">
               <label className="text-sm font-medium flex items-center gap-2">
@@ -307,6 +331,7 @@ export function ClientDetailView({
                     phoneNumber: editForm.phoneNumber,
                     pin: editForm.pin,
                     goal: editForm.goal,
+                    role: editForm.role,
                     trainerId: editForm.trainerId || undefined,
                   })
                   setIsEditModalOpen(false)

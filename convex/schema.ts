@@ -159,8 +159,8 @@ const userMeta = defineTable({
   readinessNote: v.optional(v.string()),
   accentColor: v.optional(v.string()),
 
-  currentWeight: v.number(),
-  targetWeight: v.number(),
+  currentWeight: v.optional(v.number()),
+  targetWeight: v.optional(v.number()),
 
   emergencyContactName: v.optional(v.string()),
   emergencyContactPhone: v.optional(v.string()),

@@ -187,6 +187,8 @@ export const updateUserMeta = mutation({
         progressPercent: v.optional(v.number()),
         readinessNote: v.optional(v.string()),
         accentColor: v.optional(v.string()),
+        currentWeight: v.optional(v.number()),
+        targetWeight: v.optional(v.number()),
         emergencyContactName: v.optional(v.string()),
         emergencyContactPhone: v.optional(v.string()),
     },
@@ -211,6 +213,8 @@ export const updateUserMeta = mutation({
             // Create new meta
             const metaId = await ctx.db.insert('userMeta', {
                 userId,
+                currentWeight: updates.currentWeight ?? 70,
+                targetWeight: updates.targetWeight ?? 70,
                 ...updates,
                 createdAt: now,
                 updatedAt: now,
