@@ -30,7 +30,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useAuth } from '@/components/auth/useAuth'
-import { api } from '../../../../convex/_generated/api'
+import { api } from '@convex/_generated/api'
 import {
   ChartContainer,
   ChartTooltip,

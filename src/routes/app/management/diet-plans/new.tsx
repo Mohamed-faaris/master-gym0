@@ -17,7 +17,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Progress } from '@/components/ui/progress'
 import { cn } from '@/lib/utils'
-import { api } from '../../../../../convex/_generated/api'
+import { api } from '@convex/_generated/api'
 import { Link } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/app/management/diet-plans/new')({

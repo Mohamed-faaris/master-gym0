@@ -24,7 +24,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-import { api } from '../../../../../convex/_generated/api'
+import { api } from '@convex/_generated/api'
 import { toast } from 'sonner'
 
 const privilegedRoles = new Set(['trainer', 'admin'])

@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { Plus, Utensils } from 'lucide-react'
 import { toast } from 'sonner'
 
-import { api } from '../../../../convex/_generated/api'
+import { api } from '@convex/_generated/api'
 import { useAuth } from '@/components/auth/useAuth'
 import { Button } from '@/components/ui/button'
 import {
