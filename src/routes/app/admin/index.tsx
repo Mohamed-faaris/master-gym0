@@ -44,7 +44,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { cn } from '@/lib/utils'
-import { ClientDetailView, TrainerDetailView } from './detail-views'
+import { ClientDetailView, TrainerDetailView } from './-detail-views'
 
 type Tab = 'clients' | 'trainers'
 

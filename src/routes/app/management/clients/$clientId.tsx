@@ -1,9 +1,19 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
-import { ArrowLeft, Plus, Trash2, TrendingDown, Dumbbell, UtensilsCrossed, Scale } from 'lucide-react'
+import {
+  ArrowLeft,
+  Activity,
+  Dumbbell,
+  UtensilsCrossed,
+  TrendingUp,
+  BarChart3,
+  Clock,
+  CheckCircle2,
+  X,
+  Play,
+  Pause,
+} from 'lucide-react'
 import { useQuery, useMutation } from 'convex/react'
-import { toast } from 'sonner'
-import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from 'recharts'
 
 import { useAuth } from '@/components/auth/useAuth'
 import { Button } from '@/components/ui/button'
@@ -14,30 +24,10 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
-import {
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-  type ChartConfig,
-} from '@/components/ui/chart'
 import { api } from '../../../../../convex/_generated/api'
+import { toast } from 'sonner'
 
 const privilegedRoles = new Set(['trainer', 'admin'])
-
-const weightChartConfig = {
-  weight: {
-    label: 'Weight',
-    color: 'var(--chart-1)',
-  },
-} satisfies ChartConfig
 
 export const Route = createFileRoute('/app/management/clients/$clientId')({
   component: ClientDetailRoute,
@@ -47,35 +37,42 @@ function ClientDetailRoute() {
   const { clientId } = Route.useParams()
   const { user, isLoading } = useAuth()
   const navigate = useNavigate()
+  const [showWorkoutSession, setShowWorkoutSession] = useState(false)
+  const [isPaused, setIsPaused] = useState(false)
+  const [completedSets, setCompletedSets] = useState<Set<string>>(new Set())
+  const [workoutTime, setWorkoutTime] = useState(0)
+  const [sessionId, setSessionId] = useState<string | null>(null)
+  const [workoutTitle, setWorkoutTitle] = useState('')
+  const [workoutFocus, setWorkoutFocus] = useState('Chest & Shoulders')
 
-  // Local state
-  const [isAddingWorkout, setIsAddingWorkout] = useState(false)
-  const [workoutForm, setWorkoutForm] = useState({
-    title: '',
-    notes: '',
-    duration: '',
-    intensity: 'moderate' as 'light' | 'moderate' | 'heavy',
-  })
+  const currentExerciseRef = useRef<HTMLDivElement>(null)
 
-  // Queries
-  const clientData = useQuery(api.users.getUserById, clientId ? { userId: clientId } : 'skip')
+  // Fetch client data
+  const client = useQuery(
+    api.users.getUserById,
+    clientId ? { userId: clientId } : 'skip',
+  )
+
   const workoutLogs = useQuery(
     api.workoutLogs.getWorkoutLogsByUser,
-    clientId ? { userId: clientId, limit: 10 } : 'skip'
-  )
-  const dietLogs = useQuery(
-    api.dietLogs.getDietLogsByUser,
-    clientId ? { userId: clientId, limit: 10 } : 'skip'
-  )
-  const weightLogs = useQuery(
-    api.weightLogs.getWeightLogsByUser,
-    clientId ? { userId: clientId } : 'skip'
+    clientId ? { userId: clientId } : 'skip',
   )
 
-  // Mutations
-  const logWorkout = useMutation(api.workoutLogs.addWorkoutLog)
-  const deleteWorkoutLog = useMutation(api.workoutLogs.deleteWorkoutLog)
-  const deleteDietLog = useMutation(api.dietLogs.deleteDietLog)
+  const dietLogs = useQuery(
+    api.dietLogs.getDietLogsByUser,
+    clientId ? { userId: clientId, limit: 100 } : 'skip',
+  )
+
+  const weightLogs = useQuery(
+    api.weightLogs.getWeightLogsByUser,
+    clientId ? { userId: clientId } : 'skip',
+  )
+
+  // Mutations for workout logging
+  const startSession = useMutation(api.workoutSessions.startSession)
+  const updateSession = useMutation(api.workoutSessions.updateSessionProgress)
+  const completeSession = useMutation(api.workoutSessions.completeSession)
+  const cancelSession = useMutation(api.workoutSessions.cancelSession)
 
   /* -------------------------------------------------------------------------- */
   /*                                    Auth                                    */
@@ -92,6 +89,17 @@ function ClientDetailRoute() {
     }
   }, [user, isLoading, navigate])
 
+  // Timer effect
+  useEffect(() => {
+    if (!isPaused && showWorkoutSession) {
+      const interval = setInterval(() => {
+        setWorkoutTime((prev) => prev + 1)
+      }, 1000)
+      return () => clearInterval(interval)
+    }
+  }, [isPaused, showWorkoutSession])
+
+  // Early returns AFTER all hooks
   if (isLoading) {
     return <div className="p-4">Loading...</div>
   }
@@ -100,82 +108,63 @@ function ClientDetailRoute() {
     return null
   }
 
-  /* -------------------------------------------------------------------------- */
-  /*                              Handle Submissions                            */
-  /* -------------------------------------------------------------------------- */
-
-  const handleLogWorkout = async (e: React.FormEvent) => {
-    e.preventDefault()
-
-    if (!clientId || !workoutForm.title || !workoutForm.duration) {
-      toast.error('Please fill in all required fields')
-      return
-    }
-
-    try {
-      await logWorkout({
-        userId: clientId,
-        title: workoutForm.title,
-        duration: parseInt(workoutForm.duration),
-        intensity: workoutForm.intensity,
-        notes: workoutForm.notes,
-      })
-
-      toast.success('Workout logged successfully!')
-      setWorkoutForm({ title: '', notes: '', duration: '', intensity: 'moderate' })
-      setIsAddingWorkout(false)
-    } catch (error) {
-      toast.error('Failed to log workout')
-      console.error(error)
-    }
+  if (!client) {
+    return <div className="p-4">Loading client...</div>
   }
 
-  const handleDeleteWorkout = async (logId: string) => {
-    try {
-      await deleteWorkoutLog({ logId })
-      toast.success('Workout deleted')
-    } catch (error) {
-      toast.error('Failed to delete workout')
-    }
+  // Workout session functions (defined after all guards)
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60)
+    const secs = seconds % 60
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
   }
 
-  const handleDeleteDietLog = async (logId: string) => {
-    try {
-      await deleteDietLog({ logId })
-      toast.success('Diet log deleted')
-    } catch (error) {
-      toast.error('Failed to delete diet log')
+  const endWorkout = async () => {
+    if (sessionId) {
+      try {
+        const estimatedCalories = (workoutTime / 60) * 5
+        await completeSession({
+          sessionId,
+          totalTime: workoutTime,
+          totalCaloriesBurned: Math.round(estimatedCalories),
+        })
+        toast.success('Workout logged successfully!')
+      } catch (error) {
+        toast.error('Failed to save workout')
+        console.error(error)
+      }
     }
+    setShowWorkoutSession(false)
+    setWorkoutTime(0)
+    setCompletedSets(new Set())
+    setSessionId(null)
   }
 
-  /* -------------------------------------------------------------------------- */
-  /*                              Chart Data Prep                               */
-  /* -------------------------------------------------------------------------- */
+  const cancelWorkout = async () => {
+    if (sessionId) {
+      try {
+        await cancelSession({ sessionId })
+        toast.success('Workout cancelled')
+      } catch (error) {
+        toast.error('Failed to cancel workout')
+        console.error(error)
+      }
+    }
+    setShowWorkoutSession(false)
+    setWorkoutTime(0)
+    setCompletedSets(new Set())
+    setSessionId(null)
+  }
 
-  const weightChartData = weightLogs
-    ? [...weightLogs].reverse().map((log) => ({
-        date: new Date(log.createdAt).toLocaleDateString('en-US', {
-          month: 'short',
-          day: 'numeric',
-        }),
-        weight: log.weight,
-      }))
-    : []
-
-  const currentWeight = weightLogs?.[0]?.weight ?? 0
-  const targetWeight = weightLogs?.[weightLogs.length - 1]?.weight ?? 0
-  const weightProgress = Math.round(((currentWeight - targetWeight) / Math.abs(targetWeight)) * 100) || 0
-
-  const totalWorkouts = workoutLogs?.length ?? 0
-  const totalDietLogs = dietLogs?.length ?? 0
+  // This function is already defined above, removing duplicate
 
   /* -------------------------------------------------------------------------- */
   /*                                   Render                                   */
   /* -------------------------------------------------------------------------- */
 
   return (
-    <div className="space-y-6 p-4 pb-20">
-      {/* --------------------------- Header --------------------------- */}
+    <div className="space-y-6 p-4 pb-20 max-w-4xl mx-auto">
+      {/* Header */}
       <header className="space-y-3">
         <Link
           to="/app/management/clients"
@@ -185,268 +174,340 @@ function ClientDetailRoute() {
           Back to clients
         </Link>
         <div>
-          <h1 className="text-2xl font-semibold">{clientData?.name ?? 'Loading...'}</h1>
-          <p className="text-muted-foreground text-sm">
-            {clientData?.goal?.replace(/([A-Z])/g, ' $1').trim()}
+          <h1 className="text-3xl font-semibold">{client.name}</h1>
+          <p className="text-muted-foreground">
+            {client.goal?.replace(/([A-Z])/g, ' $1').toLowerCase()}
           </p>
         </div>
       </header>
 
-      {/* ----------------------- Summary Cards ----------------------- */}
+      {/* Client Info */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Activity className="w-5 h-5" />
+            Client Information
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <div>
+            <p className="text-sm text-muted-foreground">Email</p>
+            <p className="font-medium">{client.email || 'Not provided'}</p>
+          </div>
+          <div>
+            <p className="text-sm text-muted-foreground">Phone</p>
+            <p className="font-medium">{client.phoneNumber}</p>
+          </div>
+          <div>
+            <p className="text-sm text-muted-foreground">Role</p>
+            <p className="font-medium capitalize">
+              {client.role === 'trainerManagedCustomer'
+                ? 'Trainer Managed'
+                : 'Self Managed'}
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Quick Stats */}
       <div className="grid grid-cols-3 gap-3">
         <Card>
           <CardContent className="pt-6">
-            <div className="space-y-2">
-              <p className="text-xs text-muted-foreground">Workouts Logged</p>
-              <p className="text-2xl font-bold text-primary">{totalWorkouts}</p>
+            <div className="text-center">
+              <p className="text-3xl font-bold text-primary">
+                {workoutLogs?.length || 0}
+              </p>
+              <p className="text-xs text-muted-foreground mt-1">Workouts</p>
             </div>
           </CardContent>
         </Card>
-
         <Card>
           <CardContent className="pt-6">
-            <div className="space-y-2">
-              <p className="text-xs text-muted-foreground">Diet Logs</p>
-              <p className="text-2xl font-bold text-emerald-600">{totalDietLogs}</p>
+            <div className="text-center">
+              <p className="text-3xl font-bold text-chart-2">
+                {dietLogs?.length || 0}
+              </p>
+              <p className="text-xs text-muted-foreground mt-1">Diet Logs</p>
             </div>
           </CardContent>
         </Card>
-
         <Card>
           <CardContent className="pt-6">
-            <div className="space-y-2">
-              <p className="text-xs text-muted-foreground">Weight</p>
-              <p className="text-2xl font-bold text-chart-1">{currentWeight} kg</p>
+            <div className="text-center">
+              <p className="text-3xl font-bold text-emerald-600">
+                {weightLogs?.length || 0}
+              </p>
+              <p className="text-xs text-muted-foreground mt-1">Weight Logs</p>
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* ----------------------- Weight Progress ----------------------- */}
-      {weightChartData.length > 0 && (
-        <Card>
+      {/* Log Actions */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Card
+          className="cursor-pointer hover:shadow-lg transition-shadow"
+          onClick={() => navigate({ to: `./logs/workout` })}
+        >
           <CardHeader>
-            <CardTitle className="text-base flex items-center gap-2">
-              <Scale className="w-4 h-4" />
-              Weight Progress
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Dumbbell className="w-5 h-5 text-chart-1" />
+              View Workouts
             </CardTitle>
+            <CardDescription>
+              {workoutLogs?.length || 0} entries
+            </CardDescription>
           </CardHeader>
           <CardContent>
-            <ChartContainer config={weightChartConfig} className="h-[200px]">
-              <AreaChart data={weightChartData}>
-                <defs>
-                  <linearGradient id="fillWeight" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="var(--chart-1)" stopOpacity={0.8} />
-                    <stop offset="95%" stopColor="var(--chart-1)" stopOpacity={0.1} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="2 2" />
-                <XAxis dataKey="date" />
-                <YAxis domain={['dataMin - 2', 'dataMax + 2']} />
-                <ChartTooltip content={<ChartTooltipContent />} />
-                <Area
-                  type="monotone"
-                  dataKey="weight"
-                  stroke="var(--chart-1)"
-                  fill="url(#fillWeight)"
-                />
-              </AreaChart>
-            </ChartContainer>
+            <Button variant="outline" className="w-full">
+              View Logs
+            </Button>
+          </CardContent>
+        </Card>
+
+        <Card
+          className="cursor-pointer hover:shadow-lg transition-shadow"
+          onClick={() => navigate({ to: `./logs/diet` })}
+        >
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <UtensilsCrossed className="w-5 h-5 text-emerald-600" />
+              View Diet
+            </CardTitle>
+            <CardDescription>{dietLogs?.length || 0} entries</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button variant="outline" className="w-full">
+              View Logs
+            </Button>
+          </CardContent>
+        </Card>
+
+        <Card
+          className="cursor-pointer hover:shadow-lg transition-shadow"
+          onClick={() => navigate({ to: `./logs/weight` })}
+        >
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <BarChart3 className="w-5 h-5 text-chart-2" />
+              View Weight
+            </CardTitle>
+            <CardDescription>{weightLogs?.length || 0} entries</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button variant="outline" className="w-full">
+              View Logs
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Log Workout Button */}
+      {!showWorkoutSession && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Log Workout Session</CardTitle>
+            <CardDescription>
+              Record a new workout for {client.name}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button
+              onClick={() => setShowWorkoutSession(true)}
+              className="w-full h-10"
+            >
+              <Dumbbell className="w-4 h-4 mr-2" />
+              Start Workout Session
+            </Button>
           </CardContent>
         </Card>
       )}
 
-      {/* ----------------------- Log Workout ----------------------- */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base flex items-center gap-2">
-            <Dumbbell className="w-4 h-4" />
-            Log Workout
-          </CardTitle>
-          <CardDescription>Record a workout session for this client</CardDescription>
-        </CardHeader>
-
-        <CardContent>
-          {!isAddingWorkout ? (
-            <Button
-              onClick={() => setIsAddingWorkout(true)}
-              className="w-full"
-              variant="outline"
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              Log New Workout
-            </Button>
-          ) : (
-            <form onSubmit={handleLogWorkout} className="space-y-4">
-              {/* Title */}
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Workout Title *</label>
-                <Input
-                  placeholder="e.g., Chest & Triceps"
-                  value={workoutForm.title}
-                  onChange={(e) =>
-                    setWorkoutForm({ ...workoutForm, title: e.target.value })
-                  }
+      {/* Workout Session Component */}
+      {showWorkoutSession && (
+        <div className="space-y-6">
+          {/* Workout Info Input */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Workout Details</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <label className="text-sm font-medium">Workout Title</label>
+                <input
+                  type="text"
+                  className="mt-2 w-full rounded-lg border border-border bg-background px-4 py-2 text-base"
+                  placeholder="e.g., Push Day"
+                  value={workoutTitle}
+                  onChange={(e) => setWorkoutTitle(e.target.value)}
                 />
               </div>
-
-              {/* Duration */}
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Duration (minutes) *</label>
-                <Input
-                  type="number"
-                  placeholder="45"
-                  value={workoutForm.duration}
-                  onChange={(e) =>
-                    setWorkoutForm({ ...workoutForm, duration: e.target.value })
-                  }
-                />
-              </div>
-
-              {/* Intensity */}
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Intensity</label>
-                <Select
-                  value={workoutForm.intensity}
-                  onValueChange={(value) =>
-                    setWorkoutForm({
-                      ...workoutForm,
-                      intensity: value as 'light' | 'moderate' | 'heavy',
-                    })
-                  }
+              <div>
+                <label className="text-sm font-medium">Focus Area</label>
+                <select
+                  className="mt-2 w-full rounded-lg border border-border bg-background px-4 py-2 text-base"
+                  value={workoutFocus}
+                  onChange={(e) => setWorkoutFocus(e.target.value)}
                 >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="light">Light</SelectItem>
-                    <SelectItem value="moderate">Moderate</SelectItem>
-                    <SelectItem value="heavy">Heavy</SelectItem>
-                  </SelectContent>
-                </Select>
+                  <option>Chest & Shoulders</option>
+                  <option>Back & Biceps</option>
+                  <option>Legs</option>
+                  <option>Full Body</option>
+                  <option>Cardio</option>
+                </select>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Workout Session Tracker */}
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-3">
+              <div>
+                <CardTitle>Active Session</CardTitle>
+                <CardDescription>
+                  {workoutTitle || 'Workout'} - {workoutFocus}
+                </CardDescription>
+              </div>
+              <Button variant="ghost" size="sm" onClick={cancelWorkout}>
+                <X className="w-4 h-4" />
+              </Button>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* Timer Display */}
+              <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
+                <div className="flex items-center gap-3">
+                  <Clock className="w-6 h-6 text-primary" />
+                  <div>
+                    <div className="text-3xl font-bold tabular-nums">
+                      {formatTime(workoutTime)}
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      Total Time
+                    </div>
+                  </div>
+                </div>
+                <Button
+                  variant={isPaused ? 'default' : 'secondary'}
+                  size="lg"
+                  onClick={() => setIsPaused(!isPaused)}
+                >
+                  {isPaused ? (
+                    <>
+                      <Play className="w-5 h-5 mr-2" />
+                      Resume
+                    </>
+                  ) : (
+                    <>
+                      <Pause className="w-5 h-5 mr-2" />
+                      Pause
+                    </>
+                  )}
+                </Button>
               </div>
 
-              {/* Notes */}
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Notes</label>
-                <Input
-                  placeholder="How did the workout go?"
-                  value={workoutForm.notes}
-                  onChange={(e) =>
-                    setWorkoutForm({ ...workoutForm, notes: e.target.value })
-                  }
-                />
+              {/* Completed Sets Counter */}
+              <div className="p-4 bg-muted rounded-lg text-center">
+                <p className="text-sm text-muted-foreground mb-1">
+                  Sets Completed
+                </p>
+                <p className="text-2xl font-bold">{completedSets.size}</p>
               </div>
 
-              {/* Actions */}
-              <div className="flex gap-2">
-                <Button type="submit" className="flex-1">
-                  Log Workout
+              {/* Exercise List for Logging */}
+              <div className="space-y-3">
+                <p className="text-sm font-medium">Log Exercises</p>
+                <div className="space-y-2">
+                  {['Exercise 1', 'Exercise 2', 'Exercise 3'].map(
+                    (exercise, idx) => (
+                      <Card
+                        key={idx}
+                        className="cursor-pointer hover:border-primary transition-colors"
+                      >
+                        <CardContent className="p-3">
+                          <div className="flex items-center justify-between">
+                            <div className="flex-1">
+                              <p className="font-medium">{exercise}</p>
+                              <p className="text-xs text-muted-foreground">
+                                3 sets × 10 reps
+                              </p>
+                            </div>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => {
+                                const newKey = `set-${completedSets.size}`
+                                setCompletedSets(
+                                  new Set([...completedSets, newKey]),
+                                )
+                              }}
+                            >
+                              <CheckCircle2 className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ),
+                  )}
+                </div>
+              </div>
+
+              {/* End Workout Button */}
+              <div className="flex gap-3">
+                <Button className="flex-1" onClick={endWorkout}>
+                  <CheckCircle2 className="w-4 h-4 mr-2" />
+                  End Workout
                 </Button>
                 <Button
-                  type="button"
                   variant="outline"
-                  onClick={() => setIsAddingWorkout(false)}
+                  className="flex-1"
+                  onClick={cancelWorkout}
                 >
                   Cancel
                 </Button>
               </div>
-            </form>
-          )}
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* Progress Summary */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <TrendingUp className="w-5 h-5" />
+            Progress Summary
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div>
+            <p className="text-sm text-muted-foreground">Workout Progress</p>
+            <p className="text-2xl font-bold text-primary">
+              {workoutLogs?.length || 0}
+            </p>
+            <p className="text-xs text-muted-foreground mt-1">
+              Total workouts logged
+            </p>
+          </div>
+          <div>
+            <p className="text-sm text-muted-foreground">Diet Progress</p>
+            <p className="text-2xl font-bold text-chart-2">
+              {dietLogs?.length || 0}
+            </p>
+            <p className="text-xs text-muted-foreground mt-1">
+              Diet logs recorded
+            </p>
+          </div>
+          <div>
+            <p className="text-sm text-muted-foreground">Weight Tracking</p>
+            <p className="text-2xl font-bold text-emerald-600">
+              {weightLogs?.length || 0}
+            </p>
+            <p className="text-xs text-muted-foreground mt-1">
+              Weight logs recorded
+            </p>
+          </div>
         </CardContent>
       </Card>
-
-      {/* ----------------------- Workout Logs ----------------------- */}
-      {workoutLogs && workoutLogs.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Workout History</CardTitle>
-            <CardDescription>{workoutLogs.length} workouts logged</CardDescription>
-          </CardHeader>
-
-          <CardContent className="space-y-3">
-            {workoutLogs.map((log) => (
-              <div
-                key={log._id}
-                className="flex items-start justify-between p-3 rounded-lg border border-border"
-              >
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium">{log.title}</p>
-                  <p className="text-sm text-muted-foreground">
-                    {log.duration} min • {log.intensity}
-                  </p>
-                  {log.notes && (
-                    <p className="text-xs text-muted-foreground mt-1">{log.notes}</p>
-                  )}
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {new Date(log.createdAt).toLocaleDateString()}
-                  </p>
-                </div>
-                <button
-                  onClick={() => handleDeleteWorkout(log._id)}
-                  className="ml-2 p-2 hover:bg-destructive/10 rounded transition-colors flex-shrink-0"
-                  title="Delete"
-                >
-                  <Trash2 className="w-4 h-4 text-destructive" />
-                </button>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
-      )}
-
-      {/* ----------------------- Diet Logs ----------------------- */}
-      {dietLogs && dietLogs.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base flex items-center gap-2">
-              <UtensilsCrossed className="w-4 h-4" />
-              Diet Logs
-            </CardTitle>
-            <CardDescription>{dietLogs.length} meals logged</CardDescription>
-          </CardHeader>
-
-          <CardContent className="space-y-3">
-            {dietLogs.map((log) => (
-              <div
-                key={log._id}
-                className="flex items-start justify-between p-3 rounded-lg border border-border"
-              >
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium capitalize">{log.mealType}</p>
-                  <p className="text-sm">{log.title}</p>
-                  {log.description && (
-                    <p className="text-xs text-muted-foreground">{log.description}</p>
-                  )}
-                  <p className="text-sm font-semibold mt-1">{log.calories} kcal</p>
-                  <p className="text-xs text-muted-foreground">
-                    {new Date(log.createdAt).toLocaleDateString()}
-                  </p>
-                </div>
-                <button
-                  onClick={() => handleDeleteDietLog(log._id)}
-                  className="ml-2 p-2 hover:bg-destructive/10 rounded transition-colors flex-shrink-0"
-                  title="Delete"
-                >
-                  <Trash2 className="w-4 h-4 text-destructive" />
-                </button>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
-      )}
-
-      {/* ----------------------- Empty States ----------------------- */}
-      {!workoutLogs?.length && !dietLogs?.length && !weightLogs?.length && (
-        <Card>
-          <CardContent className="pt-12 pb-12 text-center space-y-3">
-            <p className="text-sm text-muted-foreground">No logs yet</p>
-            <p className="text-xs text-muted-foreground">
-              Start logging workouts and diet for this client
-            </p>
-          </CardContent>
-        </Card>
-      )}
     </div>
   )
 }

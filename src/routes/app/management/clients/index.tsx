@@ -27,7 +27,7 @@ function ClientsRoute() {
   // Fetch clients assigned to this trainer
   const clients = useQuery(
     api.users.getUsersByTrainer,
-    user?._id ? { trainerId: user._id } : 'skip'
+    user?._id ? { trainerId: user._id } : 'skip',
   )
 
   /* -------------------------------------------------------------------------- */
@@ -92,14 +92,17 @@ function ClientsRoute() {
         <CardHeader>
           <CardTitle>Client Roster</CardTitle>
           <CardDescription>
-            {clients?.length ?? 0} client{clients?.length !== 1 ? 's' : ''} assigned
+            {clients?.length ?? 0} client{clients?.length !== 1 ? 's' : ''}{' '}
+            assigned
           </CardDescription>
         </CardHeader>
 
         <CardContent className="space-y-3">
           {!clients ? (
             <div className="text-center py-8">
-              <p className="text-sm text-muted-foreground">Loading clients...</p>
+              <p className="text-sm text-muted-foreground">
+                Loading clients...
+              </p>
             </div>
           ) : clients.length === 0 ? (
             <div className="text-center py-12 space-y-4">
