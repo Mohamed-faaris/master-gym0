@@ -183,7 +183,10 @@ export function BottomNavigation() {
           </DrawerHeader>
 
           <div className="flex flex-col gap-3 p-6">
-            <Link to="/app/workout-session" onClick={() => setDrawerOpen(false)}>
+            <Link
+              to="/app/workout-session"
+              onClick={() => setDrawerOpen(false)}
+            >
               <Button
                 variant="outline"
                 className="w-full h-16 text-lg justify-start gap-4"
@@ -371,7 +374,10 @@ export function BottomNavigation() {
                     </Tabs>
 
                     {/* Camera Button */}
-                    <Button variant="outline" className="w-full h-32 border-dashed">
+                    <Button
+                      variant="outline"
+                      className="w-full h-32 border-dashed"
+                    >
                       <div className="flex flex-col items-center gap-2">
                         <Camera className="h-8 w-8 text-muted-foreground" />
                         <span className="text-sm text-muted-foreground">
@@ -382,7 +388,10 @@ export function BottomNavigation() {
 
                     {/* Title Input */}
                     <div className="space-y-2">
-                      <label htmlFor="diet-title" className="text-sm font-medium">
+                      <label
+                        htmlFor="diet-title"
+                        className="text-sm font-medium"
+                      >
                         Meal Title
                       </label>
                       <Input
@@ -467,7 +476,9 @@ export function BottomNavigation() {
                     size="lg"
                     className="w-full"
                     disabled={
-                      !dietTitle.trim() || !calories || parseFloat(calories) <= 0
+                      !dietTitle.trim() ||
+                      !calories ||
+                      parseFloat(calories) <= 0
                     }
                   >
                     <UtensilsCrossed className="mr-2 h-4 w-4" />
