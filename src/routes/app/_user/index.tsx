@@ -189,15 +189,13 @@ function RouteComponent() {
       {/* Activity Time Card */}
       <ActivityTimeCard />
 
-      {/* Weekly Summary */}
-      {/* 
+      {/* Weekly Summary - Disabled for now
       <Card>
         <CardHeader>
           <CardTitle>Weekly Summary</CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
-          {/* Simple Bar Chart - Calories Burned */}
-          {/* <div>
+          <div>
             <h3 className="text-sm font-medium mb-3">Calories Burned</h3>
             <div className="flex items-end justify-between h-32 gap-2">
               {weeklyStats.days.map(({ day, calories }) => {
@@ -226,10 +224,9 @@ function RouteComponent() {
                 )
               })}
             </div>
-          </div> */}
+          </div>
 
-          {/* Stats Grid */}
-          {/* <div className="grid grid-cols-2 gap-4 pt-4">
+          <div className="grid grid-cols-2 gap-4 pt-4">
             <div className="space-y-1">
               <div className="flex items-center gap-2 text-muted-foreground">
                 <Flame className="w-4 h-4" />
@@ -269,44 +266,13 @@ function RouteComponent() {
                 cal
               </div>
             </div>
-          </div> */}
+          </div>
         </CardContent>
       </Card>
       */}
 
       {/* Today's Stats - Radial Chart */}
       <TodayProgressChart />
-
-      {/* Quick Access */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Quick Actions</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <Button className="w-full" size="lg">
-            <Activity className="w-5 h-5 mr-2" />
-            Start Today's Workout
-          </Button>
-          <Button
-            className="w-full"
-            size="lg"
-            variant="outline"
-            onClick={() => setWeightDrawerOpen(true)}
-          >
-            <Scale className="w-5 h-5 mr-2" />
-            Log Weight
-          </Button>
-          <Button
-            className="w-full"
-            size="lg"
-            variant="outline"
-            onClick={() => setDietDrawerOpen(true)}
-          >
-            <UtensilsCrossed className="w-5 h-5 mr-2" />
-            Log Diet
-          </Button>
-        </CardContent>
-      </Card>
 
       {/* Recent Activity */}
       <Card>

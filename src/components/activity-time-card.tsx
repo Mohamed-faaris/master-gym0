@@ -30,7 +30,7 @@ export function ActivityTimeCard() {
   // Fetch workout sessions
   const sessions = useQuery(
     api.workoutSessions.getSessionHistory,
-    user ? { userId: user._id, limit: 100 } : 'skip'
+    user ? { userId: user._id, limit: 100 } : 'skip',
   )
 
   // Calculate chart data based on time range
@@ -106,7 +106,10 @@ export function ActivityTimeCard() {
         </div>
 
         {/* Time Range Dropdown */}
-        <Select value={timeRange} onValueChange={(value: any) => setTimeRange(value)}>
+        <Select
+          value={timeRange}
+          onValueChange={(value: any) => setTimeRange(value)}
+        >
           <SelectTrigger className="w-auto border border-slate-700 bg-slate-800 px-3 py-1.5 text-sm text-white hover:bg-slate-700">
             <SelectValue />
           </SelectTrigger>
@@ -120,8 +123,15 @@ export function ActivityTimeCard() {
       {/* Chart Area */}
       <div className="mb-6 h-48 w-full">
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-            <CartesianGrid strokeDasharray="0" stroke="transparent" vertical={false} />
+          <BarChart
+            data={chartData}
+            margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+          >
+            <CartesianGrid
+              strokeDasharray="0"
+              stroke="transparent"
+              vertical={false}
+            />
             <XAxis
               dataKey="day"
               stroke="#94a3b8"
@@ -138,7 +148,9 @@ export function ActivityTimeCard() {
               }}
               labelStyle={{ color: '#e2e8f0' }}
               formatter={(value) =>
-                activeTab === 'duration' ? [`${value} min`, ''] : [`${value} cal`, '']
+                activeTab === 'duration'
+                  ? [`${value} min`, '']
+                  : [`${value} cal`, '']
               }
             />
             <Bar
