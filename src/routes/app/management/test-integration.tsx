@@ -14,7 +14,7 @@ export const Route = createFileRoute('/app/management/test-integration')({
 function TestIntegrationPage() {
   const { user } = useAuth()
   const seedDatabase = useMutation(api.seed.seedDatabase)
-  const clearDatabase = useMutation(api.seed.clearDatabase)
+  const clearDatabase = useMutation(api.seed.clearDatabase) 
 
   const allUsers = useQuery(api.users.getAllUsers)
   const trainingPlans = useQuery(api.trainingPlans.getAllTrainingPlans)
