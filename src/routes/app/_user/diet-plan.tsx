@@ -1,17 +1,20 @@
-import { createFileRoute, Link } from '@tanstack/react-router'
+import { createFileRoute } from '@tanstack/react-router'
 import { useEffect, useMemo, useState } from 'react'
-import { useQuery } from 'convex/react'
+import { useMutation, useQuery } from 'convex/react'
 import {
   Calendar,
   Droplets,
   Target,
   UtensilsCrossed,
   Utensils,
+  Camera,
+  X,
 } from 'lucide-react'
 
 import { api } from '@convex/_generated/api'
 import { useAuth } from '@/components/auth/useAuth'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import {
   Card,
   CardContent,
@@ -19,7 +22,22 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from '@/components/animate-ui/components/radix/tabs'
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerDescription,
+  DrawerFooter,
+} from '@/components/ui/drawer'
+import { MEAL_TYPES } from '@/lib/constants'
+import { toast } from 'sonner'
 
 export const Route = createFileRoute('/app/_user/diet-plan')({
   component: DietPlanRoute,
@@ -29,6 +47,15 @@ function DietPlanRoute() {
   const { user } = useAuth()
 
   const planOwnerId = user?.trainerId ?? user?._id
+
+  const [dietDrawerOpen, setDietDrawerOpen] = useState(false)
+  const [mealType, setMealType] =
+    useState<(typeof MEAL_TYPES)[number]>('breakfast')
+  const [dietTitle, setDietTitle] = useState('')
+  const [dietDescription, setDietDescription] = useState('')
+  const [calories, setCalories] = useState('')
+
+  const addDietLog = useMutation(api.dietLogs.addDietLog)
 
   const dietPlans = useQuery(
     api.dietPlans.getDietPlansByUser,
@@ -56,6 +83,70 @@ function DietPlanRoute() {
   }
 
   const dayOrder = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']
+
+  const mealsByDay = useMemo(() => {
+    if (!dietPlan) return {} as Record<string, typeof dietPlan.mealTemplate>
+    return dietPlan.mealTemplate.reduce(
+      (acc, meal) => {
+        const dayKey = meal.day || 'unknown'
+        if (!acc[dayKey]) acc[dayKey] = []
+        acc[dayKey].push(meal)
+        return acc
+      },
+      {} as Record<string, typeof dietPlan.mealTemplate>,
+    )
+  }, [dietPlan])
+
+  const availableDays = dayOrder.filter((day) => mealsByDay[day]?.length)
+  const [activeDay, setActiveDay] = useState(dayOrder[0])
+
+  useEffect(() => {
+    if (!availableDays.length) return
+    setActiveDay((prev) => (availableDays.includes(prev) ? prev : availableDays[0]))
+  }, [availableDays])
+
+  const dayTotals = useMemo(() => {
+    const totals: Record<string, number> = {}
+    Object.entries(mealsByDay).forEach(([day, meals]) => {
+      totals[day] = meals.reduce((sum, meal) => sum + (meal.calories || 0), 0)
+    })
+    return totals
+  }, [mealsByDay])
+
+  const handleLogDiet = async () => {
+    if (!user) {
+      toast.error('Please sign in first')
+      return
+    }
+    if (!dietTitle.trim()) {
+      toast.error('Please enter a meal title')
+      return
+    }
+    const caloriesValue = parseFloat(calories)
+    if (isNaN(caloriesValue) || caloriesValue <= 0) {
+      toast.error('Please enter valid calories')
+      return
+    }
+
+    try {
+      await addDietLog({
+        userId: user._id,
+        mealType,
+        title: dietTitle,
+        description: dietDescription,
+        calories: caloriesValue,
+      })
+      toast.success(
+        `${mealType.charAt(0).toUpperCase() + mealType.slice(1)} logged!`,
+      )
+      setDietTitle('')
+      setDietDescription('')
+      setCalories('')
+      setDietDrawerOpen(false)
+    } catch {
+      toast.error('Failed to log meal')
+    }
+  }
 
   if (!dietPlans) {
     return (
@@ -91,43 +182,158 @@ function DietPlanRoute() {
           </CardContent>
         </Card>
 
-        <Link to="/app/_user/diet-logs" className="fixed inset-x-4 bottom-6 z-30">
-          <Button className="h-14 w-full rounded-full shadow-lg">
-            <UtensilsCrossed className="w-5 h-5 mr-2" />
-            Log Diet
-          </Button>
-        </Link>
+        <Button
+          onClick={() => setDietDrawerOpen(true)}
+          className="h-14 w-[calc(100%-2rem)] max-w-screen-sm rounded-full shadow-lg fixed left-1/2 -translate-x-1/2 bottom-20 z-30"
+        >
+          <UtensilsCrossed className="w-5 h-5 mr-2" />
+          Log Diet
+        </Button>
+
+        <Drawer open={dietDrawerOpen} onOpenChange={setDietDrawerOpen}>
+          <DrawerContent>
+            <DrawerHeader>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="absolute right-4 top-4"
+                onClick={() => setDietDrawerOpen(false)}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+              <div className="mx-auto mb-2 flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
+                <UtensilsCrossed className="h-7 w-7 text-primary" />
+              </div>
+              <DrawerTitle className="text-center text-xl">
+                Log Your Meal
+              </DrawerTitle>
+              <DrawerDescription className="text-center">
+                Track your nutrition and calories
+              </DrawerDescription>
+            </DrawerHeader>
+
+            <div className="px-4 pb-4">
+              <div className="space-y-4">
+                <Tabs
+                  defaultValue="breakfast"
+                  value={mealType}
+                  onValueChange={(v) => setMealType(v as typeof mealType)}
+                >
+                  <TabsList className="grid w-full grid-cols-5">
+                    {MEAL_TYPES.map((type) => (
+                      <TabsTrigger
+                        key={type}
+                        value={type}
+                        className="text-xs capitalize"
+                      >
+                        {type === 'postWorkout' ? 'Post' : type}
+                      </TabsTrigger>
+                    ))}
+                  </TabsList>
+                </Tabs>
+
+                <Button variant="outline" className="w-full h-32 border-dashed">
+                  <div className="flex flex-col items-center gap-2">
+                    <Camera className="h-8 w-8 text-muted-foreground" />
+                    <span className="text-sm text-muted-foreground">
+                      Add Photo
+                    </span>
+                  </div>
+                </Button>
+
+                <div className="space-y-2">
+                  <label htmlFor="diet-title" className="text-sm font-medium">
+                    Meal Title
+                  </label>
+                  <Input
+                    id="diet-title"
+                    type="text"
+                    placeholder="e.g., Grilled Chicken Salad"
+                    value={dietTitle}
+                    onChange={(e) => setDietTitle(e.target.value)}
+                    className="h-11"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label htmlFor="diet-description" className="text-sm font-medium">
+                    Description
+                  </label>
+                  <textarea
+                    id="diet-description"
+                    placeholder="Add notes about your meal..."
+                    value={dietDescription}
+                    onChange={(e) => setDietDescription(e.target.value)}
+                    className="w-full min-h-[80px] rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:border-ring disabled:cursor-not-allowed disabled:opacity-50"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label htmlFor="calories" className="text-sm font-medium">
+                    Calories
+                  </label>
+                  <div className="flex items-center gap-3">
+                    <Button
+                      variant="outline"
+                      size="lg"
+                      onClick={() => {
+                        const current = parseFloat(calories) || 0
+                        setCalories(Math.max(0, current - 50).toString())
+                      }}
+                      className="h-11 w-11 rounded-full p-0"
+                    >
+                      <span className="text-xl font-semibold">-</span>
+                    </Button>
+
+                    <div className="relative flex-1">
+                      <Input
+                        id="calories"
+                        type="number"
+                        step="10"
+                        placeholder="0"
+                        value={calories}
+                        onChange={(e) => setCalories(e.target.value)}
+                        className="pr-16 text-lg h-11 text-center font-semibold"
+                      />
+                      <span className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground font-medium">
+                        kcal
+                      </span>
+                    </div>
+
+                    <Button
+                      variant="outline"
+                      size="lg"
+                      onClick={() => {
+                        const current = parseFloat(calories) || 0
+                        setCalories((current + 50).toString())
+                      }}
+                      className="h-11 w-11 rounded-full p-0"
+                    >
+                      <span className="text-xl font-semibold">+</span>
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <DrawerFooter className="pt-2">
+              <Button
+                onClick={handleLogDiet}
+                size="lg"
+                className="w-full"
+                disabled={
+                  !dietTitle.trim() || !calories || parseFloat(calories) <= 0
+                }
+              >
+                <UtensilsCrossed className="mr-2 h-4 w-4" />
+                Log Meal
+              </Button>
+            </DrawerFooter>
+          </DrawerContent>
+        </Drawer>
       </div>
     )
   }
-
-  const mealsByDay = dietPlan.mealTemplate.reduce(
-    (acc, meal) => {
-      const dayKey = meal.day || 'unknown'
-      if (!acc[dayKey]) acc[dayKey] = []
-      acc[dayKey].push(meal)
-      return acc
-    },
-    {} as Record<string, typeof dietPlan.mealTemplate>,
-  )
-
-  const availableDays = dayOrder.filter((day) => mealsByDay[day]?.length)
-  const [activeDay, setActiveDay] = useState(
-    availableDays[0] ?? dayOrder[0],
-  )
-
-  useEffect(() => {
-    if (!availableDays.length) return
-    setActiveDay((prev) => (availableDays.includes(prev) ? prev : availableDays[0]))
-  }, [availableDays])
-
-  const dayTotals = useMemo(() => {
-    const totals: Record<string, number> = {}
-    Object.entries(mealsByDay).forEach(([day, meals]) => {
-      totals[day] = meals.reduce((sum, meal) => sum + (meal.calories || 0), 0)
-    })
-    return totals
-  }, [mealsByDay])
 
   return (
     <div className="min-h-screen bg-background pb-24">
@@ -168,7 +374,7 @@ function DietPlanRoute() {
       </div>
 
       <div className="px-4 space-y-4">
-        <Card>
+        {/* <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Calendar className="h-5 w-5 text-primary" />
@@ -187,7 +393,7 @@ function DietPlanRoute() {
               ))}
             </div>
           </CardContent>
-        </Card>
+        </Card> */}
 
         {dietPlan.coachNote && (
           <Card>
@@ -215,7 +421,7 @@ function DietPlanRoute() {
           </CardHeader>
           <CardContent className="space-y-4">
             <Tabs value={activeDay} onValueChange={setActiveDay}>
-              <TabsList className="grid w-full grid-cols-4">
+              <TabsList className="grid w-full grid-cols-7">
                 {availableDays.map((day) => (
                   <TabsTrigger key={day} value={day}>
                     {weekDayLabels[day]?.slice(0, 3) ?? day}
@@ -273,12 +479,155 @@ function DietPlanRoute() {
         </Card>
       </div>
 
-      <Link to="/app/_user/diet-logs" className="fixed inset-x-4 bottom-6 z-30">
-        <Button className="h-14 w-full rounded-full shadow-lg">
-          <UtensilsCrossed className="w-5 h-5 mr-2" />
-          Log Diet
-        </Button>
-      </Link>
+      <Button
+        onClick={() => setDietDrawerOpen(true)}
+        className="h-14 w-[calc(100%-2rem)] max-w-screen-sm rounded-full shadow-lg fixed left-1/2 -translate-x-1/2 bottom-20 z-30"
+      >
+        <UtensilsCrossed className="w-5 h-5 mr-2" />
+        Log Diet
+      </Button>
+
+      <Drawer open={dietDrawerOpen} onOpenChange={setDietDrawerOpen}>
+        <DrawerContent>
+          <DrawerHeader>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute right-4 top-4"
+              onClick={() => setDietDrawerOpen(false)}
+            >
+              <X className="h-4 w-4" />
+            </Button>
+            <div className="mx-auto mb-2 flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
+              <UtensilsCrossed className="h-7 w-7 text-primary" />
+            </div>
+            <DrawerTitle className="text-center text-xl">
+              Log Your Meal
+            </DrawerTitle>
+            <DrawerDescription className="text-center">
+              Track your nutrition and calories
+            </DrawerDescription>
+          </DrawerHeader>
+
+          <div className="px-4 pb-4">
+            <div className="space-y-4">
+              <Tabs
+                defaultValue="breakfast"
+                value={mealType}
+                onValueChange={(v) => setMealType(v as typeof mealType)}
+              >
+                <TabsList className="grid w-full grid-cols-5">
+                  {MEAL_TYPES.map((type) => (
+                    <TabsTrigger
+                      key={type}
+                      value={type}
+                      className="text-xs capitalize"
+                    >
+                      {type === 'postWorkout' ? 'Post' : type}
+                    </TabsTrigger>
+                  ))}
+                </TabsList>
+              </Tabs>
+
+              <Button variant="outline" className="w-full h-32 border-dashed">
+                <div className="flex flex-col items-center gap-2">
+                  <Camera className="h-8 w-8 text-muted-foreground" />
+                  <span className="text-sm text-muted-foreground">
+                    Add Photo
+                  </span>
+                </div>
+              </Button>
+
+              <div className="space-y-2">
+                <label htmlFor="diet-title" className="text-sm font-medium">
+                  Meal Title
+                </label>
+                <Input
+                  id="diet-title"
+                  type="text"
+                  placeholder="e.g., Grilled Chicken Salad"
+                  value={dietTitle}
+                  onChange={(e) => setDietTitle(e.target.value)}
+                  className="h-11"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label htmlFor="diet-description" className="text-sm font-medium">
+                  Description
+                </label>
+                <textarea
+                  id="diet-description"
+                  placeholder="Add notes about your meal..."
+                  value={dietDescription}
+                  onChange={(e) => setDietDescription(e.target.value)}
+                  className="w-full min-h-[80px] rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:border-ring disabled:cursor-not-allowed disabled:opacity-50"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label htmlFor="calories" className="text-sm font-medium">
+                  Calories
+                </label>
+                <div className="flex items-center gap-3">
+                  <Button
+                    variant="outline"
+                    size="lg"
+                    onClick={() => {
+                      const current = parseFloat(calories) || 0
+                      setCalories(Math.max(0, current - 50).toString())
+                    }}
+                    className="h-11 w-11 rounded-full p-0"
+                  >
+                    <span className="text-xl font-semibold">-</span>
+                  </Button>
+
+                  <div className="relative flex-1">
+                    <Input
+                      id="calories"
+                      type="number"
+                      step="10"
+                      placeholder="0"
+                      value={calories}
+                      onChange={(e) => setCalories(e.target.value)}
+                      className="pr-16 text-lg h-11 text-center font-semibold"
+                    />
+                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground font-medium">
+                      kcal
+                    </span>
+                  </div>
+
+                  <Button
+                    variant="outline"
+                    size="lg"
+                    onClick={() => {
+                      const current = parseFloat(calories) || 0
+                      setCalories((current + 50).toString())
+                    }}
+                    className="h-11 w-11 rounded-full p-0"
+                  >
+                    <span className="text-xl font-semibold">+</span>
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <DrawerFooter className="pt-2">
+            <Button
+              onClick={handleLogDiet}
+              size="lg"
+              className="w-full"
+              disabled={
+                !dietTitle.trim() || !calories || parseFloat(calories) <= 0
+              }
+            >
+              <UtensilsCrossed className="mr-2 h-4 w-4" />
+              Log Meal
+            </Button>
+          </DrawerFooter>
+        </DrawerContent>
+      </Drawer>
     </div>
   )
 }

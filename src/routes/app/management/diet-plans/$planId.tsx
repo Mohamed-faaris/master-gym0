@@ -19,7 +19,12 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from '@/components/animate-ui/components/radix/tabs'
 import { toast } from 'sonner'
 import { api } from '@convex/_generated/api'
 import type { Id } from '../../../../../convex/_generated/dataModel'
@@ -235,7 +240,7 @@ function DietPlanDetailRoute() {
           </CardHeader>
           <CardContent className="space-y-4">
             <Tabs value={activeDay} onValueChange={setActiveDay}>
-              <TabsList className="grid w-full grid-cols-4">
+              <TabsList className="grid w-full grid-cols-7">
                 {availableDays.map((day) => (
                   <TabsTrigger key={day} value={day}>
                     {weekDayLabels[day]?.slice(0, 3) ?? day}

@@ -22,6 +22,7 @@ import { Route as AppManagementTestIntegrationRouteImport } from './routes/app/m
 import { Route as AppManagementProfileRouteImport } from './routes/app/management/profile'
 import { Route as AppUserWorkoutsRouteImport } from './routes/app/_user/workouts'
 import { Route as AppUserWorkoutSessionRouteImport } from './routes/app/_user/workout-session'
+import { Route as AppUserWeightRouteImport } from './routes/app/_user/weight'
 import { Route as AppUserSessionsRouteImport } from './routes/app/_user/sessions'
 import { Route as AppUserLogsRouteImport } from './routes/app/_user/logs'
 import { Route as AppUserGalleryRouteImport } from './routes/app/_user/gallery'
@@ -109,6 +110,11 @@ const AppUserWorkoutsRoute = AppUserWorkoutsRouteImport.update({
 const AppUserWorkoutSessionRoute = AppUserWorkoutSessionRouteImport.update({
   id: '/workout-session',
   path: '/workout-session',
+  getParentRoute: () => AppUserRoute,
+} as any)
+const AppUserWeightRoute = AppUserWeightRouteImport.update({
+  id: '/weight',
+  path: '/weight',
   getParentRoute: () => AppUserRoute,
 } as any)
 const AppUserSessionsRoute = AppUserSessionsRouteImport.update({
@@ -251,6 +257,7 @@ export interface FileRoutesByFullPath {
   '/app/gallery': typeof AppUserGalleryRoute
   '/app/logs': typeof AppUserLogsRoute
   '/app/sessions': typeof AppUserSessionsRoute
+  '/app/weight': typeof AppUserWeightRoute
   '/app/workout-session': typeof AppUserWorkoutSessionRoute
   '/app/workouts': typeof AppUserWorkoutsRoute
   '/app/management/profile': typeof AppManagementProfileRoute
@@ -285,6 +292,7 @@ export interface FileRoutesByTo {
   '/app/gallery': typeof AppUserGalleryRoute
   '/app/logs': typeof AppUserLogsRoute
   '/app/sessions': typeof AppUserSessionsRoute
+  '/app/weight': typeof AppUserWeightRoute
   '/app/workout-session': typeof AppUserWorkoutSessionRoute
   '/app/workouts': typeof AppUserWorkoutsRoute
   '/app/management/profile': typeof AppManagementProfileRoute
@@ -323,6 +331,7 @@ export interface FileRoutesById {
   '/app/_user/gallery': typeof AppUserGalleryRoute
   '/app/_user/logs': typeof AppUserLogsRoute
   '/app/_user/sessions': typeof AppUserSessionsRoute
+  '/app/_user/weight': typeof AppUserWeightRoute
   '/app/_user/workout-session': typeof AppUserWorkoutSessionRoute
   '/app/_user/workouts': typeof AppUserWorkoutsRoute
   '/app/management/profile': typeof AppManagementProfileRoute
@@ -362,6 +371,7 @@ export interface FileRouteTypes {
     | '/app/gallery'
     | '/app/logs'
     | '/app/sessions'
+    | '/app/weight'
     | '/app/workout-session'
     | '/app/workouts'
     | '/app/management/profile'
@@ -396,6 +406,7 @@ export interface FileRouteTypes {
     | '/app/gallery'
     | '/app/logs'
     | '/app/sessions'
+    | '/app/weight'
     | '/app/workout-session'
     | '/app/workouts'
     | '/app/management/profile'
@@ -433,6 +444,7 @@ export interface FileRouteTypes {
     | '/app/_user/gallery'
     | '/app/_user/logs'
     | '/app/_user/sessions'
+    | '/app/_user/weight'
     | '/app/_user/workout-session'
     | '/app/_user/workouts'
     | '/app/management/profile'
@@ -557,6 +569,13 @@ declare module '@tanstack/react-router' {
       path: '/workout-session'
       fullPath: '/app/workout-session'
       preLoaderRoute: typeof AppUserWorkoutSessionRouteImport
+      parentRoute: typeof AppUserRoute
+    }
+    '/app/_user/weight': {
+      id: '/app/_user/weight'
+      path: '/weight'
+      fullPath: '/app/weight'
+      preLoaderRoute: typeof AppUserWeightRouteImport
       parentRoute: typeof AppUserRoute
     }
     '/app/_user/sessions': {
@@ -789,6 +808,7 @@ interface AppUserRouteChildren {
   AppUserGalleryRoute: typeof AppUserGalleryRoute
   AppUserLogsRoute: typeof AppUserLogsRoute
   AppUserSessionsRoute: typeof AppUserSessionsRoute
+  AppUserWeightRoute: typeof AppUserWeightRoute
   AppUserWorkoutSessionRoute: typeof AppUserWorkoutSessionRoute
   AppUserWorkoutsRoute: typeof AppUserWorkoutsRoute
   AppUserIndexRoute: typeof AppUserIndexRoute
@@ -802,6 +822,7 @@ const AppUserRouteChildren: AppUserRouteChildren = {
   AppUserGalleryRoute: AppUserGalleryRoute,
   AppUserLogsRoute: AppUserLogsRoute,
   AppUserSessionsRoute: AppUserSessionsRoute,
+  AppUserWeightRoute: AppUserWeightRoute,
   AppUserWorkoutSessionRoute: AppUserWorkoutSessionRoute,
   AppUserWorkoutsRoute: AppUserWorkoutsRoute,
   AppUserIndexRoute: AppUserIndexRoute,
