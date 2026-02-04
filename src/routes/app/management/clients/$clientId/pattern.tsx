@@ -106,11 +106,7 @@ function PatternRoute() {
               Assign and manage plans for {client.name}
             </p>
           </div>
-          <Button asChild variant="outline" size="sm">
-            <Link to={`/app/management/clients/${clientId}/pattern`}>
-              Pattern
-            </Link>
-          </Button>
+          
         </div>
       </header>
 
