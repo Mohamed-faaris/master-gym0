@@ -86,7 +86,27 @@ export const getUserById = query({
 export const getAllUsers = query({
     handler: async (ctx) => {
         const users = await ctx.db.query('users').order('desc').collect()
-        return users
+        const withMeta = await Promise.all(
+            users.map(async (user) => {
+                const meta = await ctx.db
+                    .query('userMeta')
+                    .withIndex('by_user', (q) => q.eq('userId', user._id))
+                    .first()
+
+                const measurements = await ctx.db
+                    .query('userMeasurement')
+                    .withIndex('by_user', (q) => q.eq('userId', user._id))
+                    .first()
+
+                return {
+                    ...user,
+                    meta,
+                    measurements,
+                }
+            }),
+        )
+
+        return withMeta
     },
 })
 
@@ -221,6 +241,47 @@ export const updateUserMeta = mutation({
             })
             return metaId
         }
+    },
+})
+
+// Save user measurements (upsert)
+export const saveMeasurements = mutation({
+    args: {
+        userId: v.id('users'),
+        measurements: v.object({
+            chest: v.optional(v.number()),
+            shoulder: v.optional(v.number()),
+            hip: v.optional(v.number()),
+            arms: v.optional(v.number()),
+            legs: v.optional(v.number()),
+            timeSpanWeeks: v.optional(v.number()),
+        }),
+    },
+    handler: async (ctx, args) => {
+        const { userId, measurements } = args
+        const now = Date.now()
+
+        const existing = await ctx.db
+            .query('userMeasurement')
+            .withIndex('by_user', (q) => q.eq('userId', userId))
+            .first()
+
+        if (existing) {
+            await ctx.db.patch(existing._id, {
+                ...measurements,
+                updatedAt: now,
+            })
+            return existing._id
+        }
+
+        const measurementId = await ctx.db.insert('userMeasurement', {
+            userId,
+            ...measurements,
+            createdAt: now,
+            updatedAt: now,
+        })
+
+        return measurementId
     },
 })
 

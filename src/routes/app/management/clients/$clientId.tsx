@@ -109,9 +109,6 @@ function ClientDetailRoute() {
         </Link>
         <div>
           <h1 className="text-3xl font-semibold">{client.name}</h1>
-          <p className="text-muted-foreground">
-            {client.goal?.replace(/([A-Z])/g, ' $1').toLowerCase()}
-          </p>
         </div>
       </header>
 

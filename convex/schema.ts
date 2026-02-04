@@ -350,6 +350,7 @@ const workoutSessions = defineTable({
 export default defineSchema({
   users,
   userMeta,
+  userMeasurement,
   workoutLogs,
   workouts,
   dietLogs,
@@ -358,4 +359,3 @@ export default defineSchema({
   dietPlans,
   workoutSessions,
 })
-

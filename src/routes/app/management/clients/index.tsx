@@ -130,12 +130,6 @@ function ClientsRoute() {
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="font-medium truncate">{client.name}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {client.goal
-                          ?.replace(/([A-Z])/g, ' $1')
-                          .toLowerCase()
-                          .trim()}
-                      </p>
                     </div>
                   </div>
                   <ChevronRight className="w-5 h-5 text-muted-foreground flex-shrink-0" />

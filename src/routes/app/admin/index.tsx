@@ -5,12 +5,9 @@ import {
   Activity,
   ChevronRight,
   Dumbbell,
-  Edit2,
   Lock,
   Phone,
-  Pin,
   Plus,
-  Target,
   TrendingUp,
   User,
   Users,
@@ -60,6 +57,8 @@ function SuperAdminDashboard() {
 
   const [activeTab, setActiveTab] = useState<Tab>('clients')
   const [onboardDrawerOpen, setOnboardDrawerOpen] = useState(false)
+  const [drawerMode, setDrawerMode] = useState<'create' | 'edit'>('create')
+  const [editingUserId, setEditingUserId] = useState<string | null>(null)
 
   // Form state for onboarding
   const [newClientName, setNewClientName] = useState('')
@@ -68,9 +67,19 @@ function SuperAdminDashboard() {
   const [newClientRole, setNewClientRole] = useState<string>(
     'trainerManagedCustomer',
   )
-  const [newClientGoal, setNewClientGoal] = useState<string>('generalFitness')
   const [selectedFormTrainerId, setSelectedFormTrainerId] = useState<string>('')
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [clientAge, setClientAge] = useState('')
+  const [currentWeight, setCurrentWeight] = useState('')
+  const [targetWeight, setTargetWeight] = useState('')
+  const [measurements, setMeasurements] = useState({
+    chest: '',
+    shoulder: '',
+    hip: '',
+    arms: '',
+    legs: '',
+    timeSpanWeeks: '',
+  })
 
   // PIN change state
   const [changePinDrawerOpen, setChangePinDrawerOpen] = useState(false)
@@ -78,21 +87,6 @@ function SuperAdminDashboard() {
   const [newPin, setNewPin] = useState('')
   const [confirmPin, setConfirmPin] = useState('')
   const [isPinChanging, setIsPinChanging] = useState(false)
-
-  // Measurements state
-  const [measurementsDrawerOpen, setMeasurementsDrawerOpen] = useState(false)
-  const [selectedClientIdForMeasurements, setSelectedClientIdForMeasurements] =
-    useState<string>('')
-  const [measurements, setMeasurements] = useState({
-    weight: '',
-    chest: '',
-    waist: '',
-    hips: '',
-    arms: '',
-    thighs: '',
-    calves: '',
-  })
-  const [isSavingMeasurements, setIsSavingMeasurements] = useState(false)
 
   // Detail view state
   const [selectedClientId, setSelectedClientId] = useState<string | null>(null)
@@ -104,7 +98,8 @@ function SuperAdminDashboard() {
   const allUsers = useQuery(api.users.getAllUsers)
 
   // Update user mutation
-  const updateUserInfo = useMutation(api.users.updateUserInfo)
+  const updateUser = useMutation(api.users.updateUser)
+  const updateUserMeta = useMutation(api.users.updateUserMeta)
 
   // Create user mutation
   const createUser = useMutation(api.users.createUser)
@@ -159,38 +154,169 @@ function SuperAdminDashboard() {
     )
   }
 
+  const resetDrawerForm = () => {
+    setNewClientName('')
+    setNewClientPhone('')
+    setNewClientPin('')
+    setNewClientRole('trainerManagedCustomer')
+    setSelectedFormTrainerId('')
+    setClientAge('')
+    setCurrentWeight('')
+    setTargetWeight('')
+    setMeasurements({
+      chest: '',
+      shoulder: '',
+      hip: '',
+      arms: '',
+      legs: '',
+      timeSpanWeeks: '',
+    })
+  }
+
+  const openCreateDrawer = () => {
+    setDrawerMode('create')
+    setEditingUserId(null)
+    resetDrawerForm()
+    setOnboardDrawerOpen(true)
+  }
+
+  const openEditDrawer = (clientId: string) => {
+    const client = clients.find((c) => c._id === clientId)
+    if (!client) return
+
+    setDrawerMode('edit')
+    setEditingUserId(clientId)
+    setNewClientName(client.name ?? '')
+    setNewClientPhone(client.phoneNumber ?? '')
+    setNewClientPin(client.pin ?? '')
+    setNewClientRole(client.role ?? 'trainerManagedCustomer')
+    setSelectedFormTrainerId(client.trainerId ?? '')
+    setClientAge(
+      client.meta?.age !== undefined ? String(client.meta.age) : '',
+    )
+    setCurrentWeight(
+      client.meta?.currentWeight !== undefined
+        ? String(client.meta.currentWeight)
+        : '',
+    )
+    setTargetWeight(
+      client.meta?.targetWeight !== undefined
+        ? String(client.meta.targetWeight)
+        : '',
+    )
+    setMeasurements({
+      chest:
+        client.measurements?.chest !== undefined
+          ? String(client.measurements.chest)
+          : '',
+      shoulder:
+        client.measurements?.shoulder !== undefined
+          ? String(client.measurements.shoulder)
+          : '',
+      hip:
+        client.measurements?.hip !== undefined
+          ? String(client.measurements.hip)
+          : '',
+      arms:
+        client.measurements?.arms !== undefined
+          ? String(client.measurements.arms)
+          : '',
+      legs:
+        client.measurements?.legs !== undefined
+          ? String(client.measurements.legs)
+          : '',
+      timeSpanWeeks:
+        client.measurements?.timeSpanWeeks !== undefined
+          ? String(client.measurements.timeSpanWeeks)
+          : '',
+    })
+    setOnboardDrawerOpen(true)
+  }
+
+  const toNumberOrUndefined = (value: string) =>
+    value.trim() === '' ? undefined : Number(value)
+
   const handleOnboardClient = async () => {
     if (!newClientName || !newClientPhone || !newClientPin) return
 
     setIsSubmitting(true)
     try {
-      await createUser({
-        name: newClientName,
-        phoneNumber: newClientPhone,
-        pin: newClientPin,
-        role: newClientRole as
-          | 'trainerManagedCustomer'
-          | 'selfManagedCustomer'
-          | 'trainer'
-          | 'admin',
-        goal: newClientGoal as
-          | 'weightLoss'
-          | 'muscleGain'
-          | 'endurance'
-          | 'flexibility'
-          | 'generalFitness',
-        trainerId: selectedFormTrainerId
-          ? (selectedFormTrainerId as any)
-          : undefined,
-      })
+      const userId =
+        drawerMode === 'create'
+              ? await createUser({
+                  name: newClientName,
+                  phoneNumber: newClientPhone,
+                  pin: newClientPin,
+                  role: newClientRole as
+                    | 'trainerManagedCustomer'
+                    | 'selfManagedCustomer'
+                    | 'trainer'
+                    | 'admin',
+                  goal: 'generalFitness',
+                  trainerId: selectedFormTrainerId
+                    ? (selectedFormTrainerId as any)
+                    : undefined,
+                })
+          : (editingUserId as any)
 
-      // Reset form
-      setNewClientName('')
-      setNewClientPhone('')
-      setNewClientPin('')
-      setNewClientRole('trainerManagedCustomer')
-      setNewClientGoal('generalFitness')
-      setSelectedFormTrainerId('')
+      if (drawerMode === 'edit' && editingUserId) {
+        await updateUser({
+          userId: editingUserId as any,
+          name: newClientName,
+          phoneNumber: newClientPhone,
+          pin: newClientPin,
+          role: newClientRole as any,
+          trainerId: selectedFormTrainerId
+            ? (selectedFormTrainerId as any)
+            : undefined,
+        })
+      }
+
+      const metaUpdates = {
+        age: toNumberOrUndefined(clientAge),
+        currentWeight: toNumberOrUndefined(currentWeight),
+        targetWeight: toNumberOrUndefined(targetWeight),
+      }
+
+      const shouldUpdateMeta =
+        metaUpdates.age !== undefined ||
+        metaUpdates.currentWeight !== undefined ||
+        metaUpdates.targetWeight !== undefined
+
+      if (
+        (newClientRole === 'trainerManagedCustomer' ||
+          newClientRole === 'selfManagedCustomer') &&
+        shouldUpdateMeta
+      ) {
+        await updateUserMeta({
+          userId: userId as any,
+          ...metaUpdates,
+        })
+      }
+
+      if (newClientRole === 'trainerManagedCustomer') {
+        const measurementUpdates = {
+          chest: toNumberOrUndefined(measurements.chest),
+          shoulder: toNumberOrUndefined(measurements.shoulder),
+          hip: toNumberOrUndefined(measurements.hip),
+          arms: toNumberOrUndefined(measurements.arms),
+          legs: toNumberOrUndefined(measurements.legs),
+          timeSpanWeeks: toNumberOrUndefined(measurements.timeSpanWeeks),
+        }
+
+        const shouldSaveMeasurements = Object.values(measurementUpdates).some(
+          (value) => value !== undefined,
+        )
+
+        if (shouldSaveMeasurements) {
+          await saveMeasurements({
+            userId: userId as any,
+            measurements: measurementUpdates,
+          })
+        }
+      }
+
+      resetDrawerForm()
       setOnboardDrawerOpen(false)
     } catch (error) {
       console.error('Failed to create user:', error)
@@ -223,29 +349,7 @@ function SuperAdminDashboard() {
               client={clients.find((c) => c._id === selectedClientId)!}
               trainers={trainers}
               onBack={() => setSelectedClientId(null)}
-              onChangePin={(userId) => {
-                setSelectedUserId(userId)
-                setChangePinDrawerOpen(true)
-              }}
-              onAssignMeasurements={(clientId) => {
-                setSelectedClientIdForMeasurements(clientId)
-                setMeasurementsDrawerOpen(true)
-                setMeasurements({
-                  weight: '',
-                  chest: '',
-                  waist: '',
-                  hips: '',
-                  arms: '',
-                  thighs: '',
-                  calves: '',
-                })
-              }}
-              onUpdateClient={async (clientId, updates) => {
-                await updateUserInfo({
-                  userId: clientId as any,
-                  updates,
-                })
-              }}
+              onEditClient={(clientId) => openEditDrawer(clientId)}
             />
           ) : (
             <ClientsView
@@ -259,6 +363,7 @@ function SuperAdminDashboard() {
             <TrainerDetailView
               trainer={trainers.find((t) => t._id === selectedTrainerId)!}
               clientCount={clients.length}
+              clients={clients}
               onBack={() => setSelectedTrainerId(null)}
               onChangePin={(userId) => {
                 setSelectedUserId(userId)
@@ -296,7 +401,7 @@ function SuperAdminDashboard() {
             type="button"
             aria-label="Add new user"
             title="Add new user"
-            onClick={() => setOnboardDrawerOpen(true)}
+            onClick={openCreateDrawer}
             className="flex items-center justify-center px-6 py-4 border-x border-border bg-background hover:bg-muted/50 transition-colors"
           >
             <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-md">
@@ -319,161 +424,6 @@ function SuperAdminDashboard() {
           </button>
         </div>
       </nav>
-
-      {/* Assign Measurements Drawer */}
-      <Drawer
-        open={measurementsDrawerOpen}
-        onOpenChange={setMeasurementsDrawerOpen}
-      >
-        <DrawerContent>
-          <DrawerHeader>
-            <DrawerTitle>Assign Measurements</DrawerTitle>
-            <DrawerDescription>
-              Record client body measurements
-            </DrawerDescription>
-          </DrawerHeader>
-
-          <div className="flex flex-col gap-4 p-4 max-h-96 overflow-y-auto">
-            {/* Weight */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Weight (kg)</label>
-              <Input
-                type="number"
-                placeholder="70"
-                value={measurements.weight}
-                onChange={(e) =>
-                  setMeasurements({ ...measurements, weight: e.target.value })
-                }
-              />
-            </div>
-
-            {/* Chest */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Chest (cm)</label>
-              <Input
-                type="number"
-                placeholder="100"
-                value={measurements.chest}
-                onChange={(e) =>
-                  setMeasurements({ ...measurements, chest: e.target.value })
-                }
-              />
-            </div>
-
-            {/* Waist */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Waist (cm)</label>
-              <Input
-                type="number"
-                placeholder="80"
-                value={measurements.waist}
-                onChange={(e) =>
-                  setMeasurements({ ...measurements, waist: e.target.value })
-                }
-              />
-            </div>
-
-            {/* Hips */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Hips (cm)</label>
-              <Input
-                type="number"
-                placeholder="95"
-                value={measurements.hips}
-                onChange={(e) =>
-                  setMeasurements({ ...measurements, hips: e.target.value })
-                }
-              />
-            </div>
-
-            {/* Arms */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Arms (cm)</label>
-              <Input
-                type="number"
-                placeholder="35"
-                value={measurements.arms}
-                onChange={(e) =>
-                  setMeasurements({ ...measurements, arms: e.target.value })
-                }
-              />
-            </div>
-
-            {/* Thighs */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Thighs (cm)</label>
-              <Input
-                type="number"
-                placeholder="55"
-                value={measurements.thighs}
-                onChange={(e) =>
-                  setMeasurements({ ...measurements, thighs: e.target.value })
-                }
-              />
-            </div>
-
-            {/* Calves */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Calves (cm)</label>
-              <Input
-                type="number"
-                placeholder="38"
-                value={measurements.calves}
-                onChange={(e) =>
-                  setMeasurements({ ...measurements, calves: e.target.value })
-                }
-              />
-            </div>
-          </div>
-
-          <DrawerFooter>
-            <Button
-              onClick={async () => {
-                setIsSavingMeasurements(true)
-                try {
-                  await saveMeasurements({
-                    clientId: selectedClientIdForMeasurements as any,
-                    measurements: {
-                      weight: measurements.weight
-                        ? parseFloat(measurements.weight)
-                        : undefined,
-                      chest: measurements.chest
-                        ? parseFloat(measurements.chest)
-                        : undefined,
-                      waist: measurements.waist
-                        ? parseFloat(measurements.waist)
-                        : undefined,
-                      hips: measurements.hips
-                        ? parseFloat(measurements.hips)
-                        : undefined,
-                      arms: measurements.arms
-                        ? parseFloat(measurements.arms)
-                        : undefined,
-                      thighs: measurements.thighs
-                        ? parseFloat(measurements.thighs)
-                        : undefined,
-                      calves: measurements.calves
-                        ? parseFloat(measurements.calves)
-                        : undefined,
-                    },
-                  })
-                  setMeasurementsDrawerOpen(false)
-                } catch (error) {
-                  console.error('Failed to save measurements:', error)
-                } finally {
-                  setIsSavingMeasurements(false)
-                }
-              }}
-              disabled={isSavingMeasurements}
-            >
-              {isSavingMeasurements ? 'Saving...' : 'Save Measurements'}
-            </Button>
-            <DrawerClose asChild>
-              <Button variant="outline">Cancel</Button>
-            </DrawerClose>
-          </DrawerFooter>
-        </DrawerContent>
-      </Drawer>
 
       {/* Change PIN Drawer */}
       <Drawer open={changePinDrawerOpen} onOpenChange={setChangePinDrawerOpen}>
@@ -556,15 +506,20 @@ function SuperAdminDashboard() {
 
       {/* Onboard Client Drawer */}
       <Drawer open={onboardDrawerOpen} onOpenChange={setOnboardDrawerOpen}>
-        <DrawerContent>
+        <DrawerContent className="flex max-h-[85vh] flex-col">
           <DrawerHeader>
-            <DrawerTitle>Onboard New User</DrawerTitle>
-            <DrawerDescription>
-              Add a new client or trainer to the system
-            </DrawerDescription>
-          </DrawerHeader>
+            <DrawerTitle>
+              {drawerMode === 'create' ? 'Onboard New User' : 'Edit User'}
+            </DrawerTitle>
+          <DrawerDescription>
+            {drawerMode === 'create'
+              ? 'Add a new client or trainer to the system'
+              : 'Update user details'}
+          </DrawerDescription>
+        </DrawerHeader>
 
-          <div className="flex flex-col gap-4 p-4">
+          <div className="flex-1 overflow-y-auto">
+            <div className="flex flex-col gap-4 p-4">
             {/* Name */}
             <div className="space-y-2">
               <label className="text-sm font-medium flex items-center gap-2">
@@ -621,29 +576,6 @@ function SuperAdminDashboard() {
                     Client (Self Managed)
                   </SelectItem>
                   <SelectItem value="trainer">Trainer</SelectItem>
-                  <SelectItem value="admin">Admin</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Goal */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium flex items-center gap-2">
-                <Target className="w-4 h-4 text-muted-foreground" />
-                Fitness Goal
-              </label>
-              <Select value={newClientGoal} onValueChange={setNewClientGoal}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select goal" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="weightLoss">Weight Loss</SelectItem>
-                  <SelectItem value="muscleGain">Muscle Gain</SelectItem>
-                  <SelectItem value="endurance">Endurance</SelectItem>
-                  <SelectItem value="flexibility">Flexibility</SelectItem>
-                  <SelectItem value="generalFitness">
-                    General Fitness
-                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -672,9 +604,136 @@ function SuperAdminDashboard() {
                 </Select>
               </div>
             )}
+
+            {(newClientRole === 'trainerManagedCustomer' ||
+              newClientRole === 'selfManagedCustomer') && (
+              <>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Age</label>
+                  <Input
+                    type="number"
+                    placeholder="25"
+                    value={clientAge}
+                    onChange={(e) => setClientAge(e.target.value)}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">
+                    Current Weight (kg)
+                  </label>
+                  <Input
+                    type="number"
+                    placeholder="70"
+                    value={currentWeight}
+                    onChange={(e) => setCurrentWeight(e.target.value)}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">
+                    Target Weight (kg)
+                  </label>
+                  <Input
+                    type="number"
+                    placeholder="65"
+                    value={targetWeight}
+                    onChange={(e) => setTargetWeight(e.target.value)}
+                  />
+                </div>
+              </>
+            )}
+
+            {newClientRole === 'trainerManagedCustomer' && (
+              <>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Chest (cm)</label>
+                  <Input
+                    type="number"
+                    placeholder="100"
+                    value={measurements.chest}
+                    onChange={(e) =>
+                      setMeasurements({
+                        ...measurements,
+                        chest: e.target.value,
+                      })
+                    }
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Shoulder (cm)</label>
+                  <Input
+                    type="number"
+                    placeholder="110"
+                    value={measurements.shoulder}
+                    onChange={(e) =>
+                      setMeasurements({
+                        ...measurements,
+                        shoulder: e.target.value,
+                      })
+                    }
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Hip (cm)</label>
+                  <Input
+                    type="number"
+                    placeholder="95"
+                    value={measurements.hip}
+                    onChange={(e) =>
+                      setMeasurements({ ...measurements, hip: e.target.value })
+                    }
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Arms (cm)</label>
+                  <Input
+                    type="number"
+                    placeholder="35"
+                    value={measurements.arms}
+                    onChange={(e) =>
+                      setMeasurements({ ...measurements, arms: e.target.value })
+                    }
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Legs (cm)</label>
+                  <Input
+                    type="number"
+                    placeholder="55"
+                    value={measurements.legs}
+                    onChange={(e) =>
+                      setMeasurements({ ...measurements, legs: e.target.value })
+                    }
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">
+                    Time Span (weeks)
+                  </label>
+                  <Input
+                    type="number"
+                    placeholder="12"
+                    value={measurements.timeSpanWeeks}
+                    onChange={(e) =>
+                      setMeasurements({
+                        ...measurements,
+                        timeSpanWeeks: e.target.value,
+                      })
+                    }
+                  />
+                </div>
+              </>
+            )}
+            </div>
           </div>
 
-          <DrawerFooter>
+          <DrawerFooter className="border-t bg-background">
             <Button
               onClick={handleOnboardClient}
               disabled={
@@ -684,7 +743,13 @@ function SuperAdminDashboard() {
                 isSubmitting
               }
             >
-              {isSubmitting ? 'Creating...' : 'Create User'}
+              {isSubmitting
+                ? drawerMode === 'create'
+                  ? 'Creating...'
+                  : 'Saving...'
+                : drawerMode === 'create'
+                  ? 'Create User'
+                  : 'Save Changes'}
             </Button>
             <DrawerClose asChild>
               <Button variant="outline">Cancel</Button>
@@ -709,6 +774,20 @@ interface ClientsViewProps {
     role: string
     goal: string
     trainerId?: string
+    meta?: {
+      age?: number
+      currentWeight?: number
+      targetWeight?: number
+    } | null
+    measurements?: {
+      chest?: number
+      shoulder?: number
+      hip?: number
+      arms?: number
+      legs?: number
+      timeSpanWeeks?: number
+      updatedAt?: number
+    } | null
     createdAt: number
   }>
   trainers: Array<{
