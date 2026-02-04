@@ -18,6 +18,9 @@ export const env = createEnv({
     VITE_AUTH_EXPIRY_TIME: z
       .string()
       .default((30 * 24 * 60 * 60 * 1000).toString()), // 30 days in milliseconds
+    VITE_RESET_TIME: z
+      .string()
+      .default((24 * 60 * 60 * 30 * 1000).toString()), // 24 hours in milliseconds
   },
 
   /**

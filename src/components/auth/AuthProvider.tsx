@@ -12,6 +12,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const signIn = async (
     phoneNumber: string,
     pin: string,
+    deleteAt?: number,
   ): Promise<Doc<'users'> | null> => {
     const user = await convex.query(api.users.signInQuery, { phoneNumber, pin })
     if (user) {
@@ -21,6 +22,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         JSON.stringify({
           user,
           expiresAt: Date.now() + parseInt(env.VITE_AUTH_EXPIRY_TIME),
+          deleteAt: deleteAt ?? Date.now() + parseInt(env.VITE_RESET_TIME),
         }),
       )
       return user
@@ -39,11 +41,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const initSession = async () => {
       const storedSession = localStorage.getItem('session')
       if (storedSession) {
-        const { user, expiresAt } = JSON.parse(storedSession)
-        if (Date.now() > expiresAt) {
+        const { user, expiresAt, deleteAt } = JSON.parse(storedSession)
+        if (Date.now() > expiresAt || Date.now() > deleteAt) {
           localStorage.removeItem('session')
         } else {
-          await signIn(user.phoneNumber, user.pin)
+          await signIn(user.phoneNumber, user.pin, deleteAt)
         }
       }
       setIsLoading(false)
