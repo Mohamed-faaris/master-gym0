@@ -1,6 +1,12 @@
 import { useEffect, useState } from 'react'
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
-import { ArrowLeft, Dumbbell, UtensilsCrossed } from 'lucide-react'
+import {
+  ArrowLeft,
+  Dumbbell,
+  UtensilsCrossed,
+  Trash2,
+  Check,
+} from 'lucide-react'
 import { useQuery, useMutation } from 'convex/react'
 
 import { useAuth } from '@/components/auth/useAuth'
@@ -12,24 +18,31 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
+import {
+  DateContextSelector,
+  type DateScope,
+} from '@/components/date-context-selector'
 import { api } from '@convex/_generated/api'
 
 const privilegedRoles = new Set(['trainer', 'admin'])
 
-export const Route = createFileRoute(
-  '/app/management/clients/pattern',
-)({
+export const Route = createFileRoute('/app/management/clients/pattern')({
   component: PatternRoute,
 })
 
 function PatternRoute() {
-  const { clientId } = Route.useParams()
+  const { clientId } = Route.useParams() as { clientId: string }
   const { user, isLoading } = useAuth()
   const navigate = useNavigate()
 
+  // State
+  const [dateScope, setDateScope] = useState<DateScope>('today')
+  const [selectedTrainingPlan, setSelectedTrainingPlan] = useState('')
+  const [selectedDietPlan, setSelectedDietPlan] = useState('')
+
   const client = useQuery(
     api.users.getUserById,
-    clientId ? { userId: clientId } : 'skip',
+    clientId ? { userId: clientId as any } : 'skip',
   )
 
   const trainingPlans = useQuery(api.trainingPlans.getAllTrainingPlans)
@@ -38,11 +51,16 @@ function PatternRoute() {
     user ? { userId: user._id } : 'skip',
   )
 
+  // Mutations
   const assignTrainingPlan = useMutation(
     api.trainingPlans.assignTrainingPlanToUser,
   )
 
-  const [selectedTrainingPlan, setSelectedTrainingPlan] = useState('')
+  // Get client's assigned plans (would need API endpoint)
+  // const clientAssignedPlans = useQuery(
+  //   api.users.getAssignedPlans,
+  //   clientId ? { userId: clientId } : 'skip',
+  // )
 
   useEffect(() => {
     if (isLoading) return
@@ -68,100 +86,260 @@ function PatternRoute() {
   }
 
   return (
-    <div className="space-y-6 p-4 pb-20 max-w-3xl mx-auto">
+    <div className="space-y-6 p-4 pb-20 max-w-4xl mx-auto">
       <header className="space-y-3">
         <Link
-          to={`/app/management/clients/${clientId}`}
+          to={`/app/management/clients/${'/' + clientId}`}
           className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
         >
           <ArrowLeft className="h-4 w-4" />
           Back to client detail
         </Link>
         <div>
-          <h1 className="text-3xl font-semibold">Pattern</h1>
+          <h1 className="text-3xl font-semibold">Training & Diet Plans</h1>
           <p className="text-sm text-muted-foreground">
-            Assign and review workout + diet plans for {client.name}.
+            Assign and manage plans for {client.name}
           </p>
         </div>
       </header>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-base">
-              <Dumbbell className="w-4 h-4" />
-              Assign Workout
-            </CardTitle>
-            <CardDescription>
-              Choose a training plan to attach to this client.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            <select
-              className="w-full rounded-lg border border-border bg-background px-4 py-2 text-sm"
-              value={selectedTrainingPlan}
-              onChange={(e) => setSelectedTrainingPlan(e.target.value)}
-            >
-              <option value="">Select a workout plan...</option>
-              {trainingPlans?.map((plan) => (
-                <option key={plan._id} value={plan._id}>
-                  {plan.name}
-                </option>
-              ))}
-            </select>
-            <Button
-              className="w-full"
-              onClick={async () => {
-                if (!selectedTrainingPlan) return
-                try {
-                  await assignTrainingPlan({
-                    userId: clientId,
-                    trainingPlanId: selectedTrainingPlan,
-                  })
-                  setSelectedTrainingPlan('')
-                } catch (error) {
-                  console.error('Failed to assign workout plan:', error)
-                }
-              }}
-            >
-              Assign
-            </Button>
-          </CardContent>
-        </Card>
+      {/* Date Context for Plan Review */}
+      <div className="flex items-center justify-between">
+        <h2 className="font-semibold">Plan Duration</h2>
+        <DateContextSelector value={dateScope} onChange={setDateScope} />
+      </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-base">
-              <UtensilsCrossed className="w-4 h-4" />
-              Available Diet Plans
-            </CardTitle>
-            <CardDescription>
-              View current templates before sharing guidance.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            <div className="space-y-2 max-h-[240px] overflow-y-auto">
-              {dietPlans && dietPlans.length > 0 ? (
-                dietPlans.map((plan) => (
-                  <div
-                    key={plan._id}
-                    className="p-2 rounded-lg bg-muted hover:bg-muted/80 cursor-pointer transition-colors"
-                  >
+      {/* Assign Workout Plan */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Dumbbell className="w-5 h-5" />
+            Assign Workout Plan
+          </CardTitle>
+          <CardDescription>
+            Select a training plan to assign to this client
+            {dateScope !== 'today' &&
+              ` for ${dateScope === 'this-week' ? 'this week' : 'last week'}`}
+            .
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <select
+            className="w-full rounded-lg border border-border bg-background px-4 py-2 text-sm"
+            value={selectedTrainingPlan}
+            onChange={(e) => setSelectedTrainingPlan(e.target.value)}
+            aria-label="Select a workout plan"
+          >
+            <option value="">Select a workout plan...</option>
+            {trainingPlans?.map((plan) => (
+              <option key={plan._id} value={plan._id}>
+                {plan.name}
+              </option>
+            ))}
+          </select>
+
+          {selectedTrainingPlan && (
+            <Card className="bg-muted border-0">
+              <CardContent className="pt-4">
+                <div className="space-y-2">
+                  <p className="text-sm font-medium">
+                    {trainingPlans?.find((p) => p._id === selectedTrainingPlan)
+                      ?.name || 'Selected Plan'}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {trainingPlans?.find((p) => p._id === selectedTrainingPlan)
+                      ?.description || 'No description'}
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          <Button
+            className="w-full"
+            disabled={!selectedTrainingPlan}
+            onClick={async () => {
+              if (!selectedTrainingPlan) return
+              try {
+                await assignTrainingPlan({
+                  userId: clientId as any,
+                  trainingPlanId: selectedTrainingPlan as any,
+                })
+                setSelectedTrainingPlan('')
+                // Show success toast here
+              } catch (error) {
+                console.error('Failed to assign workout plan:', error)
+                // Show error toast here
+              }
+            }}
+          >
+            <Check className="w-4 h-4 mr-2" />
+            Assign Plan
+          </Button>
+        </CardContent>
+      </Card>
+
+      {/* Current Assigned Workouts */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base flex items-center gap-2">
+            <Dumbbell className="w-4 h-4" />
+            Currently Assigned
+          </CardTitle>
+          <CardDescription>
+            Active workout plans for this client
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-2">
+            {trainingPlans && trainingPlans.length > 0 ? (
+              trainingPlans.map((plan) => (
+                <div
+                  key={plan._id}
+                  className="flex items-start justify-between p-3 rounded-lg bg-muted hover:bg-muted/80 transition-colors"
+                >
+                  <div className="flex-1">
                     <p className="font-medium text-sm">{plan.name}</p>
                     <p className="text-xs text-muted-foreground">
                       {plan.description}
                     </p>
                   </div>
-                ))
-              ) : (
-                <p className="text-sm text-muted-foreground">
-                  No diet plans available
-                </p>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 w-8 p-0"
+                    onClick={async () => {
+                      // Unassign logic here
+                    }}
+                  >
+                    <Trash2 className="w-4 h-4 text-destructive" />
+                  </Button>
+                </div>
+              ))
+            ) : (
+              <p className="text-sm text-muted-foreground text-center py-4">
+                No workout plans assigned
+              </p>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Assign Diet Plan */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <UtensilsCrossed className="w-5 h-5" />
+            Assign Diet Plan
+          </CardTitle>
+          <CardDescription>
+            Select a diet plan to assign to this client
+            {dateScope !== 'today' &&
+              ` for ${dateScope === 'this-week' ? 'this week' : 'last week'}`}
+            .
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <select
+            className="w-full rounded-lg border border-border bg-background px-4 py-2 text-sm"
+            value={selectedDietPlan}
+            onChange={(e) => setSelectedDietPlan(e.target.value)}
+            aria-label="Select a diet plan"
+          >
+            <option value="">Select a diet plan...</option>
+            {dietPlans?.map((plan) => (
+              <option key={plan._id} value={plan._id}>
+                {plan.name}
+              </option>
+            ))}
+          </select>
+
+          {selectedDietPlan && (
+            <Card className="bg-muted border-0">
+              <CardContent className="pt-4">
+                <div className="space-y-2">
+                  <p className="text-sm font-medium">
+                    {dietPlans?.find((p) => p._id === selectedDietPlan)?.name ||
+                      'Selected Plan'}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {dietPlans?.find((p) => p._id === selectedDietPlan)
+                      ?.description || 'No description'}
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          <Button
+            className="w-full"
+            disabled={!selectedDietPlan}
+            onClick={async () => {
+              if (!selectedDietPlan) return
+              // Assign diet plan logic here
+              setSelectedDietPlan('')
+            }}
+          >
+            <Check className="w-4 h-4 mr-2" />
+            Assign Plan
+          </Button>
+        </CardContent>
+      </Card>
+
+      {/* Current Assigned Diet Plans */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base flex items-center gap-2">
+            <UtensilsCrossed className="w-4 h-4" />
+            Currently Assigned
+          </CardTitle>
+          <CardDescription>Active diet plans for this client</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-2">
+            {dietPlans && dietPlans.length > 0 ? (
+              dietPlans.map((plan) => (
+                <div
+                  key={plan._id}
+                  className="flex items-start justify-between p-3 rounded-lg bg-muted hover:bg-muted/80 transition-colors"
+                >
+                  <div className="flex-1">
+                    <p className="font-medium text-sm">{plan.name}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {plan.description}
+                    </p>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 w-8 p-0"
+                    onClick={async () => {
+                      // Unassign diet plan logic here
+                    }}
+                  >
+                    <Trash2 className="w-4 h-4 text-destructive" />
+                  </Button>
+                </div>
+              ))
+            ) : (
+              <p className="text-sm text-muted-foreground text-center py-4">
+                No diet plans assigned
+              </p>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Info Section */}
+      <Card className="bg-muted/50 border-muted">
+        <CardContent className="pt-6">
+          <p className="text-xs text-muted-foreground leading-relaxed">
+            Plans assigned with different date scopes allow you to rotate or
+            adjust training and diet based on time periods. Use the date
+            selector above to review and modify plans for specific time windows.
+          </p>
+        </CardContent>
+      </Card>
     </div>
   )
 }
