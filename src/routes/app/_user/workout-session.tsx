@@ -7,6 +7,10 @@ import { useMutation, useQuery } from 'convex/react'
 import { api } from '@convex/_generated/api'
 import { useAuth } from '@/components/auth/useAuth'
 import { toast } from 'sonner'
+import {
+  Checkbox,
+  CheckboxIndicator,
+} from '@/components/animate-ui/primitives/radix/checkbox'
 
 export const Route = createFileRoute('/app/_user/workout-session')({
   component: WorkoutSessionRouteComponent,
@@ -60,8 +64,9 @@ export function WorkoutSessionRouteComponent() {
     user
       ? {
           userId: user._id,
-          startTime: dayStart.getTime(),
-          endTime: dayEnd.getTime(),
+          dayOfWeek,
+          dayStart: dayStart.getTime(),
+          dayEnd: dayEnd.getTime(),
         }
       : 'skip',
   )
@@ -97,6 +102,30 @@ export function WorkoutSessionRouteComponent() {
       if (timer) clearInterval(timer)
     }
   }, [sessionId, isPaused])
+
+  const toggleSet = async (exerciseIndex: number, setIndex: number) => {
+    if (!sessionId) return
+
+    const key = `${exerciseIndex}-${setIndex + 1}`
+    const updatedSets = new Set(completedSets)
+    if (updatedSets.has(key)) {
+      updatedSets.delete(key)
+    } else {
+      updatedSets.add(key)
+    }
+
+    setCompletedSets(updatedSets)
+
+    try {
+      await updateSession({
+        sessionId,
+        completedSets: Array.from(updatedSets),
+        totalTime: workoutTime,
+      })
+    } catch (error) {
+      console.error(error)
+    }
+  }
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60)
@@ -186,6 +215,20 @@ export function WorkoutSessionRouteComponent() {
     )
   }
 
+  const getSetCount = (exercise: {
+    noOfSets?: number
+    sets?: Array<{ reps?: number }>
+  }) => {
+    const explicitCount = exercise.sets?.length ?? 0
+    if (explicitCount > 0) return explicitCount
+    return exercise.noOfSets ?? 0
+  }
+
+  const getRepsLabel = (exercise: { sets?: Array<{ reps?: number }> }) => {
+    const reps = exercise.sets?.[0]?.reps
+    return reps ? `${reps} reps` : 'Reps TBD'
+  }
+
   return (
     <div className="p-4 pb-20 space-y-6 max-w-4xl mx-auto">
       <header className="space-y-2">
@@ -234,33 +277,71 @@ export function WorkoutSessionRouteComponent() {
 
       <div className="space-y-4">
         {todaysWorkout.exercises.map((exercise, exerciseIndex) => (
-          <Card key={exercise.name}>
+          <Card key={exercise.exerciseName}>
             <CardContent className="pt-6 space-y-4">
               <div className="space-y-1">
-                <h2 className="text-lg font-semibold">{exercise.name}</h2>
+                <h2 className="text-lg font-semibold">
+                  {exercise.exerciseName}
+                </h2>
                 <p className="text-sm text-muted-foreground">
-                  {exercise.sets} sets · {exercise.reps} reps
+                  {getSetCount(exercise)} sets · {getRepsLabel(exercise)}
                 </p>
               </div>
 
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                {Array.from({ length: exercise.sets }).map((_, setIndex) => {
+              <div className="space-y-2">
+                {Array.from({ length: getSetCount(exercise) }).map(
+                  (_, setIndex) => {
                   const key = `${exerciseIndex}-${setIndex + 1}`
                   const isCompleted = completedSets.has(key)
                   return (
-                    <Button
+                    <Card
                       key={key}
-                      variant={isCompleted ? 'default' : 'outline'}
-                      onClick={() => handleToggleSet(exerciseIndex, setIndex + 1)}
-                      className="text-xs"
                       ref={
                         exerciseIndex === 0 && setIndex === 0
                           ? currentExerciseRef
                           : undefined
                       }
+                      className={`transition-all ${
+                        isCompleted
+                          ? 'border-green-500 bg-green-500/5'
+                          : 'border-border'
+                      } cursor-pointer`}
+                      onClick={() => toggleSet(exerciseIndex, setIndex)}
                     >
-                      Set {setIndex + 1}
-                    </Button>
+                      <CardContent className="p-3">
+                        <div className="flex items-center gap-3">
+                          <div className="flex items-center justify-center flex-shrink-0">
+                            <Checkbox
+                              checked={isCompleted}
+                              onCheckedChange={() =>
+                                toggleSet(exerciseIndex, setIndex)
+                              }
+                              aria-label={`Mark set ${setIndex + 1}`}
+                              onClick={(event) => event.stopPropagation()}
+                              className="size-5 flex justify-center items-center border [&[data-state=checked],&[data-state=indeterminate]]:bg-primary [&[data-state=checked],&[data-state=indeterminate]]:text-primary-foreground transition-colors duration-500"
+                            >
+                              <CheckboxIndicator className="size-3.5" />
+                            </Checkbox>
+                          </div>
+                          <div className="flex-1">
+                            <div
+                              className={`font-semibold ${
+                                isCompleted ? 'line-through text-muted-foreground' : ''
+                              }`}
+                            >
+                              Set {setIndex + 1}
+                            </div>
+                            <div
+                              className={`text-sm text-muted-foreground ${
+                                isCompleted ? 'line-through' : ''
+                              }`}
+                            >
+                              {getRepsLabel(exercise)}
+                            </div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
                   )
                 })}
               </div>

@@ -1,4 +1,4 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, Link } from '@tanstack/react-router'
 import {
   Calendar,
   Dumbbell,
@@ -16,6 +16,7 @@ import {
   CardTitle,
   CardDescription,
 } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
 import { useAuth } from '@/components/auth/useAuth'
 import { api } from '@convex/_generated/api'
 
@@ -71,7 +72,7 @@ function RouteComponent() {
   const todayStats = getTodayStats()
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 pb-24">
       {/* Header with date and day */}
       <div className="sticky top-0 z-10 bg-background p-4 border-b">
         <div className="flex items-center justify-between">
@@ -238,6 +239,18 @@ function RouteComponent() {
           </>
         )}
       </div>
+
+      {user && (
+        <Link
+          to="/app/workout-session"
+          className="fixed inset-x-4 bottom-6 z-30 m-16"
+        >
+          <Button className="h-14 w-full rounded-full shadow-lg">
+            <Dumbbell className="w-5 h-5 mr-2" />
+            Start Workout
+          </Button>
+        </Link>
+      )}
     </div>
   )
 }

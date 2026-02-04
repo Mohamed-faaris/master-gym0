@@ -15,6 +15,10 @@ import { useMutation, useQuery } from 'convex/react'
 import { api } from '@convex/_generated/api'
 import { useAuth } from '@/components/auth/useAuth'
 import { toast } from 'sonner'
+import {
+  Checkbox,
+  CheckboxIndicator,
+} from '@/components/animate-ui/primitives/radix/checkbox'
 
 export const Route = createFileRoute(
   '/app/management/clients/$clientId/workout-session',
@@ -229,6 +233,49 @@ function TrainerWorkoutSessionRoute() {
     }
   }, [completedSets])
 
+  const toggleSet = async (exerciseIndex: number, setIndex: number) => {
+    const setKey = `${exerciseIndex}-${setIndex}`
+    const newCompleted = new Set(completedSets)
+    if (newCompleted.has(setKey)) {
+      newCompleted.delete(setKey)
+    } else {
+      newCompleted.add(setKey)
+    }
+    setCompletedSets(newCompleted)
+
+    if (!sessionId) return
+
+    try {
+      await updateSession({
+        sessionId,
+        exercises: activeExercises.map((ex, idx) => {
+          const setTotal = getSetCount(ex)
+          const sets =
+            ex.sets.length > 0
+              ? ex.sets.map((set, setIdx) => ({
+                  reps: set.reps,
+                  weight: set.weight,
+                  notes: set.notes,
+                  completed: newCompleted.has(`${idx}-${setIdx}`),
+                }))
+              : Array.from({ length: setTotal }).map((_, setIdx) => ({
+                  completed: newCompleted.has(`${idx}-${setIdx}`),
+                }))
+
+          return {
+            exerciseName: ex.exerciseName,
+            noOfSets: ex.noOfSets,
+            sets,
+          }
+        }),
+        totalTime: workoutTime,
+        totalCaloriesBurned: Math.round((workoutTime / 60) * 5),
+      })
+    } catch (error) {
+      console.error('Failed to update session:', error)
+    }
+  }
+
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60)
     const secs = seconds % 60
@@ -434,153 +481,52 @@ function TrainerWorkoutSessionRoute() {
                           : isCompleted
                             ? 'border-green-500 bg-green-500/5'
                             : 'border-border'
-                      }`}
+                      } cursor-pointer`}
+                      onClick={() => toggleSet(exerciseIndex, setIndex)}
                     >
                       <CardContent className="p-3">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3 flex-1">
-                            <div
-                              className={`w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 text-sm font-bold ${
-                                isCompleted
-                                  ? 'bg-green-500 text-white'
-                                  : isCurrent
-                                    ? 'bg-primary text-primary-foreground'
-                                    : 'bg-muted text-muted-foreground'
-                              }`}
-                            >
-                              {isCompleted ? (
-                                <CheckCircle2 className="w-5 h-5" />
-                              ) : (
-                                setIndex + 1
-                              )}
+                            <div className="flex items-center justify-center flex-shrink-0">
+                              <Checkbox
+                                checked={isCompleted}
+                                onCheckedChange={() =>
+                                  toggleSet(exerciseIndex, setIndex)
+                                }
+                                aria-label={`Mark set ${setIndex + 1}`}
+                                onClick={(event) => event.stopPropagation()}
+                                className="size-5 flex justify-center items-center border [&[data-state=checked],&[data-state=indeterminate]]:bg-primary [&[data-state=checked],&[data-state=indeterminate]]:text-primary-foreground transition-colors duration-500"
+                              >
+                                <CheckboxIndicator className="size-3.5" />
+                              </Checkbox>
                             </div>
                             <div className="flex-1">
-                              <div className="font-semibold">
+                              <div
+                                className={`font-semibold ${
+                                  isCompleted ? 'line-through text-muted-foreground' : ''
+                                }`}
+                              >
                                 Set {setIndex + 1}
                               </div>
-                              <div className="text-sm text-muted-foreground">
+                              <div
+                                className={`text-sm text-muted-foreground ${
+                                  isCompleted ? 'line-through' : ''
+                                }`}
+                              >
                                 {setData?.reps && `${setData.reps} reps`}
                                 {setData?.weight && ` • ${setData.weight} lbs`}
                               </div>
                               {setData?.notes && (
-                                <div className="text-xs text-muted-foreground mt-1">
+                                <div
+                                  className={`text-xs text-muted-foreground mt-1 ${
+                                    isCompleted ? 'line-through' : ''
+                                  }`}
+                                >
                                   {setData.notes}
                                 </div>
                               )}
                             </div>
                           </div>
-
-                          {isCurrent && (
-                            <div className="flex gap-2">
-                              {exerciseIndex === activeExercises.length - 1 &&
-                              setIndex === setCount - 1 ? (
-                                <Button
-                                  size="sm"
-                                  onClick={() => {
-                                    const newCompleted = new Set(completedSets)
-                                    newCompleted.add(setKey)
-                                    setCompletedSets(newCompleted)
-                                    if (sessionId) {
-                                      updateSession({
-                                        sessionId,
-                                        exercises: activeExercises.map(
-                                          (ex, idx) => {
-                                            const setTotal = getSetCount(ex)
-                                            const sets =
-                                              ex.sets.length > 0
-                                                ? ex.sets.map(
-                                                    (set, setIdx) => ({
-                                                      reps: set.reps,
-                                                      weight: set.weight,
-                                                      notes: set.notes,
-                                                      completed:
-                                                        newCompleted.has(
-                                                          `${idx}-${setIdx}`,
-                                                        ),
-                                                    }),
-                                                  )
-                                                : Array.from({
-                                                    length: setTotal,
-                                                  }).map((_, setIdx) => ({
-                                                    completed: newCompleted.has(
-                                                      `${idx}-${setIdx}`,
-                                                    ),
-                                                  }))
-
-                                            return {
-                                              exerciseName: ex.exerciseName,
-                                              noOfSets: ex.noOfSets,
-                                              sets,
-                                            }
-                                          },
-                                        ),
-                                        totalTime: workoutTime,
-                                        totalCaloriesBurned: Math.round(
-                                          (workoutTime / 60) * 5,
-                                        ),
-                                      })
-                                    }
-                                    endWorkout()
-                                  }}
-                                >
-                                  <CheckCircle2 className="w-4 h-4 mr-1" />
-                                  End
-                                </Button>
-                              ) : (
-                                <Button
-                                  size="sm"
-                                  onClick={() => {
-                                    const newCompleted = new Set(completedSets)
-                                    newCompleted.add(setKey)
-                                    setCompletedSets(newCompleted)
-                                    if (sessionId) {
-                                      updateSession({
-                                        sessionId,
-                                        exercises: activeExercises.map(
-                                          (ex, idx) => {
-                                            const setTotal = getSetCount(ex)
-                                            const sets =
-                                              ex.sets.length > 0
-                                                ? ex.sets.map(
-                                                    (set, setIdx) => ({
-                                                      reps: set.reps,
-                                                      weight: set.weight,
-                                                      notes: set.notes,
-                                                      completed:
-                                                        newCompleted.has(
-                                                          `${idx}-${setIdx}`,
-                                                        ),
-                                                    }),
-                                                  )
-                                                : Array.from({
-                                                    length: setTotal,
-                                                  }).map((_, setIdx) => ({
-                                                    completed: newCompleted.has(
-                                                      `${idx}-${setIdx}`,
-                                                    ),
-                                                  }))
-
-                                            return {
-                                              exerciseName: ex.exerciseName,
-                                              noOfSets: ex.noOfSets,
-                                              sets,
-                                            }
-                                          },
-                                        ),
-                                        totalTime: workoutTime,
-                                        totalCaloriesBurned: Math.round(
-                                          (workoutTime / 60) * 5,
-                                        ),
-                                      })
-                                    }
-                                  }}
-                                >
-                                  <CheckCircle2 className="w-4 h-4 mr-1" />
-                                  Done
-                                </Button>
-                              )}
-                            </div>
-                          )}
                         </div>
                       </CardContent>
                     </Card>

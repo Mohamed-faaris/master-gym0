@@ -92,6 +92,19 @@ export const getTrainingPlanById = query({
   },
 })
 
+// Get workout for a specific day from a training plan
+export const getWorkoutForDay = query({
+  args: {
+    trainingPlanId: v.id('trainingPlans'),
+    day: DayOfWeekValidator,
+  },
+  handler: async (ctx, args) => {
+    const trainingPlan = await ctx.db.get(args.trainingPlanId)
+    if (!trainingPlan) return null
+    return trainingPlan.days.find((day) => day.day === args.day) ?? null
+  },
+})
+
 // Update a training plan
 export const updateTrainingPlan = mutation({
   args: {

@@ -198,28 +198,45 @@ export const getOngoingSession = query({
 export const getLatestSessionForDay = query({
   args: {
     userId: v.id('users'),
-    dayOfWeek: v.union(
-      v.literal('mon'),
-      v.literal('tue'),
-      v.literal('wed'),
-      v.literal('thu'),
-      v.literal('fri'),
-      v.literal('sat'),
-      v.literal('sun'),
+    dayOfWeek: v.optional(
+      v.union(
+        v.literal('mon'),
+        v.literal('tue'),
+        v.literal('wed'),
+        v.literal('thu'),
+        v.literal('fri'),
+        v.literal('sat'),
+        v.literal('sun'),
+      ),
     ),
-    dayStart: v.number(),
-    dayEnd: v.number(),
+    dayStart: v.optional(v.number()),
+    dayEnd: v.optional(v.number()),
+    startTime: v.optional(v.number()),
+    endTime: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
+    const dayStart = args.dayStart ?? args.startTime
+    const dayEnd = args.dayEnd ?? args.endTime
+
+    if (dayStart == null || dayEnd == null) {
+      throw new Error('Missing dayStart/dayEnd for getLatestSessionForDay')
+    }
+
+    const dayOfWeek =
+      args.dayOfWeek ??
+      (['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'][
+        new Date(dayStart).getDay()
+      ] as 'sun' | 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat')
+
     const session = await ctx.db
       .query('workoutSessions')
       .withIndex('by_user_day', (q) =>
-        q.eq('userId', args.userId).eq('dayOfWeek', args.dayOfWeek),
+        q.eq('userId', args.userId).eq('dayOfWeek', dayOfWeek),
       )
       .filter((q) =>
         q.and(
-          q.gte(q.field('startTime'), args.dayStart),
-          q.lt(q.field('startTime'), args.dayEnd),
+          q.gte(q.field('startTime'), dayStart),
+          q.lt(q.field('startTime'), dayEnd),
         ),
       )
       .order('desc')
