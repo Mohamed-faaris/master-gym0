@@ -26,7 +26,7 @@ function RouteComponent() {
 
   // Fetch user stats
   const workoutStats = useQuery(
-    api.workoutLogs.getWorkoutStats,
+    api.workoutSessions.getSessionStats,
     user ? { userId: user._id } : 'skip',
   )
 
@@ -35,7 +35,8 @@ function RouteComponent() {
     navigate({ to: '/app/sign-in' })
   }
 
-  const formatDuration = (minutes: number) => {
+  const formatDuration = (seconds: number) => {
+    const minutes = Math.round(seconds / 60)
     const hours = Math.floor(minutes / 60)
     return hours > 0 ? `${hours}h` : `${minutes}m`
   }
@@ -103,13 +104,13 @@ function RouteComponent() {
               <div className="space-y-4">
                 <div className="text-center">
                   <div className="text-2xl font-bold">
-                    {workoutStats.completedWorkouts}
+                    {workoutStats.totalSessions}
                   </div>
                   <div className="text-xs text-muted-foreground">Workouts</div>
                 </div>
                 <div className="text-center">
                   <div className="text-2xl font-bold">
-                    {formatDuration(workoutStats.totalDuration)}
+                    {formatDuration(workoutStats.totalTime)}
                   </div>
                   <div className="text-xs text-muted-foreground">
                     Total Time

@@ -51,11 +51,11 @@ function RouteComponent() {
 
   // Database queries
   const workoutStats = useQuery(
-    api.workoutLogs.getWorkoutStats,
+    api.workoutSessions.getSessionStats,
     user ? { userId: user._id } : 'skip',
   )
   const recentWorkouts = useQuery(
-    api.workoutLogs.getWorkoutLogsByUser,
+    api.workoutSessions.getSessionHistory,
     user ? { userId: user._id, limit: 7 } : 'skip',
   )
 
@@ -86,7 +86,7 @@ function RouteComponent() {
         })
 
         const calories = dayWorkouts.reduce(
-          (sum, w) => sum + (w.caloriesBurned || 0),
+          (sum, w) => sum + (w.totalCaloriesBurned || 0),
           0,
         )
         return { day, calories }
@@ -94,11 +94,11 @@ function RouteComponent() {
     )
 
     const totalCalories = recentWorkouts.reduce(
-      (sum, w) => sum + (w.caloriesBurned || 0),
+      (sum, w) => sum + (w.totalCaloriesBurned || 0),
       0,
     )
     const totalTime = recentWorkouts.reduce(
-      (sum, w) => sum + (w.duration || 0),
+      (sum, w) => sum + (w.totalTime || 0),
       0,
     )
     const workoutCount = recentWorkouts.filter(
@@ -166,7 +166,8 @@ function RouteComponent() {
     }
   }
 
-  const formatDuration = (minutes: number) => {
+  const formatDuration = (seconds: number) => {
+    const minutes = Math.round(seconds / 60)
     const hours = Math.floor(minutes / 60)
     const mins = minutes % 60
     return hours > 0 ? `${hours}h ${mins}m` : `${mins}m`
@@ -242,7 +243,7 @@ function RouteComponent() {
                 <span className="text-sm">Total Time</span>
               </div>
               <div className="text-2xl font-bold">
-                {formatDuration(workoutStats?.totalDuration ?? 0)}
+                {formatDuration(workoutStats?.totalTime ?? 0)}
               </div>
             </div>
             <div className="space-y-1">
@@ -251,7 +252,7 @@ function RouteComponent() {
                 <span className="text-sm">Workouts</span>
               </div>
               <div className="text-2xl font-bold">
-                {workoutStats?.completedWorkouts ?? 0}
+                {workoutStats?.totalSessions ?? 0}
               </div>
             </div>
             <div className="space-y-1">
@@ -301,20 +302,18 @@ function RouteComponent() {
                   <div className="flex items-center gap-3">
                     <div
                       className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                        workout.workoutType === 'strength'
-                          ? 'bg-blue-500/10 text-blue-500'
-                          : workout.workoutType === 'cardio'
-                            ? 'bg-red-500/10 text-red-500'
-                            : workout.workoutType === 'flexibility'
-                              ? 'bg-green-500/10 text-green-500'
-                              : 'bg-purple-500/10 text-purple-500'
+                        workout.status === 'completed'
+                          ? 'bg-green-500/10 text-green-500'
+                          : workout.status === 'ongoing'
+                            ? 'bg-blue-500/10 text-blue-500'
+                            : 'bg-red-500/10 text-red-500'
                       }`}
                     >
                       <Activity className="w-5 h-5" />
                     </div>
                     <div>
                       <p className="font-medium capitalize">
-                        {workout.workoutType} Workout
+                        {workout.status} Session
                       </p>
                       <p className="text-xs text-muted-foreground">
                         {new Date(workout.startTime).toLocaleDateString(
@@ -330,11 +329,11 @@ function RouteComponent() {
                   </div>
                   <div className="text-right">
                     <p className="font-medium">
-                      {workout.caloriesBurned ?? 0} cal
+                      {workout.totalCaloriesBurned ?? 0} cal
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      {workout.duration
-                        ? formatDuration(workout.duration)
+                      {workout.totalTime
+                        ? formatDuration(workout.totalTime)
                         : '-'}
                     </p>
                   </div>

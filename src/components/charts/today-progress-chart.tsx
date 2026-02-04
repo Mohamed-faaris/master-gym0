@@ -11,7 +11,6 @@ import {
 import { useAuth } from '@/components/auth/useAuth'
 import { useQuery } from 'convex/react'
 import { api } from 'convex/_generated/api'
-import { Loader2 } from 'lucide-react'
 
 const chartConfig = {
   calories: {
@@ -45,29 +44,29 @@ export function TodayProgressChart() {
   )
 
   // Get today's workout logs
-  const recentWorkouts = useQuery(
-    api.workoutLogs.getWorkoutLogsByUser,
+  const recentSessions = useQuery(
+    api.workoutSessions.getSessionHistory,
     user ? { userId: user._id, limit: 10 } : 'skip',
   )
 
   // Calculate today's workout stats
   const getTodayWorkoutStats = () => {
-    if (!recentWorkouts) return { duration: 0, caloriesBurned: 0 }
+    if (!recentSessions) return { duration: 0, caloriesBurned: 0 }
 
     const today = new Date()
     today.setHours(0, 0, 0, 0)
     const todayTimestamp = today.getTime()
 
-    const todayWorkouts = recentWorkouts.filter(
+    const todayWorkouts = recentSessions.filter(
       (w) => w.startTime >= todayTimestamp && w.status === 'completed',
     )
 
     const duration = todayWorkouts.reduce(
-      (sum, w) => sum + (w.duration || 0),
+      (sum, w) => sum + Math.round((w.totalTime || 0) / 60),
       0,
     )
     const caloriesBurned = todayWorkouts.reduce(
-      (sum, w) => sum + (w.caloriesBurned || 0),
+      (sum, w) => sum + (w.totalCaloriesBurned || 0),
       0,
     )
 

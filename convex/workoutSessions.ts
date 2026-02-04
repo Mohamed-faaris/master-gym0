@@ -8,6 +8,8 @@ export const startSession = mutation({
     args: {
         userId: v.id('users'),
         trainingPlanId: v.optional(v.id('trainingPlans')),
+        dayStart: v.number(),
+        dayEnd: v.number(),
         dayOfWeek: v.union(
             v.literal('mon'),
             v.literal('tue'),
@@ -17,32 +19,73 @@ export const startSession = mutation({
             v.literal('sat'),
             v.literal('sun')
         ),
-        exercises: v.array(
-            v.object({
-                exerciseName: v.string(),
-                index: v.number(),
-                completed: v.boolean(),
-                timeSpent: v.number(),
-                sets: v.array(
-                    v.object({
-                        setIndex: v.number(),
-                        reps: v.number(),
-                        weight: v.number(),
-                        completed: v.boolean(),
-                    })
-                ),
-                notes: v.optional(v.string()),
-            })
+        exercises: v.optional(
+            v.array(
+                v.object({
+                    exerciseName: v.string(),
+                    noOfSets: v.number(),
+                    sets: v.array(
+                        v.object({
+                            reps: v.optional(v.number()),
+                            weight: v.optional(v.number()),
+                            notes: v.optional(v.string()),
+                            completed: v.boolean(),
+                        })
+                    ),
+                })
+            )
         ),
     },
     handler: async (ctx, args) => {
+        const existingSession = await ctx.db
+            .query('workoutSessions')
+            .withIndex('by_user_day', (q) =>
+                q.eq('userId', args.userId).eq('dayOfWeek', args.dayOfWeek)
+            )
+            .filter((q) =>
+                q.and(
+                    q.gte(q.field('startTime'), args.dayStart),
+                    q.lt(q.field('startTime'), args.dayEnd),
+                )
+            )
+            .order('desc')
+            .first()
+
+        if (existingSession) {
+            return existingSession._id
+        }
+
+        let exercises = args.exercises
+
+        if (args.trainingPlanId) {
+            const trainingPlan = await ctx.db.get(args.trainingPlanId)
+            const dayPlan = trainingPlan?.days.find((day) => day.day === args.dayOfWeek)
+
+            if (dayPlan) {
+                exercises = dayPlan.exercises.map((exercise) => ({
+                    exerciseName: exercise.exerciseName,
+                    noOfSets: exercise.noOfSets,
+                    sets: exercise.sets.map((set) => ({
+                        reps: set.reps,
+                        weight: set.weight,
+                        notes: set.notes,
+                        completed: false,
+                    })),
+                }))
+            }
+        }
+
+        if (!exercises) {
+            throw new Error('Workout session requires exercises or a valid training plan day')
+        }
+
         const sessionId = await ctx.db.insert('workoutSessions', {
             userId: args.userId,
             trainingPlanId: args.trainingPlanId,
             dayOfWeek: args.dayOfWeek,
             status: 'ongoing',
             startTime: Date.now(),
-            exercises: args.exercises,
+            exercises,
             totalTime: 0,
             totalCaloriesBurned: 0,
             createdAt: Date.now(),
@@ -61,18 +104,15 @@ export const updateSessionProgress = mutation({
         exercises: v.array(
             v.object({
                 exerciseName: v.string(),
-                index: v.number(),
-                completed: v.boolean(),
-                timeSpent: v.number(),
+                noOfSets: v.number(),
                 sets: v.array(
                     v.object({
-                        setIndex: v.number(),
-                        reps: v.number(),
-                        weight: v.number(),
+                        reps: v.optional(v.number()),
+                        weight: v.optional(v.number()),
+                        notes: v.optional(v.string()),
                         completed: v.boolean(),
                     })
                 ),
-                notes: v.optional(v.string()),
             })
         ),
         totalTime: v.number(),
@@ -83,6 +123,8 @@ export const updateSessionProgress = mutation({
             exercises: args.exercises,
             totalTime: args.totalTime,
             totalCaloriesBurned: args.totalCaloriesBurned,
+            endTime: Date.now(),
+            status: 'ongoing',
             updatedAt: Date.now(),
         })
         return args.sessionId
@@ -143,6 +185,43 @@ export const getOngoingSession = query({
             .collect()
 
         return sessions.length > 0 ? sessions[0] : null
+    },
+})
+
+/**
+ * Get latest workout session for a given day
+ */
+export const getLatestSessionForDay = query({
+    args: {
+        userId: v.id('users'),
+        dayOfWeek: v.union(
+            v.literal('mon'),
+            v.literal('tue'),
+            v.literal('wed'),
+            v.literal('thu'),
+            v.literal('fri'),
+            v.literal('sat'),
+            v.literal('sun')
+        ),
+        dayStart: v.number(),
+        dayEnd: v.number(),
+    },
+    handler: async (ctx, args) => {
+        const session = await ctx.db
+            .query('workoutSessions')
+            .withIndex('by_user_day', (q) =>
+                q.eq('userId', args.userId).eq('dayOfWeek', args.dayOfWeek)
+            )
+            .filter((q) =>
+                q.and(
+                    q.gte(q.field('startTime'), args.dayStart),
+                    q.lt(q.field('startTime'), args.dayEnd),
+                )
+            )
+            .order('desc')
+            .first()
+
+        return session ?? null
     },
 })
 

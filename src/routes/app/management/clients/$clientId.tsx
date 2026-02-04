@@ -38,9 +38,9 @@ function ClientDetailRoute() {
     clientId ? { userId: clientId } : 'skip',
   )
 
-  const workoutLogs = useQuery(
-    api.workoutLogs.getWorkoutLogsByUser,
-    clientId ? { userId: clientId } : 'skip',
+  const workoutSessions = useQuery(
+    api.workoutSessions.getSessionHistory,
+    clientId ? { userId: clientId, limit: 100 } : 'skip',
   )
 
   const dietLogs = useQuery(
@@ -146,7 +146,7 @@ function ClientDetailRoute() {
           <CardContent className="pt-6">
             <div className="text-center">
               <p className="text-3xl font-bold text-primary">
-                {workoutLogs?.length || 0}
+                {workoutSessions?.length || 0}
               </p>
               <p className="text-xs text-muted-foreground mt-1">Workouts</p>
             </div>
@@ -257,7 +257,7 @@ function ClientDetailRoute() {
           className="h-12 w-full"
         >
           <Dumbbell className="w-4 h-4 mr-2" />
-          View Workout Logs
+          View Workout Sessions
         </Button>
 
         <Button
@@ -314,7 +314,7 @@ function ClientDetailRoute() {
           <div>
             <p className="text-sm text-muted-foreground">Workout Progress</p>
             <p className="text-2xl font-bold text-primary">
-              {workoutLogs?.length || 0}
+              {workoutSessions?.length || 0}
             </p>
             <p className="text-xs text-muted-foreground mt-1">
               Total workouts logged

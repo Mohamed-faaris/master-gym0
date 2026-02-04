@@ -15,8 +15,6 @@ const ROLES = [
 
 const WORKOUT_STATUSES = ['ongoing', 'completed', 'cancelled'] as const
 
-const WORKOUT_TYPES = ['cardio', 'strength', 'flexibility', 'balance'] as const
-
 export const MEAL_TYPES = ['breakfast', 'lunch', 'dinner', 'snack', "postWorkout"] as const
 
 const DAYS_OF_WEEK = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'] as const
@@ -103,7 +101,6 @@ function enumToValidator<T extends ReadonlyArray<string>>(values: T) {
 
 const RoleValidator = enumToValidator(ROLES)
 const WorkoutStatusValidator = enumToValidator(WORKOUT_STATUSES)
-const WorkoutTypeValidator = enumToValidator(WORKOUT_TYPES)
 const MealTypeValidator = enumToValidator(MEAL_TYPES)
 const DayOfWeekValidator = enumToValidator(DAYS_OF_WEEK)
 const GoalValidator = enumToValidator(GOALS)
@@ -112,14 +109,6 @@ const ExerciseNameValidator = enumToValidator(EXERCISE_NAMES)
 /* ======================================================
    TABLES
 ====================================================== */
-
-/*
-For PT clients - 
-Name, Age, Measurement(Chest, Shoulder, Hip, Arms, Legs), Current Weight, Target Weight, Time Span. 
-
-For normal users(app purchasers) - 
-Name,Age,Current Weight, Target weight.
-*/
 
 
 /* -------------------- USERS -------------------- */
@@ -184,44 +173,6 @@ const userMeasurement = defineTable({
   createdAt: v.number(),
   updatedAt: v.number(),
 }).index('by_user', ['userId'])
-
-/* -------------------- WORKOUT LOGS -------------------- */
-
-const workoutLogs = defineTable({
-  userId: v.id('users'),
-
-  startTime: v.number(),
-  endTime: v.optional(v.number()),
-
-  status: WorkoutStatusValidator,
-  workoutType: WorkoutTypeValidator,
-
-  duration: v.optional(v.number()),
-  caloriesBurned: v.optional(v.number()),
-
-  createdAt: v.number(),
-  updatedAt: v.number(),
-}).index('by_user', ['userId'])
-
-/* -------------------- WORKOUT (EXERCISES) -------------------- */
-
-const workouts = defineTable({
-  workoutLogId: v.id('workoutLogs'),
-
-  exercises: v.array(
-    v.object({
-      createdAt: v.number(),
-      exerciseName: v.string(),
-      sets: v.optional(v.number()),
-      reps: v.optional(v.number()),
-      weight: v.optional(v.number()),
-      notes: v.optional(v.string()),
-    }),
-  ),
-
-  createdAt: v.number(),
-  updatedAt: v.number(),
-}).index('by_workout_log', ['workoutLogId'])
 
 /* -------------------- DIET LOGS -------------------- */
 
@@ -321,18 +272,15 @@ const workoutSessions = defineTable({
   exercises: v.array(
     v.object({
       exerciseName: v.string(),
-      index: v.number(),
-      completed: v.boolean(),
-      timeSpent: v.number(), // in seconds
+      noOfSets: v.number(),
       sets: v.array(
         v.object({
-          setIndex: v.number(),
-          reps: v.number(),
-          weight: v.number(),
+          reps: v.optional(v.number()),
+          weight: v.optional(v.number()),
+          notes: v.optional(v.string()),
           completed: v.boolean(),
-        })
+        }),
       ),
-      notes: v.optional(v.string()),
     })
   ),
 
@@ -343,6 +291,7 @@ const workoutSessions = defineTable({
   updatedAt: v.number(),
 })
   .index('by_user', ['userId'])
+  .index('by_user_day', ['userId', 'dayOfWeek'])
   .index('by_user_status', ['userId', 'status'])
 
 /* ======================================================= */
@@ -351,8 +300,6 @@ export default defineSchema({
   users,
   userMeta,
   userMeasurement,
-  workoutLogs,
-  workouts,
   dietLogs,
   weightLogs,
   trainingPlans,

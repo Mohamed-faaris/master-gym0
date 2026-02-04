@@ -1,11 +1,10 @@
+
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import * as React from 'react'
 import { Play, Pause, CheckCircle2, X, Clock } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { TRAINING_PLAN, type WorkoutDay } from '@/lib/mock-data'
-import { SlidingNumber } from '@/components/animate-ui/primitives/texts/sliding-number'
-import { useMutation } from 'convex/react'
+import { useMutation, useQuery } from 'convex/react'
 import { api } from '@convex/_generated/api'
 import { useAuth } from '@/components/auth/useAuth'
 import { toast } from 'sonner'
@@ -24,6 +23,18 @@ function RouteComponent() {
   const completeSession = useMutation(api.workoutSessions.completeSession)
   const cancelSession = useMutation(api.workoutSessions.cancelSession)
 
+  const userWithMeta = useQuery(
+    api.users.getUserWithMeta,
+    user ? { userId: user._id } : 'skip',
+  )
+
+  const trainingPlan = useQuery(
+    api.trainingPlans.getTrainingPlanById,
+    userWithMeta?.trainingPlanId
+      ? { trainingPlanId: userWithMeta.trainingPlanId }
+      : 'skip',
+  )
+
   // Workout session state - track individual sets
   const [isPaused, setIsPaused] = React.useState(false)
   const [completedSets, setCompletedSets] = React.useState<Set<string>>(
@@ -39,15 +50,58 @@ function RouteComponent() {
   const today = new Date()
   const dayOfWeek = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'][
     today.getDay()
-  ] as WorkoutDay['day']
-  const todaysWorkout = TRAINING_PLAN.weeks.find((w) => w.day === dayOfWeek)
+  ] as 'sun' | 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat'
+  const dayStart = new Date(today)
+  dayStart.setHours(0, 0, 0, 0)
+  const dayEnd = new Date(today)
+  dayEnd.setHours(23, 59, 59, 999)
+
+  const existingSession = useQuery(
+    api.workoutSessions.getLatestSessionForDay,
+    user
+      ? {
+          userId: user._id,
+          dayOfWeek,
+          dayStart: dayStart.getTime(),
+          dayEnd: dayEnd.getTime(),
+        }
+      : 'skip',
+  )
+  const todaysWorkout = trainingPlan?.days.find((day) => day.day === dayOfWeek)
+
+  const getSetCount = (exercise: {
+    noOfSets: number
+    sets: Array<{
+      reps?: number
+      weight?: number
+      notes?: string
+    }>
+  }) => (exercise.sets.length > 0 ? exercise.sets.length : exercise.noOfSets)
+
+  const activeExercises = existingSession?.exercises ?? todaysWorkout?.exercises ?? []
+
+  const hydrateFromSession = React.useCallback(() => {
+    if (!existingSession) return
+    const completed = new Set<string>()
+    existingSession.exercises.forEach((exercise, exIndex) => {
+      exercise.sets.forEach((set, setIndex) => {
+        if (set.completed) {
+          completed.add(`${exIndex}-${setIndex}`)
+        }
+      })
+    })
+    setCompletedSets(completed)
+    setSessionId(existingSession._id)
+    setWorkoutTime(existingSession.totalTime || 0)
+  }, [existingSession])
 
   // Calculate total sets and current set index
   const calculateSetInfo = () => {
     let totalSets = 0
     let currentSetIndex = 0
-    for (let i = 0; i < (todaysWorkout?.exercises.length || 0); i++) {
-      for (let j = 0; j < (todaysWorkout?.exercises[i].sets || 0); j++) {
+    for (let i = 0; i < activeExercises.length; i++) {
+      const setCount = getSetCount(activeExercises[i])
+      for (let j = 0; j < setCount; j++) {
         const setKey = `${i}-${j}`
         if (!completedSets.has(setKey)) {
           currentSetIndex = totalSets
@@ -61,29 +115,27 @@ function RouteComponent() {
 
   const { totalSets, currentSetIndex } = calculateSetInfo()
 
+  React.useEffect(() => {
+    hydrateFromSession()
+  }, [hydrateFromSession])
+
   // Initialize session on component mount
   React.useEffect(() => {
-    if (user && todaysWorkout && !sessionId) {
+    if (
+      user &&
+      todaysWorkout &&
+      !sessionId &&
+      userWithMeta?.trainingPlanId &&
+      !existingSession
+    ) {
       const initSession = async () => {
         try {
-          const exercises = todaysWorkout.exercises.map((ex, idx) => ({
-            exerciseName: ex.name,
-            index: idx,
-            completed: false,
-            timeSpent: 0,
-            sets: Array.from({ length: ex.sets }).map((_, setIdx) => ({
-              setIndex: setIdx,
-              reps: ex.reps,
-              weight: ex.weight,
-              completed: false,
-            })),
-            notes: ex.notes,
-          }))
-
           const id = await startSession({
             userId: user._id,
+            trainingPlanId: userWithMeta.trainingPlanId,
             dayOfWeek,
-            exercises,
+            dayStart: dayStart.getTime(),
+            dayEnd: dayEnd.getTime(),
           })
           setSessionId(id)
         } catch (error) {
@@ -93,7 +145,17 @@ function RouteComponent() {
       }
       initSession()
     }
-  }, [user, todaysWorkout, sessionId, startSession])
+  }, [
+    user,
+    todaysWorkout,
+    sessionId,
+    startSession,
+    dayOfWeek,
+    userWithMeta,
+    existingSession,
+    dayStart,
+    dayEnd,
+  ])
 
   // Timer effect for total workout time
   React.useEffect(() => {
@@ -107,25 +169,30 @@ function RouteComponent() {
 
   // Update session progress every 10 seconds
   React.useEffect(() => {
-    if (!sessionId || !todaysWorkout) return
+    if (!sessionId || activeExercises.length === 0) return
 
     const updateInterval = setInterval(async () => {
       try {
-        const exercises = todaysWorkout.exercises.map((ex, idx) => ({
-          exerciseName: ex.name,
-          index: idx,
-          completed:
-            Array.from(completedSets).filter((key) => key.startsWith(`${idx}-`))
-              .length === ex.sets,
-          timeSpent: workoutTime,
-          sets: Array.from({ length: ex.sets }).map((_, setIdx) => ({
-            setIndex: setIdx,
-            reps: ex.reps,
-            weight: ex.weight,
-            completed: completedSets.has(`${idx}-${setIdx}`),
-          })),
-          notes: ex.notes,
-        }))
+        const exercises = activeExercises.map((ex, idx) => {
+          const setCount = getSetCount(ex)
+          const sets =
+            ex.sets.length > 0
+              ? ex.sets.map((set, setIdx) => ({
+                  reps: set.reps,
+                  weight: set.weight,
+                  notes: set.notes,
+                  completed: completedSets.has(`${idx}-${setIdx}`),
+                }))
+              : Array.from({ length: setCount }).map((_, setIdx) => ({
+                  completed: completedSets.has(`${idx}-${setIdx}`),
+                }))
+
+          return {
+            exerciseName: ex.exerciseName,
+            noOfSets: ex.noOfSets,
+            sets,
+          }
+        })
 
         // Simple calorie estimation: ~5 calories per minute per exercise
         const estimatedCalories = (workoutTime / 60) * 5
@@ -142,7 +209,13 @@ function RouteComponent() {
     }, 10000) // Update every 10 seconds
 
     return () => clearInterval(updateInterval)
-  }, [sessionId, completedSets, workoutTime, todaysWorkout, updateSession])
+  }, [
+    sessionId,
+    completedSets,
+    workoutTime,
+    activeExercises,
+    updateSession,
+  ])
 
   // Redirect if no workout
   React.useEffect(() => {
@@ -221,7 +294,9 @@ function RouteComponent() {
       <div className="sticky top-0 z-10 bg-background border-b p-4">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-xl font-bold">{todaysWorkout.name}</h2>
+            <h2 className="text-xl font-bold">
+              {trainingPlan?.name || 'Workout Session'}
+            </h2>
             <div className="text-sm text-muted-foreground">
               {completedSets.size} / {totalSets} sets completed
             </div>
@@ -238,33 +313,37 @@ function RouteComponent() {
         {/* Empty space to allow first items to scroll above timer */}
         <div className="h-[50vh]" />
 
-        {todaysWorkout.exercises.map((exercise, exerciseIndex) => {
+        {activeExercises.map((exercise, exerciseIndex) => {
           const exerciseCompletedSets = Array.from(completedSets).filter(
             (key) => key.startsWith(`${exerciseIndex}-`),
           ).length
+          const setCount = getSetCount(exercise)
 
           return (
             <div key={exerciseIndex} className="space-y-2">
               {/* Exercise Group Header */}
               <div className="px-2 py-1">
-                <h3 className="font-bold text-lg">{exercise.name}</h3>
+                <h3 className="font-bold text-lg">
+                  {exercise.exerciseName}
+                </h3>
                 <div className="text-xs text-muted-foreground">
-                  {exerciseCompletedSets} / {exercise.sets} sets
-                  {exercise.reps && ` • ${exercise.reps} reps`}
-                  {exercise.weight > 0 && ` • ${exercise.weight} lbs`}
+                  {exerciseCompletedSets} / {setCount} sets
                 </div>
               </div>
 
               {/* Individual Sets */}
               <div className="space-y-2">
-                {Array.from({ length: exercise.sets }).map((_, setIndex) => {
+                {Array.from({ length: setCount }).map((_, setIndex) => {
                   const setKey = `${exerciseIndex}-${setIndex}`
                   const isCompleted = completedSets.has(setKey)
                   const isCurrent =
                     completedSets.size === currentSetIndex && !isCompleted
 
                   // Get the specific set data from the exercise
-                  const setData = exercise.sets ? exercise.sets[setIndex] : null
+                  const setData =
+                    exercise.sets && exercise.sets.length > 0
+                      ? exercise.sets[setIndex]
+                      : null
 
                   return (
                     <Card
@@ -301,11 +380,12 @@ function RouteComponent() {
                                 Set {setIndex + 1}
                               </div>
                               <div className="text-sm text-muted-foreground">
-                                {exercise.reps} reps • {exercise.weight} lbs
+                                {setData?.reps && `${setData.reps} reps`}
+                                {setData?.weight && ` • ${setData.weight} lbs`}
                               </div>
-                              {exercise.notes && (
+                              {setData?.notes && (
                                 <div className="text-xs text-muted-foreground mt-1">
-                                  {exercise.notes}
+                                  {setData.notes}
                                 </div>
                               )}
                             </div>
@@ -314,14 +394,49 @@ function RouteComponent() {
                           {isCurrent && (
                             <div className="flex gap-2">
                               {exerciseIndex ===
-                                todaysWorkout.exercises.length - 1 &&
-                              setIndex === exercise.sets - 1 ? (
+                                activeExercises.length - 1 &&
+                              setIndex === setCount - 1 ? (
                                 <Button
                                   size="sm"
                                   onClick={() => {
                                     const newCompleted = new Set(completedSets)
                                     newCompleted.add(setKey)
                                     setCompletedSets(newCompleted)
+                                    if (sessionId) {
+                                      updateSession({
+                                        sessionId,
+                                        exercises: activeExercises.map((ex, idx) => {
+                                          const setTotal = getSetCount(ex)
+                                          const sets =
+                                            ex.sets.length > 0
+                                              ? ex.sets.map((set, setIdx) => ({
+                                                  reps: set.reps,
+                                                  weight: set.weight,
+                                                  notes: set.notes,
+                                                  completed: newCompleted.has(
+                                                    `${idx}-${setIdx}`,
+                                                  ),
+                                                }))
+                                              : Array.from({ length: setTotal }).map(
+                                                  (_, setIdx) => ({
+                                                    completed: newCompleted.has(
+                                                      `${idx}-${setIdx}`,
+                                                    ),
+                                                  }),
+                                                )
+
+                                          return {
+                                            exerciseName: ex.exerciseName,
+                                            noOfSets: ex.noOfSets,
+                                            sets,
+                                          }
+                                        }),
+                                        totalTime: workoutTime,
+                                        totalCaloriesBurned: Math.round(
+                                          (workoutTime / 60) * 5,
+                                        ),
+                                      })
+                                    }
                                     endWorkout()
                                   }}
                                 >
@@ -335,6 +450,41 @@ function RouteComponent() {
                                     const newCompleted = new Set(completedSets)
                                     newCompleted.add(setKey)
                                     setCompletedSets(newCompleted)
+                                    if (sessionId) {
+                                      updateSession({
+                                        sessionId,
+                                        exercises: activeExercises.map((ex, idx) => {
+                                          const setTotal = getSetCount(ex)
+                                          const sets =
+                                            ex.sets.length > 0
+                                              ? ex.sets.map((set, setIdx) => ({
+                                                  reps: set.reps,
+                                                  weight: set.weight,
+                                                  notes: set.notes,
+                                                  completed: newCompleted.has(
+                                                    `${idx}-${setIdx}`,
+                                                  ),
+                                                }))
+                                              : Array.from({ length: setTotal }).map(
+                                                  (_, setIdx) => ({
+                                                    completed: newCompleted.has(
+                                                      `${idx}-${setIdx}`,
+                                                    ),
+                                                  }),
+                                                )
+
+                                          return {
+                                            exerciseName: ex.exerciseName,
+                                            noOfSets: ex.noOfSets,
+                                            sets,
+                                          }
+                                        }),
+                                        totalTime: workoutTime,
+                                        totalCaloriesBurned: Math.round(
+                                          (workoutTime / 60) * 5,
+                                        ),
+                                      })
+                                    }
                                   }}
                                 >
                                   <CheckCircle2 className="w-4 h-4 mr-1" />
