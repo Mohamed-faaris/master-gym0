@@ -92,11 +92,18 @@ function PatternRoute() {
           <ArrowLeft className="h-4 w-4" />
           Back to client detail
         </Link>
-        <div>
-          <h1 className="text-3xl font-semibold">Training & Diet Plans</h1>
-          <p className="text-sm text-muted-foreground">
-            Assign and manage plans for {client.name}
-          </p>
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-semibold">Training & Diet Plans</h1>
+            <p className="text-sm text-muted-foreground">
+              Assign and manage plans for {client.name}
+            </p>
+          </div>
+          <Button asChild variant="outline" size="sm">
+            <Link to={`/app/management/clients/${clientId}/pattern`}>
+              Pattern
+            </Link>
+          </Button>
         </div>
       </header>
 
