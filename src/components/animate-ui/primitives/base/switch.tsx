@@ -1,33 +1,33 @@
-'use client';
+'use client'
 
-import * as React from 'react';
-import { Switch as SwitchPrimitives } from '@base-ui-components/react/switch';
+import * as React from 'react'
+import { Switch as SwitchPrimitives } from '@base-ui-components/react/switch'
 import {
   motion,
   type TargetAndTransition,
   type VariantLabels,
   type HTMLMotionProps,
   type LegacyAnimationControls,
-} from 'motion/react';
+} from 'motion/react'
 
-import { getStrictContext } from '@/lib/get-strict-context';
-import { useControlledState } from '@/hooks/use-controlled-state';
+import { getStrictContext } from '@/lib/get-strict-context'
+import { useControlledState } from '@/hooks/use-controlled-state'
 
 type SwitchContextType = {
-  isChecked: boolean;
-  setIsChecked: SwitchProps['onCheckedChange'];
-  isPressed: boolean;
-  setIsPressed: (isPressed: boolean) => void;
-};
+  isChecked: boolean
+  setIsChecked: SwitchProps['onCheckedChange']
+  isPressed: boolean
+  setIsPressed: (isPressed: boolean) => void
+}
 
 const [SwitchProvider, useSwitch] =
-  getStrictContext<SwitchContextType>('SwitchContext');
+  getStrictContext<SwitchContextType>('SwitchContext')
 
 type SwitchProps = Omit<
   React.ComponentProps<typeof SwitchPrimitives.Root>,
   'render'
 > &
-  HTMLMotionProps<'button'>;
+  HTMLMotionProps<'button'>
 
 function Switch({
   name,
@@ -42,12 +42,12 @@ function Switch({
   id,
   ...props
 }: SwitchProps) {
-  const [isPressed, setIsPressed] = React.useState(false);
+  const [isPressed, setIsPressed] = React.useState(false)
   const [isChecked, setIsChecked] = useControlledState({
     value: checked,
     defaultValue: defaultChecked,
     onChange: onCheckedChange,
-  });
+  })
 
   return (
     <SwitchProvider
@@ -77,7 +77,7 @@ function Switch({
         }
       />
     </SwitchProvider>
-  );
+  )
 }
 
 type SwitchThumbProps = Omit<
@@ -89,15 +89,15 @@ type SwitchThumbProps = Omit<
       | TargetAndTransition
       | VariantLabels
       | boolean
-      | LegacyAnimationControls;
-  };
+      | LegacyAnimationControls
+  }
 
 function SwitchThumb({
   pressedAnimation,
   transition = { type: 'spring', stiffness: 300, damping: 25 },
   ...props
 }: SwitchThumbProps) {
-  const { isPressed } = useSwitch();
+  const { isPressed } = useSwitch()
 
   return (
     <SwitchPrimitives.Thumb
@@ -112,28 +112,28 @@ function SwitchThumb({
         />
       }
     />
-  );
+  )
 }
 
-type SwitchIconPosition = 'left' | 'right' | 'thumb';
+type SwitchIconPosition = 'left' | 'right' | 'thumb'
 
 type SwitchIconProps = HTMLMotionProps<'div'> & {
-  position: SwitchIconPosition;
-};
+  position: SwitchIconPosition
+}
 
 function SwitchIcon({
   position,
   transition = { type: 'spring', bounce: 0 },
   ...props
 }: SwitchIconProps) {
-  const { isChecked } = useSwitch();
+  const { isChecked } = useSwitch()
 
   const isAnimated = React.useMemo(() => {
-    if (position === 'right') return !isChecked;
-    if (position === 'left') return isChecked;
-    if (position === 'thumb') return true;
-    return false;
-  }, [position, isChecked]);
+    if (position === 'right') return !isChecked
+    if (position === 'left') return isChecked
+    if (position === 'thumb') return true
+    return false
+  }, [position, isChecked])
 
   return (
     <motion.div
@@ -142,7 +142,7 @@ function SwitchIcon({
       transition={transition}
       {...props}
     />
-  );
+  )
 }
 
 export {
@@ -155,4 +155,4 @@ export {
   type SwitchIconProps,
   type SwitchIconPosition,
   type SwitchContextType,
-};
+}

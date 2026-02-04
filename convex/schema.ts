@@ -1,7 +1,6 @@
 import { defineSchema, defineTable } from 'convex/server'
 import { v } from 'convex/values'
 
-
 /* ======================================================
    CONSTANTS (Single Source of Truth)
 ====================================================== */
@@ -15,7 +14,13 @@ const ROLES = [
 
 const WORKOUT_STATUSES = ['ongoing', 'completed', 'cancelled'] as const
 
-export const MEAL_TYPES = ['breakfast', 'lunch', 'dinner', 'snack', "postWorkout"] as const
+export const MEAL_TYPES = [
+  'breakfast',
+  'lunch',
+  'dinner',
+  'snack',
+  'postWorkout',
+] as const
 
 const DAYS_OF_WEEK = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'] as const
 
@@ -110,7 +115,6 @@ const ExerciseNameValidator = enumToValidator(EXERCISE_NAMES)
    TABLES
 ====================================================== */
 
-
 /* -------------------- USERS -------------------- */
 
 const users = defineTable({
@@ -166,7 +170,6 @@ const userMeasurement = defineTable({
   hip: v.optional(v.number()),
   arms: v.optional(v.number()),
   legs: v.optional(v.number()),
-
 
   timeSpanWeeks: v.optional(v.number()),
 
@@ -249,7 +252,7 @@ export const dietPlans = defineTable({
       title: v.string(),
       description: v.string(),
       calories: v.number(),
-    })
+    }),
   ),
 
   createdBy: v.id('users'),
@@ -281,7 +284,7 @@ const workoutSessions = defineTable({
           completed: v.boolean(),
         }),
       ),
-    })
+    }),
   ),
 
   totalTime: v.number(), // in seconds

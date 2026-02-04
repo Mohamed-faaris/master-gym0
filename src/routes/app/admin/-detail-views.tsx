@@ -1,10 +1,4 @@
-import {
-  ChevronRight,
-  Dumbbell,
-  Edit2,
-  Lock,
-  Phone,
-} from 'lucide-react'
+import { ChevronRight, Dumbbell, Edit2, Lock, Phone } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
@@ -224,9 +218,7 @@ export function ClientDetailView({
                   )}
                   {client.measurements.timeSpanWeeks && (
                     <div>
-                      <p className="text-xs text-muted-foreground">
-                        Time Span
-                      </p>
+                      <p className="text-xs text-muted-foreground">Time Span</p>
                       <p className="font-medium">
                         {client.measurements.timeSpanWeeks} weeks
                       </p>
@@ -236,7 +228,9 @@ export function ClientDetailView({
                 {client.measurements.updatedAt && (
                   <p className="text-xs text-muted-foreground">
                     Last updated:{' '}
-                    {new Date(client.measurements.updatedAt).toLocaleDateString()}
+                    {new Date(
+                      client.measurements.updatedAt,
+                    ).toLocaleDateString()}
                   </p>
                 )}
               </div>

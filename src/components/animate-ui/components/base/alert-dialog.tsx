@@ -1,4 +1,4 @@
-import * as React from 'react';
+import * as React from 'react'
 
 import {
   AlertDialog as AlertDialogPrimitive,
@@ -20,23 +20,23 @@ import {
   type AlertDialogTriggerProps as AlertDialogTriggerPrimitiveProps,
   type AlertDialogBackdropProps as AlertDialogBackdropPrimitiveProps,
   type AlertDialogCloseProps as AlertDialogClosePrimitiveProps,
-} from '@/components/animate-ui/primitives/base/alert-dialog';
-import { buttonVariants } from '@/components/animate-ui/components/buttons/button';
-import { cn } from '@/lib/utils';
+} from '@/components/animate-ui/primitives/base/alert-dialog'
+import { buttonVariants } from '@/components/animate-ui/components/buttons/button'
+import { cn } from '@/lib/utils'
 
-type AlertDialogProps = AlertDialogPrimitiveProps;
+type AlertDialogProps = AlertDialogPrimitiveProps
 
 function AlertDialog(props: AlertDialogProps) {
-  return <AlertDialogPrimitive {...props} />;
+  return <AlertDialogPrimitive {...props} />
 }
 
-type AlertDialogTriggerProps = AlertDialogTriggerPrimitiveProps;
+type AlertDialogTriggerProps = AlertDialogTriggerPrimitiveProps
 
 function AlertDialogTrigger(props: AlertDialogTriggerProps) {
-  return <AlertDialogTriggerPrimitive {...props} />;
+  return <AlertDialogTriggerPrimitive {...props} />
 }
 
-type AlertDialogBackdropProps = AlertDialogBackdropPrimitiveProps;
+type AlertDialogBackdropProps = AlertDialogBackdropPrimitiveProps
 
 function AlertDialogBackdrop({
   className,
@@ -47,10 +47,10 @@ function AlertDialogBackdrop({
       className={cn('fixed inset-0 z-50 bg-black/50', className)}
       {...props}
     />
-  );
+  )
 }
 
-type AlertDialogPopupProps = AlertDialogPopupPrimitiveProps;
+type AlertDialogPopupProps = AlertDialogPopupPrimitiveProps
 
 function AlertDialogPopup({ className, ...props }: AlertDialogPopupProps) {
   return (
@@ -64,10 +64,10 @@ function AlertDialogPopup({ className, ...props }: AlertDialogPopupProps) {
         {...props}
       />
     </AlertDialogPortalPrimitive>
-  );
+  )
 }
 
-type AlertDialogHeaderProps = AlertDialogHeaderPrimitiveProps;
+type AlertDialogHeaderProps = AlertDialogHeaderPrimitiveProps
 
 function AlertDialogHeader({ className, ...props }: AlertDialogHeaderProps) {
   return (
@@ -75,10 +75,10 @@ function AlertDialogHeader({ className, ...props }: AlertDialogHeaderProps) {
       className={cn('flex flex-col gap-2 text-center sm:text-left', className)}
       {...props}
     />
-  );
+  )
 }
 
-type AlertDialogFooterProps = AlertDialogFooterPrimitiveProps;
+type AlertDialogFooterProps = AlertDialogFooterPrimitiveProps
 
 function AlertDialogFooter({ className, ...props }: AlertDialogFooterProps) {
   return (
@@ -89,10 +89,10 @@ function AlertDialogFooter({ className, ...props }: AlertDialogFooterProps) {
       )}
       {...props}
     />
-  );
+  )
 }
 
-type AlertDialogTitleProps = AlertDialogTitlePrimitiveProps;
+type AlertDialogTitleProps = AlertDialogTitlePrimitiveProps
 
 function AlertDialogTitle({ className, ...props }: AlertDialogTitleProps) {
   return (
@@ -100,10 +100,10 @@ function AlertDialogTitle({ className, ...props }: AlertDialogTitleProps) {
       className={cn('text-lg font-semibold', className)}
       {...props}
     />
-  );
+  )
 }
 
-type AlertDialogDescriptionProps = AlertDialogDescriptionPrimitiveProps;
+type AlertDialogDescriptionProps = AlertDialogDescriptionPrimitiveProps
 
 function AlertDialogDescription({
   className,
@@ -114,10 +114,10 @@ function AlertDialogDescription({
       className={cn('text-muted-foreground text-sm', className)}
       {...props}
     />
-  );
+  )
 }
 
-type AlertDialogActionProps = AlertDialogClosePrimitiveProps;
+type AlertDialogActionProps = AlertDialogClosePrimitiveProps
 
 function AlertDialogAction({ className, ...props }: AlertDialogActionProps) {
   return (
@@ -125,10 +125,10 @@ function AlertDialogAction({ className, ...props }: AlertDialogActionProps) {
       className={cn(buttonVariants(), className)}
       {...props}
     />
-  );
+  )
 }
 
-type AlertDialogCancelProps = AlertDialogClosePrimitiveProps;
+type AlertDialogCancelProps = AlertDialogClosePrimitiveProps
 
 function AlertDialogCancel({ className, ...props }: AlertDialogCancelProps) {
   return (
@@ -136,7 +136,7 @@ function AlertDialogCancel({ className, ...props }: AlertDialogCancelProps) {
       className={cn(buttonVariants({ variant: 'outline' }), className)}
       {...props}
     />
-  );
+  )
 }
 
 export {
@@ -158,4 +158,4 @@ export {
   type AlertDialogDescriptionProps,
   type AlertDialogActionProps,
   type AlertDialogCancelProps,
-};
+}

@@ -1,6 +1,12 @@
 import { useEffect, useState } from 'react'
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
-import { ArrowLeft, Dumbbell, UtensilsCrossed, Trash2, Check } from 'lucide-react'
+import {
+  ArrowLeft,
+  Dumbbell,
+  UtensilsCrossed,
+  Trash2,
+  Check,
+} from 'lucide-react'
 import { useQuery, useMutation } from 'convex/react'
 
 import { useAuth } from '@/components/auth/useAuth'
@@ -297,9 +303,7 @@ function PatternRoute() {
             <UtensilsCrossed className="w-4 h-4" />
             Currently Assigned
           </CardTitle>
-          <CardDescription>
-            Active diet plans for this client
-          </CardDescription>
+          <CardDescription>Active diet plans for this client</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-2">

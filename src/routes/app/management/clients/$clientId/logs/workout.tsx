@@ -1,11 +1,6 @@
 import { useEffect } from 'react'
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
-import {
-  ArrowLeft,
-  Dumbbell,
-  Calendar,
-  Clock,
-} from 'lucide-react'
+import { ArrowLeft, Dumbbell, Calendar, Clock } from 'lucide-react'
 import { useQuery } from 'convex/react'
 
 import { useAuth } from '@/components/auth/useAuth'
@@ -100,7 +95,10 @@ function WorkoutLogsRoute() {
           </Card>
         ) : (
           workoutSessions.map((session) => (
-            <Card key={session._id} className="hover:shadow-lg transition-shadow">
+            <Card
+              key={session._id}
+              className="hover:shadow-lg transition-shadow"
+            >
               <CardContent className="pt-6">
                 <div className="space-y-3">
                   <div className="flex items-start justify-between">
@@ -111,15 +109,20 @@ function WorkoutLogsRoute() {
                       <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
                         <div className="flex items-center gap-1">
                           <Calendar className="w-4 h-4" />
-                          {new Date(session.startTime).toLocaleDateString('en-US', {
-                            month: 'short',
-                            day: 'numeric',
-                            year: 'numeric',
-                          })}
+                          {new Date(session.startTime).toLocaleDateString(
+                            'en-US',
+                            {
+                              month: 'short',
+                              day: 'numeric',
+                              year: 'numeric',
+                            },
+                          )}
                         </div>
                         <div className="flex items-center gap-1">
                           <Clock className="w-4 h-4" />
-                          {Math.round((session.totalTime || 0) / 60) || 'N/A'} min
+                          {Math.round((session.totalTime || 0) / 60) ||
+                            'N/A'}{' '}
+                          min
                         </div>
                       </div>
                     </div>
@@ -142,7 +145,8 @@ function WorkoutLogsRoute() {
                               {exercise.exerciseName || 'Exercise'}
                             </span>
                             <span className="text-muted-foreground">
-                              {(exercise.sets?.length || 0) || exercise.noOfSets} sets
+                              {exercise.sets?.length || 0 || exercise.noOfSets}{' '}
+                              sets
                             </span>
                           </div>
                         ))}

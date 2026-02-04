@@ -56,7 +56,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       <body className="dark">
         <ConvexProvider>
           <AuthProvider>
-                                                                                                    <div vaul-drawer-wrapper="" className="min-h-screen bg-background">
+            <div vaul-drawer-wrapper="" className="min-h-screen bg-background">
               {children}
             </div>
             <TanStackDevtools

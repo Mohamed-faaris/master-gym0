@@ -1,6 +1,6 @@
-'use client';
+'use client'
 
-import * as React from 'react';
+import * as React from 'react'
 import {
   ChevronLeft,
   ChevronRight,
@@ -8,11 +8,11 @@ import {
   X,
   Command,
   IdCard,
-} from 'lucide-react';
-import { SlidingNumber } from '@/components/animate-ui/primitives/texts/sliding-number';
-import { motion, type Variants, type Transition } from 'motion/react';
+} from 'lucide-react'
+import { SlidingNumber } from '@/components/animate-ui/primitives/texts/sliding-number'
+import { motion, type Variants, type Transition } from 'motion/react'
 
-const TOTAL_PAGES = 10;
+const TOTAL_PAGES = 10
 
 const BUTTON_MOTION_CONFIG = {
   initial: 'rest',
@@ -27,30 +27,30 @@ const BUTTON_MOTION_CONFIG = {
     tap: { scale: 0.95 },
   },
   transition: { type: 'spring', stiffness: 250, damping: 25 },
-} as const;
+} as const
 
 const LABEL_VARIANTS: Variants = {
   rest: { opacity: 0, x: 4 },
   hover: { opacity: 1, x: 0, visibility: 'visible' },
   tap: { opacity: 1, x: 0, visibility: 'visible' },
-};
+}
 
 const LABEL_TRANSITION: Transition = {
   type: 'spring',
   stiffness: 200,
   damping: 25,
-};
+}
 
 function ManagementBar() {
-  const [currentPage, setCurrentPage] = React.useState(1);
+  const [currentPage, setCurrentPage] = React.useState(1)
 
   const handlePrevPage = React.useCallback(() => {
-    if (currentPage > 1) setCurrentPage(currentPage - 1);
-  }, [currentPage]);
+    if (currentPage > 1) setCurrentPage(currentPage - 1)
+  }, [currentPage])
 
   const handleNextPage = React.useCallback(() => {
-    if (currentPage < TOTAL_PAGES) setCurrentPage(currentPage + 1);
-  }, [currentPage]);
+    if (currentPage < TOTAL_PAGES) setCurrentPage(currentPage + 1)
+  }, [currentPage])
 
   return (
     <div className="@container/wrapper w-full flex justify-center">
@@ -149,7 +149,7 @@ function ManagementBar() {
         </motion.button>
       </div>
     </div>
-  );
+  )
 }
 
-export { ManagementBar };
+export { ManagementBar }

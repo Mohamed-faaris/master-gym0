@@ -191,9 +191,7 @@ function SuperAdminDashboard() {
     setNewClientPin(client.pin ?? '')
     setNewClientRole(client.role ?? 'trainerManagedCustomer')
     setSelectedFormTrainerId(client.trainerId ?? '')
-    setClientAge(
-      client.meta?.age !== undefined ? String(client.meta.age) : '',
-    )
+    setClientAge(client.meta?.age !== undefined ? String(client.meta.age) : '')
     setCurrentWeight(
       client.meta?.currentWeight !== undefined
         ? String(client.meta.currentWeight)
@@ -243,20 +241,20 @@ function SuperAdminDashboard() {
     try {
       const userId =
         drawerMode === 'create'
-              ? await createUser({
-                  name: newClientName,
-                  phoneNumber: newClientPhone,
-                  pin: newClientPin,
-                  role: newClientRole as
-                    | 'trainerManagedCustomer'
-                    | 'selfManagedCustomer'
-                    | 'trainer'
-                    | 'admin',
-                  goal: 'generalFitness',
-                  trainerId: selectedFormTrainerId
-                    ? (selectedFormTrainerId as any)
-                    : undefined,
-                })
+          ? await createUser({
+              name: newClientName,
+              phoneNumber: newClientPhone,
+              pin: newClientPin,
+              role: newClientRole as
+                | 'trainerManagedCustomer'
+                | 'selfManagedCustomer'
+                | 'trainer'
+                | 'admin',
+              goal: 'generalFitness',
+              trainerId: selectedFormTrainerId
+                ? (selectedFormTrainerId as any)
+                : undefined,
+            })
           : (editingUserId as any)
 
       if (drawerMode === 'edit' && editingUserId) {
@@ -511,225 +509,234 @@ function SuperAdminDashboard() {
             <DrawerTitle>
               {drawerMode === 'create' ? 'Onboard New User' : 'Edit User'}
             </DrawerTitle>
-          <DrawerDescription>
-            {drawerMode === 'create'
-              ? 'Add a new client or trainer to the system'
-              : 'Update user details'}
-          </DrawerDescription>
-        </DrawerHeader>
+            <DrawerDescription>
+              {drawerMode === 'create'
+                ? 'Add a new client or trainer to the system'
+                : 'Update user details'}
+            </DrawerDescription>
+          </DrawerHeader>
 
           <div className="flex-1 overflow-y-auto">
             <div className="flex flex-col gap-4 p-4">
-            {/* Name */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium flex items-center gap-2">
-                <User className="w-4 h-4 text-muted-foreground" />
-                Full Name
-              </label>
-              <Input
-                placeholder="John Doe"
-                value={newClientName}
-                onChange={(e) => setNewClientName(e.target.value)}
-              />
-            </div>
-
-            {/* Phone */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium flex items-center gap-2">
-                <Phone className="w-4 h-4 text-muted-foreground" />
-                Phone Number
-              </label>
-              <Input
-                placeholder="+1234567890"
-                value={newClientPhone}
-                onChange={(e) => setNewClientPhone(e.target.value)}
-              />
-            </div>
-
-            {/* PIN */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium flex items-center gap-2">
-                <Lock className="w-4 h-4 text-muted-foreground" />
-                PIN Code
-              </label>
-              <Input
-                placeholder="1234"
-                type="password"
-                maxLength={6}
-                value={newClientPin}
-                onChange={(e) => setNewClientPin(e.target.value)}
-              />
-            </div>
-
-            {/* Role */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Role</label>
-              <Select value={newClientRole} onValueChange={setNewClientRole}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select role" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="trainerManagedCustomer">
-                    Client (Trainer Managed)
-                  </SelectItem>
-                  <SelectItem value="selfManagedCustomer">
-                    Client (Self Managed)
-                  </SelectItem>
-                  <SelectItem value="trainer">Trainer</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Assign Trainer (for clients) */}
-            {newClientRole === 'trainerManagedCustomer' && (
+              {/* Name */}
               <div className="space-y-2">
                 <label className="text-sm font-medium flex items-center gap-2">
-                  <Dumbbell className="w-4 h-4 text-muted-foreground" />
-                  Assign Trainer
+                  <User className="w-4 h-4 text-muted-foreground" />
+                  Full Name
                 </label>
-                <Select
-                  value={selectedFormTrainerId}
-                  onValueChange={setSelectedFormTrainerId}
-                >
+                <Input
+                  placeholder="John Doe"
+                  value={newClientName}
+                  onChange={(e) => setNewClientName(e.target.value)}
+                />
+              </div>
+
+              {/* Phone */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium flex items-center gap-2">
+                  <Phone className="w-4 h-4 text-muted-foreground" />
+                  Phone Number
+                </label>
+                <Input
+                  placeholder="+1234567890"
+                  value={newClientPhone}
+                  onChange={(e) => setNewClientPhone(e.target.value)}
+                />
+              </div>
+
+              {/* PIN */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium flex items-center gap-2">
+                  <Lock className="w-4 h-4 text-muted-foreground" />
+                  PIN Code
+                </label>
+                <Input
+                  placeholder="1234"
+                  type="password"
+                  maxLength={6}
+                  value={newClientPin}
+                  onChange={(e) => setNewClientPin(e.target.value)}
+                />
+              </div>
+
+              {/* Role */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Role</label>
+                <Select value={newClientRole} onValueChange={setNewClientRole}>
                   <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select trainer" />
+                    <SelectValue placeholder="Select role" />
                   </SelectTrigger>
                   <SelectContent>
-                    {trainers.map((trainer) => (
-                      <SelectItem key={trainer._id} value={trainer._id}>
-                        {trainer.name}
-                      </SelectItem>
-                    ))}
+                    <SelectItem value="trainerManagedCustomer">
+                      Client (Trainer Managed)
+                    </SelectItem>
+                    <SelectItem value="selfManagedCustomer">
+                      Client (Self Managed)
+                    </SelectItem>
+                    <SelectItem value="trainer">Trainer</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
-            )}
 
-            {(newClientRole === 'trainerManagedCustomer' ||
-              newClientRole === 'selfManagedCustomer') && (
-              <>
+              {/* Assign Trainer (for clients) */}
+              {newClientRole === 'trainerManagedCustomer' && (
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Age</label>
-                  <Input
-                    type="number"
-                    placeholder="25"
-                    value={clientAge}
-                    onChange={(e) => setClientAge(e.target.value)}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">
-                    Current Weight (kg)
+                  <label className="text-sm font-medium flex items-center gap-2">
+                    <Dumbbell className="w-4 h-4 text-muted-foreground" />
+                    Assign Trainer
                   </label>
-                  <Input
-                    type="number"
-                    placeholder="70"
-                    value={currentWeight}
-                    onChange={(e) => setCurrentWeight(e.target.value)}
-                  />
+                  <Select
+                    value={selectedFormTrainerId}
+                    onValueChange={setSelectedFormTrainerId}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select trainer" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {trainers.map((trainer) => (
+                        <SelectItem key={trainer._id} value={trainer._id}>
+                          {trainer.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
+              )}
 
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">
-                    Target Weight (kg)
-                  </label>
-                  <Input
-                    type="number"
-                    placeholder="65"
-                    value={targetWeight}
-                    onChange={(e) => setTargetWeight(e.target.value)}
-                  />
-                </div>
-              </>
-            )}
+              {(newClientRole === 'trainerManagedCustomer' ||
+                newClientRole === 'selfManagedCustomer') && (
+                <>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Age</label>
+                    <Input
+                      type="number"
+                      placeholder="25"
+                      value={clientAge}
+                      onChange={(e) => setClientAge(e.target.value)}
+                    />
+                  </div>
 
-            {newClientRole === 'trainerManagedCustomer' && (
-              <>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Chest (cm)</label>
-                  <Input
-                    type="number"
-                    placeholder="100"
-                    value={measurements.chest}
-                    onChange={(e) =>
-                      setMeasurements({
-                        ...measurements,
-                        chest: e.target.value,
-                      })
-                    }
-                  />
-                </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">
+                      Current Weight (kg)
+                    </label>
+                    <Input
+                      type="number"
+                      placeholder="70"
+                      value={currentWeight}
+                      onChange={(e) => setCurrentWeight(e.target.value)}
+                    />
+                  </div>
 
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Shoulder (cm)</label>
-                  <Input
-                    type="number"
-                    placeholder="110"
-                    value={measurements.shoulder}
-                    onChange={(e) =>
-                      setMeasurements({
-                        ...measurements,
-                        shoulder: e.target.value,
-                      })
-                    }
-                  />
-                </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">
+                      Target Weight (kg)
+                    </label>
+                    <Input
+                      type="number"
+                      placeholder="65"
+                      value={targetWeight}
+                      onChange={(e) => setTargetWeight(e.target.value)}
+                    />
+                  </div>
+                </>
+              )}
 
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Hip (cm)</label>
-                  <Input
-                    type="number"
-                    placeholder="95"
-                    value={measurements.hip}
-                    onChange={(e) =>
-                      setMeasurements({ ...measurements, hip: e.target.value })
-                    }
-                  />
-                </div>
+              {newClientRole === 'trainerManagedCustomer' && (
+                <>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Chest (cm)</label>
+                    <Input
+                      type="number"
+                      placeholder="100"
+                      value={measurements.chest}
+                      onChange={(e) =>
+                        setMeasurements({
+                          ...measurements,
+                          chest: e.target.value,
+                        })
+                      }
+                    />
+                  </div>
 
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Arms (cm)</label>
-                  <Input
-                    type="number"
-                    placeholder="35"
-                    value={measurements.arms}
-                    onChange={(e) =>
-                      setMeasurements({ ...measurements, arms: e.target.value })
-                    }
-                  />
-                </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Shoulder (cm)</label>
+                    <Input
+                      type="number"
+                      placeholder="110"
+                      value={measurements.shoulder}
+                      onChange={(e) =>
+                        setMeasurements({
+                          ...measurements,
+                          shoulder: e.target.value,
+                        })
+                      }
+                    />
+                  </div>
 
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Legs (cm)</label>
-                  <Input
-                    type="number"
-                    placeholder="55"
-                    value={measurements.legs}
-                    onChange={(e) =>
-                      setMeasurements({ ...measurements, legs: e.target.value })
-                    }
-                  />
-                </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Hip (cm)</label>
+                    <Input
+                      type="number"
+                      placeholder="95"
+                      value={measurements.hip}
+                      onChange={(e) =>
+                        setMeasurements({
+                          ...measurements,
+                          hip: e.target.value,
+                        })
+                      }
+                    />
+                  </div>
 
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">
-                    Time Span (weeks)
-                  </label>
-                  <Input
-                    type="number"
-                    placeholder="12"
-                    value={measurements.timeSpanWeeks}
-                    onChange={(e) =>
-                      setMeasurements({
-                        ...measurements,
-                        timeSpanWeeks: e.target.value,
-                      })
-                    }
-                  />
-                </div>
-              </>
-            )}
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Arms (cm)</label>
+                    <Input
+                      type="number"
+                      placeholder="35"
+                      value={measurements.arms}
+                      onChange={(e) =>
+                        setMeasurements({
+                          ...measurements,
+                          arms: e.target.value,
+                        })
+                      }
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Legs (cm)</label>
+                    <Input
+                      type="number"
+                      placeholder="55"
+                      value={measurements.legs}
+                      onChange={(e) =>
+                        setMeasurements({
+                          ...measurements,
+                          legs: e.target.value,
+                        })
+                      }
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">
+                      Time Span (weeks)
+                    </label>
+                    <Input
+                      type="number"
+                      placeholder="12"
+                      value={measurements.timeSpanWeeks}
+                      onChange={(e) =>
+                        setMeasurements({
+                          ...measurements,
+                          timeSpanWeeks: e.target.value,
+                        })
+                      }
+                    />
+                  </div>
+                </>
+              )}
             </div>
           </div>
 

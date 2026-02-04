@@ -1,4 +1,3 @@
-
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import * as React from 'react'
 import { Play, Pause, CheckCircle2, X, Clock } from 'lucide-react'
@@ -78,7 +77,8 @@ function RouteComponent() {
     }>
   }) => (exercise.sets.length > 0 ? exercise.sets.length : exercise.noOfSets)
 
-  const activeExercises = existingSession?.exercises ?? todaysWorkout?.exercises ?? []
+  const activeExercises =
+    existingSession?.exercises ?? todaysWorkout?.exercises ?? []
 
   const hydrateFromSession = React.useCallback(() => {
     if (!existingSession) return
@@ -209,13 +209,7 @@ function RouteComponent() {
     }, 10000) // Update every 10 seconds
 
     return () => clearInterval(updateInterval)
-  }, [
-    sessionId,
-    completedSets,
-    workoutTime,
-    activeExercises,
-    updateSession,
-  ])
+  }, [sessionId, completedSets, workoutTime, activeExercises, updateSession])
 
   // Redirect if no workout
   React.useEffect(() => {
@@ -323,9 +317,7 @@ function RouteComponent() {
             <div key={exerciseIndex} className="space-y-2">
               {/* Exercise Group Header */}
               <div className="px-2 py-1">
-                <h3 className="font-bold text-lg">
-                  {exercise.exerciseName}
-                </h3>
+                <h3 className="font-bold text-lg">{exercise.exerciseName}</h3>
                 <div className="text-xs text-muted-foreground">
                   {exerciseCompletedSets} / {setCount} sets
                 </div>
@@ -393,8 +385,7 @@ function RouteComponent() {
 
                           {isCurrent && (
                             <div className="flex gap-2">
-                              {exerciseIndex ===
-                                activeExercises.length - 1 &&
+                              {exerciseIndex === activeExercises.length - 1 &&
                               setIndex === setCount - 1 ? (
                                 <Button
                                   size="sm"
@@ -405,32 +396,37 @@ function RouteComponent() {
                                     if (sessionId) {
                                       updateSession({
                                         sessionId,
-                                        exercises: activeExercises.map((ex, idx) => {
-                                          const setTotal = getSetCount(ex)
-                                          const sets =
-                                            ex.sets.length > 0
-                                              ? ex.sets.map((set, setIdx) => ({
-                                                  reps: set.reps,
-                                                  weight: set.weight,
-                                                  notes: set.notes,
-                                                  completed: newCompleted.has(
-                                                    `${idx}-${setIdx}`,
-                                                  ),
-                                                }))
-                                              : Array.from({ length: setTotal }).map(
-                                                  (_, setIdx) => ({
+                                        exercises: activeExercises.map(
+                                          (ex, idx) => {
+                                            const setTotal = getSetCount(ex)
+                                            const sets =
+                                              ex.sets.length > 0
+                                                ? ex.sets.map(
+                                                    (set, setIdx) => ({
+                                                      reps: set.reps,
+                                                      weight: set.weight,
+                                                      notes: set.notes,
+                                                      completed:
+                                                        newCompleted.has(
+                                                          `${idx}-${setIdx}`,
+                                                        ),
+                                                    }),
+                                                  )
+                                                : Array.from({
+                                                    length: setTotal,
+                                                  }).map((_, setIdx) => ({
                                                     completed: newCompleted.has(
                                                       `${idx}-${setIdx}`,
                                                     ),
-                                                  }),
-                                                )
+                                                  }))
 
-                                          return {
-                                            exerciseName: ex.exerciseName,
-                                            noOfSets: ex.noOfSets,
-                                            sets,
-                                          }
-                                        }),
+                                            return {
+                                              exerciseName: ex.exerciseName,
+                                              noOfSets: ex.noOfSets,
+                                              sets,
+                                            }
+                                          },
+                                        ),
                                         totalTime: workoutTime,
                                         totalCaloriesBurned: Math.round(
                                           (workoutTime / 60) * 5,
@@ -453,32 +449,37 @@ function RouteComponent() {
                                     if (sessionId) {
                                       updateSession({
                                         sessionId,
-                                        exercises: activeExercises.map((ex, idx) => {
-                                          const setTotal = getSetCount(ex)
-                                          const sets =
-                                            ex.sets.length > 0
-                                              ? ex.sets.map((set, setIdx) => ({
-                                                  reps: set.reps,
-                                                  weight: set.weight,
-                                                  notes: set.notes,
-                                                  completed: newCompleted.has(
-                                                    `${idx}-${setIdx}`,
-                                                  ),
-                                                }))
-                                              : Array.from({ length: setTotal }).map(
-                                                  (_, setIdx) => ({
+                                        exercises: activeExercises.map(
+                                          (ex, idx) => {
+                                            const setTotal = getSetCount(ex)
+                                            const sets =
+                                              ex.sets.length > 0
+                                                ? ex.sets.map(
+                                                    (set, setIdx) => ({
+                                                      reps: set.reps,
+                                                      weight: set.weight,
+                                                      notes: set.notes,
+                                                      completed:
+                                                        newCompleted.has(
+                                                          `${idx}-${setIdx}`,
+                                                        ),
+                                                    }),
+                                                  )
+                                                : Array.from({
+                                                    length: setTotal,
+                                                  }).map((_, setIdx) => ({
                                                     completed: newCompleted.has(
                                                       `${idx}-${setIdx}`,
                                                     ),
-                                                  }),
-                                                )
+                                                  }))
 
-                                          return {
-                                            exerciseName: ex.exerciseName,
-                                            noOfSets: ex.noOfSets,
-                                            sets,
-                                          }
-                                        }),
+                                            return {
+                                              exerciseName: ex.exerciseName,
+                                              noOfSets: ex.noOfSets,
+                                              sets,
+                                            }
+                                          },
+                                        ),
                                         totalTime: workoutTime,
                                         totalCaloriesBurned: Math.round(
                                           (workoutTime / 60) * 5,
