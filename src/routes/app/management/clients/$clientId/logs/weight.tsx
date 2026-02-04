@@ -115,7 +115,7 @@ function WeightLogsRoute() {
 
       {/* Weight Stats */}
       {weightLogs && weightLogs.length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-3 gap-4">
           <Card>
             <CardContent className="pt-6">
               <div className="space-y-2">
@@ -239,7 +239,9 @@ function WeightLogsRoute() {
               <CardTitle>Weight Log History</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              {[...weightLogs].reverse().map((log, index) => (
+              {[...weightLogs].reverse().map((log, index, reversedLogs) => {
+                const previousLog = reversedLogs[index + 1]
+                return (
                 <div
                   key={log._id}
                   className="flex items-center justify-between p-3 rounded-lg border border-border hover:bg-muted/50 transition-colors"
@@ -261,44 +263,27 @@ function WeightLogsRoute() {
                       </p>
                     </div>
                   </div>
-                  {index > 0 && (
+                  {previousLog && (
                     <div className="flex items-center gap-1 ml-4">
-                      {weightLogs.length - 1 - index < weightLogs.length ? (
+                      {log.weight > previousLog.weight ? (
                         <>
-                          {log.weight >
-                          weightLogs[weightLogs.length - 2 - index].weight ? (
-                            <>
-                              <TrendingUp className="w-4 h-4 text-red-500" />
-                              <span className="text-xs text-red-500">
-                                +
-                                {(
-                                  log.weight -
-                                  weightLogs[weightLogs.length - 2 - index]
-                                    .weight
-                                ).toFixed(1)}{' '}
-                                kg
-                              </span>
-                            </>
-                          ) : log.weight <
-                            weightLogs[weightLogs.length - 2 - index].weight ? (
-                            <>
-                              <TrendingDown className="w-4 h-4 text-green-500" />
-                              <span className="text-xs text-green-500">
-                                {(
-                                  log.weight -
-                                  weightLogs[weightLogs.length - 2 - index]
-                                    .weight
-                                ).toFixed(1)}{' '}
-                                kg
-                              </span>
-                            </>
-                          ) : null}
+                          <TrendingUp className="w-4 h-4 text-red-500" />
+                          <span className="text-xs text-red-500">
+                            +{(log.weight - previousLog.weight).toFixed(1)} kg
+                          </span>
+                        </>
+                      ) : log.weight < previousLog.weight ? (
+                        <>
+                          <TrendingDown className="w-4 h-4 text-green-500" />
+                          <span className="text-xs text-green-500">
+                            {(log.weight - previousLog.weight).toFixed(1)} kg
+                          </span>
                         </>
                       ) : null}
                     </div>
                   )}
                 </div>
-              ))}
+              )})}
             </CardContent>
           </Card>
         </>

@@ -9,10 +9,10 @@ import { useAuth } from '@/components/auth/useAuth'
 import { toast } from 'sonner'
 
 export const Route = createFileRoute('/app/_user/workout-session')({
-  component: RouteComponent,
+  component: WorkoutSessionRouteComponent,
 })
 
-function RouteComponent() {
+export function WorkoutSessionRouteComponent() {
   const navigate = useNavigate()
   const { user } = useAuth()
 
@@ -60,483 +60,213 @@ function RouteComponent() {
     user
       ? {
           userId: user._id,
-          dayOfWeek,
-          dayStart: dayStart.getTime(),
-          dayEnd: dayEnd.getTime(),
+          startTime: dayStart.getTime(),
+          endTime: dayEnd.getTime(),
         }
       : 'skip',
   )
-  const todaysWorkout = trainingPlan?.days.find((day) => day.day === dayOfWeek)
 
-  const getSetCount = (exercise: {
-    noOfSets: number
-    sets: Array<{
-      reps?: number
-      weight?: number
-      notes?: string
-    }>
-  }) => (exercise.sets.length > 0 ? exercise.sets.length : exercise.noOfSets)
+  const todaysWorkout = useQuery(
+    api.trainingPlans.getWorkoutForDay,
+    userWithMeta?.trainingPlanId
+      ? { trainingPlanId: userWithMeta.trainingPlanId, day: dayOfWeek }
+      : 'skip',
+  )
 
-  const activeExercises =
-    existingSession?.exercises ?? todaysWorkout?.exercises ?? []
-
-  const hydrateFromSession = React.useCallback(() => {
-    if (!existingSession) return
-    const completed = new Set<string>()
-    existingSession.exercises.forEach((exercise, exIndex) => {
-      exercise.sets.forEach((set, setIndex) => {
-        if (set.completed) {
-          completed.add(`${exIndex}-${setIndex}`)
-        }
-      })
-    })
-    setCompletedSets(completed)
-    setSessionId(existingSession._id)
-    setWorkoutTime(existingSession.totalTime || 0)
+  React.useEffect(() => {
+    if (existingSession) {
+      setSessionId(existingSession._id)
+      setWorkoutTime(existingSession.totalTime || 0)
+      setCompletedSets(new Set(existingSession.completedSets || []))
+      if (existingSession.status === 'completed') {
+        setIsPaused(true)
+      }
+    }
   }, [existingSession])
 
-  // Calculate total sets and current set index
-  const calculateSetInfo = () => {
-    let totalSets = 0
-    let currentSetIndex = 0
-    for (let i = 0; i < activeExercises.length; i++) {
-      const setCount = getSetCount(activeExercises[i])
-      for (let j = 0; j < setCount; j++) {
-        const setKey = `${i}-${j}`
-        if (!completedSets.has(setKey)) {
-          currentSetIndex = totalSets
-          return { totalSets, currentSetIndex }
-        }
-        totalSets++
-      }
-    }
-    return { totalSets, currentSetIndex }
-  }
-
-  const { totalSets, currentSetIndex } = calculateSetInfo()
-
   React.useEffect(() => {
-    hydrateFromSession()
-  }, [hydrateFromSession])
+    let timer: NodeJS.Timeout | undefined
 
-  // Initialize session on component mount
-  React.useEffect(() => {
-    if (
-      user &&
-      todaysWorkout &&
-      !sessionId &&
-      userWithMeta?.trainingPlanId &&
-      !existingSession
-    ) {
-      const initSession = async () => {
-        try {
-          const id = await startSession({
-            userId: user._id,
-            trainingPlanId: userWithMeta.trainingPlanId,
-            dayOfWeek,
-            dayStart: dayStart.getTime(),
-            dayEnd: dayEnd.getTime(),
-          })
-          setSessionId(id)
-        } catch (error) {
-          toast.error('Failed to start workout session')
-          console.error(error)
-        }
-      }
-      initSession()
-    }
-  }, [
-    user,
-    todaysWorkout,
-    sessionId,
-    startSession,
-    dayOfWeek,
-    userWithMeta,
-    existingSession,
-    dayStart,
-    dayEnd,
-  ])
-
-  // Timer effect for total workout time
-  React.useEffect(() => {
-    if (!isPaused) {
-      const interval = setInterval(() => {
+    if (sessionId && !isPaused) {
+      timer = setInterval(() => {
         setWorkoutTime((prev) => prev + 1)
       }, 1000)
-      return () => clearInterval(interval)
     }
-  }, [isPaused])
 
-  // Update session progress every 10 seconds
-  React.useEffect(() => {
-    if (!sessionId || activeExercises.length === 0) return
-
-    const updateInterval = setInterval(async () => {
-      try {
-        const exercises = activeExercises.map((ex, idx) => {
-          const setCount = getSetCount(ex)
-          const sets =
-            ex.sets.length > 0
-              ? ex.sets.map((set, setIdx) => ({
-                  reps: set.reps,
-                  weight: set.weight,
-                  notes: set.notes,
-                  completed: completedSets.has(`${idx}-${setIdx}`),
-                }))
-              : Array.from({ length: setCount }).map((_, setIdx) => ({
-                  completed: completedSets.has(`${idx}-${setIdx}`),
-                }))
-
-          return {
-            exerciseName: ex.exerciseName,
-            noOfSets: ex.noOfSets,
-            sets,
-          }
-        })
-
-        // Simple calorie estimation: ~5 calories per minute per exercise
-        const estimatedCalories = (workoutTime / 60) * 5
-
-        await updateSession({
-          sessionId,
-          exercises,
-          totalTime: workoutTime,
-          totalCaloriesBurned: Math.round(estimatedCalories),
-        })
-      } catch (error) {
-        console.error('Failed to update session:', error)
-      }
-    }, 10000) // Update every 10 seconds
-
-    return () => clearInterval(updateInterval)
-  }, [sessionId, completedSets, workoutTime, activeExercises, updateSession])
-
-  // Redirect if no workout
-  React.useEffect(() => {
-    if (!todaysWorkout || todaysWorkout.exercises.length === 0) {
-      navigate({ to: '/app/workouts' })
+    return () => {
+      if (timer) clearInterval(timer)
     }
-  }, [todaysWorkout, navigate])
-
-  // Auto-scroll to current set when it changes
-  React.useEffect(() => {
-    if (
-      currentExerciseRef.current &&
-      document.body.contains(currentExerciseRef.current)
-    ) {
-      try {
-        currentExerciseRef.current.scrollIntoView({
-          behavior: 'smooth',
-          block: 'center',
-        })
-      } catch (error) {
-        // Silently handle scroll errors
-        console.debug('Scroll error:', error)
-      }
-    }
-  }, [completedSets])
-
-  const togglePause = () => {
-    setIsPaused(!isPaused)
-  }
-
-  const endWorkout = async () => {
-    if (sessionId) {
-      try {
-        // Simple calorie estimation
-        const estimatedCalories = (workoutTime / 60) * 5
-        await completeSession({
-          sessionId,
-          totalTime: workoutTime,
-          totalCaloriesBurned: Math.round(estimatedCalories),
-        })
-        toast.success('Workout completed!')
-      } catch (error) {
-        toast.error('Failed to save workout')
-        console.error(error)
-      }
-    }
-    navigate({ to: '/app/workouts' })
-  }
-
-  const cancelWorkout = async () => {
-    if (sessionId) {
-      try {
-        await cancelSession({ sessionId })
-        toast.success('Workout cancelled')
-      } catch (error) {
-        toast.error('Failed to cancel workout')
-        console.error(error)
-      }
-    }
-    navigate({ to: '/app/workouts' })
-  }
+  }, [sessionId, isPaused])
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60)
     const secs = seconds % 60
-    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
+    return `${mins}:${secs.toString().padStart(2, '0')}`
+  }
+
+  const handleStartSession = async () => {
+    if (!user || !trainingPlan) return
+
+    try {
+      const session = await startSession({
+        userId: user._id,
+        trainingPlanId: trainingPlan._id,
+      })
+      setSessionId(session)
+      toast.success('Workout session started')
+    } catch (error) {
+      console.error(error)
+      toast.error('Failed to start session')
+    }
+  }
+
+  const handleToggleSet = async (exerciseIndex: number, setNumber: number) => {
+    if (!sessionId) return
+
+    const key = `${exerciseIndex}-${setNumber}`
+    const updatedSets = new Set(completedSets)
+    if (updatedSets.has(key)) {
+      updatedSets.delete(key)
+    } else {
+      updatedSets.add(key)
+    }
+
+    setCompletedSets(updatedSets)
+
+    try {
+      await updateSession({
+        sessionId,
+        completedSets: Array.from(updatedSets),
+        totalTime: workoutTime,
+      })
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
+  const handleCompleteSession = async () => {
+    if (!sessionId) return
+
+    try {
+      await completeSession({
+        sessionId,
+        totalTime: workoutTime,
+        completedSets: Array.from(completedSets),
+      })
+      toast.success('Workout completed!')
+      navigate({ to: '/app' })
+    } catch (error) {
+      console.error(error)
+      toast.error('Failed to complete workout')
+    }
+  }
+
+  const handleCancelSession = async () => {
+    if (!sessionId) return
+
+    try {
+      await cancelSession({ sessionId })
+      toast.success('Workout session canceled')
+      navigate({ to: '/app' })
+    } catch (error) {
+      console.error(error)
+      toast.error('Failed to cancel workout')
+    }
   }
 
   if (!todaysWorkout) {
-    return null
+    return (
+      <div className="p-4">
+        <Card>
+          <CardContent className="pt-6 text-center">
+            <p className="text-muted-foreground">No workout scheduled today.</p>
+          </CardContent>
+        </Card>
+      </div>
+    )
   }
 
   return (
-    <div className="min-h-screen bg-background pb-48">
-      {/* Simple Header */}
-      <div className="sticky top-0 z-10 bg-background border-b p-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-xl font-bold">
-              {trainingPlan?.name || 'Workout Session'}
-            </h2>
-            <div className="text-sm text-muted-foreground">
-              {completedSets.size} / {totalSets} sets completed
-            </div>
-          </div>
-          <Button variant="outline" size="sm" onClick={cancelWorkout}>
-            <X className="w-4 h-4 mr-2" />
-            End
-          </Button>
+    <div className="p-4 pb-20 space-y-6 max-w-4xl mx-auto">
+      <header className="space-y-2">
+        <h1 className="text-2xl font-semibold">{todaysWorkout.name}</h1>
+        <div className="flex items-center gap-3 text-sm text-muted-foreground">
+          <Clock className="w-4 h-4" />
+          {formatTime(workoutTime)} elapsed
         </div>
+      </header>
+
+      <div className="flex items-center gap-3">
+        {!sessionId ? (
+          <Button onClick={handleStartSession} className="gap-2">
+            <Play className="w-4 h-4" />
+            Start Session
+          </Button>
+        ) : (
+          <>
+            <Button
+              onClick={() => setIsPaused((prev) => !prev)}
+              variant="outline"
+              className="gap-2"
+            >
+              {isPaused ? <Play className="w-4 h-4" /> : <Pause className="w-4 h-4" />}
+              {isPaused ? 'Resume' : 'Pause'}
+            </Button>
+            <Button
+              onClick={handleCompleteSession}
+              className="gap-2"
+              variant="default"
+            >
+              <CheckCircle2 className="w-4 h-4" />
+              Complete
+            </Button>
+            <Button
+              onClick={handleCancelSession}
+              className="gap-2"
+              variant="destructive"
+            >
+              <X className="w-4 h-4" />
+              Cancel
+            </Button>
+          </>
+        )}
       </div>
 
-      {/* Exercise List - Grouped by Exercise with Individual Sets */}
-      <div className="p-4 space-y-6">
-        {/* Empty space to allow first items to scroll above timer */}
-        <div className="h-[50vh]" />
-
-        {activeExercises.map((exercise, exerciseIndex) => {
-          const exerciseCompletedSets = Array.from(completedSets).filter(
-            (key) => key.startsWith(`${exerciseIndex}-`),
-          ).length
-          const setCount = getSetCount(exercise)
-
-          return (
-            <div key={exerciseIndex} className="space-y-2">
-              {/* Exercise Group Header */}
-              <div className="px-2 py-1">
-                <h3 className="font-bold text-lg">{exercise.exerciseName}</h3>
-                <div className="text-xs text-muted-foreground">
-                  {exerciseCompletedSets} / {setCount} sets
-                </div>
+      <div className="space-y-4">
+        {todaysWorkout.exercises.map((exercise, exerciseIndex) => (
+          <Card key={exercise.name}>
+            <CardContent className="pt-6 space-y-4">
+              <div className="space-y-1">
+                <h2 className="text-lg font-semibold">{exercise.name}</h2>
+                <p className="text-sm text-muted-foreground">
+                  {exercise.sets} sets · {exercise.reps} reps
+                </p>
               </div>
 
-              {/* Individual Sets */}
-              <div className="space-y-2">
-                {Array.from({ length: setCount }).map((_, setIndex) => {
-                  const setKey = `${exerciseIndex}-${setIndex}`
-                  const isCompleted = completedSets.has(setKey)
-                  const isCurrent =
-                    completedSets.size === currentSetIndex && !isCompleted
-
-                  // Get the specific set data from the exercise
-                  const setData =
-                    exercise.sets && exercise.sets.length > 0
-                      ? exercise.sets[setIndex]
-                      : null
-
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                {Array.from({ length: exercise.sets }).map((_, setIndex) => {
+                  const key = `${exerciseIndex}-${setIndex + 1}`
+                  const isCompleted = completedSets.has(key)
                   return (
-                    <Card
-                      key={setKey}
-                      ref={isCurrent ? currentExerciseRef : null}
-                      className={`transition-all ${
-                        isCurrent
-                          ? 'border-primary shadow-lg scale-[1.01]'
-                          : isCompleted
-                            ? 'border-green-500 bg-green-500/5'
-                            : 'border-border'
-                      }`}
+                    <Button
+                      key={key}
+                      variant={isCompleted ? 'default' : 'outline'}
+                      onClick={() => handleToggleSet(exerciseIndex, setIndex + 1)}
+                      className="text-xs"
+                      ref={
+                        exerciseIndex === 0 && setIndex === 0
+                          ? currentExerciseRef
+                          : undefined
+                      }
                     >
-                      <CardContent className="p-3">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-3 flex-1">
-                            <div
-                              className={`w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 text-sm font-bold ${
-                                isCompleted
-                                  ? 'bg-green-500 text-white'
-                                  : isCurrent
-                                    ? 'bg-primary text-primary-foreground'
-                                    : 'bg-muted text-muted-foreground'
-                              }`}
-                            >
-                              {isCompleted ? (
-                                <CheckCircle2 className="w-5 h-5" />
-                              ) : (
-                                setIndex + 1
-                              )}
-                            </div>
-                            <div className="flex-1">
-                              <div className="font-semibold">
-                                Set {setIndex + 1}
-                              </div>
-                              <div className="text-sm text-muted-foreground">
-                                {setData?.reps && `${setData.reps} reps`}
-                                {setData?.weight && ` • ${setData.weight} lbs`}
-                              </div>
-                              {setData?.notes && (
-                                <div className="text-xs text-muted-foreground mt-1">
-                                  {setData.notes}
-                                </div>
-                              )}
-                            </div>
-                          </div>
-
-                          {isCurrent && (
-                            <div className="flex gap-2">
-                              {exerciseIndex === activeExercises.length - 1 &&
-                              setIndex === setCount - 1 ? (
-                                <Button
-                                  size="sm"
-                                  onClick={() => {
-                                    const newCompleted = new Set(completedSets)
-                                    newCompleted.add(setKey)
-                                    setCompletedSets(newCompleted)
-                                    if (sessionId) {
-                                      updateSession({
-                                        sessionId,
-                                        exercises: activeExercises.map(
-                                          (ex, idx) => {
-                                            const setTotal = getSetCount(ex)
-                                            const sets =
-                                              ex.sets.length > 0
-                                                ? ex.sets.map(
-                                                    (set, setIdx) => ({
-                                                      reps: set.reps,
-                                                      weight: set.weight,
-                                                      notes: set.notes,
-                                                      completed:
-                                                        newCompleted.has(
-                                                          `${idx}-${setIdx}`,
-                                                        ),
-                                                    }),
-                                                  )
-                                                : Array.from({
-                                                    length: setTotal,
-                                                  }).map((_, setIdx) => ({
-                                                    completed: newCompleted.has(
-                                                      `${idx}-${setIdx}`,
-                                                    ),
-                                                  }))
-
-                                            return {
-                                              exerciseName: ex.exerciseName,
-                                              noOfSets: ex.noOfSets,
-                                              sets,
-                                            }
-                                          },
-                                        ),
-                                        totalTime: workoutTime,
-                                        totalCaloriesBurned: Math.round(
-                                          (workoutTime / 60) * 5,
-                                        ),
-                                      })
-                                    }
-                                    endWorkout()
-                                  }}
-                                >
-                                  <CheckCircle2 className="w-4 h-4 mr-1" />
-                                  End
-                                </Button>
-                              ) : (
-                                <Button
-                                  size="sm"
-                                  onClick={() => {
-                                    const newCompleted = new Set(completedSets)
-                                    newCompleted.add(setKey)
-                                    setCompletedSets(newCompleted)
-                                    if (sessionId) {
-                                      updateSession({
-                                        sessionId,
-                                        exercises: activeExercises.map(
-                                          (ex, idx) => {
-                                            const setTotal = getSetCount(ex)
-                                            const sets =
-                                              ex.sets.length > 0
-                                                ? ex.sets.map(
-                                                    (set, setIdx) => ({
-                                                      reps: set.reps,
-                                                      weight: set.weight,
-                                                      notes: set.notes,
-                                                      completed:
-                                                        newCompleted.has(
-                                                          `${idx}-${setIdx}`,
-                                                        ),
-                                                    }),
-                                                  )
-                                                : Array.from({
-                                                    length: setTotal,
-                                                  }).map((_, setIdx) => ({
-                                                    completed: newCompleted.has(
-                                                      `${idx}-${setIdx}`,
-                                                    ),
-                                                  }))
-
-                                            return {
-                                              exerciseName: ex.exerciseName,
-                                              noOfSets: ex.noOfSets,
-                                              sets,
-                                            }
-                                          },
-                                        ),
-                                        totalTime: workoutTime,
-                                        totalCaloriesBurned: Math.round(
-                                          (workoutTime / 60) * 5,
-                                        ),
-                                      })
-                                    }
-                                  }}
-                                >
-                                  <CheckCircle2 className="w-4 h-4 mr-1" />
-                                  Done
-                                </Button>
-                              )}
-                            </div>
-                          )}
-                        </div>
-                      </CardContent>
-                    </Card>
+                      Set {setIndex + 1}
+                    </Button>
                   )
                 })}
               </div>
-            </div>
-          )
-        })}
-      </div>
-
-      {/* Fixed Bottom Timer Bar */}
-      <div className="fixed bottom-16 left-0 right-0 bg-background border-t shadow-lg z-20">
-        <div className="p-4">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-3">
-              <Clock className="w-6 h-6 text-primary" />
-              <div>
-                <div className="text-3xl font-bold tabular-nums">
-                  {formatTime(workoutTime)}
-                </div>
-                <div className="text-xs text-muted-foreground">Total Time</div>
-              </div>
-            </div>
-            <Button
-              variant={isPaused ? 'default' : 'secondary'}
-              size="lg"
-              onClick={togglePause}
-            >
-              {isPaused ? (
-                <>
-                  <Play className="w-5 h-5 mr-2" />
-                  Resume
-                </>
-              ) : (
-                <>
-                  <Pause className="w-5 h-5 mr-2" />
-                  Pause
-                </>
-              )}
-            </Button>
-          </div>
-        </div>
+            </CardContent>
+          </Card>
+        ))}
       </div>
     </div>
   )

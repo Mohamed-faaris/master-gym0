@@ -1,6 +1,14 @@
 import { createFileRoute, useNavigate, Link } from '@tanstack/react-router'
 import * as React from 'react'
-import { Play, Pause, CheckCircle2, X, Clock, ArrowLeft } from 'lucide-react'
+import {
+  Play,
+  Pause,
+  CheckCircle2,
+  X,
+  Clock,
+  ArrowLeft,
+  Dumbbell,
+} from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { useMutation, useQuery } from 'convex/react'
