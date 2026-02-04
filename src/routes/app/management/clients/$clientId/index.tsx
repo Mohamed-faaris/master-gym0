@@ -161,73 +161,7 @@ function ClientDetailRoute() {
         <>
           {/* TODAY MODE: Action-First Layout */}
 
-          {/* Client Info */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Activity className="w-5 h-5" />
-                Client Information
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div>
-                <p className="text-sm text-muted-foreground">Email</p>
-                <p className="font-medium">{client.email || 'Not provided'}</p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Phone</p>
-                <p className="font-medium">{client.phoneNumber}</p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Role</p>
-                <p className="font-medium capitalize">
-                  {client.role === 'trainerManagedCustomer'
-                    ? 'Trainer Managed'
-                    : 'Self Managed'}
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Quick Stats */}
-          <div className="grid grid-cols-3 gap-3">
-            <Card>
-              <CardContent className="pt-6">
-                <div className="text-center">
-                  <p className="text-3xl font-bold text-primary">
-                    {filteredWorkouts.length}
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Workouts Today
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="pt-6">
-                <div className="text-center">
-                  <p className="text-3xl font-bold text-chart-2">
-                    {filteredDiets.length}
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Diet Logs Today
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="pt-6">
-                <div className="text-center">
-                  <p className="text-3xl font-bold text-emerald-600">
-                    {weightLogs?.length || 0}
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Weight Logs
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+          {/* Client Info */}          
 
           {/* Action Buttons */}
           <div className="space-y-3">
@@ -241,6 +175,19 @@ function ClientDetailRoute() {
             >
               <Dumbbell className="w-4 h-4 mr-2" />
               Log Workout Session
+            </Button>
+
+            <Button
+              onClick={() =>
+                navigate({
+                  to: `/app/management/clients/${clientId}/view-work`,
+                })
+              }
+              variant="outline"
+              className="h-12 w-full"
+            >
+              <Dumbbell className="w-4 h-4 mr-2" />
+              View Workout Sessions
             </Button>
 
             <Button
