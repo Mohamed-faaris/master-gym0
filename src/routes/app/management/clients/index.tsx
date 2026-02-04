@@ -67,13 +67,7 @@ function ClientsRoute() {
     <div className="space-y-6 p-4 pb-20">
       {/* --------------------------- Header --------------------------- */}
       <header className="space-y-3">
-        <Link
-          to="/app/management"
-          className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Back to overview
-        </Link>
+      
         <p className="text-xs uppercase tracking-wide text-muted-foreground">
           Client roster · {todayLabel}
         </p>

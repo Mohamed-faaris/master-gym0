@@ -170,6 +170,26 @@ function ClientDetailRoute() {
     ? formatDuration(latestWorkout.totalTime || 0)
     : '0m'
 
+  const weightLogsInScope = (weightLogs || []).filter((log) => {
+    return (
+      log.createdAt >= scopeStart.getTime() &&
+      log.createdAt <= scopeEnd.getTime()
+    )
+  })
+
+  const averageWeight =
+    weightLogsInScope.length > 0
+      ? weightLogsInScope.reduce((sum, log) => sum + log.weight, 0) /
+        weightLogsInScope.length
+      : null
+
+  const scopeLabel =
+    dateScope === 'this-week'
+      ? 'This Week'
+      : dateScope === 'last-week'
+        ? 'Last Week'
+        : 'Today'
+
   // Build days data for activity card
   const daysOfWeek = getDaysOfWeek(dateScope)
   const daysData = daysOfWeek.map((day) => {
@@ -188,11 +208,23 @@ function ClientDetailRoute() {
       return time >= dayStart.getTime() && time <= dayEnd.getTime()
     })
 
+    const workoutMinutes = Math.round(
+      dayWorkouts.reduce((sum, session) => sum + (session.totalTime || 0), 0) /
+        60,
+    )
+
+    const dietCalories = dayDiets.reduce(
+      (sum, log) => sum + (log.calories || 0),
+      0,
+    )
+
     return {
       day: day.toLocaleDateString('en-US', { weekday: 'short' }),
       date: formatDateShort(day),
       workouts: dayWorkouts.length,
       diets: dayDiets.length,
+      workoutMinutes,
+      dietCalories,
       isActive: dayWorkouts.length > 0 || dayDiets.length > 0,
     }
   })
@@ -332,7 +364,7 @@ function ClientDetailRoute() {
                   className="flex-1"
                 >
                   <Dumbbell className="w-4 h-4 mr-2" />
-                  Workouts
+                  Duration
                 </Button>
                 <Button
                   variant={dataType === 'diet' ? 'default' : 'outline'}
@@ -340,143 +372,143 @@ function ClientDetailRoute() {
                   className="flex-1"
                 >
                   <UtensilsCrossed className="w-4 h-4 mr-2" />
-                  Diet
+                  Calories
                 </Button>
               </div>
             </CardContent>
           </Card>
 
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">
+                Average Weight ({scopeLabel})
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-3xl font-bold">
+                {averageWeight !== null ? averageWeight.toFixed(1) : '—'}
+              </p>
+              <p className="text-xs text-muted-foreground mt-1">lbs</p>
+            </CardContent>
+          </Card>
+
           {/* Weekly Summary Cards */}
-          {dataType === 'workout' ? (
-            <>
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-base">Workout Summary</CardTitle>
-                  <CardDescription>
-                    {getComparisonLabel(dateScope)}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
-                    <p className="text-sm text-muted-foreground">
-                      Total Sessions
-                    </p>
-                    <p className="text-3xl font-bold text-primary">
-                      {filteredWorkouts.length}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">
-                      Days Completed
-                    </p>
-                    <p className="text-2xl font-bold">
-                      {daysData.filter((d) => d.workouts > 0).length}/
-                      {daysData.length}
-                    </p>
-                  </div>
-                  <div className="pt-4 border-t">
-                    <div className="w-full bg-muted rounded-full h-2 overflow-hidden">
-                      {/* stylelint-disable */}
-                      <div
-                        className="bg-primary h-2 rounded-full transition-all"
-                        style={
-                          {
-                            width: `${(daysData.filter((d) => d.workouts > 0).length / daysData.length) * 100}%`,
-                          } as React.CSSProperties
-                        }
-                      />
-                      {/* stylelint-enable */}
-                    </div>
-                    <p className="text-xs text-muted-foreground mt-2">
-                      Consistency:{' '}
-                      {Math.round(
-                        (daysData.filter((d) => d.workouts > 0).length /
-                          daysData.length) *
-                          100,
-                      )}
-                      %
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">Workout Summary</CardTitle>
+              <CardDescription>{getComparisonLabel(dateScope)}</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <p className="text-sm text-muted-foreground">Total Sessions</p>
+                <p className="text-3xl font-bold text-primary">
+                  {filteredWorkouts.length}
+                </p>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Days Completed</p>
+                <p className="text-2xl font-bold">
+                  {daysData.filter((d) => d.workouts > 0).length}/
+                  {daysData.length}
+                </p>
+              </div>
+              <div className="pt-4 border-t">
+                <div className="w-full bg-muted rounded-full h-2 overflow-hidden">
+                  {/* stylelint-disable */}
+                  <div
+                    className="bg-primary h-2 rounded-full transition-all"
+                    style={
+                      {
+                        width: `${(daysData.filter((d) => d.workouts > 0).length / daysData.length) * 100}%`,
+                      } as React.CSSProperties
+                    }
+                  />
+                  {/* stylelint-enable */}
+                </div>
+                <p className="text-xs text-muted-foreground mt-2">
+                  Consistency:{' '}
+                  {Math.round(
+                    (daysData.filter((d) => d.workouts > 0).length /
+                      daysData.length) *
+                      100,
+                  )}
+                  %
+                </p>
+              </div>
+            </CardContent>
+          </Card>
 
-              <Button
-                onClick={() =>
-                  navigate({
-                    to: `/app/management/clients/${clientId}/logs/workout`,
-                  })
-                }
-                variant="outline"
-                className="w-full h-12"
-              >
-                View All Workout Sessions
-              </Button>
-            </>
-          ) : (
-            <>
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-base">Diet Summary</CardTitle>
-                  <CardDescription>
-                    {getComparisonLabel(dateScope)}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
-                    <p className="text-sm text-muted-foreground">Total Logs</p>
-                    <p className="text-3xl font-bold text-chart-2">
-                      {filteredDiets.length}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Days Logged</p>
-                    <p className="text-2xl font-bold">
-                      {daysData.filter((d) => d.diets > 0).length}/
-                      {daysData.length}
-                    </p>
-                  </div>
-                  <div className="pt-4 border-t">
-                    <div className="w-full bg-muted rounded-full h-2 overflow-hidden">
-                      {/* stylelint-disable */}
-                      <div
-                        className="bg-chart-2 h-2 rounded-full transition-all"
-                        style={
-                          {
-                            width: `${(daysData.filter((d) => d.diets > 0).length / daysData.length) * 100}%`,
-                          } as React.CSSProperties
-                        }
-                      />
-                      {/* stylelint-enable */}
-                    </div>
-                    <p className="text-xs text-muted-foreground mt-2">
-                      Consistency:{' '}
-                      {Math.round(
-                        (daysData.filter((d) => d.diets > 0).length /
-                          daysData.length) *
-                          100,
-                      )}
-                      %
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
+          {/* <Button
+            onClick={() =>
+              navigate({
+                to: `/app/management/clients/${clientId}/logs/workout`,
+              })
+            }
+            variant="outline"
+            className="w-full h-12"
+          >
+            View All Workout Sessions
+          </Button> */}
 
-              <Button
-                onClick={() =>
-                  navigate({
-                    to: `/app/management/clients/${clientId}/logs/diet`,
-                  })
-                }
-                variant="outline"
-                className="w-full h-12"
-              >
-                View All Diet Logs
-              </Button>
-            </>
-          )}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">Diet Summary</CardTitle>
+              <CardDescription>{getComparisonLabel(dateScope)}</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <p className="text-sm text-muted-foreground">Total Logs</p>
+                <p className="text-3xl font-bold text-chart-2">
+                  {filteredDiets.length}
+                </p>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Days Logged</p>
+                <p className="text-2xl font-bold">
+                  {daysData.filter((d) => d.diets > 0).length}/
+                  {daysData.length}
+                </p>
+              </div>
+              <div className="pt-4 border-t">
+                <div className="w-full bg-muted rounded-full h-2 overflow-hidden">
+                  {/* stylelint-disable */}
+                  <div
+                    className="bg-chart-2 h-2 rounded-full transition-all"
+                    style={
+                      {
+                        width: `${(daysData.filter((d) => d.diets > 0).length / daysData.length) * 100}%`,
+                      } as React.CSSProperties
+                    }
+                  />
+                  {/* stylelint-enable */}
+                </div>
+                <p className="text-xs text-muted-foreground mt-2">
+                  Consistency:{' '}
+                  {Math.round(
+                    (daysData.filter((d) => d.diets > 0).length /
+                      daysData.length) *
+                      100,
+                  )}
+                  %
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* <Button
+            onClick={() =>
+              navigate({
+                to: `/app/management/clients/${clientId}/logs/diet`,
+              })
+            }
+            variant="outline"
+            className="w-full h-12"
+          >
+            View All Diet Logs
+          </Button> */}
 
           {/* View Assigned Plans */}
-          <Button
+          {/* <Button
             onClick={() =>
               navigate({
                 to: `/app/management/clients/${clientId}/pattern`,
@@ -487,7 +519,7 @@ function ClientDetailRoute() {
           >
             <Dumbbell className="w-4 h-4 mr-2" />
             View Assigned Plans
-          </Button>
+          </Button> */}
         </>
       )}
     </div>

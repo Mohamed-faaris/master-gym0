@@ -7,6 +7,8 @@ interface DayActivity {
   date: string
   workouts: number
   diets: number
+  workoutMinutes: number
+  dietCalories: number
   isActive: boolean
 }
 
@@ -29,35 +31,53 @@ export function ActivityWeekCard({
     return 'Last Week'
   }
 
+  const values = days.map((day) =>
+    dataType === 'workout' ? day.workoutMinutes : day.dietCalories,
+  )
+  const maxValue = Math.max(1, ...values)
+
   return (
     <Card>
       <CardHeader>
         <CardTitle className="text-base">{getScopeLabel()} Activity</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="flex justify-between gap-1">
-          {days.map((day, index) => (
-            <div
-              key={day.date}
-              className="flex flex-col items-center gap-2 flex-1"
-            >
-              <div className="text-xs font-medium text-muted-foreground">
-                {dayLabels[index]}
-              </div>
+        <div className="flex justify-between gap-2">
+          {days.map((day, index) => {
+            const value =
+              dataType === 'workout' ? day.workoutMinutes : day.dietCalories
+            const heightPercent = Math.max(
+              6,
+              Math.round((value / maxValue) * 100),
+            )
+            const barClasses =
+              day.isActive || value > 0
+                ? dataType === 'workout'
+                  ? 'bg-primary'
+                  : 'bg-chart-2'
+                : 'bg-muted'
+
+            return (
               <div
-                className={`w-full aspect-square rounded-lg flex items-center justify-center text-sm font-semibold transition-colors ${
-                  day.isActive
-                    ? dataType === 'workout'
-                      ? 'bg-primary text-primary-foreground'
-                      : 'bg-chart-2 text-chart-2-foreground'
-                    : 'bg-muted text-muted-foreground'
-                }`}
+                key={day.date}
+                className="flex flex-col items-center gap-2 flex-1"
               >
-                {dataType === 'workout' ? day.workouts : day.diets}
+                <div className="text-xs font-medium text-muted-foreground">
+                  {dayLabels[index]}
+                </div>
+                <div className="flex items-end h-28 w-full">
+                  <div
+                    className={`w-full rounded-md transition-all ${barClasses}`}
+                    style={{ height: `${heightPercent}%` }}
+                  />
+                </div>
+                <div className="text-xs font-semibold">
+                  {dataType === 'workout' ? `${value}m` : `${value}`}
+                </div>
+                <div className="text-xs text-muted-foreground">{day.date}</div>
               </div>
-              <div className="text-xs text-muted-foreground">{day.date}</div>
-            </div>
-          ))}
+            )
+          })}
         </div>
       </CardContent>
     </Card>
