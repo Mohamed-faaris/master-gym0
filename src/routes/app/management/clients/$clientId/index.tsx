@@ -33,7 +33,7 @@ import { api } from '@convex/_generated/api'
 
 const privilegedRoles = new Set(['trainer', 'admin'])
 
-export const Route = createFileRoute('/app/management/clients/$clientId')({
+export const Route = createFileRoute('/app/management/clients/$clientId/')({
   component: ClientDetailRoute,
 })
 

@@ -1,14 +1,16 @@
 import { useEffect, useState } from 'react'
-import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
+import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
 import {
   ArrowLeft,
-  Dumbbell,
-  UtensilsCrossed,
-  Trash2,
   Check,
+  Dumbbell,
+  Trash2,
+  UtensilsCrossed,
 } from 'lucide-react'
-import { useQuery, useMutation } from 'convex/react'
+import { useMutation, useQuery } from 'convex/react'
 
+import { api } from '@convex/_generated/api'
+import type {DateScope} from '@/components/date-context-selector';
 import { useAuth } from '@/components/auth/useAuth'
 import { Button } from '@/components/ui/button'
 import {
@@ -19,10 +21,9 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import {
-  DateContextSelector,
-  type DateScope,
+  DateContextSelector
+  
 } from '@/components/date-context-selector'
-import { api } from '@convex/_generated/api'
 
 const privilegedRoles = new Set(['trainer', 'admin'])
 
