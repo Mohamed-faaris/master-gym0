@@ -330,6 +330,83 @@ export const seedDatabase = mutation({
     })
 
     // Create diet plans
+    const allDays = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'] as const
+
+    const weightLossMeals = [
+      {
+        mealType: 'breakfast',
+        title: 'Oatmeal with Berries',
+        description: '1 cup oatmeal, mixed berries, almond milk, chia seeds',
+        calories: 350,
+      },
+      {
+        mealType: 'lunch',
+        title: 'Grilled Chicken Salad',
+        description:
+          'Grilled chicken breast, mixed greens, olive oil dressing',
+        calories: 450,
+      },
+      {
+        mealType: 'snack',
+        title: 'Greek Yogurt & Nuts',
+        description: '1 cup Greek yogurt, handful of almonds',
+        calories: 200,
+      },
+      {
+        mealType: 'dinner',
+        title: 'Baked Salmon with Veggies',
+        description: 'Salmon fillet, roasted vegetables, quinoa',
+        calories: 550,
+      },
+      {
+        mealType: 'postWorkout',
+        title: 'Protein Shake',
+        description: 'Whey protein, banana, almond butter',
+        calories: 250,
+      },
+    ]
+
+    const weightLossMealTemplate = allDays.flatMap((day) =>
+      weightLossMeals.map((meal) => ({ day, ...meal })),
+    )
+
+    const muscleGainMeals = [
+      {
+        mealType: 'breakfast',
+        title: 'Protein Pancakes',
+        description: '4 egg whites, oats, banana, peanut butter',
+        calories: 550,
+      },
+      {
+        mealType: 'lunch',
+        title: 'Beef & Rice Bowl',
+        description: 'Lean beef, brown rice, broccoli, avocado',
+        calories: 750,
+      },
+      {
+        mealType: 'snack',
+        title: 'Chicken Wrap',
+        description: 'Whole wheat wrap, grilled chicken, hummus',
+        calories: 400,
+      },
+      {
+        mealType: 'dinner',
+        title: 'Steak with Sweet Potato',
+        description: 'Ribeye steak, sweet potato, asparagus',
+        calories: 800,
+      },
+      {
+        mealType: 'postWorkout',
+        title: 'Mass Gainer Shake',
+        description: 'Whey protein, oats, banana, whole milk, peanut butter',
+        calories: 500,
+      },
+    ]
+
+    const muscleGainMealTemplate = allDays.flatMap((day) =>
+      muscleGainMeals.map((meal) => ({ day, ...meal })),
+    )
+
     const weightLossDietId = await ctx.db.insert('dietPlans', {
       name: 'Weight Loss Meal Plan',
       description: 'Balanced calorie-deficit meal plan for healthy weight loss',
@@ -340,39 +417,7 @@ export const seedDatabase = mutation({
       hydrationTarget: '3 liters',
       coachNote:
         'Stay consistent with meals and hydration. Avoid processed foods.',
-      mealTemplate: [
-        {
-          mealType: 'breakfast',
-          title: 'Oatmeal with Berries',
-          description: '1 cup oatmeal, mixed berries, almond milk, chia seeds',
-          calories: 350,
-        },
-        {
-          mealType: 'lunch',
-          title: 'Grilled Chicken Salad',
-          description:
-            'Grilled chicken breast, mixed greens, olive oil dressing',
-          calories: 450,
-        },
-        {
-          mealType: 'snack',
-          title: 'Greek Yogurt & Nuts',
-          description: '1 cup Greek yogurt, handful of almonds',
-          calories: 200,
-        },
-        {
-          mealType: 'dinner',
-          title: 'Baked Salmon with Veggies',
-          description: 'Salmon fillet, roasted vegetables, quinoa',
-          calories: 550,
-        },
-        {
-          mealType: 'postWorkout',
-          title: 'Protein Shake',
-          description: 'Whey protein, banana, almond butter',
-          calories: 250,
-        },
-      ],
+      mealTemplate: weightLossMealTemplate,
       createdBy: trainerId,
       createdAt: now,
       updatedAt: now,
@@ -388,38 +433,7 @@ export const seedDatabase = mutation({
       hydrationTarget: '4 liters',
       coachNote:
         'Focus on protein intake (2g per kg body weight). Eat every 3-4 hours.',
-      mealTemplate: [
-        {
-          mealType: 'breakfast',
-          title: 'Protein Pancakes',
-          description: '4 egg whites, oats, banana, peanut butter',
-          calories: 550,
-        },
-        {
-          mealType: 'lunch',
-          title: 'Beef & Rice Bowl',
-          description: 'Lean beef, brown rice, broccoli, avocado',
-          calories: 750,
-        },
-        {
-          mealType: 'snack',
-          title: 'Chicken Wrap',
-          description: 'Whole wheat wrap, grilled chicken, hummus',
-          calories: 400,
-        },
-        {
-          mealType: 'dinner',
-          title: 'Steak with Sweet Potato',
-          description: 'Ribeye steak, sweet potato, asparagus',
-          calories: 800,
-        },
-        {
-          mealType: 'postWorkout',
-          title: 'Mass Gainer Shake',
-          description: 'Whey protein, oats, banana, whole milk, peanut butter',
-          calories: 500,
-        },
-      ],
+      mealTemplate: muscleGainMealTemplate,
       createdBy: trainerId,
       createdAt: now,
       updatedAt: now,

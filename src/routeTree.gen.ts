@@ -25,6 +25,7 @@ import { Route as AppUserWorkoutSessionRouteImport } from './routes/app/_user/wo
 import { Route as AppUserSessionsRouteImport } from './routes/app/_user/sessions'
 import { Route as AppUserLogsRouteImport } from './routes/app/_user/logs'
 import { Route as AppUserGalleryRouteImport } from './routes/app/_user/gallery'
+import { Route as AppUserDietPlanRouteImport } from './routes/app/_user/diet-plan'
 import { Route as AppUserDietLogsRouteImport } from './routes/app/_user/diet-logs'
 import { Route as AppUserDashboardRouteImport } from './routes/app/_user/dashboard'
 import { Route as AppUserAccountRouteImport } from './routes/app/_user/account'
@@ -123,6 +124,11 @@ const AppUserLogsRoute = AppUserLogsRouteImport.update({
 const AppUserGalleryRoute = AppUserGalleryRouteImport.update({
   id: '/gallery',
   path: '/gallery',
+  getParentRoute: () => AppUserRoute,
+} as any)
+const AppUserDietPlanRoute = AppUserDietPlanRouteImport.update({
+  id: '/diet-plan',
+  path: '/diet-plan',
   getParentRoute: () => AppUserRoute,
 } as any)
 const AppUserDietLogsRoute = AppUserDietLogsRouteImport.update({
@@ -241,6 +247,7 @@ export interface FileRoutesByFullPath {
   '/app/account': typeof AppUserAccountRoute
   '/app/dashboard': typeof AppUserDashboardRoute
   '/app/diet-logs': typeof AppUserDietLogsRoute
+  '/app/diet-plan': typeof AppUserDietPlanRoute
   '/app/gallery': typeof AppUserGalleryRoute
   '/app/logs': typeof AppUserLogsRoute
   '/app/sessions': typeof AppUserSessionsRoute
@@ -274,6 +281,7 @@ export interface FileRoutesByTo {
   '/app/account': typeof AppUserAccountRoute
   '/app/dashboard': typeof AppUserDashboardRoute
   '/app/diet-logs': typeof AppUserDietLogsRoute
+  '/app/diet-plan': typeof AppUserDietPlanRoute
   '/app/gallery': typeof AppUserGalleryRoute
   '/app/logs': typeof AppUserLogsRoute
   '/app/sessions': typeof AppUserSessionsRoute
@@ -311,6 +319,7 @@ export interface FileRoutesById {
   '/app/_user/account': typeof AppUserAccountRoute
   '/app/_user/dashboard': typeof AppUserDashboardRoute
   '/app/_user/diet-logs': typeof AppUserDietLogsRoute
+  '/app/_user/diet-plan': typeof AppUserDietPlanRoute
   '/app/_user/gallery': typeof AppUserGalleryRoute
   '/app/_user/logs': typeof AppUserLogsRoute
   '/app/_user/sessions': typeof AppUserSessionsRoute
@@ -349,6 +358,7 @@ export interface FileRouteTypes {
     | '/app/account'
     | '/app/dashboard'
     | '/app/diet-logs'
+    | '/app/diet-plan'
     | '/app/gallery'
     | '/app/logs'
     | '/app/sessions'
@@ -382,6 +392,7 @@ export interface FileRouteTypes {
     | '/app/account'
     | '/app/dashboard'
     | '/app/diet-logs'
+    | '/app/diet-plan'
     | '/app/gallery'
     | '/app/logs'
     | '/app/sessions'
@@ -418,6 +429,7 @@ export interface FileRouteTypes {
     | '/app/_user/account'
     | '/app/_user/dashboard'
     | '/app/_user/diet-logs'
+    | '/app/_user/diet-plan'
     | '/app/_user/gallery'
     | '/app/_user/logs'
     | '/app/_user/sessions'
@@ -566,6 +578,13 @@ declare module '@tanstack/react-router' {
       path: '/gallery'
       fullPath: '/app/gallery'
       preLoaderRoute: typeof AppUserGalleryRouteImport
+      parentRoute: typeof AppUserRoute
+    }
+    '/app/_user/diet-plan': {
+      id: '/app/_user/diet-plan'
+      path: '/diet-plan'
+      fullPath: '/app/diet-plan'
+      preLoaderRoute: typeof AppUserDietPlanRouteImport
       parentRoute: typeof AppUserRoute
     }
     '/app/_user/diet-logs': {
@@ -766,6 +785,7 @@ interface AppUserRouteChildren {
   AppUserAccountRoute: typeof AppUserAccountRoute
   AppUserDashboardRoute: typeof AppUserDashboardRoute
   AppUserDietLogsRoute: typeof AppUserDietLogsRoute
+  AppUserDietPlanRoute: typeof AppUserDietPlanRoute
   AppUserGalleryRoute: typeof AppUserGalleryRoute
   AppUserLogsRoute: typeof AppUserLogsRoute
   AppUserSessionsRoute: typeof AppUserSessionsRoute
@@ -778,6 +798,7 @@ const AppUserRouteChildren: AppUserRouteChildren = {
   AppUserAccountRoute: AppUserAccountRoute,
   AppUserDashboardRoute: AppUserDashboardRoute,
   AppUserDietLogsRoute: AppUserDietLogsRoute,
+  AppUserDietPlanRoute: AppUserDietPlanRoute,
   AppUserGalleryRoute: AppUserGalleryRoute,
   AppUserLogsRoute: AppUserLogsRoute,
   AppUserSessionsRoute: AppUserSessionsRoute,

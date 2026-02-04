@@ -50,6 +50,8 @@ const weekDays = [
   { key: 'sun', label: 'Sun' },
 ] as const
 
+type DayKey = (typeof weekDays)[number]['key']
+
 const steps = [
   { key: 'details', label: 'Plan details' },
   { key: 'schedule', label: 'Schedule' },
@@ -73,13 +75,25 @@ function RouteComponent() {
   const [calorieTarget, setCalorieTarget] = useState('')
   const [hydrationTarget, setHydrationTarget] = useState('')
   const [coachNote, setCoachNote] = useState('')
-  const [meals, setMeals] = useState<Record<MealType, MealEntry>>({
+  const createEmptyDayMeals = (): Record<MealType, MealEntry> => ({
     breakfast: { title: '', description: '', calories: '' },
     lunch: { title: '', description: '', calories: '' },
     dinner: { title: '', description: '', calories: '' },
     snack: { title: '', description: '', calories: '' },
     postWorkout: { title: '', description: '', calories: '' },
   })
+
+  const [mealsByDay, setMealsByDay] = useState<
+    Record<DayKey, Record<MealType, MealEntry>>
+  >(() =>
+    weekDays.reduce(
+      (acc, day) => {
+        acc[day.key] = createEmptyDayMeals()
+        return acc
+      },
+      {} as Record<DayKey, Record<MealType, MealEntry>>,
+    ),
+  )
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   /* -------------------------------------------------------------------------- */
@@ -126,20 +140,36 @@ function RouteComponent() {
       return
     }
 
-    // Convert meals to array format for backend
-    const mealTemplate = Object.entries(meals)
-      .filter(([_, meal]) => meal.title.trim() !== '')
-      .map(([mealType, meal]) => ({
-        mealType: mealType as any,
-        title: meal.title,
-        description: meal.description,
-        calories: parseFloat(meal.calories) || 0,
-      }))
+    const missingDays = selectedDays.filter((dayKey) => {
+      const mealsForDay = mealsByDay[dayKey as DayKey]
+      return !Object.values(mealsForDay).some(
+        (meal) => meal.title.trim() !== '',
+      )
+    })
 
-    if (mealTemplate.length === 0) {
-      toast.error('Please add at least one meal')
+    if (missingDays.length > 0) {
+      const missingLabels = missingDays
+        .map(
+          (day) => weekDays.find((entry) => entry.key === day)?.label || day,
+        )
+        .join(', ')
+      toast.error(`Add at least one meal for: ${missingLabels}`)
       return
     }
+
+    // Convert meals to array format for backend
+    const mealTemplate = selectedDays.flatMap((dayKey) => {
+      const mealsForDay = mealsByDay[dayKey as DayKey]
+      return Object.entries(mealsForDay)
+        .filter(([_, meal]) => meal.title.trim() !== '')
+        .map(([mealType, meal]) => ({
+          day: dayKey as any,
+          mealType: mealType as any,
+          title: meal.title,
+          description: meal.description,
+          calories: parseFloat(meal.calories) || 0,
+        }))
+    })
 
     setIsSubmitting(true)
 
@@ -359,84 +389,123 @@ function RouteComponent() {
             </CardHeader>
             <CardContent className="space-y-4">
               <p className="text-sm text-muted-foreground">
-                Design a repeatable meal structure. You can refine per day
-                later.
+                Build meal templates for each active day.
               </p>
 
-              <div className="space-y-4">
-                {(Object.keys(meals) as MealType[]).map((mealType) => (
-                  <div
-                    key={mealType}
-                    className="rounded-2xl border border-border bg-muted/30 p-4 space-y-3"
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-semibold">
-                        {mealTypeLabels[mealType]}
-                      </span>
-                      <span className="text-xs text-muted-foreground">
-                        Template entry
-                      </span>
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-xs font-medium uppercase text-muted-foreground">
-                        Meal title
-                      </label>
-                      <Input
-                        placeholder="e.g. Protein oats"
-                        value={meals[mealType].title}
-                        onChange={(event) =>
-                          setMeals((prev) => ({
-                            ...prev,
-                            [mealType]: {
-                              ...prev[mealType],
-                              title: event.target.value,
-                            },
-                          }))
-                        }
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-xs font-medium uppercase text-muted-foreground">
-                        Description
-                      </label>
-                      <textarea
-                        className="w-full min-h-[80px] rounded-lg border border-border bg-background px-3 py-2 text-sm"
-                        placeholder="Ingredients, timing, or portion notes."
-                        value={meals[mealType].description}
-                        onChange={(event) =>
-                          setMeals((prev) => ({
-                            ...prev,
-                            [mealType]: {
-                              ...prev[mealType],
-                              description: event.target.value,
-                            },
-                          }))
-                        }
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-xs font-medium uppercase text-muted-foreground">
-                        Calories
-                      </label>
-                      <Input
-                        type="number"
-                        min={0}
-                        placeholder="0"
-                        value={meals[mealType].calories}
-                        onChange={(event) =>
-                          setMeals((prev) => ({
-                            ...prev,
-                            [mealType]: {
-                              ...prev[mealType],
-                              calories: event.target.value,
-                            },
-                          }))
-                        }
-                      />
-                    </div>
-                  </div>
-                ))}
-              </div>
+              {selectedDays.length === 0 ? (
+                <div className="rounded-2xl border border-dashed border-border bg-muted/20 p-6 text-sm text-muted-foreground">
+                  Select active days first to add meals per day.
+                </div>
+              ) : (
+                <div className="space-y-6">
+                  {weekDays
+                    .filter((day) => selectedDays.includes(day.key))
+                    .map((day) => (
+                      <div key={day.key} className="space-y-3">
+                        <div className="flex items-center justify-between">
+                          <p className="text-sm font-semibold">
+                            {day.label}
+                          </p>
+                          <span className="text-xs text-muted-foreground">
+                            Daily template
+                          </span>
+                        </div>
+
+                        <div className="space-y-4">
+                          {(Object.keys(mealsByDay[day.key]) as MealType[]).map(
+                            (mealType) => (
+                              <div
+                                key={`${day.key}-${mealType}`}
+                                className="rounded-2xl border border-border bg-muted/30 p-4 space-y-3"
+                              >
+                                <div className="flex items-center justify-between">
+                                  <span className="text-sm font-semibold">
+                                    {mealTypeLabels[mealType]}
+                                  </span>
+                                  <span className="text-xs text-muted-foreground">
+                                    Template entry
+                                  </span>
+                                </div>
+                                <div className="space-y-2">
+                                  <label className="text-xs font-medium uppercase text-muted-foreground">
+                                    Meal title
+                                  </label>
+                                  <Input
+                                    placeholder="e.g. Protein oats"
+                                    value={
+                                      mealsByDay[day.key][mealType].title
+                                    }
+                                    onChange={(event) =>
+                                      setMealsByDay((prev) => ({
+                                        ...prev,
+                                        [day.key]: {
+                                          ...prev[day.key],
+                                          [mealType]: {
+                                            ...prev[day.key][mealType],
+                                            title: event.target.value,
+                                          },
+                                        },
+                                      }))
+                                    }
+                                  />
+                                </div>
+                                <div className="space-y-2">
+                                  <label className="text-xs font-medium uppercase text-muted-foreground">
+                                    Description
+                                  </label>
+                                  <textarea
+                                    className="w-full min-h-[80px] rounded-lg border border-border bg-background px-3 py-2 text-sm"
+                                    placeholder="Ingredients, timing, or portion notes."
+                                    value={
+                                      mealsByDay[day.key][mealType].description
+                                    }
+                                    onChange={(event) =>
+                                      setMealsByDay((prev) => ({
+                                        ...prev,
+                                        [day.key]: {
+                                          ...prev[day.key],
+                                          [mealType]: {
+                                            ...prev[day.key][mealType],
+                                            description: event.target.value,
+                                          },
+                                        },
+                                      }))
+                                    }
+                                  />
+                                </div>
+                                <div className="space-y-2">
+                                  <label className="text-xs font-medium uppercase text-muted-foreground">
+                                    Calories
+                                  </label>
+                                  <Input
+                                    type="number"
+                                    min={0}
+                                    placeholder="0"
+                                    value={
+                                      mealsByDay[day.key][mealType].calories
+                                    }
+                                    onChange={(event) =>
+                                      setMealsByDay((prev) => ({
+                                        ...prev,
+                                        [day.key]: {
+                                          ...prev[day.key],
+                                          [mealType]: {
+                                            ...prev[day.key][mealType],
+                                            calories: event.target.value,
+                                          },
+                                        },
+                                      }))
+                                    }
+                                  />
+                                </div>
+                              </div>
+                            ),
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                </div>
+              )}
             </CardContent>
           </Card>
         )}
@@ -486,21 +555,42 @@ function RouteComponent() {
 
               <div className="rounded-2xl border border-border bg-muted/30 p-4 space-y-3">
                 <p className="text-sm font-semibold">Meals snapshot</p>
-                <div className="grid gap-3">
-                  {(Object.keys(meals) as MealType[]).map((mealType) => (
-                    <div key={mealType} className="space-y-1">
-                      <p className="text-xs font-semibold uppercase text-muted-foreground">
-                        {mealTypeLabels[mealType]}
-                      </p>
-                      <p className="text-sm">
-                        {meals[mealType].title || 'No title yet'}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {meals[mealType].description || 'Add meal notes.'}
-                      </p>
-                    </div>
-                  ))}
-                </div>
+                {selectedDays.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">
+                    No days selected yet.
+                  </p>
+                ) : (
+                  <div className="grid gap-4">
+                    {weekDays
+                      .filter((day) => selectedDays.includes(day.key))
+                      .map((day) => (
+                        <div key={day.key} className="space-y-2">
+                          <p className="text-xs font-semibold uppercase text-muted-foreground">
+                            {day.label}
+                          </p>
+                          <div className="grid gap-2">
+                            {(Object.keys(
+                              mealsByDay[day.key],
+                            ) as MealType[]).map((mealType) => (
+                              <div key={`${day.key}-${mealType}`}>
+                                <p className="text-xs font-semibold uppercase text-muted-foreground">
+                                  {mealTypeLabels[mealType]}
+                                </p>
+                                <p className="text-sm">
+                                  {mealsByDay[day.key][mealType].title ||
+                                    'No title yet'}
+                                </p>
+                                <p className="text-xs text-muted-foreground">
+                                  {mealsByDay[day.key][mealType].description ||
+                                    'Add meal notes.'}
+                                </p>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>

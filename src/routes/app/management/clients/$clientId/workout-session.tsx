@@ -541,29 +541,29 @@ function TrainerWorkoutSessionRoute() {
       {/* Fixed Bottom Timer Bar */}
       <div className="fixed bottom-16 left-0 right-0 bg-background border-t shadow-lg z-20">
         <div className="p-4">
-          <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <Clock className="w-6 h-6 text-primary" />
+              <Clock className="w-5 h-5 text-primary" />
               <div>
-                <div className="text-3xl font-bold tabular-nums">
+                <div className="text-2xl font-bold tabular-nums">
                   {formatTime(workoutTime)}
                 </div>
                 <div className="text-xs text-muted-foreground">Total Time</div>
               </div>
             </div>
             <Button
+              className="h-10 px-5 rounded-full"
               variant={isPaused ? 'default' : 'secondary'}
-              size="lg"
               onClick={() => setIsPaused(!isPaused)}
             >
               {isPaused ? (
                 <>
-                  <Play className="w-5 h-5 mr-2" />
+                  <Play className="w-4 h-4 mr-2" />
                   Resume
                 </>
               ) : (
                 <>
-                  <Pause className="w-5 h-5 mr-2" />
+                  <Pause className="w-4 h-4 mr-2" />
                   Pause
                 </>
               )}

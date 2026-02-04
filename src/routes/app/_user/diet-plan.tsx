@@ -1,15 +1,15 @@
+import { createFileRoute, Link } from '@tanstack/react-router'
 import { useEffect, useMemo, useState } from 'react'
-import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
-import { useQuery, useMutation } from 'convex/react'
+import { useQuery } from 'convex/react'
 import {
-  ArrowLeft,
   Calendar,
   Droplets,
   Target,
-  Trash2,
   UtensilsCrossed,
+  Utensils,
 } from 'lucide-react'
 
+import { api } from '@convex/_generated/api'
 import { useAuth } from '@/components/auth/useAuth'
 import { Button } from '@/components/ui/button'
 import {
@@ -20,62 +20,22 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { toast } from 'sonner'
-import { api } from '@convex/_generated/api'
-import type { Id } from '../../../../../convex/_generated/dataModel'
 
-const privilegedRoles = new Set(['trainer', 'admin'])
-
-export const Route = createFileRoute('/app/management/diet-plans/$planId')({
-  component: DietPlanDetailRoute,
+export const Route = createFileRoute('/app/_user/diet-plan')({
+  component: DietPlanRoute,
 })
 
-function DietPlanDetailRoute() {
-  const { planId } = Route.useParams()
-  const { user, isLoading } = useAuth()
-  const navigate = useNavigate()
+function DietPlanRoute() {
+  const { user } = useAuth()
 
-  const dietPlan = useQuery(api.dietPlans.getDietPlanById, {
-    dietPlanId: planId as Id<'dietPlans'>,
-  })
+  const planOwnerId = user?.trainerId ?? user?._id
 
-  const deleteDietPlan = useMutation(api.dietPlans.deleteDietPlan)
+  const dietPlans = useQuery(
+    api.dietPlans.getDietPlansByUser,
+    planOwnerId ? { userId: planOwnerId } : 'skip',
+  )
 
-  /* -------------------------------------------------------------------------- */
-  /*                                 Auth Guard                                 */
-  /* -------------------------------------------------------------------------- */
-
-  useEffect(() => {
-    if (isLoading) return
-    if (!user) {
-      navigate({ to: '/' })
-      return
-    }
-    if (!privilegedRoles.has(user.role)) {
-      navigate({ to: '/app/_user' })
-    }
-  }, [user, isLoading, navigate])
-
-  const handleDelete = async () => {
-    if (!confirm('Are you sure you want to delete this diet plan?')) return
-
-    try {
-      await deleteDietPlan({ dietPlanId: planId as Id<'dietPlans'> })
-      toast.success('Diet plan deleted successfully')
-      navigate({ to: '/app/management/diet-plans' })
-    } catch (error) {
-      console.error('Failed to delete diet plan:', error)
-      toast.error('Failed to delete diet plan')
-    }
-  }
-
-  if (isLoading || !dietPlan) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <p className="text-muted-foreground">Loading...</p>
-      </div>
-    )
-  }
+  const dietPlan = dietPlans?.[0] ?? null
 
   const weekDayLabels: Record<string, string> = {
     mon: 'Monday',
@@ -96,6 +56,50 @@ function DietPlanDetailRoute() {
   }
 
   const dayOrder = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']
+
+  if (!dietPlans) {
+    return (
+      <div className="p-4">
+        <p className="text-muted-foreground">Loading diet plan...</p>
+      </div>
+    )
+  }
+
+  if (!dietPlan) {
+    return (
+      <div className="p-4 pb-24 space-y-4">
+        <div>
+          <h1 className="text-2xl font-bold">Diet Plan</h1>
+          <p className="text-muted-foreground">
+            Your assigned nutrition plan will appear here.
+          </p>
+        </div>
+
+        <Card>
+          <CardContent className="py-12">
+            <div className="text-center space-y-4">
+              <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
+                <Utensils className="h-8 w-8 text-primary" />
+              </div>
+              <div className="space-y-2">
+                <h3 className="font-semibold">No plan assigned</h3>
+                <p className="text-sm text-muted-foreground max-w-sm mx-auto">
+                  Ask your trainer to assign a diet plan.
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Link to="/app/_user/diet-logs" className="fixed inset-x-4 bottom-6 z-30">
+          <Button className="h-14 w-full rounded-full shadow-lg">
+            <UtensilsCrossed className="w-5 h-5 mr-2" />
+            Log Diet
+          </Button>
+        </Link>
+      </div>
+    )
+  }
 
   const mealsByDay = dietPlan.mealTemplate.reduce(
     (acc, meal) => {
@@ -128,32 +132,11 @@ function DietPlanDetailRoute() {
   return (
     <div className="min-h-screen bg-background pb-24">
       <div className="px-4 pt-6 pb-4 space-y-4">
-        <header className="space-y-3">
-          <Link
-            to="/app/management/diet-plans"
-            className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back to diet plans
-          </Link>
-
-          <div className="flex items-start justify-between gap-4">
-            <div className="space-y-1">
-              <h1 className="text-2xl font-semibold">{dietPlan.name}</h1>
-              <p className="text-sm text-muted-foreground">
-                {dietPlan.description}
-              </p>
-            </div>
-            <Button
-              variant="destructive"
-              size="sm"
-              className="gap-2"
-              onClick={handleDelete}
-            >
-              <Trash2 className="h-4 w-4" />
-              Delete
-            </Button>
-          </div>
+        <header className="space-y-1">
+          <h1 className="text-2xl font-semibold">{dietPlan.name}</h1>
+          <p className="text-sm text-muted-foreground">
+            {dietPlan.description}
+          </p>
         </header>
 
         <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
@@ -185,7 +168,6 @@ function DietPlanDetailRoute() {
       </div>
 
       <div className="px-4 space-y-4">
-        {/* Active Days */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -207,7 +189,6 @@ function DietPlanDetailRoute() {
           </CardContent>
         </Card>
 
-        {/* Coach Guidance */}
         {dietPlan.coachNote && (
           <Card>
             <CardHeader>
@@ -221,7 +202,6 @@ function DietPlanDetailRoute() {
           </Card>
         )}
 
-        {/* Meal Template */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -292,6 +272,13 @@ function DietPlanDetailRoute() {
           </CardContent>
         </Card>
       </div>
+
+      <Link to="/app/_user/diet-logs" className="fixed inset-x-4 bottom-6 z-30">
+        <Button className="h-14 w-full rounded-full shadow-lg">
+          <UtensilsCrossed className="w-5 h-5 mr-2" />
+          Log Diet
+        </Button>
+      </Link>
     </div>
   )
 }

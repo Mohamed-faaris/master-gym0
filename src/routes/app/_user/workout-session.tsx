@@ -103,8 +103,37 @@ export function WorkoutSessionRouteComponent() {
     }
   }, [sessionId, isPaused])
 
+  const buildExercisesData = (
+    updatedSets: Set<string>,
+    exercises: Array<{
+      exerciseName: string
+      noOfSets?: number
+      sets?: Array<{ reps?: number; weight?: number; notes?: string }>
+    }>,
+  ) =>
+    exercises.map((ex, idx) => {
+      const setCount = getSetCount(ex)
+      const sets =
+        ex.sets && ex.sets.length > 0
+          ? ex.sets.map((set, setIdx) => ({
+              reps: set.reps,
+              weight: set.weight,
+              notes: set.notes,
+              completed: updatedSets.has(`${idx}-${setIdx + 1}`),
+            }))
+          : Array.from({ length: setCount }).map((_, setIdx) => ({
+              completed: updatedSets.has(`${idx}-${setIdx + 1}`),
+            }))
+
+      return {
+        exerciseName: ex.exerciseName,
+        noOfSets: ex.noOfSets ?? setCount,
+        sets,
+      }
+    })
+
   const toggleSet = async (exerciseIndex: number, setIndex: number) => {
-    if (!sessionId) return
+    if (!sessionId || !todaysWorkout) return
 
     const key = `${exerciseIndex}-${setIndex + 1}`
     const updatedSets = new Set(completedSets)
@@ -117,10 +146,12 @@ export function WorkoutSessionRouteComponent() {
     setCompletedSets(updatedSets)
 
     try {
+      const estimatedCalories = (workoutTime / 60) * 5
       await updateSession({
         sessionId,
-        completedSets: Array.from(updatedSets),
+        exercises: buildExercisesData(updatedSets, todaysWorkout.exercises),
         totalTime: workoutTime,
+        totalCaloriesBurned: Math.round(estimatedCalories),
       })
     } catch (error) {
       console.error(error)
@@ -150,27 +181,7 @@ export function WorkoutSessionRouteComponent() {
   }
 
   const handleToggleSet = async (exerciseIndex: number, setNumber: number) => {
-    if (!sessionId) return
-
-    const key = `${exerciseIndex}-${setNumber}`
-    const updatedSets = new Set(completedSets)
-    if (updatedSets.has(key)) {
-      updatedSets.delete(key)
-    } else {
-      updatedSets.add(key)
-    }
-
-    setCompletedSets(updatedSets)
-
-    try {
-      await updateSession({
-        sessionId,
-        completedSets: Array.from(updatedSets),
-        totalTime: workoutTime,
-      })
-    } catch (error) {
-      console.error(error)
-    }
+    await toggleSet(exerciseIndex, setNumber - 1)
   }
 
   const handleCompleteSession = async () => {

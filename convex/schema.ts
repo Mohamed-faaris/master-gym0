@@ -181,7 +181,6 @@ const userMeasurement = defineTable({
 
 const dietLogs = defineTable({
   userId: v.id('users'),
-
   createdAt: v.number(),
   mealType: MealTypeValidator,
   title: v.string(),
@@ -248,6 +247,7 @@ export const dietPlans = defineTable({
   // Meal template for each day (repeatable structure)
   mealTemplate: v.array(
     v.object({
+      day: DayOfWeekValidator,
       mealType: MealTypeValidator,
       title: v.string(),
       description: v.string(),

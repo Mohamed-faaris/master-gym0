@@ -20,6 +20,14 @@ const MealTypeValidator = v.union(
   v.literal('postWorkout'),
 )
 
+const MealTemplateValidator = v.object({
+  day: DayOfWeekValidator,
+  mealType: MealTypeValidator,
+  title: v.string(),
+  description: v.string(),
+  calories: v.number(),
+})
+
 export const createDietPlan = mutation({
   args: {
     name: v.string(),
@@ -30,14 +38,7 @@ export const createDietPlan = mutation({
     dailyCalorieTarget: v.optional(v.number()),
     hydrationTarget: v.optional(v.string()),
     coachNote: v.optional(v.string()),
-    mealTemplate: v.array(
-      v.object({
-        mealType: MealTypeValidator,
-        title: v.string(),
-        description: v.string(),
-        calories: v.number(),
-      }),
-    ),
+    mealTemplate: v.array(MealTemplateValidator),
     createdBy: v.id('users'),
   },
   handler: async (ctx, args) => {
@@ -98,16 +99,7 @@ export const updateDietPlan = mutation({
     dailyCalorieTarget: v.optional(v.number()),
     hydrationTarget: v.optional(v.string()),
     coachNote: v.optional(v.string()),
-    mealTemplate: v.optional(
-      v.array(
-        v.object({
-          mealType: MealTypeValidator,
-          title: v.string(),
-          description: v.string(),
-          calories: v.number(),
-        }),
-      ),
-    ),
+    mealTemplate: v.optional(v.array(MealTemplateValidator)),
   },
   handler: async (ctx, args) => {
     const { dietPlanId, ...updates } = args
@@ -128,5 +120,45 @@ export const deleteDietPlan = mutation({
   handler: async (ctx, args) => {
     await ctx.db.delete(args.dietPlanId)
     return { success: true }
+  },
+})
+
+export const backfillDietPlanMealDays = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const dayOrder = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'] as const
+    const plans = await ctx.db.query('dietPlans').collect()
+
+    let updatedCount = 0
+
+    for (const plan of plans) {
+      const hasMissingDay = plan.mealTemplate.some(
+        (meal) => !('day' in meal) || !meal.day,
+      )
+
+      if (!hasMissingDay) continue
+
+      const activeDays =
+        plan.activeDays && plan.activeDays.length > 0
+          ? plan.activeDays
+          : dayOrder
+
+      const updatedMeals = plan.mealTemplate.flatMap((meal) => {
+        if (meal.day) return [meal]
+        return activeDays.map((day) => ({
+          ...meal,
+          day,
+        }))
+      })
+
+      await ctx.db.patch(plan._id, {
+        mealTemplate: updatedMeals,
+        updatedAt: Date.now(),
+      })
+
+      updatedCount++
+    }
+
+    return { updatedCount }
   },
 })
