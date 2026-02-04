@@ -26,6 +26,7 @@ import { ActivityWeekCard } from '@/components/activity-week-card'
 import {
   filterByDateScope,
   getDaysOfWeek,
+  getDateRange,
   formatDateShort,
   getComparisonLabel,
 } from '@/lib/date-helpers'
@@ -65,6 +66,11 @@ function ClientDetailRoute() {
   const weightLogs = useQuery(
     api.weightLogs.getWeightLogsByUser,
     clientId ? { userId: clientId as any } : 'skip',
+  )
+
+  const trainingPlan = useQuery(
+    api.trainingPlans.getTrainingPlanById,
+    client?.trainingPlanId ? { trainingPlanId: client.trainingPlanId } : 'skip',
   )
 
   // Fetch training plans and diet plans (kept for potential future use)
@@ -107,6 +113,62 @@ function ClientDetailRoute() {
     ? filterByDateScope(workoutSessions, dateScope)
     : []
   const filteredDiets = dietLogs ? filterByDateScope(dietLogs, dateScope) : []
+
+  const { start: scopeStart, end: scopeEnd } = getDateRange(dateScope)
+  const scopeDays = getDaysOfWeek(dateScope)
+
+  const workoutsInScope = (workoutSessions || []).filter((session) => {
+    const time = session.startTime || session._creationTime
+    return time >= scopeStart.getTime() && time <= scopeEnd.getTime()
+  })
+
+  const dietLogsInScope = (dietLogs || []).filter((log) => {
+    return log.createdAt >= scopeStart.getTime() && log.createdAt <= scopeEnd.getTime()
+  })
+
+  const dayKeys = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'] as const
+
+  const plannedWorkoutDays = scopeDays.filter((day) => {
+    const dayKey = dayKeys[day.getDay()]
+    const plannedDay = trainingPlan?.days.find((d) => d.day === dayKey)
+    return (plannedDay?.exercises?.length || 0) > 0
+  })
+
+  const completedWorkoutsCount = workoutsInScope.filter(
+    (session) => session.status === 'completed',
+  ).length
+
+  const plannedWorkoutsCount = plannedWorkoutDays.length
+  const workoutProgressPercent =
+    plannedWorkoutsCount > 0
+      ? Math.min(
+          100,
+          Math.round((completedWorkoutsCount / plannedWorkoutsCount) * 100),
+        )
+      : 0
+
+  const dietTargetPerDay = 3
+  const dietTargetTotal = dietTargetPerDay * scopeDays.length
+  const dietProgressPercent =
+    dietTargetTotal > 0
+      ? Math.min(100, Math.round((dietLogsInScope.length / dietTargetTotal) * 100))
+      : 0
+
+  const latestWorkout = workoutsInScope
+    .slice()
+    .sort((a, b) => (b.startTime || 0) - (a.startTime || 0))[0]
+
+  const formatDuration = (seconds: number) => {
+    const totalMinutes = Math.round(seconds / 60)
+    const hours = Math.floor(totalMinutes / 60)
+    const minutes = totalMinutes % 60
+    if (hours > 0) return `${hours}h ${minutes}m`
+    return `${minutes}m`
+  }
+
+  const activeDurationLabel = latestWorkout
+    ? formatDuration(latestWorkout.totalTime || 0)
+    : '0m'
 
   // Build days data for activity card
   const daysOfWeek = getDaysOfWeek(dateScope)
@@ -163,6 +225,33 @@ function ClientDetailRoute() {
 
           {/* Client Info */}          
 
+          <Card>
+            <CardContent className="pt-6">
+              <div className="grid grid-cols-3 gap-4 text-center">
+                <div>
+                  <p className="text-xs text-muted-foreground">
+                    Workout Progress
+                  </p>
+                  <p className="text-2xl font-bold text-primary">
+                    {workoutProgressPercent}%
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Diet Progress</p>
+                  <p className="text-2xl font-bold text-chart-2">
+                    {dietProgressPercent}%
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">
+                    Active Duration
+                  </p>
+                  <p className="text-2xl font-bold">{activeDurationLabel}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
           {/* Action Buttons */}
           <div className="space-y-3">
             <Button
@@ -217,52 +306,7 @@ function ClientDetailRoute() {
             </Button>
           </div>
 
-          {/* Assign Plans */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-base">
-                  <Dumbbell className="w-4 h-4" />
-                  Assign Workout Plan
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                <Button
-                  onClick={() =>
-                    navigate({
-                      to: `/app/management/clients/${clientId}/pattern`,
-                    })
-                  }
-                  variant="outline"
-                  className="w-full"
-                >
-                  Manage Plans
-                </Button>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-base">
-                  <UtensilsCrossed className="w-4 h-4" />
-                  View Diet Plans
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                <Button
-                  onClick={() =>
-                    navigate({
-                      to: `/app/management/clients/${clientId}/pattern`,
-                    })
-                  }
-                  variant="outline"
-                  className="w-full"
-                >
-                  Manage Plans
-                </Button>
-              </CardContent>
-            </Card>
-          </div>
+    
         </>
       ) : (
         <>
