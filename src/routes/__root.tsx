@@ -58,7 +58,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
           event.preventDefault()
         }
       },
-      { passive: false }
+      { passive: false },
     )
 
     // Block double-tap zoom (iOS Safari fix)
@@ -72,7 +72,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         }
         lastTouchEnd = now
       },
-      false
+      false,
     )
   }, [])
 
