@@ -16,7 +16,8 @@ export const addDietLog = mutation({
     mealType: MealTypeValidator,
     title: v.string(),
     description: v.string(),
-    calories: v.number(),
+    calories: v.optional(v.number()),
+    imageId: v.optional(v.id('_storage')),
   },
   handler: async (ctx, args) => {
     const now = Date.now()
@@ -26,7 +27,8 @@ export const addDietLog = mutation({
       mealType: args.mealType,
       title: args.title,
       description: args.description,
-      calories: args.calories,
+      ...(args.calories === undefined ? {} : { calories: args.calories }),
+      imageId: args.imageId,
       createdAt: now,
     })
 
@@ -90,7 +92,10 @@ export const getTodayCalories = query({
       .filter((q) => q.gte(q.field('createdAt'), todayTimestamp))
       .collect()
 
-    const totalCalories = dietLogs.reduce((sum, log) => sum + log.calories, 0)
+    const totalCalories = dietLogs.reduce(
+      (sum, log) => sum + (log.calories || 0),
+      0,
+    )
 
     return {
       totalCalories,
@@ -105,6 +110,10 @@ export const deleteDietLog = mutation({
     dietLogId: v.id('dietLogs'),
   },
   handler: async (ctx, args) => {
+    const existing = await ctx.db.get(args.dietLogId)
+    if (existing?.imageId) {
+      await ctx.storage.delete(existing.imageId)
+    }
     await ctx.db.delete(args.dietLogId)
     return { success: true }
   },
@@ -140,7 +149,10 @@ export const getDietStats = query({
       .collect()
 
     const totalLogs = dietLogs.length
-    const totalCalories = dietLogs.reduce((sum, log) => sum + log.calories, 0)
+    const totalCalories = dietLogs.reduce(
+      (sum, log) => sum + (log.calories || 0),
+      0,
+    )
     const averageCalories = totalLogs > 0 ? totalCalories / totalLogs : 0
 
     return {

@@ -38,6 +38,8 @@ export const Route = createFileRoute('/app/_user/')({
 
 function RouteComponent() {
   const { user } = useAuth()
+  const isTrainerManaged = user?.role === 'trainerManagedCustomer'
+  const needsCalories = !isTrainerManaged
 
   const [weightDrawerOpen, setWeightDrawerOpen] = useState(false)
   const [weight, setWeight] = useState('')
@@ -140,10 +142,14 @@ function RouteComponent() {
       toast.error('Please enter a meal title')
       return
     }
-    const caloriesValue = parseFloat(calories)
-    if (isNaN(caloriesValue) || caloriesValue <= 0) {
-      toast.error('Please enter valid calories')
-      return
+    let caloriesValue: number | undefined
+    if (needsCalories) {
+      const parsedCalories = parseFloat(calories)
+      if (isNaN(parsedCalories) || parsedCalories <= 0) {
+        toast.error('Please enter valid calories')
+        return
+      }
+      caloriesValue = parsedCalories
     }
 
     try {
@@ -526,52 +532,53 @@ function RouteComponent() {
                 />
               </div>
 
-              {/* Calories Input */}
-              <div className="space-y-2">
-                <label htmlFor="calories" className="text-sm font-medium">
-                  Calories
-                </label>
-                <div className="flex items-center gap-3">
-                  <Button
-                    variant="outline"
-                    size="lg"
-                    onClick={() => {
-                      const current = parseFloat(calories) || 0
-                      setCalories(Math.max(0, current - 50).toString())
-                    }}
-                    className="h-11 w-11 rounded-full p-0"
-                  >
-                    <span className="text-xl font-semibold">-</span>
-                  </Button>
+              {needsCalories && (
+                <div className="space-y-2">
+                  <label htmlFor="calories" className="text-sm font-medium">
+                    Calories
+                  </label>
+                  <div className="flex items-center gap-3">
+                    <Button
+                      variant="outline"
+                      size="lg"
+                      onClick={() => {
+                        const current = parseFloat(calories) || 0
+                        setCalories(Math.max(0, current - 50).toString())
+                      }}
+                      className="h-11 w-11 rounded-full p-0"
+                    >
+                      <span className="text-xl font-semibold">-</span>
+                    </Button>
 
-                  <div className="relative flex-1">
-                    <Input
-                      id="calories"
-                      type="number"
-                      step="10"
-                      placeholder="0"
-                      value={calories}
-                      onChange={(e) => setCalories(e.target.value)}
-                      className="pr-16 text-lg h-11 text-center font-semibold"
-                    />
-                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground font-medium">
-                      kcal
-                    </span>
+                    <div className="relative flex-1">
+                      <Input
+                        id="calories"
+                        type="number"
+                        step="10"
+                        placeholder="0"
+                        value={calories}
+                        onChange={(e) => setCalories(e.target.value)}
+                        className="pr-16 text-lg h-11 text-center font-semibold"
+                      />
+                      <span className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground font-medium">
+                        kcal
+                      </span>
+                    </div>
+
+                    <Button
+                      variant="outline"
+                      size="lg"
+                      onClick={() => {
+                        const current = parseFloat(calories) || 0
+                        setCalories((current + 50).toString())
+                      }}
+                      className="h-11 w-11 rounded-full p-0"
+                    >
+                      <span className="text-xl font-semibold">+</span>
+                    </Button>
                   </div>
-
-                  <Button
-                    variant="outline"
-                    size="lg"
-                    onClick={() => {
-                      const current = parseFloat(calories) || 0
-                      setCalories((current + 50).toString())
-                    }}
-                    className="h-11 w-11 rounded-full p-0"
-                  >
-                    <span className="text-xl font-semibold">+</span>
-                  </Button>
                 </div>
-              </div>
+              )}
             </div>
           </div>
 
@@ -581,7 +588,9 @@ function RouteComponent() {
               size="lg"
               className="w-full"
               disabled={
-                !dietTitle.trim() || !calories || parseFloat(calories) <= 0
+                !dietTitle.trim() ||
+                (needsCalories &&
+                  (!calories || parseFloat(calories) <= 0))
               }
             >
               <UtensilsCrossed className="mr-2 h-4 w-4" />

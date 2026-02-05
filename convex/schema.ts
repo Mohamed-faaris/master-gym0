@@ -185,7 +185,8 @@ const dietLogs = defineTable({
   mealType: MealTypeValidator,
   title: v.string(),
   description: v.string(),
-  calories: v.number(),
+  calories: v.optional(v.number()),
+  imageId: v.optional(v.id('_storage')),
 }).index('by_user', ['userId'])
 
 /* -------------------- WEIGHT LOGS -------------------- */

@@ -31,6 +31,8 @@ type MealType = 'breakfast' | 'lunch' | 'dinner' | 'snack' | 'postWorkout'
 
 function RouteComponent() {
   const { user } = useAuth()
+  const isTrainerManaged = user?.role === 'trainerManagedCustomer'
+  const needsCalories = !isTrainerManaged
   const [isAddingMeal, setIsAddingMeal] = useState(false)
   const [mealType, setMealType] = useState<MealType>('breakfast')
   const [title, setTitle] = useState('')
@@ -50,18 +52,24 @@ function RouteComponent() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (!user || !title || !calories) {
+    if (!user || !title || (needsCalories && !calories)) {
       toast.error('Please fill in all required fields')
       return
     }
 
     try {
+      const parsedCalories = needsCalories ? parseFloat(calories) : undefined
+      if (needsCalories && (!parsedCalories || parsedCalories <= 0)) {
+        toast.error('Please enter valid calories')
+        return
+      }
+
       await addDietLog({
         userId: user._id,
         mealType,
         title,
         description,
-        calories: parseFloat(calories),
+        calories: parsedCalories,
       })
 
       toast.success('Meal logged successfully!')
@@ -162,16 +170,18 @@ function RouteComponent() {
                 />
               </div>
 
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Calories</label>
-                <Input
-                  type="number"
-                  placeholder="e.g., 450"
-                  value={calories}
-                  onChange={(e) => setCalories(e.target.value)}
-                  required
-                />
-              </div>
+              {/* {needsCalories && (
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Calories</label>
+                  <Input
+                    type="number"
+                    placeholder="e.g., 450"
+                    value={calories}
+                    onChange={(e) => setCalories(e.target.value)}
+                    required
+                  />
+                </div>
+              )} */}
 
               <div className="flex gap-2">
                 <Button type="submit" className="flex-1">

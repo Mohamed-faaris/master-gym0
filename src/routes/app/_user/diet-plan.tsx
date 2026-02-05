@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState, type ChangeEvent } from 'react'
 import { useMutation, useQuery } from 'convex/react'
 import {
   Calendar,
@@ -43,10 +43,14 @@ export const Route = createFileRoute('/app/_user/diet-plan')({
   component: DietPlanRoute,
 })
 
+const MAX_IMAGE_SIZE = 5 * 1024 * 1024
+
 function DietPlanRoute() {
   const { user } = useAuth()
 
   const planOwnerId = user?.trainerId ?? user?._id
+  const isTrainerManaged = user?.role === 'trainerManagedCustomer'
+  const needsCalories = !isTrainerManaged
 
   const [dietDrawerOpen, setDietDrawerOpen] = useState(false)
   const [mealType, setMealType] =
@@ -54,8 +58,14 @@ function DietPlanRoute() {
   const [dietTitle, setDietTitle] = useState('')
   const [dietDescription, setDietDescription] = useState('')
   const [calories, setCalories] = useState('')
+  const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null)
+  const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null)
+  const [imageStorageId, setImageStorageId] = useState<string | null>(null)
+  const [isUploadingImage, setIsUploadingImage] = useState(false)
+  const imageInputRef = useRef<HTMLInputElement | null>(null)
 
   const addDietLog = useMutation(api.dietLogs.addDietLog)
+  const generateUploadUrl = useMutation(api.files.generateUploadUrl)
 
   const dietPlans = useQuery(
     api.dietPlans.getDietPlansByUser,
@@ -120,6 +130,76 @@ function DietPlanRoute() {
     return totals
   }, [mealsByDay])
 
+  useEffect(() => {
+    return () => {
+      if (imagePreviewUrl) {
+        URL.revokeObjectURL(imagePreviewUrl)
+      }
+    }
+  }, [imagePreviewUrl])
+
+  const clearImageState = () => {
+    if (imagePreviewUrl) {
+      URL.revokeObjectURL(imagePreviewUrl)
+    }
+    setSelectedImageFile(null)
+    setImagePreviewUrl(null)
+    setImageStorageId(null)
+    if (imageInputRef.current) {
+      imageInputRef.current.value = ''
+    }
+  }
+
+  const handlePickImage = () => {
+    imageInputRef.current?.click()
+  }
+
+  const handleImageChange = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please select an image file')
+      clearImageState()
+      return
+    }
+
+    if (file.size > MAX_IMAGE_SIZE) {
+      toast.error('Image must be 5MB or smaller')
+      clearImageState()
+      return
+    }
+
+    if (imagePreviewUrl) {
+      URL.revokeObjectURL(imagePreviewUrl)
+    }
+
+    const previewUrl = URL.createObjectURL(file)
+    setSelectedImageFile(file)
+    setImagePreviewUrl(previewUrl)
+    setIsUploadingImage(true)
+
+    try {
+      const uploadUrl = await generateUploadUrl()
+      const response = await fetch(uploadUrl, {
+        method: 'POST',
+        body: file,
+      })
+
+      if (!response.ok) {
+        throw new Error('Upload failed')
+      }
+
+      const data = await response.json()
+      setImageStorageId(data.storageId)
+    } catch {
+      toast.error('Failed to upload image')
+      clearImageState()
+    } finally {
+      setIsUploadingImage(false)
+    }
+  }
+
   const handleLogDiet = async () => {
     if (!user) {
       toast.error('Please sign in first')
@@ -129,10 +209,14 @@ function DietPlanRoute() {
       toast.error('Please enter a meal title')
       return
     }
-    const caloriesValue = parseFloat(calories)
-    if (isNaN(caloriesValue) || caloriesValue <= 0) {
-      toast.error('Please enter valid calories')
-      return
+    let caloriesValue: number | undefined
+    if (!isTrainerManaged) {
+      const parsedCalories = parseFloat(calories)
+      if (isNaN(parsedCalories) || parsedCalories <= 0) {
+        toast.error('Please enter valid calories')
+        return
+      }
+      caloriesValue = parsedCalories
     }
 
     try {
@@ -142,6 +226,7 @@ function DietPlanRoute() {
         title: dietTitle,
         description: dietDescription,
         calories: caloriesValue,
+        imageId: imageStorageId ?? undefined,
       })
       toast.success(
         `${mealType.charAt(0).toUpperCase() + mealType.slice(1)} logged!`,
@@ -149,6 +234,7 @@ function DietPlanRoute() {
       setDietTitle('')
       setDietDescription('')
       setCalories('')
+      clearImageState()
       setDietDrawerOpen(false)
     } catch {
       toast.error('Failed to log meal')
@@ -239,14 +325,51 @@ function DietPlanRoute() {
                   </TabsList>
                 </Tabs>
 
-                <Button variant="outline" className="w-full h-32 border-dashed">
-                  <div className="flex flex-col items-center gap-2">
-                    <Camera className="h-8 w-8 text-muted-foreground" />
-                    <span className="text-sm text-muted-foreground">
-                      Add Photo
-                    </span>
-                  </div>
-                </Button>
+                <div className="space-y-3">
+                  <input
+                    ref={imageInputRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleImageChange}
+                  />
+                  <Button
+                    variant="outline"
+                    className="w-full h-32 border-dashed p-0"
+                    onClick={handlePickImage}
+                    disabled={isUploadingImage}
+                  >
+                    {imagePreviewUrl ? (
+                      <img
+                        src={imagePreviewUrl}
+                        alt="Meal preview"
+                        className="h-full w-full rounded-md object-cover"
+                      />
+                    ) : (
+                      <div className="flex flex-col items-center gap-2">
+                        <Camera className="h-8 w-8 text-muted-foreground" />
+                        <span className="text-sm text-muted-foreground">
+                          {isUploadingImage ? 'Uploading...' : 'Add Photo'}
+                        </span>
+                      </div>
+                    )}
+                  </Button>
+                  {imagePreviewUrl && (
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground truncate">
+                        {selectedImageFile?.name ?? 'Selected image'}
+                      </span>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={clearImageState}
+                      >
+                        Remove
+                      </Button>
+                    </div>
+                  )}
+                </div>
 
                 <div className="space-y-2">
                   <label htmlFor="diet-title" className="text-sm font-medium">
@@ -275,51 +398,53 @@ function DietPlanRoute() {
                   />
                 </div>
 
-                <div className="space-y-2">
-                  <label htmlFor="calories" className="text-sm font-medium">
-                    Calories
-                  </label>
-                  <div className="flex items-center gap-3">
-                    <Button
-                      variant="outline"
-                      size="lg"
-                      onClick={() => {
-                        const current = parseFloat(calories) || 0
-                        setCalories(Math.max(0, current - 50).toString())
-                      }}
-                      className="h-11 w-11 rounded-full p-0"
-                    >
-                      <span className="text-xl font-semibold">-</span>
-                    </Button>
+                {!isTrainerManaged && (
+                  <div className="space-y-2">
+                    <label htmlFor="calories" className="text-sm font-medium">
+                      Calories
+                    </label>
+                    <div className="flex items-center gap-3">
+                      <Button
+                        variant="outline"
+                        size="lg"
+                        onClick={() => {
+                          const current = parseFloat(calories) || 0
+                          setCalories(Math.max(0, current - 50).toString())
+                        }}
+                        className="h-11 w-11 rounded-full p-0"
+                      >
+                        <span className="text-xl font-semibold">-</span>
+                      </Button>
 
-                    <div className="relative flex-1">
-                      <Input
-                        id="calories"
-                        type="number"
-                        step="10"
-                        placeholder="0"
-                        value={calories}
-                        onChange={(e) => setCalories(e.target.value)}
-                        className="pr-16 text-lg h-11 text-center font-semibold"
-                      />
-                      <span className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground font-medium">
-                        kcal
-                      </span>
+                      <div className="relative flex-1">
+                        <Input
+                          id="calories"
+                          type="number"
+                          step="10"
+                          placeholder="0"
+                          value={calories}
+                          onChange={(e) => setCalories(e.target.value)}
+                          className="pr-16 text-lg h-11 text-center font-semibold"
+                        />
+                        <span className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground font-medium">
+                          kcal
+                        </span>
+                      </div>
+
+                      <Button
+                        variant="outline"
+                        size="lg"
+                        onClick={() => {
+                          const current = parseFloat(calories) || 0
+                          setCalories((current + 50).toString())
+                        }}
+                        className="h-11 w-11 rounded-full p-0"
+                      >
+                        <span className="text-xl font-semibold">+</span>
+                      </Button>
                     </div>
-
-                    <Button
-                      variant="outline"
-                      size="lg"
-                      onClick={() => {
-                        const current = parseFloat(calories) || 0
-                        setCalories((current + 50).toString())
-                      }}
-                      className="h-11 w-11 rounded-full p-0"
-                    >
-                      <span className="text-xl font-semibold">+</span>
-                    </Button>
                   </div>
-                </div>
+                )}
               </div>
             </div>
 
@@ -328,10 +453,13 @@ function DietPlanRoute() {
                 onClick={handleLogDiet}
                 size="lg"
                 className="w-full"
-                disabled={
-                  !dietTitle.trim() || !calories || parseFloat(calories) <= 0
-                }
-              >
+              disabled={
+                !dietTitle.trim() ||
+                (needsCalories &&
+                  (!calories || parseFloat(calories) <= 0)) ||
+                isUploadingImage
+              }
+            >
                 <UtensilsCrossed className="mr-2 h-4 w-4" />
                 Log Meal
               </Button>
@@ -536,14 +664,51 @@ function DietPlanRoute() {
                 </TabsList>
               </Tabs>
 
-              <Button variant="outline" className="w-full h-32 border-dashed">
-                <div className="flex flex-col items-center gap-2">
-                  <Camera className="h-8 w-8 text-muted-foreground" />
-                  <span className="text-sm text-muted-foreground">
-                    Add Photo
-                  </span>
-                </div>
-              </Button>
+              <div className="space-y-3">
+                <input
+                  ref={imageInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleImageChange}
+                />
+                <Button
+                  variant="outline"
+                  className="w-full h-32 border-dashed p-0"
+                  onClick={handlePickImage}
+                  disabled={isUploadingImage}
+                >
+                  {imagePreviewUrl ? (
+                    <img
+                      src={imagePreviewUrl}
+                      alt="Meal preview"
+                      className="h-full w-full rounded-md object-cover"
+                    />
+                  ) : (
+                    <div className="flex flex-col items-center gap-2">
+                      <Camera className="h-8 w-8 text-muted-foreground" />
+                      <span className="text-sm text-muted-foreground">
+                        {isUploadingImage ? 'Uploading...' : 'Add Photo'}
+                      </span>
+                    </div>
+                  )}
+                </Button>
+                {imagePreviewUrl && (
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-muted-foreground truncate">
+                      {selectedImageFile?.name ?? 'Selected image'}
+                    </span>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={clearImageState}
+                    >
+                      Remove
+                    </Button>
+                  </div>
+                )}
+              </div>
 
               <div className="space-y-2">
                 <label htmlFor="diet-title" className="text-sm font-medium">
@@ -626,7 +791,10 @@ function DietPlanRoute() {
               size="lg"
               className="w-full"
               disabled={
-                !dietTitle.trim() || !calories || parseFloat(calories) <= 0
+                !dietTitle.trim() ||
+                (needsCalories &&
+                  (!calories || parseFloat(calories) <= 0)) ||
+                isUploadingImage
               }
             >
               <UtensilsCrossed className="mr-2 h-4 w-4" />

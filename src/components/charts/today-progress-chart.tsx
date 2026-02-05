@@ -1,6 +1,6 @@
 'use client'
 
-import { RadialBar, RadialBarChart } from 'recharts'
+import { PolarAngleAxis, RadialBar, RadialBarChart } from 'recharts'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
   ChartContainer,
@@ -14,24 +14,22 @@ import { api } from 'convex/_generated/api'
 
 const chartConfig = {
   calories: {
-    label: 'Calories',
+    label: 'Calories Eaten',
     color: 'var(--chart-1)',
   },
-  workout: {
-    label: 'Workout',
+  duration: {
+    label: 'Duration',
     color: 'var(--chart-2)',
   },
-  protein: {
-    label: 'Protein',
+  progress: {
+    label: 'Progress',
     color: 'var(--chart-4)',
   },
 } satisfies ChartConfig
 
-// Default targets - these could come from user settings
 const TARGETS = {
   caloriesConsumed: 2000, // kcal
   workoutTime: 60, // minutes
-  caloriesBurned: 500, // kcal
 }
 
 export function TodayProgressChart() {
@@ -49,57 +47,71 @@ export function TodayProgressChart() {
     user ? { userId: user._id, limit: 10 } : 'skip',
   )
 
-  // Calculate today's workout stats
   const getTodayWorkoutStats = () => {
-    if (!recentSessions) return { duration: 0, caloriesBurned: 0 }
+    if (!recentSessions) {
+      return {
+        durationMinutes: 0,
+        completedSets: 0,
+        totalSets: 0,
+      }
+    }
 
     const today = new Date()
     today.setHours(0, 0, 0, 0)
     const todayTimestamp = today.getTime()
 
     const todayWorkouts = recentSessions.filter(
-      (w) => w.startTime >= todayTimestamp && w.status === 'completed',
+      (w) => w.startTime >= todayTimestamp,
     )
 
-    const duration = todayWorkouts.reduce(
-      (sum, w) => sum + Math.round((w.totalTime || 0) / 60),
-      0,
-    )
-    const caloriesBurned = todayWorkouts.reduce(
-      (sum, w) => sum + (w.totalCaloriesBurned || 0),
-      0,
-    )
+    let durationMinutes = 0
+    let completedSets = 0
+    let totalSets = 0
 
-    return { duration, caloriesBurned }
+    todayWorkouts.forEach((session) => {
+      durationMinutes += Math.round((session.totalTime || 0) / 60)
+
+      session.exercises?.forEach((exercise) => {
+        const sets = exercise.sets ?? []
+        const totalForExercise =
+          sets.length > 0 ? sets.length : exercise.noOfSets || 0
+        totalSets += totalForExercise
+        completedSets += sets.filter((set) => set.completed).length
+      })
+    })
+
+    return { durationMinutes, completedSets, totalSets }
   }
 
   const todayWorkoutStats = getTodayWorkoutStats()
   const caloriesConsumed = todayCalories?.totalCalories ?? 0
-
+  const progressPercent =
+    todayWorkoutStats.totalSets > 0
+      ? Math.round(
+          (todayWorkoutStats.completedSets / todayWorkoutStats.totalSets) * 100,
+        )
+      : 0
   const caloriesPercent = Math.min(
     100,
     Math.round((caloriesConsumed / TARGETS.caloriesConsumed) * 100),
   )
-  const workoutPercent = Math.min(
+  const durationPercent = Math.min(
     100,
-    Math.round((todayWorkoutStats.duration / TARGETS.workoutTime) * 100),
-  )
-  const burnedPercent = Math.min(
-    100,
-    Math.round(
-      (todayWorkoutStats.caloriesBurned / TARGETS.caloriesBurned) * 100,
-    ),
+    Math.round((todayWorkoutStats.durationMinutes / TARGETS.workoutTime) * 100),
   )
 
   const chartData = [
-    { metric: 'protein', value: burnedPercent, fill: 'var(--color-protein)' },
-    { metric: 'workout', value: workoutPercent, fill: 'var(--color-workout)' },
-    {
-      metric: 'calories',
-      value: caloriesPercent,
-      fill: 'var(--color-calories)',
-    },
+    { metric: 'progress', value: progressPercent, fill: 'var(--color-progress)' },
+    { metric: 'duration', value: durationPercent, fill: 'var(--color-duration)' },
+    { metric: 'calories', value: caloriesPercent, fill: 'var(--color-calories)' },
   ]
+
+  const formatDuration = (minutes: number) => {
+    const hours = Math.floor(minutes / 60)
+    const mins = minutes % 60
+    if (hours <= 0) return `${mins}m`
+    return `${hours}h ${mins}m`
+  }
 
   if (!user) {
     return (
@@ -125,7 +137,6 @@ export function TodayProgressChart() {
       </CardHeader>
       <CardContent>
         <div className="flex items-center justify-center gap-8">
-          {/* Radial Chart */}
           <div className="relative overflow-visible">
             <ChartContainer
               config={chartConfig}
@@ -138,6 +149,11 @@ export function TodayProgressChart() {
                 innerRadius={23}
                 outerRadius={83}
               >
+                <PolarAngleAxis
+                  type="number"
+                  domain={[0, 100]}
+                  tick={false}
+                />
                 <ChartTooltip
                   cursor={false}
                   content={<ChartTooltipContent hideLabel nameKey="metric" />}
@@ -147,33 +163,34 @@ export function TodayProgressChart() {
             </ChartContainer>
           </div>
 
-          {/* Legends */}
           <div className="space-y-4">
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded-full bg-chart-1" />
               <div>
                 <div className="text-sm font-medium">Calories Eaten</div>
                 <div className="text-xs text-muted-foreground">
-                  {caloriesConsumed} / {TARGETS.caloriesConsumed} kcal
+                  {caloriesConsumed.toLocaleString()} /{' '}
+                  {TARGETS.caloriesConsumed} kcal
                 </div>
               </div>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded-full bg-chart-2" />
               <div>
-                <div className="text-sm font-medium">Workout Time</div>
+                <div className="text-sm font-medium">Duration</div>
                 <div className="text-xs text-muted-foreground">
-                  {todayWorkoutStats.duration} / {TARGETS.workoutTime} min
+                  {formatDuration(todayWorkoutStats.durationMinutes)} /{' '}
+                  {TARGETS.workoutTime} min
                 </div>
               </div>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded-full bg-chart-4" />
               <div>
-                <div className="text-sm font-medium">Calories Burned</div>
+                <div className="text-sm font-medium">Progress</div>
                 <div className="text-xs text-muted-foreground">
-                  {todayWorkoutStats.caloriesBurned} / {TARGETS.caloriesBurned}{' '}
-                  kcal
+                  {todayWorkoutStats.completedSets}/
+                  {todayWorkoutStats.totalSets} sets
                 </div>
               </div>
             </div>

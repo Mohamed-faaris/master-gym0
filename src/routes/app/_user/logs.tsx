@@ -101,7 +101,7 @@ function RouteComponent() {
             if (!acc[dateKey]) {
               acc[dateKey] = { date: dateKey, calories: 0 }
             }
-            acc[dateKey].calories += log.calories
+            acc[dateKey].calories += log.calories || 0
             return acc
           },
           {} as Record<string, { date: string; calories: number }>,
@@ -253,7 +253,7 @@ function RouteComponent() {
                           </p>
                           <div className="mt-2">
                             <span className="text-sm font-semibold text-primary">
-                              {log.calories} cal
+                              {log.calories != null ? `${log.calories} cal` : '—'}
                             </span>
                           </div>
                         </div>
