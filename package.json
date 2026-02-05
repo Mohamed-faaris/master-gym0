@@ -20,6 +20,9 @@
   },
   "dependencies": {
     "@base-ui-components/react": "1.0.0-rc.0",
+    "@capacitor/android": "^8.0.2",
+    "@capacitor/cli": "^8.0.2",
+    "@capacitor/core": "^8.0.2",
     "@convex-dev/react-query": "0.1.0",
     "@modelcontextprotocol/sdk": "^1.25.3",
     "@radix-ui/react-dialog": "^1.1.15",
