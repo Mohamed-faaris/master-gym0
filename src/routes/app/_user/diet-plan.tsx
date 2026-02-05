@@ -386,7 +386,10 @@ function DietPlanRoute() {
                 </div>
 
                 <div className="space-y-2">
-                  <label htmlFor="diet-description" className="text-sm font-medium">
+                  <label
+                    htmlFor="diet-description"
+                    className="text-sm font-medium"
+                  >
                     Description
                   </label>
                   <textarea
@@ -453,13 +456,12 @@ function DietPlanRoute() {
                 onClick={handleLogDiet}
                 size="lg"
                 className="w-full"
-              disabled={
-                !dietTitle.trim() ||
-                (needsCalories &&
-                  (!calories || parseFloat(calories) <= 0)) ||
-                isUploadingImage
-              }
-            >
+                disabled={
+                  !dietTitle.trim() ||
+                  (needsCalories && (!calories || parseFloat(calories) <= 0)) ||
+                  isUploadingImage
+                }
+              >
                 <UtensilsCrossed className="mr-2 h-4 w-4" />
                 Log Meal
               </Button>
@@ -725,7 +727,10 @@ function DietPlanRoute() {
               </div>
 
               <div className="space-y-2">
-                <label htmlFor="diet-description" className="text-sm font-medium">
+                <label
+                  htmlFor="diet-description"
+                  className="text-sm font-medium"
+                >
                   Description
                 </label>
                 <textarea
@@ -792,8 +797,7 @@ function DietPlanRoute() {
               className="w-full"
               disabled={
                 !dietTitle.trim() ||
-                (needsCalories &&
-                  (!calories || parseFloat(calories) <= 0)) ||
+                (needsCalories && (!calories || parseFloat(calories) <= 0)) ||
                 isUploadingImage
               }
             >
