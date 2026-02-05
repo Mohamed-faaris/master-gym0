@@ -52,6 +52,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       <head>
         <HeadContent />
         <script src="https://tweakcn.com/live-preview.min.js"></script>
+        <link rel="manifest" href="/manifest.json" />
       </head>
       <body className="dark">
         <ConvexProvider>
