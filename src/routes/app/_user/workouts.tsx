@@ -243,7 +243,7 @@ function RouteComponent() {
       {user && (
         <Link
           to="/app/workout-session"
-          className="fixed inset-x-4 bottom-6 z-30 m-16"
+          className="fixed inset-x-4 bottom-6 z-30 mb-15"
         >
           <Button className="h-14 w-full rounded-full shadow-lg">
             <Dumbbell className="w-5 h-5 mr-2" />

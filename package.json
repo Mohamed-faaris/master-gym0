@@ -14,7 +14,9 @@
     "db:migrate": "drizzle-kit migrate",
     "db:push": "drizzle-kit push",
     "db:pull": "drizzle-kit pull",
-    "db:studio": "drizzle-kit studio"
+    "db:studio": "drizzle-kit studio",
+    "convex:seed": "convex run seed:seedDatabase",
+    "convex:clear": "convex run seed:clearDatabase"
   },
   "dependencies": {
     "@base-ui-components/react": "1.0.0-rc.0",

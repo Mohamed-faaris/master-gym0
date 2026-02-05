@@ -19,7 +19,7 @@ export const seedDatabase = mutation({
 
     // Create trainer user
     const trainerId = await ctx.db.insert('users', {
-      name: 'John Trainer',
+      name: 'Arjun Murthy',
       phoneNumber: '1111111111',
       email: 'trainer@gym.com',
       pin: '1234',
@@ -46,9 +46,9 @@ export const seedDatabase = mutation({
 
     // Create client users
     const client1Id = await ctx.db.insert('users', {
-      name: 'Sarah Johnson',
+      name: 'Priya Selvaraj',
       phoneNumber: '2222222222',
-      email: 'sarah@example.com',
+      email: 'priya@example.com',
       pin: '1234',
       role: 'trainerManagedCustomer',
       goal: 'weightLoss',
@@ -68,16 +68,16 @@ export const seedDatabase = mutation({
       accentColor: '#ec4899',
       currentWeight: 72,
       targetWeight: 65,
-      emergencyContactName: 'Mike Johnson',
+      emergencyContactName: 'Rajesh Selvaraj',
       emergencyContactPhone: '9999999991',
       createdAt: now,
       updatedAt: now,
     })
 
     const client2Id = await ctx.db.insert('users', {
-      name: 'Mike Chen',
+      name: 'Vikram Krishnan',
       phoneNumber: '3333333333',
-      email: 'mike@example.com',
+      email: 'vikram@example.com',
       pin: '1234',
       role: 'trainerManagedCustomer',
       goal: 'muscleGain',
@@ -97,16 +97,16 @@ export const seedDatabase = mutation({
       accentColor: '#10b981',
       currentWeight: 75,
       targetWeight: 85,
-      emergencyContactName: 'Lisa Chen',
+      emergencyContactName: 'Deepa Krishnan',
       emergencyContactPhone: '9999999992',
       createdAt: now,
       updatedAt: now,
     })
 
     const client3Id = await ctx.db.insert('users', {
-      name: 'Emma Davis',
+      name: 'Anjali Iyer',
       phoneNumber: '4444444444',
-      email: 'emma@example.com',
+      email: 'anjali@example.com',
       pin: '1234',
       role: 'selfManagedCustomer',
       goal: 'endurance',
@@ -124,7 +124,7 @@ export const seedDatabase = mutation({
       accentColor: '#f59e0b',
       currentWeight: 68,
       targetWeight: 62,
-      emergencyContactName: 'Tom Davis',
+      emergencyContactName: 'Karthik Iyer',
       emergencyContactPhone: '9999999993',
       createdAt: now,
       updatedAt: now,
@@ -170,6 +170,38 @@ export const seedDatabase = mutation({
           ],
         },
         {
+          day: 'tue',
+          exercises: [
+            {
+              exerciseName: 'Incline Dumbbell Press',
+              noOfSets: 3,
+              sets: [
+                { reps: 10, weight: 25 },
+                { reps: 8, weight: 30 },
+                { reps: 6, weight: 35 },
+              ],
+            },
+            {
+              exerciseName: 'Dumbbell Rows',
+              noOfSets: 3,
+              sets: [
+                { reps: 10, weight: 30 },
+                { reps: 8, weight: 35 },
+                { reps: 6, weight: 40 },
+              ],
+            },
+            {
+              exerciseName: 'Leg Curls',
+              noOfSets: 3,
+              sets: [
+                { reps: 12, weight: 40 },
+                { reps: 10, weight: 50 },
+                { reps: 8, weight: 60 },
+              ],
+            },
+          ],
+        },
+        {
           day: 'wed',
           exercises: [
             {
@@ -197,6 +229,39 @@ export const seedDatabase = mutation({
                 { reps: 10, weight: 60 },
                 { reps: 8, weight: 70 },
                 { reps: 6, weight: 75 },
+              ],
+            },
+          ],
+        },
+        {
+          day: 'thu',
+          exercises: [
+            {
+              exerciseName: 'Leg Press',
+              noOfSets: 4,
+              sets: [
+                { reps: 12, weight: 150 },
+                { reps: 10, weight: 170 },
+                { reps: 8, weight: 190 },
+                { reps: 6, weight: 200 },
+              ],
+            },
+            {
+              exerciseName: 'Cable Flyes',
+              noOfSets: 3,
+              sets: [
+                { reps: 12, weight: 25 },
+                { reps: 10, weight: 30 },
+                { reps: 8, weight: 35 },
+              ],
+            },
+            {
+              exerciseName: 'Barbell Curls',
+              noOfSets: 3,
+              sets: [
+                { reps: 10, weight: 30 },
+                { reps: 8, weight: 35 },
+                { reps: 6, weight: 40 },
               ],
             },
           ],
@@ -234,6 +299,57 @@ export const seedDatabase = mutation({
             },
           ],
         },
+        {
+          day: 'sat',
+          exercises: [
+            {
+              exerciseName: 'Smith Machine Squat',
+              noOfSets: 3,
+              sets: [
+                { reps: 10, weight: 90 },
+                { reps: 8, weight: 100 },
+                { reps: 6, weight: 110 },
+              ],
+            },
+            {
+              exerciseName: 'Dumbbell Press',
+              noOfSets: 3,
+              sets: [
+                { reps: 10, weight: 30 },
+                { reps: 8, weight: 35 },
+                { reps: 6, weight: 40 },
+              ],
+            },
+            {
+              exerciseName: 'Machine Chest Press',
+              noOfSets: 3,
+              sets: [
+                { reps: 12, weight: 60 },
+                { reps: 10, weight: 70 },
+                { reps: 8, weight: 80 },
+              ],
+            },
+          ],
+        },
+        {
+          day: 'sun',
+          exercises: [
+            {
+              exerciseName: 'Light Cardio - Treadmill',
+              noOfSets: 1,
+              sets: [
+                { notes: '30 minutes at moderate pace' },
+              ],
+            },
+            {
+              exerciseName: 'Stretching & Flexibility',
+              noOfSets: 1,
+              sets: [
+                { notes: '20 minutes full body stretch' },
+              ],
+            },
+          ],
+        },
       ],
       createdBy: trainerId,
       createdAt: now,
@@ -245,6 +361,21 @@ export const seedDatabase = mutation({
       description: '6-week cardio and endurance focused training program',
       durationWeeks: 6,
       days: [
+        {
+          day: 'mon',
+          exercises: [
+            {
+              exerciseName: 'Treadmill Running',
+              noOfSets: 1,
+              sets: [{ notes: '30 minutes steady state' }],
+            },
+            {
+              exerciseName: 'Burpees',
+              noOfSets: 3,
+              sets: [{ reps: 15 }, { reps: 12 }, { reps: 10 }],
+            },
+          ],
+        },
         {
           day: 'tue',
           exercises: [
@@ -266,6 +397,21 @@ export const seedDatabase = mutation({
                 { notes: '45 seconds' },
                 { notes: '60 seconds' },
               ],
+            },
+          ],
+        },
+        {
+          day: 'wed',
+          exercises: [
+            {
+              exerciseName: 'Cycling',
+              noOfSets: 1,
+              sets: [{ notes: '40 minutes moderate intensity' }],
+            },
+            {
+              exerciseName: 'Jump Rope',
+              noOfSets: 3,
+              sets: [{ notes: '2 minutes' }, { notes: '2 minutes' }, { notes: '2 minutes' }],
             },
           ],
         },
@@ -293,6 +439,21 @@ export const seedDatabase = mutation({
           ],
         },
         {
+          day: 'fri',
+          exercises: [
+            {
+              exerciseName: 'Stair Climber',
+              noOfSets: 1,
+              sets: [{ notes: '20 minutes' }],
+            },
+            {
+              exerciseName: 'Mountain Climbers',
+              noOfSets: 3,
+              sets: [{ reps: 20 }, { reps: 20 }, { reps: 20 }],
+            },
+          ],
+        },
+        {
           day: 'sat',
           exercises: [
             {
@@ -304,6 +465,21 @@ export const seedDatabase = mutation({
               exerciseName: 'Hanging Leg Raises',
               noOfSets: 3,
               sets: [{ reps: 10 }, { reps: 8 }, { reps: 6 }],
+            },
+          ],
+        },
+        {
+          day: 'sun',
+          exercises: [
+            {
+              exerciseName: 'Long Steady Run',
+              noOfSets: 1,
+              sets: [{ notes: '45-60 minutes easy pace' }],
+            },
+            {
+              exerciseName: 'Yoga & Recovery',
+              noOfSets: 1,
+              sets: [{ notes: '20 minutes' }],
             },
           ],
         },
@@ -439,15 +615,33 @@ export const seedDatabase = mutation({
       updatedAt: now,
     })
 
-    // Create diet logs - comprehensive for multiple days
-    // Today's meals for client1
+    // Create diet logs - comprehensive for multiple days and users
+    // Client 1 (Priya Selvaraj) - Today's meals
     await ctx.db.insert('dietLogs', {
       userId: client1Id,
       mealType: 'breakfast',
       title: 'Oatmeal with Berries',
       description: 'Oats, blueberries, almond milk, chia seeds',
       calories: 350,
-      createdAt: now - 2 * 60 * 60 * 1000, // 2 hours ago
+      createdAt: now - 2 * 60 * 60 * 1000,
+    })
+
+    await ctx.db.insert('dietLogs', {
+      userId: client1Id,
+      mealType: 'lunch',
+      title: 'Grilled Chicken Salad',
+      description: 'Grilled chicken, mixed greens, olive oil dressing',
+      calories: 450,
+      createdAt: now - 6 * 60 * 60 * 1000,
+    })
+
+    await ctx.db.insert('dietLogs', {
+      userId: client1Id,
+      mealType: 'snack',
+      title: 'Greek Yogurt & Nuts',
+      description: 'Greek yogurt with honey and almonds',
+      calories: 200,
+      createdAt: now - 4 * 60 * 60 * 1000,
     })
 
     await ctx.db.insert('dietLogs', {
@@ -456,7 +650,16 @@ export const seedDatabase = mutation({
       title: 'Protein Shake',
       description: 'Whey protein, banana, almond butter',
       calories: 280,
-      createdAt: now - 3 * 60 * 60 * 1000, // 3 hours ago (after workout)
+      createdAt: now - 3 * 60 * 60 * 1000,
+    })
+
+    await ctx.db.insert('dietLogs', {
+      userId: client1Id,
+      mealType: 'dinner',
+      title: 'Baked Salmon with Veggies',
+      description: 'Salmon fillet, roasted vegetables, quinoa',
+      calories: 520,
+      createdAt: now - 1 * 60 * 60 * 1000,
     })
 
     // Yesterday's meals for client1
@@ -472,31 +675,31 @@ export const seedDatabase = mutation({
     await ctx.db.insert('dietLogs', {
       userId: client1Id,
       mealType: 'lunch',
-      title: 'Grilled Chicken Salad',
-      description: 'Chicken breast, mixed greens, olive oil dressing',
-      calories: 450,
+      title: 'Turkey Sandwich',
+      description: 'Whole grain bread, turkey, lettuce, tomato',
+      calories: 410,
       createdAt: now - 1 * 24 * 60 * 60 * 1000 - 6 * 60 * 60 * 1000,
     })
 
     await ctx.db.insert('dietLogs', {
       userId: client1Id,
-      mealType: 'dinner',
-      title: 'Salmon with Quinoa',
-      description: 'Baked salmon, quinoa, steamed vegetables',
-      calories: 580,
-      createdAt: now - 1 * 24 * 60 * 60 * 1000 - 12 * 60 * 60 * 1000,
+      mealType: 'snack',
+      title: 'Apple & Almond Butter',
+      description: 'Red apple with almond butter',
+      calories: 200,
+      createdAt: now - 1 * 24 * 60 * 60 * 1000 - 4 * 60 * 60 * 1000,
     })
 
     await ctx.db.insert('dietLogs', {
       userId: client1Id,
-      mealType: 'snack',
-      title: 'Greek Yogurt',
-      description: 'Greek yogurt with honey and walnuts',
-      calories: 180,
-      createdAt: now - 1 * 24 * 60 * 60 * 1000 - 9 * 60 * 60 * 1000,
+      mealType: 'dinner',
+      title: 'Grilled Chicken Breast',
+      description: 'Chicken breast, sweet potato, steamed broccoli',
+      calories: 480,
+      createdAt: now - 1 * 24 * 60 * 60 * 1000 - 12 * 60 * 60 * 1000,
     })
 
-    // Day 2 meals for client1
+    // 2 days ago for client1
     await ctx.db.insert('dietLogs', {
       userId: client1Id,
       mealType: 'breakfast',
@@ -509,9 +712,9 @@ export const seedDatabase = mutation({
     await ctx.db.insert('dietLogs', {
       userId: client1Id,
       mealType: 'lunch',
-      title: 'Turkey Sandwich',
-      description: 'Whole grain bread, turkey, lettuce, tomato',
-      calories: 410,
+      title: 'Tuna Salad',
+      description: 'Canned tuna, lettuce, tomato, olive oil',
+      calories: 320,
       createdAt: now - 2 * 24 * 60 * 60 * 1000 - 6 * 60 * 60 * 1000,
     })
 
@@ -524,14 +727,32 @@ export const seedDatabase = mutation({
       createdAt: now - 2 * 24 * 60 * 60 * 1000 - 12 * 60 * 60 * 1000,
     })
 
-    // Today's meals for client2
+    await ctx.db.insert('dietLogs', {
+      userId: client1Id,
+      mealType: 'snack',
+      title: 'Protein Bar',
+      description: 'High protein granola bar',
+      calories: 220,
+      createdAt: now - 2 * 24 * 60 * 60 * 1000 - 4 * 60 * 60 * 1000,
+    })
+
+    // Client 2 (Vikram Krishnan) - Today's meals
     await ctx.db.insert('dietLogs', {
       userId: client2Id,
       mealType: 'breakfast',
       title: 'Protein Pancakes',
       description: 'Eggs, oats, banana, peanut butter',
       calories: 550,
-      createdAt: now - 3 * 60 * 60 * 1000, // 3 hours ago
+      createdAt: now - 3 * 60 * 60 * 1000,
+    })
+
+    await ctx.db.insert('dietLogs', {
+      userId: client2Id,
+      mealType: 'lunch',
+      title: 'Beef & Rice Bowl',
+      description: 'Lean ground beef, brown rice, broccoli, avocado',
+      calories: 750,
+      createdAt: now - 7 * 60 * 60 * 1000,
     })
 
     await ctx.db.insert('dietLogs', {
@@ -549,7 +770,16 @@ export const seedDatabase = mutation({
       title: 'Mass Gainer Shake',
       description: 'Whey protein, oats, banana, milk, peanut butter',
       calories: 650,
-      createdAt: now - 1 * 60 * 60 * 1000, // 1 hour ago
+      createdAt: now - 1 * 60 * 60 * 1000,
+    })
+
+    await ctx.db.insert('dietLogs', {
+      userId: client2Id,
+      mealType: 'dinner',
+      title: 'Grilled Salmon',
+      description: 'Salmon, jasmine rice, mixed vegetables',
+      calories: 720,
+      createdAt: now - 8 * 60 * 60 * 1000,
     })
 
     // Yesterday's meals for client2
@@ -557,7 +787,7 @@ export const seedDatabase = mutation({
       userId: client2Id,
       mealType: 'breakfast',
       title: 'Egg White Omelette',
-      description: '6 egg whites, cheese, spinach1234t',
+      description: '6 egg whites, cheese, spinach, mushrooms',
       calories: 480,
       createdAt: now - 1 * 24 * 60 * 60 * 1000 - 2 * 60 * 60 * 1000,
     })
@@ -565,19 +795,10 @@ export const seedDatabase = mutation({
     await ctx.db.insert('dietLogs', {
       userId: client2Id,
       mealType: 'lunch',
-      title: 'Beef & Rice Bowl',
-      description: 'Lean ground beef, brown rice, broccoli',
-      calories: 720,
-      createdAt: now - 1 * 24 * 60 * 60 * 1000 - 6 * 60 * 60 * 1000,
-    })
-
-    await ctx.db.insert('dietLogs', {
-      userId: client2Id,
-      mealType: 'dinner',
-      title: 'Chicken Pasta',
+      title: 'Chicken & Pasta',
       description: 'Grilled chicken, whole wheat pasta, tomato sauce',
       calories: 680,
-      createdAt: now - 1 * 24 * 60 * 60 * 1000 - 12 * 60 * 60 * 1000,
+      createdAt: now - 1 * 24 * 60 * 60 * 1000 - 6 * 60 * 60 * 1000,
     })
 
     await ctx.db.insert('dietLogs', {
@@ -586,14 +807,180 @@ export const seedDatabase = mutation({
       title: 'Mixed Nuts',
       description: 'Almonds, cashews, walnuts',
       calories: 320,
-      createdAt: now - 1 * 24 * 60 * 60 * 1000 - 9 * 60 * 60 * 1000,
+      createdAt: now - 1 * 24 * 60 * 60 * 1000 - 4 * 60 * 60 * 1000,
     })
 
+    await ctx.db.insert('dietLogs', {
+      userId: client2Id,
+      mealType: 'dinner',
+      title: 'Grilled Steak & Potatoes',
+      description: 'Ribeye steak, sweet potato, asparagus',
+      calories: 820,
+      createdAt: now - 1 * 24 * 60 * 60 * 1000 - 12 * 60 * 60 * 1000,
+    })
+
+    // 2 days ago for client2
+    await ctx.db.insert('dietLogs', {
+      userId: client2Id,
+      mealType: 'breakfast',
+      title: 'Pancakes with Protein',
+      description: 'Whole wheat pancakes with maple syrup and protein powder',
+      calories: 500,
+      createdAt: now - 2 * 24 * 60 * 60 * 1000 - 2 * 60 * 60 * 1000,
+    })
+
+    await ctx.db.insert('dietLogs', {
+      userId: client2Id,
+      mealType: 'lunch',
+      title: 'Mutton Biryani',
+      description: 'Spiced biryani with basmati rice and yogurt',
+      calories: 780,
+      createdAt: now - 2 * 24 * 60 * 60 * 1000 - 6 * 60 * 60 * 1000,
+    })
+
+    await ctx.db.insert('dietLogs', {
+      userId: client2Id,
+      mealType: 'snack',
+      title: 'Protein Shake',
+      description: 'Whey protein, banana, milk',
+      calories: 280,
+      createdAt: now - 2 * 24 * 60 * 60 * 1000 - 4 * 60 * 60 * 1000,
+    })
+
+    await ctx.db.insert('dietLogs', {
+      userId: client2Id,
+      mealType: 'dinner',
+      title: 'Tandoori Chicken',
+      description: 'Tandoori chicken, naan, raita',
+      calories: 700,
+      createdAt: now - 2 * 24 * 60 * 60 * 1000 - 12 * 60 * 60 * 1000,
+    })
+
+    // Client 3 (Anjali Iyer) - Today's meals
+    await ctx.db.insert('dietLogs', {
+      userId: client3Id,
+      mealType: 'breakfast',
+      title: 'Dosa with Sambar',
+      description: 'Crispy dosa with sambar and coconut chutney',
+      calories: 320,
+      createdAt: now - 2 * 60 * 60 * 1000,
+    })
+
+    await ctx.db.insert('dietLogs', {
+      userId: client3Id,
+      mealType: 'lunch',
+      title: 'Idli with Sambar',
+      description: 'Steamed idli, sambar, and coconut chutney',
+      calories: 280,
+      createdAt: now - 6 * 60 * 60 * 1000,
+    })
+
+    await ctx.db.insert('dietLogs', {
+      userId: client3Id,
+      mealType: 'snack',
+      title: 'Fruit Smoothie',
+      description: 'Banana, mango, and yogurt smoothie',
+      calories: 180,
+      createdAt: now - 4 * 60 * 60 * 1000,
+    })
+
+    await ctx.db.insert('dietLogs', {
+      userId: client3Id,
+      mealType: 'dinner',
+      title: 'Vegetable Stir-fry',
+      description: 'Mixed vegetables with brown rice',
+      calories: 350,
+      createdAt: now - 12 * 60 * 60 * 1000,
+    })
+
+    // Yesterday's meals for client3
+    await ctx.db.insert('dietLogs', {
+      userId: client3Id,
+      mealType: 'breakfast',
+      title: 'Poha with Peanuts',
+      description: 'Flattened rice with peanuts and vegetables',
+      calories: 280,
+      createdAt: now - 1 * 24 * 60 * 60 * 1000 - 2 * 60 * 60 * 1000,
+    })
+
+    await ctx.db.insert('dietLogs', {
+      userId: client3Id,
+      mealType: 'lunch',
+      title: 'Chapati with Curry',
+      description: 'Whole wheat chapati with chickpea curry',
+      calories: 400,
+      createdAt: now - 1 * 24 * 60 * 60 * 1000 - 6 * 60 * 60 * 1000,
+    })
+
+    await ctx.db.insert('dietLogs', {
+      userId: client3Id,
+      mealType: 'snack',
+      title: 'Coconut Water',
+      description: 'Fresh coconut water',
+      calories: 45,
+      createdAt: now - 1 * 24 * 60 * 60 * 1000 - 4 * 60 * 60 * 1000,
+    })
+
+    await ctx.db.insert('dietLogs', {
+      userId: client3Id,
+      mealType: 'dinner',
+      title: 'Rice & Lentil Curry',
+      description: 'Basmati rice with aromatic lentil curry',
+      calories: 380,
+      createdAt: now - 1 * 24 * 60 * 60 * 1000 - 12 * 60 * 60 * 1000,
+    })
+
+    // 2 days ago for client3
+    await ctx.db.insert('dietLogs', {
+      userId: client3Id,
+      mealType: 'breakfast',
+      title: 'Upma',
+      description: 'Semolina upma with vegetables',
+      calories: 300,
+      createdAt: now - 2 * 24 * 60 * 60 * 1000 - 2 * 60 * 60 * 1000,
+    })
+
+    await ctx.db.insert('dietLogs', {
+      userId: client3Id,
+      mealType: 'lunch',
+      title: 'Pulao',
+      description: 'Vegetable pulao with yogurt',
+      calories: 420,
+      createdAt: now - 2 * 24 * 60 * 60 * 1000 - 6 * 60 * 60 * 1000,
+    })
+
+    await ctx.db.insert('dietLogs', {
+      userId: client3Id,
+      mealType: 'snack',
+      title: 'Banana',
+      description: 'Fresh banana',
+      calories: 89,
+      createdAt: now - 2 * 24 * 60 * 60 * 1000 - 4 * 60 * 60 * 1000,
+    })
+
+    await ctx.db.insert('dietLogs', {
+      userId: client3Id,
+      mealType: 'dinner',
+      title: 'Sambar Rice',
+      description: 'Rice with sambar and papadům',
+      calories: 350,
+      createdAt: now - 2 * 24 * 60 * 60 * 1000 - 12 * 60 * 60 * 1000,
+    })
+
+
+
     // Create weight logs
+    // Client 1 (Priya Selvaraj) - Weight loss journey
     await ctx.db.insert('weightLogs', {
       userId: client1Id,
       weight: 72.5,
       createdAt: now - 30 * 24 * 60 * 60 * 1000, // 30 days ago
+    })
+
+    await ctx.db.insert('weightLogs', {
+      userId: client1Id,
+      weight: 72.2,
+      createdAt: now - 28 * 24 * 60 * 60 * 1000,
     })
 
     await ctx.db.insert('weightLogs', {
@@ -604,8 +991,20 @@ export const seedDatabase = mutation({
 
     await ctx.db.insert('weightLogs', {
       userId: client1Id,
+      weight: 71.5,
+      createdAt: now - 21 * 24 * 60 * 60 * 1000,
+    })
+
+    await ctx.db.insert('weightLogs', {
+      userId: client1Id,
       weight: 71.2,
       createdAt: now - 16 * 24 * 60 * 60 * 1000,
+    })
+
+    await ctx.db.insert('weightLogs', {
+      userId: client1Id,
+      weight: 70.9,
+      createdAt: now - 14 * 24 * 60 * 60 * 1000,
     })
 
     await ctx.db.insert('weightLogs', {
@@ -616,38 +1015,142 @@ export const seedDatabase = mutation({
 
     await ctx.db.insert('weightLogs', {
       userId: client1Id,
+      weight: 70.2,
+      createdAt: now - 5 * 24 * 60 * 60 * 1000,
+    })
+
+    await ctx.db.insert('weightLogs', {
+      userId: client1Id,
       weight: 70.0,
       createdAt: now - 2 * 24 * 60 * 60 * 1000,
     })
 
     await ctx.db.insert('weightLogs', {
+      userId: client1Id,
+      weight: 69.8,
+      createdAt: now - 1 * 24 * 60 * 60 * 1000,
+    })
+
+    // Client 2 (Vikram Krishnan) - Muscle gain journey
+    await ctx.db.insert('weightLogs', {
       userId: client2Id,
-      weight: 78.0,
+      weight: 75.0,
       createdAt: now - 30 * 24 * 60 * 60 * 1000,
     })
 
     await ctx.db.insert('weightLogs', {
       userId: client2Id,
-      weight: 79.2,
+      weight: 76.2,
+      createdAt: now - 28 * 24 * 60 * 60 * 1000,
+    })
+
+    await ctx.db.insert('weightLogs', {
+      userId: client2Id,
+      weight: 77.0,
       createdAt: now - 23 * 24 * 60 * 60 * 1000,
     })
 
     await ctx.db.insert('weightLogs', {
       userId: client2Id,
-      weight: 80.5,
+      weight: 77.8,
+      createdAt: now - 21 * 24 * 60 * 60 * 1000,
+    })
+
+    await ctx.db.insert('weightLogs', {
+      userId: client2Id,
+      weight: 79.2,
       createdAt: now - 16 * 24 * 60 * 60 * 1000,
     })
 
     await ctx.db.insert('weightLogs', {
       userId: client2Id,
-      weight: 81.8,
+      weight: 80.0,
+      createdAt: now - 14 * 24 * 60 * 60 * 1000,
+    })
+
+    await ctx.db.insert('weightLogs', {
+      userId: client2Id,
+      weight: 80.5,
       createdAt: now - 9 * 24 * 60 * 60 * 1000,
     })
 
     await ctx.db.insert('weightLogs', {
       userId: client2Id,
-      weight: 83.0,
+      weight: 81.8,
+      createdAt: now - 5 * 24 * 60 * 60 * 1000,
+    })
+
+    await ctx.db.insert('weightLogs', {
+      userId: client2Id,
+      weight: 82.5,
       createdAt: now - 2 * 24 * 60 * 60 * 1000,
+    })
+
+    await ctx.db.insert('weightLogs', {
+      userId: client2Id,
+      weight: 83.0,
+      createdAt: now - 1 * 24 * 60 * 60 * 1000,
+    })
+
+    // Client 3 (Anjali Iyer) - Endurance training
+    await ctx.db.insert('weightLogs', {
+      userId: client3Id,
+      weight: 68.5,
+      createdAt: now - 30 * 24 * 60 * 60 * 1000,
+    })
+
+    await ctx.db.insert('weightLogs', {
+      userId: client3Id,
+      weight: 68.2,
+      createdAt: now - 28 * 24 * 60 * 60 * 1000,
+    })
+
+    await ctx.db.insert('weightLogs', {
+      userId: client3Id,
+      weight: 68.0,
+      createdAt: now - 23 * 24 * 60 * 60 * 1000,
+    })
+
+    await ctx.db.insert('weightLogs', {
+      userId: client3Id,
+      weight: 67.8,
+      createdAt: now - 21 * 24 * 60 * 60 * 1000,
+    })
+
+    await ctx.db.insert('weightLogs', {
+      userId: client3Id,
+      weight: 67.5,
+      createdAt: now - 16 * 24 * 60 * 60 * 1000,
+    })
+
+    await ctx.db.insert('weightLogs', {
+      userId: client3Id,
+      weight: 67.2,
+      createdAt: now - 14 * 24 * 60 * 60 * 1000,
+    })
+
+    await ctx.db.insert('weightLogs', {
+      userId: client3Id,
+      weight: 66.8,
+      createdAt: now - 9 * 24 * 60 * 60 * 1000,
+    })
+
+    await ctx.db.insert('weightLogs', {
+      userId: client3Id,
+      weight: 66.5,
+      createdAt: now - 5 * 24 * 60 * 60 * 1000,
+    })
+
+    await ctx.db.insert('weightLogs', {
+      userId: client3Id,
+      weight: 66.2,
+      createdAt: now - 2 * 24 * 60 * 60 * 1000,
+    })
+
+    await ctx.db.insert('weightLogs', {
+      userId: client3Id,
+      weight: 65.9,
+      createdAt: now - 1 * 24 * 60 * 60 * 1000,
     })
 
     return {
@@ -658,8 +1161,8 @@ export const seedDatabase = mutation({
         userMeta: 4,
         trainingPlans: 2,
         dietPlans: 2,
-        dietLogs: 18,
-        weightLogs: 10,
+        dietLogs: 40,
+        weightLogs: 30,
       },
     }
   },

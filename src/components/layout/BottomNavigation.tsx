@@ -2,8 +2,6 @@ import * as React from 'react'
 import { Link, useRouterState } from '@tanstack/react-router'
 import { Home, Dumbbell, User, Scale, Utensils } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { Button } from '@/components/ui/button'
-import { useAuth } from '@/components/auth/useAuth'
 
 interface NavItem {
   to: string
@@ -19,18 +17,25 @@ const navItems: NavItem[] = [
   { to: '/app/account', icon: User, label: 'Account' },
 ]
 
-const navItemsRight: NavItem[] = []
-
 export function BottomNavigation() {
   const router = useRouterState()
   const currentPath = router.location.pathname
-  const { user } = useAuth()
+
+  const normalizePath = (path: string) =>
+    path.endsWith('/') && path !== '/' ? path.slice(0, -1) : path
 
   const isActive = (path: string) => {
-    if (path === '/app') {
-      return currentPath === '/app' || currentPath === '/app/'
+    const normalizedPath = normalizePath(path)
+    const normalizedCurrent = normalizePath(currentPath)
+
+    if (normalizedPath === '/app' || normalizedPath === '/app/_user') {
+      return normalizedCurrent === normalizedPath
     }
-    return currentPath.startsWith(path)
+
+    return (
+      normalizedCurrent === normalizedPath ||
+      normalizedCurrent.startsWith(`${normalizedPath}/`)
+    )
   }
 
   return (
@@ -53,21 +58,6 @@ export function BottomNavigation() {
             </Link>
           ))}
 
-          {navItemsRight.map((item) => (
-            <Link
-              key={item.to}
-              to={item.to}
-              className={cn(
-                'flex flex-col items-center justify-center flex-1 h-full gap-1 text-xs transition-colors',
-                isActive(item.to)
-                  ? 'text-primary'
-                  : 'text-muted-foreground hover:text-foreground',
-              )}
-            >
-              <item.icon className="w-5 h-5" />
-              <span className="font-medium">{item.label}</span>
-            </Link>
-          ))}
         </div>
       </nav>
     </>

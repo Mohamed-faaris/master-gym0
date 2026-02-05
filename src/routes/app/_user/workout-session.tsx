@@ -171,6 +171,9 @@ export function WorkoutSessionRouteComponent() {
       const session = await startSession({
         userId: user._id,
         trainingPlanId: trainingPlan._id,
+        dayOfWeek,
+        dayStart: dayStart.getTime(),
+        dayEnd: dayEnd.getTime(),
       })
       setSessionId(session)
       toast.success('Workout session started')
@@ -191,6 +194,7 @@ export function WorkoutSessionRouteComponent() {
       await completeSession({
         sessionId,
         totalTime: workoutTime,
+        totalCaloriesBurned: Math.round((workoutTime / 60) * 5),
         completedSets: Array.from(completedSets),
       })
       toast.success('Workout completed!')
