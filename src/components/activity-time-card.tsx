@@ -33,6 +33,12 @@ export function ActivityTimeCard() {
     user ? { userId: user._id, limit: 100 } : 'skip',
   )
 
+  // Debug: inspect Convex data at runtime
+  if (import.meta.env.DEV) {
+    console.log('[ActivityTimeCard] user:', user)
+    console.log('[ActivityTimeCard] sessions:', sessions)
+  }
+
   // Calculate chart data based on time range
   const chartData = useMemo(() => {
     if (!sessions) return []
@@ -65,11 +71,21 @@ export function ActivityTimeCard() {
     }
 
     sessions.forEach((session) => {
-      if (session.status === 'completed' && session.startTime) {
+      if (session.startTime) {
         const sessionDate = new Date(session.startTime)
         if (sessionDate >= weekStart && sessionDate < weekEnd) {
           const day = sessionDate.getDay()
-          dayData[day].duration += session.totalTime || 0
+          const endTime = session.endTime ?? session.updatedAt ?? Date.now()
+          const durationSeconds = Math.max(0, (endTime - session.startTime) / 1000)
+          if (import.meta.env.DEV) {
+            console.log('[ActivityTimeCard] session duration seconds:', {
+              sessionId: session._id,
+              startTime: session.startTime,
+              endTime,
+              durationSeconds,
+            })
+          }
+          dayData[day].duration += durationSeconds
           dayData[day].calories += session.totalCaloriesBurned || 0
         }
       }
@@ -78,7 +94,7 @@ export function ActivityTimeCard() {
     const weekDays = ['S', 'M', 'T', 'W', 'T', 'F', 'S']
     return weekDays.map((day, index) => ({
       day,
-      duration: Math.ceil(dayData[index].duration / 60), // Convert to minutes
+      duration: Math.ceil(dayData[index].duration / 60), // seconds -> minutes
       calories: dayData[index].calories,
     }))
   }, [sessions, timeRange])
