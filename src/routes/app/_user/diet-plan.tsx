@@ -98,11 +98,18 @@ function DietPlanRoute() {
   }, [dietPlan])
 
   const availableDays = dayOrder.filter((day) => mealsByDay[day]?.length)
-  const [activeDay, setActiveDay] = useState(dayOrder[0])
+  const todayKey = (['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'] as const)[
+    new Date().getDay()
+  ]
+  const [activeDay, setActiveDay] = useState<string>(todayKey)
 
   useEffect(() => {
     if (!availableDays.length) return
-    setActiveDay((prev) => (availableDays.includes(prev) ? prev : availableDays[0]))
+    setActiveDay((prev) => {
+      if (availableDays.includes(prev)) return prev
+      if (availableDays.includes(todayKey)) return todayKey
+      return availableDays[0]
+    })
   }, [availableDays])
 
   const dayTotals = useMemo(() => {

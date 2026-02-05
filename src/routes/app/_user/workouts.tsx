@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
+import { useEffect, useMemo, useState } from 'react'
 import {
   Calendar,
   Dumbbell,
@@ -19,6 +20,13 @@ import {
 import { Button } from '@/components/ui/button'
 import { useAuth } from '@/components/auth/useAuth'
 import { api } from '@convex/_generated/api'
+import {
+  Tabs,
+  TabsContent,
+  TabsContents,
+  TabsList,
+  TabsTrigger,
+} from '@/components/animate-ui/components/radix/tabs'
 
 export const Route = createFileRoute('/app/_user/workouts')({
   component: RouteComponent,
@@ -70,6 +78,48 @@ function RouteComponent() {
   }
 
   const todayStats = getTodayStats()
+
+  const dayOrder = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'] as const
+  const dayLabels: Record<(typeof dayOrder)[number], string> = {
+    mon: 'Mon',
+    tue: 'Tue',
+    wed: 'Wed',
+    thu: 'Thu',
+    fri: 'Fri',
+    sat: 'Sat',
+    sun: 'Sun',
+  }
+
+  const todayKey = (['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'] as const)[
+    today.getDay()
+  ]
+
+  const sortedDays = useMemo(() => {
+    if (!trainingPlan) return []
+    const orderIndex = new Map(dayOrder.map((day, index) => [day, index]))
+    return [...trainingPlan.days].sort((a, b) => {
+      return (orderIndex.get(a.day) ?? 0) - (orderIndex.get(b.day) ?? 0)
+    })
+  }, [trainingPlan, dayOrder])
+
+  const availableDays = useMemo(
+    () => sortedDays.map((day) => day.day),
+    [sortedDays],
+  )
+  const availableDaySet = useMemo(
+    () => new Set(availableDays),
+    [availableDays],
+  )
+  const [activeDay, setActiveDay] = useState<string | undefined>(todayKey)
+
+  useEffect(() => {
+    if (!availableDays.length) return
+    setActiveDay((prev) => {
+      if (prev && availableDaySet.has(prev)) return prev
+      if (availableDaySet.has(todayKey)) return todayKey
+      return availableDays[0]
+    })
+  }, [availableDays, availableDaySet, todayKey])
 
   return (
     <div className="space-y-4 pb-24">
@@ -192,50 +242,74 @@ function RouteComponent() {
               </CardContent>
             </Card>
 
-            {trainingPlan.days.map((day, index) => (
-              <Card key={index}>
-                <CardHeader>
-                  <CardTitle className="text-lg capitalize">
-                    {day.day}
-                  </CardTitle>
-                  <CardDescription>
-                    {day.exercises.length} exercises
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  {day.exercises.map((exercise, exIndex) => (
-                    <div
-                      key={exIndex}
-                      className="border rounded-lg p-4 space-y-2"
+            <Tabs value={activeDay} onValueChange={setActiveDay}>
+              <TabsList className="grid w-full grid-cols-7">
+                {dayOrder.map((dayKey) => {
+                  const isAvailable = availableDaySet.has(dayKey)
+                  return (
+                    <TabsTrigger
+                      key={dayKey}
+                      value={dayKey}
+                      disabled={!isAvailable}
+                      className="text-xs uppercase"
                     >
-                      <h4 className="font-medium">{exercise.exerciseName}</h4>
-                      <div className="text-sm text-muted-foreground">
-                        {exercise.noOfSets} sets
-                      </div>
-                      <div className="space-y-1">
-                        {exercise.sets.map((set, setIndex) => (
+                      {dayLabels[dayKey]}
+                    </TabsTrigger>
+                  )
+                })}
+              </TabsList>
+
+              <TabsContents className="space-y-4">
+                {sortedDays.map((day) => (
+                  <TabsContent key={day.day} value={day.day}>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="text-lg capitalize">
+                          {day.day}
+                        </CardTitle>
+                        <CardDescription>
+                          {day.exercises.length} exercises
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-3">
+                        {day.exercises.map((exercise, exIndex) => (
                           <div
-                            key={setIndex}
-                            className="text-sm flex items-center gap-2"
+                            key={exIndex}
+                            className="border rounded-lg p-4 space-y-2"
                           >
-                            <span className="text-muted-foreground">
-                              Set {setIndex + 1}:
-                            </span>
-                            <span>{set.reps} reps</span>
-                            {set.weight && <span>@ {set.weight}kg</span>}
-                            {set.notes && (
-                              <span className="text-muted-foreground italic">
-                                ({set.notes})
-                              </span>
-                            )}
+                            <h4 className="font-medium">
+                              {exercise.exerciseName}
+                            </h4>
+                            <div className="text-sm text-muted-foreground">
+                              {exercise.noOfSets} sets
+                            </div>
+                            <div className="space-y-1">
+                              {exercise.sets.map((set, setIndex) => (
+                                <div
+                                  key={setIndex}
+                                  className="text-sm flex items-center gap-2"
+                                >
+                                  <span className="text-muted-foreground">
+                                    Set {setIndex + 1}:
+                                  </span>
+                                  <span>{set.reps} reps</span>
+                                  {set.weight && <span>@ {set.weight}kg</span>}
+                                  {set.notes && (
+                                    <span className="text-muted-foreground italic">
+                                      ({set.notes})
+                                    </span>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
                           </div>
                         ))}
-                      </div>
-                    </div>
-                  ))}
-                </CardContent>
-              </Card>
-            ))}
+                      </CardContent>
+                    </Card>
+                  </TabsContent>
+                ))}
+              </TabsContents>
+            </Tabs>
           </>
         )}
       </div>
