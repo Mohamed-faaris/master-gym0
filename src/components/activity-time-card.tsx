@@ -111,14 +111,14 @@ export function ActivityTimeCard() {
   const dataKey = activeTab === 'duration' ? 'duration' : 'calories'
 
   return (
-    <div className="rounded-2xl bg-gradient-to-br from-slate-900 to-slate-800 p-6 shadow-lg">
+    <div className="rounded-2xl border border-border bg-card p-6 text-card-foreground shadow-lg">
       {/* Header */}
       <div className="mb-6 flex items-start justify-between">
         <div className="flex-1">
-          <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
             Activity Time
           </p>
-          <p className="mt-2 text-4xl font-bold text-white">{displayValue}</p>
+          <p className="mt-2 text-4xl font-bold text-foreground">{displayValue}</p>
         </div>
 
         {/* Time Range Dropdown */}
@@ -126,10 +126,10 @@ export function ActivityTimeCard() {
           value={timeRange}
           onValueChange={(value: any) => setTimeRange(value)}
         >
-          <SelectTrigger className="w-auto border border-slate-700 bg-slate-800 px-3 py-1.5 text-sm text-white hover:bg-slate-700">
+          <SelectTrigger className="w-auto border border-border bg-background px-3 py-1.5 text-sm text-foreground hover:bg-muted">
             <SelectValue />
           </SelectTrigger>
-          <SelectContent className="bg-slate-800 text-white border border-slate-700">
+          <SelectContent className="border-border bg-popover text-popover-foreground">
             <SelectItem value="thisWeek">This Week</SelectItem>
             <SelectItem value="lastWeek">Last Week</SelectItem>
           </SelectContent>
@@ -150,20 +150,21 @@ export function ActivityTimeCard() {
             />
             <XAxis
               dataKey="day"
-              stroke="#94a3b8"
+              stroke="var(--muted-foreground)"
               style={{ fontSize: '12px', fontWeight: 500 }}
               axisLine={{ stroke: 'transparent' }}
               tickLine={false}
             />
             <YAxis hide={true} />
             <Tooltip
-              cursor={{ fill: 'rgba(59, 130, 246, 0.14)' }}
+              cursor={{ fill: 'var(--muted)' }}
               contentStyle={{
-                backgroundColor: '#1e293b',
-                border: '1px solid #475569',
+                backgroundColor: 'var(--popover)',
+                border: '1px solid var(--border)',
                 borderRadius: '8px',
+                color: 'var(--popover-foreground)',
               }}
-              labelStyle={{ color: '#e2e8f0' }}
+              labelStyle={{ color: 'var(--muted-foreground)' }}
               formatter={(value) =>
                 activeTab === 'duration'
                   ? [`${value} min`, '']
@@ -172,8 +173,8 @@ export function ActivityTimeCard() {
             />
             <Bar
               dataKey={dataKey}
-              fill="#3b82f6"
-              activeBar={{ fill: '#60a5fa' }}
+              fill="var(--chart-1)"
+              activeBar={{ fill: 'var(--chart-2)' }}
               radius={[8, 8, 0, 0]}
               isAnimationActive={true}
             />
@@ -182,13 +183,13 @@ export function ActivityTimeCard() {
       </div>
 
       {/* Bottom Navigation Tabs */}
-      <div className="flex items-center justify-center gap-8 border-t border-slate-700 pt-4">
+      <div className="flex items-center justify-center gap-8 border-t border-border pt-4">
         <button
           onClick={() => setActiveTab('duration')}
           className={`pb-2 transition-all ${
             activeTab === 'duration'
-              ? 'border-b-2 border-blue-500 text-white'
-              : 'border-b-2 border-transparent text-slate-500 hover:text-slate-400'
+              ? 'border-b-2 border-primary text-foreground'
+              : 'border-b-2 border-transparent text-muted-foreground hover:text-foreground'
           }`}
         >
           <span className="text-sm font-medium">Duration</span>
@@ -197,8 +198,8 @@ export function ActivityTimeCard() {
           onClick={() => setActiveTab('calories')}
           className={`pb-2 transition-all ${
             activeTab === 'calories'
-              ? 'border-b-2 border-blue-500 text-white'
-              : 'border-b-2 border-transparent text-slate-500 hover:text-slate-400'
+              ? 'border-b-2 border-primary text-foreground'
+              : 'border-b-2 border-transparent text-muted-foreground hover:text-foreground'
           }`}
         >
           <span className="text-sm font-medium">Calories</span>
