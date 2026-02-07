@@ -157,6 +157,7 @@ export function ActivityTimeCard() {
             />
             <YAxis hide={true} />
             <Tooltip
+              cursor={{ fill: 'rgba(59, 130, 246, 0.14)' }}
               contentStyle={{
                 backgroundColor: '#1e293b',
                 border: '1px solid #475569',
@@ -172,6 +173,7 @@ export function ActivityTimeCard() {
             <Bar
               dataKey={dataKey}
               fill="#3b82f6"
+              activeBar={{ fill: '#60a5fa' }}
               radius={[8, 8, 0, 0]}
               isAnimationActive={true}
             />

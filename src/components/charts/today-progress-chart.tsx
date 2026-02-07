@@ -136,11 +136,11 @@ export function TodayProgressChart() {
         <CardTitle>Today's Progress</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="flex items-center justify-center gap-8">
-          <div className="relative overflow-visible">
+        <div className="flex flex-col items-center gap-6 sm:flex-row sm:items-center sm:justify-center sm:gap-8">
+          <div className="relative overflow-visible shrink-0">
             <ChartContainer
               config={chartConfig}
-              className="mx-auto aspect-square w-60 h-60 overflow-visible"
+              className="mx-auto h-48 w-48 overflow-visible sm:h-60 sm:w-60"
             >
               <RadialBarChart
                 data={chartData}
@@ -163,32 +163,32 @@ export function TodayProgressChart() {
             </ChartContainer>
           </div>
 
-          <div className="space-y-4">
+          <div className="w-full max-w-xs space-y-4 sm:w-auto sm:max-w-none">
             <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-chart-1" />
-              <div>
+              <div className="h-3 w-3 shrink-0 rounded-full bg-chart-1" />
+              <div className="min-w-0">
                 <div className="text-sm font-medium">Calories Eaten</div>
-                <div className="text-xs text-muted-foreground">
+                <div className="text-xs text-muted-foreground break-words">
                   {caloriesConsumed.toLocaleString()} /{' '}
                   {TARGETS.caloriesConsumed} kcal
                 </div>
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-chart-2" />
-              <div>
+              <div className="h-3 w-3 shrink-0 rounded-full bg-chart-2" />
+              <div className="min-w-0">
                 <div className="text-sm font-medium">Duration</div>
-                <div className="text-xs text-muted-foreground">
+                <div className="text-xs text-muted-foreground break-words">
                   {formatDuration(todayWorkoutStats.durationMinutes)} /{' '}
                   {TARGETS.workoutTime} min
                 </div>
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-chart-4" />
-              <div>
+              <div className="h-3 w-3 shrink-0 rounded-full bg-chart-4" />
+              <div className="min-w-0">
                 <div className="text-sm font-medium">Progress</div>
-                <div className="text-xs text-muted-foreground">
+                <div className="text-xs text-muted-foreground break-words">
                   {todayWorkoutStats.completedSets}/
                   {todayWorkoutStats.totalSets} sets
                 </div>
