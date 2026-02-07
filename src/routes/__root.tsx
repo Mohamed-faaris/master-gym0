@@ -53,32 +53,6 @@ function RootDocument({ children }: { children: React.ReactNode }) {
   React.useEffect(() => {
     // Configure Capacitor status bar for mobile apps
     StatusBar.setOverlaysWebView({ overlay: false })
-
-    // Block pinch zoom
-    document.addEventListener(
-      'touchmove',
-      function (event) {
-        const touchEvent = event as TouchEvent & { scale?: number }
-        if (touchEvent.scale !== 1) {
-          event.preventDefault()
-        }
-      },
-      { passive: false },
-    )
-
-    // Block double-tap zoom (iOS Safari fix)
-    let lastTouchEnd = 0
-    document.addEventListener(
-      'touchend',
-      function (event) {
-        const now = new Date().getTime()
-        if (now - lastTouchEnd <= 300) {
-          event.preventDefault()
-        }
-        lastTouchEnd = now
-      },
-      false,
-    )
   }, [])
 
   return (
