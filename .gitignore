@@ -16,3 +16,5 @@ mcp-todos.json
 
 # Local Netlify folder
 .netlify
+*.keystore
+master-gym.keystore

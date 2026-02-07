@@ -1,4 +1,4 @@
-name: Build Release APK
+name: Build Signed Release APK
 
 on:
   push:
@@ -34,6 +34,11 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
+      - name: Install apksigner
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y apksigner
+
       - name: Install dependencies
         run: pnpm install
 
@@ -50,14 +55,34 @@ jobs:
           cd android
           ./gradlew assembleRelease
 
-      - name: Upload Release APK
+      - name: Decode Keystore
+        env:
+          ENCODED_STRING: ${{ secrets.KEYSTORE_BASE64 }}
+        run: |
+          echo $ENCODED_STRING | base64 -di > master-gym.keystore
+
+      - name: Sign APK
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+        run: |
+          apksigner sign \
+            --ks master-gym.keystore \
+            --ks-key-alias $KEY_ALIAS \
+            --ks-pass pass:$KEYSTORE_PASSWORD \
+            --key-pass pass:$KEYSTORE_PASSWORD \
+            --out android/app/build/outputs/apk/release/app-release-signed.apk \
+            android/app/build/outputs/apk/release/app-release-unsigned.apk
+
+      - name: Upload Signed APK
         uses: actions/upload-artifact@v4
         with:
-          name: release-apk
-          path: android/app/build/outputs/apk/release/app-release-unsigned.apk
+          name: release-apk-signed
+          path: android/app/build/outputs/apk/release/app-release-signed.apk
 
       - name: Create Release
         if: github.event_name == 'push' && github.ref == 'refs/heads/release'
+        id: create_release
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -74,6 +99,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: android/app/build/outputs/apk/release/app-release-unsigned.apk
-          asset_name: master-gym-release.apk
+          asset_path: android/app/build/outputs/apk/release/app-release-signed.apk
+          asset_name: master-gym-release-signed.apk
           asset_content_type: application/vnd.android.package-archive
