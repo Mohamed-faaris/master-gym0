@@ -470,6 +470,15 @@ function TrainerWorkoutSessionRoute() {
                     exercise.sets && exercise.sets.length > 0
                       ? exercise.sets[setIndex]
                       : null
+                  const repsLabel = setData?.reps
+                    ? `${setData.reps} reps`
+                    : 'Reps TBD'
+                  const weightLabel = setData?.weight
+                    ? `${setData.weight} lbs`
+                    : 'Weight TBD'
+                  const notesLabel = setData?.notes?.trim()
+                    ? setData.notes
+                    : 'No notes'
 
                   return (
                     <Card
@@ -513,18 +522,15 @@ function TrainerWorkoutSessionRoute() {
                                   isCompleted ? 'line-through' : ''
                                 }`}
                               >
-                                {setData?.reps && `${setData.reps} reps`}
-                                {setData?.weight && ` • ${setData.weight} lbs`}
+                                {repsLabel} · {weightLabel}
                               </div>
-                              {setData?.notes && (
-                                <div
-                                  className={`text-xs text-muted-foreground mt-1 ${
-                                    isCompleted ? 'line-through' : ''
-                                  }`}
-                                >
-                                  {setData.notes}
-                                </div>
-                              )}
+                              <div
+                                className={`text-xs text-muted-foreground mt-1 ${
+                                  isCompleted ? 'line-through' : ''
+                                }`}
+                              >
+                                {notesLabel}
+                              </div>
                             </div>
                           </div>
                         </div>

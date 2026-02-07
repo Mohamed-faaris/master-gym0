@@ -247,6 +247,21 @@ export function WorkoutSessionRouteComponent() {
     return reps ? `${reps} reps` : 'Reps TBD'
   }
 
+  const getSetDetails = (
+    exercise: {
+      sets?: Array<{ reps?: number; weight?: number; notes?: string }>
+    },
+    setIndex: number,
+  ) => {
+    const setData = exercise.sets?.[setIndex]
+
+    return {
+      repsLabel: setData?.reps ? `${setData.reps} reps` : 'Reps TBD',
+      weightLabel: setData?.weight ? `${setData.weight} lbs` : 'Weight TBD',
+      notesLabel: setData?.notes?.trim() ? setData.notes : 'No notes',
+    }
+  }
+
   return (
     <div className="p-4 pb-20 space-y-6 max-w-4xl mx-auto">
       <header className="space-y-2">
@@ -311,6 +326,10 @@ export function WorkoutSessionRouteComponent() {
                   (_, setIndex) => {
                   const key = `${exerciseIndex}-${setIndex}`
                   const isCompleted = completedSets.has(key)
+                  const { repsLabel, weightLabel, notesLabel } = getSetDetails(
+                    exercise,
+                    setIndex,
+                  )
                   return (
                     <Card
                       key={key}
@@ -354,7 +373,14 @@ export function WorkoutSessionRouteComponent() {
                                 isCompleted ? 'line-through' : ''
                               }`}
                             >
-                              {getRepsLabel(exercise)}
+                              {repsLabel} · {weightLabel}
+                            </div>
+                            <div
+                              className={`text-xs text-muted-foreground mt-1 ${
+                                isCompleted ? 'line-through' : ''
+                              }`}
+                            >
+                              {notesLabel}
                             </div>
                           </div>
                         </div>
