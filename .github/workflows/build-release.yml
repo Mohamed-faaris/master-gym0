@@ -39,6 +39,11 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y apksigner
 
+      - name: Fix pnpm workspace
+        run: |
+          # Remove workspace config to avoid "packages field missing" error
+          rm -f pnpm-workspace.yaml
+
       - name: Install dependencies
         run: pnpm install
 
