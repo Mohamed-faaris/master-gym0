@@ -7,22 +7,25 @@ import { env } from '@/env'
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [userSession, setUserSession] = useState<Doc<'users'> | null>(null)
+  const [deleteAt, setDeleteAt] = useState<number | undefined>(undefined)
   const convex = useConvex()
 
   const signIn = async (
     phoneNumber: string,
     pin: string,
-    deleteAt?: number,
   ): Promise<Doc<'users'> | null> => {
     const user = await convex.query(api.users.signInQuery, { phoneNumber, pin })
     if (user) {
+      const finalDeleteAt =
+        deleteAt ?? Date.now() + parseInt(env.VITE_RESET_TIME)
       setUserSession(user)
+      setDeleteAt(finalDeleteAt)
       localStorage.setItem(
         'session',
         JSON.stringify({
           user,
           expiresAt: Date.now() + parseInt(env.VITE_AUTH_EXPIRY_TIME),
-          deleteAt: deleteAt ?? Date.now() + parseInt(env.VITE_RESET_TIME),
+          deleteAt: finalDeleteAt,
         }),
       )
       return user
@@ -32,6 +35,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const signOut = () => {
     setUserSession(null)
+    setDeleteAt(undefined)
     localStorage.removeItem('session')
   }
 
@@ -44,6 +48,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         const { user, expiresAt, deleteAt } = JSON.parse(storedSession)
         if (Date.now() > expiresAt || Date.now() > deleteAt) {
           localStorage.removeItem('session')
+          setDeleteAt(undefined)
         } else {
           await signIn(user.phoneNumber, user.pin, deleteAt)
         }
@@ -55,7 +60,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <AuthContext.Provider
-      value={{ user: userSession, isLoading, signIn, signOut }}
+      value={{ user: userSession, isLoading, signIn, signOut, deleteAt }}
     >
       {children}
     </AuthContext.Provider>

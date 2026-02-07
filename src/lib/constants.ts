@@ -1,8 +1,8 @@
 // Meal types for diet logs
 export const MEAL_TYPES = [
   'breakfast',
+  'middaySnack',
   'lunch',
-  'dinner',
-  'snack',
+  'preWorkout',
   'postWorkout',
 ] as const

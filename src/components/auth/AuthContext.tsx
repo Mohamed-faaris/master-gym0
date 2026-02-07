@@ -6,6 +6,7 @@ export interface AuthContextType {
   isLoading: boolean
   signIn: (phoneNumber: string, pin: string) => Promise<Doc<'users'> | null>
   signOut: () => void
+  deleteAt?: number
 }
 
 export const AuthContext = createContext<AuthContextType | null>(null)

@@ -1,13 +1,8 @@
 import { mutation, query } from './_generated/server'
 import { v } from 'convex/values'
+import { MEAL_TYPES } from './schema'
 
-const MealTypeValidator = v.union(
-  v.literal('breakfast'),
-  v.literal('lunch'),
-  v.literal('dinner'),
-  v.literal('snack'),
-  v.literal('postWorkout'),
-)
+const MealTypeValidator = v.union(...MEAL_TYPES.map(v.literal))
 
 // Add a diet log
 export const addDietLog = mutation({

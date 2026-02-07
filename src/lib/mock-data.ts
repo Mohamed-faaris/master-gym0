@@ -169,7 +169,7 @@ export interface WorkoutLog {
 export interface DietLog {
   id: string
   createdAt: Date
-  mealType: 'breakfast' | 'lunch' | 'dinner' | 'snack'
+  mealType: 'breakfast' | 'middaySnack' | 'lunch' | 'preWorkout' | 'postWorkout'
   description: string
   calories: number
 }
@@ -241,14 +241,14 @@ export const MOCK_DIET_LOGS: DietLog[] = [
   {
     id: '2',
     createdAt: new Date(2026, 0, 28, 12, 30),
-    mealType: 'lunch',
+    mealType: 'middaySnack',
     description: 'Grilled chicken salad with quinoa',
     calories: 550,
   },
   {
     id: '3',
     createdAt: new Date(2026, 0, 28, 15, 0),
-    mealType: 'snack',
+    mealType: 'preWorkout',
     description: 'Apple and almond butter',
     calories: 200,
   },
@@ -262,14 +262,14 @@ export const MOCK_DIET_LOGS: DietLog[] = [
   {
     id: '5',
     createdAt: new Date(2026, 0, 27, 13, 0),
-    mealType: 'lunch',
+    mealType: 'middaySnack',
     description: 'Turkey wrap with vegetables',
     calories: 480,
   },
   {
     id: '6',
     createdAt: new Date(2026, 0, 27, 19, 0),
-    mealType: 'dinner',
+    mealType: 'lunch',
     description: 'Salmon with roasted vegetables',
     calories: 650,
   },
@@ -596,257 +596,257 @@ export const TRAINER_DASHBOARD_MOCK: TrainerDashboardData = {
 }
 
 export const TRAINER_CLIENT_DETAILS_MOCK: Record<string, TrainerClientDetail> =
-  {
-    'client-1': {
-      id: 'client-1',
-      name: 'Noah Patel',
-      focus: 'Power + sprint work',
-      readiness: 'Green',
-      compliance: 92,
-      trend: '+4% week-over-week',
-      plan: 'Block 3 • Week 2',
-      metrics: [
-        { label: 'Average load', value: '8,450 lb', helper: 'Last 7 sessions' },
-        { label: 'Session RPE', value: '7.2', helper: 'Moderate intensity' },
-        { label: 'Sleep avg', value: '7h 45m', helper: 'Trending up' },
-        {
-          label: 'Nutrition compliance',
-          value: '94%',
-          helper: 'Macros on target',
-        },
-      ],
-      readinessBreakdown: [
-        { label: 'Load', current: 78, target: 80 },
-        { label: 'Recovery', current: 84, target: 88 },
-        { label: 'Mindset', current: 76, target: 80 },
-      ],
-      recentWorkouts: [
-        {
-          id: 'nw1',
-          title: 'Acceleration clusters',
-          date: 'Tue · 06:30',
-          focus: 'Track sprint work',
-          load: 'High CNS',
-          readiness: 'Green',
-        },
-        {
-          id: 'nw2',
-          title: 'Strength density',
-          date: 'Sun · 09:00',
-          focus: 'Lower-body',
-          load: 'Moderate',
-          readiness: 'Green',
-        },
-        {
-          id: 'nw3',
-          title: 'Assault bike intervals',
-          date: 'Fri · 07:15',
-          focus: 'Conditioning',
-          load: 'Low',
-          readiness: 'Amber',
-        },
-      ],
-      nutritionLog: [
-        {
-          id: 'nn1',
-          time: '08:00',
-          mealType: 'Breakfast',
-          description: 'Protein oats + berries',
-          calories: 480,
-        },
-        {
-          id: 'nn2',
-          time: '13:00',
-          mealType: 'Lunch',
-          description: 'Turkey quinoa bowl',
-          calories: 620,
-        },
-        {
-          id: 'nn3',
-          time: '19:30',
-          mealType: 'Dinner',
-          description: 'Salmon, rice, greens',
-          calories: 710,
-        },
-      ],
-      actionItems: [
-        {
-          id: 'na1',
-          label: 'Upload sprint footage',
-          status: 'In progress',
-          description: 'Share slow-mo clips for technical review.',
-        },
-        {
-          id: 'na2',
-          label: 'Nutrition check-in',
-          status: 'Queued',
-          description: 'Review new macro targets on Thu.',
-        },
-      ],
-    },
-    'client-2': {
-      id: 'client-2',
-      name: 'Amelia Trent',
-      focus: 'Hybrid marathon prep',
-      readiness: 'Amber',
-      compliance: 86,
-      trend: '-2% week-over-week',
-      plan: 'Deload scheduled',
-      metrics: [
-        { label: 'Long-run pace', value: '5:05 /km', helper: 'Goal 4:55 /km' },
-        {
-          label: 'VO₂ max',
-          value: '51 ml/kg/min',
-          helper: 'Hold through deload',
-        },
-        { label: 'HRV avg', value: '68 ms', helper: 'Down 5% this week' },
-        { label: 'Strength touchpoints', value: '2', helper: 'Need 3 minimum' },
-      ],
-      readinessBreakdown: [
-        { label: 'Load', current: 64, target: 75 },
-        { label: 'Recovery', current: 70, target: 80 },
-        { label: 'Mindset', current: 82, target: 85 },
-      ],
-      recentWorkouts: [
-        {
-          id: 'aw1',
-          title: 'Tempo + hills',
-          date: 'Mon · 05:45',
-          focus: 'Run economy',
-          load: 'High',
-          readiness: 'Amber',
-        },
-        {
-          id: 'aw2',
-          title: 'Joint prep circuit',
-          date: 'Sat · 08:15',
-          focus: 'Strength support',
-          load: 'Low',
-          readiness: 'Green',
-        },
-      ],
-      nutritionLog: [
-        {
-          id: 'an1',
-          time: '07:30',
-          mealType: 'Breakfast',
-          description: 'Bagel + egg whites',
-          calories: 520,
-        },
-        {
-          id: 'an2',
-          time: '12:15',
-          mealType: 'Lunch',
-          description: 'Chicken wrap, greens',
-          calories: 610,
-        },
-        {
-          id: 'an3',
-          time: '21:00',
-          mealType: 'Snack',
-          description: 'Casein shake',
-          calories: 230,
-        },
-      ],
-      actionItems: [
-        {
-          id: 'aa1',
-          label: 'Schedule deload call',
-          status: 'Queued',
-          description: 'Align on next block adjustments.',
-        },
-        {
-          id: 'aa2',
-          label: 'Upload HRV screenshots',
-          status: 'Blocked',
-          description: 'Waiting for morning readings.',
-        },
-      ],
-    },
-    'client-3': {
-      id: 'client-3',
-      name: 'Leo Morales',
-      focus: 'Strength / hypertrophy',
-      readiness: 'Green',
-      compliance: 89,
-      trend: '+1% week-over-week',
-      plan: 'Push/pull split',
-      metrics: [
-        { label: 'Volume PRs', value: '3', helper: 'Hit this week' },
-        { label: 'Avg. tonnage', value: '32k lb', helper: 'Up 6%' },
-        { label: 'Sleep avg', value: '7h 10m', helper: 'Stable' },
-        { label: 'Energy check-ins', value: 'Green', helper: 'No red flags' },
-      ],
-      readinessBreakdown: [
-        { label: 'Load', current: 81, target: 82 },
-        { label: 'Recovery', current: 79, target: 83 },
-        { label: 'Mindset', current: 74, target: 78 },
-      ],
-      recentWorkouts: [
-        {
-          id: 'lw1',
-          title: 'Upper push volume',
-          date: 'Tue · 18:00',
-          focus: 'Chest + triceps',
-          load: 'Moderate',
-          readiness: 'Green',
-        },
-        {
-          id: 'lw2',
-          title: 'Lower strength wave',
-          date: 'Sun · 10:00',
-          focus: 'Squat + hinge',
-          load: 'High',
-          readiness: 'Green',
-        },
-        {
-          id: 'lw3',
-          title: 'Conditioning finisher',
-          date: 'Fri · 17:30',
-          focus: 'Bike sprints',
-          load: 'Low',
-          readiness: 'Green',
-        },
-      ],
-      nutritionLog: [
-        {
-          id: 'ln1',
-          time: '09:00',
-          mealType: 'Breakfast',
-          description: 'Egg scramble + rice',
-          calories: 650,
-        },
-        {
-          id: 'ln2',
-          time: '14:00',
-          mealType: 'Lunch',
-          description: 'Steak bowl',
-          calories: 780,
-        },
-        {
-          id: 'ln3',
-          time: '22:00',
-          mealType: 'Snack',
-          description: 'Greek yogurt + honey',
-          calories: 320,
-        },
-      ],
-      actionItems: [
-        {
-          id: 'la1',
-          label: 'Film squat top set',
-          status: 'Queued',
-          description: 'Need angle check before adding load.',
-        },
-        {
-          id: 'la2',
-          label: 'Update macro targets',
-          status: 'In progress',
-          description: 'Adjust carbs on heavy days.',
-        },
-      ],
-    },
-  }
+{
+  'client-1': {
+    id: 'client-1',
+    name: 'Noah Patel',
+    focus: 'Power + sprint work',
+    readiness: 'Green',
+    compliance: 92,
+    trend: '+4% week-over-week',
+    plan: 'Block 3 • Week 2',
+    metrics: [
+      { label: 'Average load', value: '8,450 lb', helper: 'Last 7 sessions' },
+      { label: 'Session RPE', value: '7.2', helper: 'Moderate intensity' },
+      { label: 'Sleep avg', value: '7h 45m', helper: 'Trending up' },
+      {
+        label: 'Nutrition compliance',
+        value: '94%',
+        helper: 'Macros on target',
+      },
+    ],
+    readinessBreakdown: [
+      { label: 'Load', current: 78, target: 80 },
+      { label: 'Recovery', current: 84, target: 88 },
+      { label: 'Mindset', current: 76, target: 80 },
+    ],
+    recentWorkouts: [
+      {
+        id: 'nw1',
+        title: 'Acceleration clusters',
+        date: 'Tue · 06:30',
+        focus: 'Track sprint work',
+        load: 'High CNS',
+        readiness: 'Green',
+      },
+      {
+        id: 'nw2',
+        title: 'Strength density',
+        date: 'Sun · 09:00',
+        focus: 'Lower-body',
+        load: 'Moderate',
+        readiness: 'Green',
+      },
+      {
+        id: 'nw3',
+        title: 'Assault bike intervals',
+        date: 'Fri · 07:15',
+        focus: 'Conditioning',
+        load: 'Low',
+        readiness: 'Amber',
+      },
+    ],
+    nutritionLog: [
+      {
+        id: 'nn1',
+        time: '08:00',
+        mealType: 'Breakfast',
+        description: 'Protein oats + berries',
+        calories: 480,
+      },
+      {
+        id: 'nn2',
+        time: '13:00',
+        mealType: 'Midday Snack',
+        description: 'Turkey quinoa bowl',
+        calories: 620,
+      },
+      {
+        id: 'nn3',
+        time: '19:30',
+        mealType: 'Lunch',
+        description: 'Salmon, rice, greens',
+        calories: 710,
+      },
+    ],
+    actionItems: [
+      {
+        id: 'na1',
+        label: 'Upload sprint footage',
+        status: 'In progress',
+        description: 'Share slow-mo clips for technical review.',
+      },
+      {
+        id: 'na2',
+        label: 'Nutrition check-in',
+        status: 'Queued',
+        description: 'Review new macro targets on Thu.',
+      },
+    ],
+  },
+  'client-2': {
+    id: 'client-2',
+    name: 'Amelia Trent',
+    focus: 'Hybrid marathon prep',
+    readiness: 'Amber',
+    compliance: 86,
+    trend: '-2% week-over-week',
+    plan: 'Deload scheduled',
+    metrics: [
+      { label: 'Long-run pace', value: '5:05 /km', helper: 'Goal 4:55 /km' },
+      {
+        label: 'VO₂ max',
+        value: '51 ml/kg/min',
+        helper: 'Hold through deload',
+      },
+      { label: 'HRV avg', value: '68 ms', helper: 'Down 5% this week' },
+      { label: 'Strength touchpoints', value: '2', helper: 'Need 3 minimum' },
+    ],
+    readinessBreakdown: [
+      { label: 'Load', current: 64, target: 75 },
+      { label: 'Recovery', current: 70, target: 80 },
+      { label: 'Mindset', current: 82, target: 85 },
+    ],
+    recentWorkouts: [
+      {
+        id: 'aw1',
+        title: 'Tempo + hills',
+        date: 'Mon · 05:45',
+        focus: 'Run economy',
+        load: 'High',
+        readiness: 'Amber',
+      },
+      {
+        id: 'aw2',
+        title: 'Joint prep circuit',
+        date: 'Sat · 08:15',
+        focus: 'Strength support',
+        load: 'Low',
+        readiness: 'Green',
+      },
+    ],
+    nutritionLog: [
+      {
+        id: 'an1',
+        time: '07:30',
+        mealType: 'Breakfast',
+        description: 'Bagel + egg whites',
+        calories: 520,
+      },
+      {
+        id: 'an2',
+        time: '12:15',
+        mealType: 'Lunch',
+        description: 'Chicken wrap, greens',
+        calories: 610,
+      },
+      {
+        id: 'an3',
+        time: '21:00',
+        mealType: 'Snack',
+        description: 'Casein shake',
+        calories: 230,
+      },
+    ],
+    actionItems: [
+      {
+        id: 'aa1',
+        label: 'Schedule deload call',
+        status: 'Queued',
+        description: 'Align on next block adjustments.',
+      },
+      {
+        id: 'aa2',
+        label: 'Upload HRV screenshots',
+        status: 'Blocked',
+        description: 'Waiting for morning readings.',
+      },
+    ],
+  },
+  'client-3': {
+    id: 'client-3',
+    name: 'Leo Morales',
+    focus: 'Strength / hypertrophy',
+    readiness: 'Green',
+    compliance: 89,
+    trend: '+1% week-over-week',
+    plan: 'Push/pull split',
+    metrics: [
+      { label: 'Volume PRs', value: '3', helper: 'Hit this week' },
+      { label: 'Avg. tonnage', value: '32k lb', helper: 'Up 6%' },
+      { label: 'Sleep avg', value: '7h 10m', helper: 'Stable' },
+      { label: 'Energy check-ins', value: 'Green', helper: 'No red flags' },
+    ],
+    readinessBreakdown: [
+      { label: 'Load', current: 81, target: 82 },
+      { label: 'Recovery', current: 79, target: 83 },
+      { label: 'Mindset', current: 74, target: 78 },
+    ],
+    recentWorkouts: [
+      {
+        id: 'lw1',
+        title: 'Upper push volume',
+        date: 'Tue · 18:00',
+        focus: 'Chest + triceps',
+        load: 'Moderate',
+        readiness: 'Green',
+      },
+      {
+        id: 'lw2',
+        title: 'Lower strength wave',
+        date: 'Sun · 10:00',
+        focus: 'Squat + hinge',
+        load: 'High',
+        readiness: 'Green',
+      },
+      {
+        id: 'lw3',
+        title: 'Conditioning finisher',
+        date: 'Fri · 17:30',
+        focus: 'Bike sprints',
+        load: 'Low',
+        readiness: 'Green',
+      },
+    ],
+    nutritionLog: [
+      {
+        id: 'ln1',
+        time: '09:00',
+        mealType: 'Breakfast',
+        description: 'Egg scramble + rice',
+        calories: 650,
+      },
+      {
+        id: 'ln2',
+        time: '14:00',
+        mealType: 'Lunch',
+        description: 'Steak bowl',
+        calories: 780,
+      },
+      {
+        id: 'ln3',
+        time: '22:00',
+        mealType: 'Snack',
+        description: 'Greek yogurt + honey',
+        calories: 320,
+      },
+    ],
+    actionItems: [
+      {
+        id: 'la1',
+        label: 'Film squat top set',
+        status: 'Queued',
+        description: 'Need angle check before adding load.',
+      },
+      {
+        id: 'la2',
+        label: 'Update macro targets',
+        status: 'In progress',
+        description: 'Adjust carbs on heavy days.',
+      },
+    ],
+  },
+}
 
 export const TRAINER_PROGRAMS_MOCK: TrainerProgramSummary[] = [
   {
@@ -1053,12 +1053,12 @@ export const TRAINER_PROGRAM_DETAILS_MOCK: Record<
             calories: 560,
           },
           {
-            title: 'Lunch',
+            title: 'Midday Snack',
             description: 'Rice bowl with steak, greens, avocado',
             calories: 720,
           },
           {
-            title: 'Dinner',
+            title: 'Lunch',
             description: 'Salmon, sweet potato, roasted veg',
             calories: 680,
           },
@@ -1076,12 +1076,12 @@ export const TRAINER_PROGRAM_DETAILS_MOCK: Record<
             calories: 520,
           },
           {
-            title: 'Lunch',
+            title: 'Midday Snack',
             description: 'Quinoa salad with chicken and olive oil',
             calories: 640,
           },
           {
-            title: 'Dinner',
+            title: 'Lunch',
             description: 'Turkey meatballs, pasta, tomato sauce',
             calories: 690,
           },
@@ -1098,12 +1098,12 @@ export const TRAINER_PROGRAM_DETAILS_MOCK: Record<
             calories: 600,
           },
           {
-            title: 'Lunch',
+            title: 'Midday Snack',
             description: 'Bison burger, baked fries, greens',
             calories: 780,
           },
           {
-            title: 'Dinner',
+            title: 'Lunch',
             description: 'Rice, chicken thighs, broccoli',
             calories: 700,
           },
@@ -1121,12 +1121,12 @@ export const TRAINER_PROGRAM_DETAILS_MOCK: Record<
             calories: 480,
           },
           {
-            title: 'Lunch',
+            title: 'Midday Snack',
             description: 'Lentil soup, sourdough, salad',
             calories: 540,
           },
           {
-            title: 'Dinner',
+            title: 'Lunch',
             description: 'Seared cod, jasmine rice, veggies',
             calories: 620,
           },
@@ -1144,12 +1144,12 @@ export const TRAINER_PROGRAM_DETAILS_MOCK: Record<
             calories: 650,
           },
           {
-            title: 'Lunch',
+            title: 'Midday Snack',
             description: 'Pasta with lean beef and pesto',
             calories: 760,
           },
           {
-            title: 'Dinner',
+            title: 'Lunch',
             description: 'Stir fry with rice noodles and shrimp',
             calories: 700,
           },
@@ -1167,12 +1167,12 @@ export const TRAINER_PROGRAM_DETAILS_MOCK: Record<
             calories: 610,
           },
           {
-            title: 'Lunch',
+            title: 'Midday Snack',
             description: 'Chicken burrito bowl',
             calories: 680,
           },
           {
-            title: 'Dinner',
+            title: 'Lunch',
             description: 'Beef stir fry with rice',
             calories: 720,
           },
@@ -1189,12 +1189,12 @@ export const TRAINER_PROGRAM_DETAILS_MOCK: Record<
             calories: 480,
           },
           {
-            title: 'Lunch',
+            title: 'Midday Snack',
             description: 'Mediterranean plate, hummus, veggies',
             calories: 560,
           },
           {
-            title: 'Dinner',
+            title: 'Lunch',
             description: 'Bone broth ramen with soft eggs',
             calories: 640,
           },
@@ -1364,12 +1364,12 @@ export const TRAINER_PROGRAM_DETAILS_MOCK: Record<
             calories: 650,
           },
           {
-            title: 'Lunch',
+            title: 'Midday Snack',
             description: 'Rice, grilled chicken, beet salad',
             calories: 720,
           },
           {
-            title: 'Dinner',
+            title: 'Lunch',
             description: 'Pasta with salmon and veggies',
             calories: 780,
           },
@@ -1387,12 +1387,12 @@ export const TRAINER_PROGRAM_DETAILS_MOCK: Record<
             calories: 580,
           },
           {
-            title: 'Lunch',
+            title: 'Midday Snack',
             description: 'Quinoa bowl with turkey meatballs',
             calories: 690,
           },
           {
-            title: 'Dinner',
+            title: 'Lunch',
             description: 'Shrimp tacos, cabbage slaw',
             calories: 650,
           },
@@ -1409,12 +1409,12 @@ export const TRAINER_PROGRAM_DETAILS_MOCK: Record<
             calories: 520,
           },
           {
-            title: 'Lunch',
+            title: 'Midday Snack',
             description: 'Whole grain wrap, hummus, veggies',
             calories: 560,
           },
           {
-            title: 'Dinner',
+            title: 'Lunch',
             description: 'Chicken stir fry, jasmine rice',
             calories: 640,
           },
@@ -1432,12 +1432,12 @@ export const TRAINER_PROGRAM_DETAILS_MOCK: Record<
             calories: 480,
           },
           {
-            title: 'Lunch',
+            title: 'Midday Snack',
             description: 'Bone broth soup, rice crackers',
             calories: 500,
           },
           {
-            title: 'Dinner',
+            title: 'Lunch',
             description: 'Baked cod, potatoes, asparagus',
             calories: 620,
           },
@@ -1454,12 +1454,12 @@ export const TRAINER_PROGRAM_DETAILS_MOCK: Record<
             calories: 600,
           },
           {
-            title: 'Lunch',
+            title: 'Midday Snack',
             description: 'Pasta with turkey bolognese',
             calories: 780,
           },
           {
-            title: 'Dinner',
+            title: 'Lunch',
             description: 'Rice, tofu, stir fried greens',
             calories: 640,
           },
@@ -1477,12 +1477,12 @@ export const TRAINER_PROGRAM_DETAILS_MOCK: Record<
             calories: 620,
           },
           {
-            title: 'Lunch',
+            title: 'Midday Snack',
             description: 'Recovery smoothie and rice bowl',
             calories: 700,
           },
           {
-            title: 'Dinner',
+            title: 'Lunch',
             description: 'Lean beef, potatoes, veggies',
             calories: 760,
           },
@@ -1500,12 +1500,12 @@ export const TRAINER_PROGRAM_DETAILS_MOCK: Record<
             calories: 480,
           },
           {
-            title: 'Lunch',
+            title: 'Midday Snack',
             description: 'Miso soup, rice, steamed greens',
             calories: 520,
           },
           {
-            title: 'Dinner',
+            title: 'Lunch',
             description: 'Chicken pho with herbs',
             calories: 630,
           },
@@ -1658,12 +1658,12 @@ export const TRAINER_PROGRAM_DETAILS_MOCK: Record<
             calories: 420,
           },
           {
-            title: 'Lunch',
+            title: 'Midday Snack',
             description: 'Turkey wrap, greens, hummus',
             calories: 520,
           },
           {
-            title: 'Dinner',
+            title: 'Lunch',
             description: 'Baked chicken, quinoa, veggies',
             calories: 600,
           },
@@ -1680,12 +1680,12 @@ export const TRAINER_PROGRAM_DETAILS_MOCK: Record<
             calories: 430,
           },
           {
-            title: 'Lunch',
+            title: 'Midday Snack',
             description: 'Lentil soup, sourdough',
             calories: 500,
           },
           {
-            title: 'Dinner',
+            title: 'Lunch',
             description: 'Fish tacos, cabbage slaw',
             calories: 580,
           },
@@ -1702,12 +1702,12 @@ export const TRAINER_PROGRAM_DETAILS_MOCK: Record<
             calories: 450,
           },
           {
-            title: 'Lunch',
+            title: 'Midday Snack',
             description: 'Rice bowl, tofu, veggies',
             calories: 560,
           },
           {
-            title: 'Dinner',
+            title: 'Lunch',
             description: 'Pasta with turkey and marinara',
             calories: 620,
           },
@@ -1725,12 +1725,12 @@ export const TRAINER_PROGRAM_DETAILS_MOCK: Record<
             calories: 480,
           },
           {
-            title: 'Lunch',
+            title: 'Midday Snack',
             description: 'Mediterranean salad, chickpeas',
             calories: 520,
           },
           {
-            title: 'Dinner',
+            title: 'Lunch',
             description: 'Stir fried veggies, brown rice',
             calories: 590,
           },
@@ -1747,12 +1747,12 @@ export const TRAINER_PROGRAM_DETAILS_MOCK: Record<
             calories: 550,
           },
           {
-            title: 'Lunch',
+            title: 'Midday Snack',
             description: 'Chicken burrito bowl',
             calories: 620,
           },
           {
-            title: 'Dinner',
+            title: 'Lunch',
             description: 'Sirloin, mashed potatoes, greens',
             calories: 640,
           },
@@ -1769,12 +1769,12 @@ export const TRAINER_PROGRAM_DETAILS_MOCK: Record<
             calories: 560,
           },
           {
-            title: 'Lunch',
+            title: 'Midday Snack',
             description: 'Grain bowl with salmon',
             calories: 610,
           },
           {
-            title: 'Dinner',
+            title: 'Lunch',
             description: 'Turkey chili, cornbread',
             calories: 630,
           },
@@ -1791,12 +1791,12 @@ export const TRAINER_PROGRAM_DETAILS_MOCK: Record<
             calories: 430,
           },
           {
-            title: 'Lunch',
+            title: 'Midday Snack',
             description: 'Chicken soup, crackers',
             calories: 520,
           },
           {
-            title: 'Dinner',
+            title: 'Lunch',
             description: 'Veggie pasta bake',
             calories: 610,
           },

@@ -1,3 +1,5 @@
+import { useQuery } from 'convex/react'
+import { api } from 'convex/_generated/api'
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import {
   User,
@@ -13,15 +15,13 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { useAuth } from '@/components/auth/useAuth'
-import { useQuery } from 'convex/react'
-import { api } from 'convex/_generated/api'
 
 export const Route = createFileRoute('/app/_user/account')({
   component: RouteComponent,
 })
 
 function RouteComponent() {
-  const { user, signOut } = useAuth()
+  const { user, signOut, deleteAt: expiresIn } = useAuth()
   const navigate = useNavigate()
 
   // Fetch user stats
@@ -47,6 +47,14 @@ function RouteComponent() {
         year: 'numeric',
       })
     : 'Unknown'
+
+  const expiresInDays =
+    typeof expiresIn === 'number'
+      ? Math.max(
+          0,
+          Math.ceil((expiresIn - Date.now()) / (1000 * 60 * 60 * 24)),
+        )
+      : null
   return (
     <div className="p-4 space-y-6">
       {/* Header */}
@@ -69,6 +77,11 @@ function RouteComponent() {
               <p className="text-sm text-muted-foreground">
                 Member since {memberSince}
               </p>
+              {expiresInDays !== null ? (
+                <p className="text-sm text-muted-foreground">
+                  Expiring in {expiresInDays} days
+                </p>
+              ) : null}
             </div>
             <Button variant="outline" size="sm">
               Edit

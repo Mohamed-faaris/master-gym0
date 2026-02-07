@@ -94,9 +94,9 @@ function DietPlanDetailRoute() {
 
   const mealTypeLabels: Record<string, string> = {
     breakfast: 'Breakfast',
+    middaySnack: 'Midday Snack',
     lunch: 'Lunch',
-    dinner: 'Dinner',
-    snack: 'Snack',
+    preWorkout: 'Pre-workout',
     postWorkout: 'Post-workout',
   }
 
@@ -113,13 +113,13 @@ function DietPlanDetailRoute() {
   )
 
   const availableDays = dayOrder.filter((day) => mealsByDay[day]?.length)
-  const [activeDay, setActiveDay] = useState(
-    availableDays[0] ?? dayOrder[0],
-  )
+  const [activeDay, setActiveDay] = useState(availableDays[0] ?? dayOrder[0])
 
   useEffect(() => {
     if (!availableDays.length) return
-    setActiveDay((prev) => (availableDays.includes(prev) ? prev : availableDays[0]))
+    setActiveDay((prev) =>
+      availableDays.includes(prev) ? prev : availableDays[0],
+    )
   }, [availableDays])
 
   const dayTotals = useMemo(() => {

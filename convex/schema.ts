@@ -16,9 +16,9 @@ const WORKOUT_STATUSES = ['ongoing', 'completed', 'cancelled'] as const
 
 export const MEAL_TYPES = [
   'breakfast',
+  'middaySnack',
   'lunch',
-  'dinner',
-  'snack',
+  'preWorkout',
   'postWorkout',
 ] as const
 

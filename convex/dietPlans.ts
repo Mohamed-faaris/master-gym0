@@ -12,13 +12,7 @@ const DayOfWeekValidator = v.union(
   v.literal('sun'),
 )
 
-const MealTypeValidator = v.union(
-  v.literal('breakfast'),
-  v.literal('lunch'),
-  v.literal('dinner'),
-  v.literal('snack'),
-  v.literal('postWorkout'),
-)
+const MealTypeValidator = v.union(...MEAL_TYPES.map(v.literal))
 
 const MealTemplateValidator = v.object({
   day: DayOfWeekValidator,

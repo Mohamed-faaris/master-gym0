@@ -30,13 +30,18 @@ type MealEntry = {
   calories: string
 }
 
-type MealType = 'breakfast' | 'lunch' | 'dinner' | 'snack' | 'postWorkout'
+type MealType =
+  | 'breakfast'
+  | 'middaySnack'
+  | 'lunch'
+  | 'preWorkout'
+  | 'postWorkout'
 
 const mealTypeLabels: Record<MealType, string> = {
   breakfast: 'Breakfast',
+  middaySnack: 'Midday Snack',
   lunch: 'Lunch',
-  dinner: 'Dinner',
-  snack: 'Snack',
+  preWorkout: 'Pre-workout',
   postWorkout: 'Post-workout',
 }
 
@@ -77,9 +82,9 @@ function RouteComponent() {
   const [coachNote, setCoachNote] = useState('')
   const createEmptyDayMeals = (): Record<MealType, MealEntry> => ({
     breakfast: { title: '', description: '', calories: '' },
+    middaySnack: { title: '', description: '', calories: '' },
     lunch: { title: '', description: '', calories: '' },
-    dinner: { title: '', description: '', calories: '' },
-    snack: { title: '', description: '', calories: '' },
+    preWorkout: { title: '', description: '', calories: '' },
     postWorkout: { title: '', description: '', calories: '' },
   })
 
@@ -149,9 +154,7 @@ function RouteComponent() {
 
     if (missingDays.length > 0) {
       const missingLabels = missingDays
-        .map(
-          (day) => weekDays.find((entry) => entry.key === day)?.label || day,
-        )
+        .map((day) => weekDays.find((entry) => entry.key === day)?.label || day)
         .join(', ')
       toast.error(`Add at least one meal for: ${missingLabels}`)
       return
@@ -403,9 +406,7 @@ function RouteComponent() {
                     .map((day) => (
                       <div key={day.key} className="space-y-3">
                         <div className="flex items-center justify-between">
-                          <p className="text-sm font-semibold">
-                            {day.label}
-                          </p>
+                          <p className="text-sm font-semibold">{day.label}</p>
                           <span className="text-xs text-muted-foreground">
                             Daily template
                           </span>
@@ -432,9 +433,7 @@ function RouteComponent() {
                                   </label>
                                   <Input
                                     placeholder="e.g. Protein oats"
-                                    value={
-                                      mealsByDay[day.key][mealType].title
-                                    }
+                                    value={mealsByDay[day.key][mealType].title}
                                     onChange={(event) =>
                                       setMealsByDay((prev) => ({
                                         ...prev,
@@ -569,9 +568,9 @@ function RouteComponent() {
                             {day.label}
                           </p>
                           <div className="grid gap-2">
-                            {(Object.keys(
-                              mealsByDay[day.key],
-                            ) as MealType[]).map((mealType) => (
+                            {(
+                              Object.keys(mealsByDay[day.key]) as MealType[]
+                            ).map((mealType) => (
                               <div key={`${day.key}-${mealType}`}>
                                 <p className="text-xs font-semibold uppercase text-muted-foreground">
                                   {mealTypeLabels[mealType]}

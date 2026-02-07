@@ -86,9 +86,9 @@ function DietPlanRoute() {
 
   const mealTypeLabels: Record<string, string> = {
     breakfast: 'Breakfast',
+    middaySnack: 'Midday Snack',
     lunch: 'Lunch',
-    dinner: 'Dinner',
-    snack: 'Snack',
+    preWorkout: 'Pre-workout',
     postWorkout: 'Post-workout',
   }
 

@@ -516,20 +516,20 @@ export const seedDatabase = mutation({
         calories: 350,
       },
       {
-        mealType: 'lunch',
+        mealType: 'middaySnack',
         title: 'Grilled Chicken Salad',
         description:
           'Grilled chicken breast, mixed greens, olive oil dressing',
         calories: 450,
       },
       {
-        mealType: 'snack',
+        mealType: 'preWorkout',
         title: 'Greek Yogurt & Nuts',
         description: '1 cup Greek yogurt, handful of almonds',
         calories: 200,
       },
       {
-        mealType: 'dinner',
+        mealType: 'middaySnack',
         title: 'Baked Salmon with Veggies',
         description: 'Salmon fillet, roasted vegetables, quinoa',
         calories: 550,
@@ -554,19 +554,19 @@ export const seedDatabase = mutation({
         calories: 550,
       },
       {
-        mealType: 'lunch',
+        mealType: 'middaySnack',
         title: 'Beef & Rice Bowl',
         description: 'Lean beef, brown rice, broccoli, avocado',
         calories: 750,
       },
       {
-        mealType: 'snack',
+        mealType: 'preWorkout',
         title: 'Chicken Wrap',
         description: 'Whole wheat wrap, grilled chicken, hummus',
         calories: 400,
       },
       {
-        mealType: 'dinner',
+        mealType: 'middaySnack',
         title: 'Steak with Sweet Potato',
         description: 'Ribeye steak, sweet potato, asparagus',
         calories: 800,
@@ -628,7 +628,7 @@ export const seedDatabase = mutation({
 
     await ctx.db.insert('dietLogs', {
       userId: client1Id,
-      mealType: 'lunch',
+      mealType: 'middaySnack',
       title: 'Grilled Chicken Salad',
       description: 'Grilled chicken, mixed greens, olive oil dressing',
       calories: 450,
@@ -637,7 +637,7 @@ export const seedDatabase = mutation({
 
     await ctx.db.insert('dietLogs', {
       userId: client1Id,
-      mealType: 'snack',
+      mealType: 'preWorkout',
       title: 'Greek Yogurt & Nuts',
       description: 'Greek yogurt with honey and almonds',
       calories: 200,
@@ -655,7 +655,7 @@ export const seedDatabase = mutation({
 
     await ctx.db.insert('dietLogs', {
       userId: client1Id,
-      mealType: 'dinner',
+      mealType: 'middaySnack',
       title: 'Baked Salmon with Veggies',
       description: 'Salmon fillet, roasted vegetables, quinoa',
       calories: 520,
@@ -674,7 +674,7 @@ export const seedDatabase = mutation({
 
     await ctx.db.insert('dietLogs', {
       userId: client1Id,
-      mealType: 'lunch',
+      mealType: 'middaySnack',
       title: 'Turkey Sandwich',
       description: 'Whole grain bread, turkey, lettuce, tomato',
       calories: 410,
@@ -683,7 +683,7 @@ export const seedDatabase = mutation({
 
     await ctx.db.insert('dietLogs', {
       userId: client1Id,
-      mealType: 'snack',
+      mealType: 'preWorkout',
       title: 'Apple & Almond Butter',
       description: 'Red apple with almond butter',
       calories: 200,
@@ -692,7 +692,7 @@ export const seedDatabase = mutation({
 
     await ctx.db.insert('dietLogs', {
       userId: client1Id,
-      mealType: 'dinner',
+      mealType: 'middaySnack',
       title: 'Grilled Chicken Breast',
       description: 'Chicken breast, sweet potato, steamed broccoli',
       calories: 480,
@@ -711,7 +711,7 @@ export const seedDatabase = mutation({
 
     await ctx.db.insert('dietLogs', {
       userId: client1Id,
-      mealType: 'lunch',
+      mealType: 'middaySnack',
       title: 'Tuna Salad',
       description: 'Canned tuna, lettuce, tomato, olive oil',
       calories: 320,
@@ -720,7 +720,7 @@ export const seedDatabase = mutation({
 
     await ctx.db.insert('dietLogs', {
       userId: client1Id,
-      mealType: 'dinner',
+      mealType: 'middaySnack',
       title: 'Grilled Steak',
       description: 'Lean steak, sweet potato, green beans',
       calories: 620,
@@ -729,7 +729,7 @@ export const seedDatabase = mutation({
 
     await ctx.db.insert('dietLogs', {
       userId: client1Id,
-      mealType: 'snack',
+      mealType: 'preWorkout',
       title: 'Protein Bar',
       description: 'High protein granola bar',
       calories: 220,
@@ -748,7 +748,7 @@ export const seedDatabase = mutation({
 
     await ctx.db.insert('dietLogs', {
       userId: client2Id,
-      mealType: 'lunch',
+      mealType: 'middaySnack',
       title: 'Beef & Rice Bowl',
       description: 'Lean ground beef, brown rice, broccoli, avocado',
       calories: 750,
@@ -757,7 +757,7 @@ export const seedDatabase = mutation({
 
     await ctx.db.insert('dietLogs', {
       userId: client2Id,
-      mealType: 'snack',
+      mealType: 'preWorkout',
       title: 'Protein Bar',
       description: 'Quest protein bar',
       calories: 200,
@@ -775,7 +775,7 @@ export const seedDatabase = mutation({
 
     await ctx.db.insert('dietLogs', {
       userId: client2Id,
-      mealType: 'dinner',
+      mealType: 'middaySnack',
       title: 'Grilled Salmon',
       description: 'Salmon, jasmine rice, mixed vegetables',
       calories: 720,
@@ -794,7 +794,7 @@ export const seedDatabase = mutation({
 
     await ctx.db.insert('dietLogs', {
       userId: client2Id,
-      mealType: 'lunch',
+      mealType: 'middaySnack',
       title: 'Chicken & Pasta',
       description: 'Grilled chicken, whole wheat pasta, tomato sauce',
       calories: 680,
@@ -803,7 +803,7 @@ export const seedDatabase = mutation({
 
     await ctx.db.insert('dietLogs', {
       userId: client2Id,
-      mealType: 'snack',
+      mealType: 'preWorkout',
       title: 'Mixed Nuts',
       description: 'Almonds, cashews, walnuts',
       calories: 320,
@@ -812,7 +812,7 @@ export const seedDatabase = mutation({
 
     await ctx.db.insert('dietLogs', {
       userId: client2Id,
-      mealType: 'dinner',
+      mealType: 'middaySnack',
       title: 'Grilled Steak & Potatoes',
       description: 'Ribeye steak, sweet potato, asparagus',
       calories: 820,
@@ -831,7 +831,7 @@ export const seedDatabase = mutation({
 
     await ctx.db.insert('dietLogs', {
       userId: client2Id,
-      mealType: 'lunch',
+      mealType: 'middaySnack',
       title: 'Mutton Biryani',
       description: 'Spiced biryani with basmati rice and yogurt',
       calories: 780,
@@ -840,7 +840,7 @@ export const seedDatabase = mutation({
 
     await ctx.db.insert('dietLogs', {
       userId: client2Id,
-      mealType: 'snack',
+      mealType: 'preWorkout',
       title: 'Protein Shake',
       description: 'Whey protein, banana, milk',
       calories: 280,
@@ -849,7 +849,7 @@ export const seedDatabase = mutation({
 
     await ctx.db.insert('dietLogs', {
       userId: client2Id,
-      mealType: 'dinner',
+      mealType: 'middaySnack',
       title: 'Tandoori Chicken',
       description: 'Tandoori chicken, naan, raita',
       calories: 700,
@@ -868,7 +868,7 @@ export const seedDatabase = mutation({
 
     await ctx.db.insert('dietLogs', {
       userId: client3Id,
-      mealType: 'lunch',
+      mealType: 'middaySnack',
       title: 'Idli with Sambar',
       description: 'Steamed idli, sambar, and coconut chutney',
       calories: 280,
@@ -877,7 +877,7 @@ export const seedDatabase = mutation({
 
     await ctx.db.insert('dietLogs', {
       userId: client3Id,
-      mealType: 'snack',
+      mealType: 'preWorkout',
       title: 'Fruit Smoothie',
       description: 'Banana, mango, and yogurt smoothie',
       calories: 180,
@@ -886,7 +886,7 @@ export const seedDatabase = mutation({
 
     await ctx.db.insert('dietLogs', {
       userId: client3Id,
-      mealType: 'dinner',
+      mealType: 'middaySnack',
       title: 'Vegetable Stir-fry',
       description: 'Mixed vegetables with brown rice',
       calories: 350,
@@ -905,7 +905,7 @@ export const seedDatabase = mutation({
 
     await ctx.db.insert('dietLogs', {
       userId: client3Id,
-      mealType: 'lunch',
+      mealType: 'middaySnack',
       title: 'Chapati with Curry',
       description: 'Whole wheat chapati with chickpea curry',
       calories: 400,
@@ -914,7 +914,7 @@ export const seedDatabase = mutation({
 
     await ctx.db.insert('dietLogs', {
       userId: client3Id,
-      mealType: 'snack',
+      mealType: 'preWorkout',
       title: 'Coconut Water',
       description: 'Fresh coconut water',
       calories: 45,
@@ -923,7 +923,7 @@ export const seedDatabase = mutation({
 
     await ctx.db.insert('dietLogs', {
       userId: client3Id,
-      mealType: 'dinner',
+      mealType: 'middaySnack',
       title: 'Rice & Lentil Curry',
       description: 'Basmati rice with aromatic lentil curry',
       calories: 380,
@@ -942,7 +942,7 @@ export const seedDatabase = mutation({
 
     await ctx.db.insert('dietLogs', {
       userId: client3Id,
-      mealType: 'lunch',
+      mealType: 'middaySnack',
       title: 'Pulao',
       description: 'Vegetable pulao with yogurt',
       calories: 420,
@@ -951,7 +951,7 @@ export const seedDatabase = mutation({
 
     await ctx.db.insert('dietLogs', {
       userId: client3Id,
-      mealType: 'snack',
+      mealType: 'preWorkout',
       title: 'Banana',
       description: 'Fresh banana',
       calories: 89,
@@ -960,7 +960,7 @@ export const seedDatabase = mutation({
 
     await ctx.db.insert('dietLogs', {
       userId: client3Id,
-      mealType: 'dinner',
+      mealType: 'middaySnack',
       title: 'Sambar Rice',
       description: 'Rice with sambar and papadům',
       calories: 350,

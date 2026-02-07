@@ -27,7 +27,12 @@ export const Route = createFileRoute('/app/_user/diet-logs')({
   component: RouteComponent,
 })
 
-type MealType = 'breakfast' | 'lunch' | 'dinner' | 'snack' | 'postWorkout'
+type MealType =
+  | 'breakfast'
+  | 'middaySnack'
+  | 'lunch'
+  | 'preWorkout'
+  | 'postWorkout'
 
 function RouteComponent() {
   const { user } = useAuth()
@@ -86,9 +91,9 @@ function RouteComponent() {
   const getMealTypeLabel = (type: string) => {
     const labels: Record<string, string> = {
       breakfast: 'Breakfast',
+      middaySnack: 'Midday Snack',
       lunch: 'Lunch',
-      dinner: 'Dinner',
-      snack: 'Snack',
+      preWorkout: 'Pre-workout',
       postWorkout: 'Post Workout',
     }
     return labels[type] || type
@@ -143,9 +148,9 @@ function RouteComponent() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="breakfast">Breakfast</SelectItem>
+                    <SelectItem value="middaySnack">Midday Snack</SelectItem>
                     <SelectItem value="lunch">Lunch</SelectItem>
-                    <SelectItem value="dinner">Dinner</SelectItem>
-                    <SelectItem value="snack">Snack</SelectItem>
+                    <SelectItem value="preWorkout">Pre-workout</SelectItem>
                     <SelectItem value="postWorkout">Post Workout</SelectItem>
                   </SelectContent>
                 </Select>
