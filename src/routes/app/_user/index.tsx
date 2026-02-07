@@ -25,7 +25,7 @@ import {
   DrawerFooter,
 } from '@/components/ui/drawer'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { useState } from 'react'
+import { useEffect, useRef, useState, type ChangeEvent } from 'react'
 import { toast } from 'sonner'
 import { MEAL_TYPES } from '@/lib/constants'
 import { useAuth } from '@/components/auth/useAuth'
@@ -40,6 +40,9 @@ function RouteComponent() {
   const { user } = useAuth()
   const isTrainerManaged = user?.role === 'trainerManagedCustomer'
   const needsCalories = !isTrainerManaged
+  const trainerManagedCopy = isTrainerManaged
+    ? 'Calories will be added by your trainer after review.'
+    : 'Track your nutrition and calories'
 
   const [weightDrawerOpen, setWeightDrawerOpen] = useState(false)
   const [weight, setWeight] = useState('')
@@ -50,6 +53,13 @@ function RouteComponent() {
   const [dietTitle, setDietTitle] = useState('')
   const [dietDescription, setDietDescription] = useState('')
   const [calories, setCalories] = useState('')
+  const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null)
+  const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null)
+  const [imageStorageId, setImageStorageId] = useState<string | null>(null)
+  const [isUploadingImage, setIsUploadingImage] = useState(false)
+  const imageInputRef = useRef<HTMLInputElement | null>(null)
+
+  const MAX_IMAGE_SIZE = 5 * 1024 * 1024
 
   // Database queries
   const workoutStats = useQuery(
@@ -64,6 +74,7 @@ function RouteComponent() {
   // Mutations
   const addWeightLog = useMutation(api.weightLogs.addWeightLog)
   const addDietLog = useMutation(api.dietLogs.addDietLog)
+  const generateUploadUrl = useMutation(api.files.generateUploadUrl)
 
   // Calculate weekly stats
   const getWeeklyStats = () => {
@@ -159,6 +170,7 @@ function RouteComponent() {
         title: dietTitle,
         description: dietDescription,
         calories: caloriesValue,
+        imageId: imageStorageId ?? undefined,
       })
       toast.success(
         `${mealType.charAt(0).toUpperCase() + mealType.slice(1)} logged!`,
@@ -166,9 +178,80 @@ function RouteComponent() {
       setDietTitle('')
       setDietDescription('')
       setCalories('')
+      clearImageState()
       setDietDrawerOpen(false)
     } catch {
       toast.error('Failed to log meal')
+    }
+  }
+
+  useEffect(() => {
+    return () => {
+      if (imagePreviewUrl) {
+        URL.revokeObjectURL(imagePreviewUrl)
+      }
+    }
+  }, [imagePreviewUrl])
+
+  const clearImageState = () => {
+    if (imagePreviewUrl) {
+      URL.revokeObjectURL(imagePreviewUrl)
+    }
+    setSelectedImageFile(null)
+    setImagePreviewUrl(null)
+    setImageStorageId(null)
+    if (imageInputRef.current) {
+      imageInputRef.current.value = ''
+    }
+  }
+
+  const handlePickImage = () => {
+    imageInputRef.current?.click()
+  }
+
+  const handleImageChange = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please select an image file')
+      clearImageState()
+      return
+    }
+
+    if (file.size > MAX_IMAGE_SIZE) {
+      toast.error('Image must be 5MB or smaller')
+      clearImageState()
+      return
+    }
+
+    if (imagePreviewUrl) {
+      URL.revokeObjectURL(imagePreviewUrl)
+    }
+
+    const previewUrl = URL.createObjectURL(file)
+    setSelectedImageFile(file)
+    setImagePreviewUrl(previewUrl)
+    setIsUploadingImage(true)
+
+    try {
+      const uploadUrl = await generateUploadUrl()
+      const response = await fetch(uploadUrl, {
+        method: 'POST',
+        body: file,
+      })
+
+      if (!response.ok) {
+        throw new Error('Upload failed')
+      }
+
+      const data = await response.json()
+      setImageStorageId(data.storageId)
+    } catch {
+      toast.error('Failed to upload image')
+      clearImageState()
+    } finally {
+      setIsUploadingImage(false)
     }
   }
 
@@ -465,7 +548,7 @@ function RouteComponent() {
               Log Your Meal
             </DrawerTitle>
             <DrawerDescription className="text-center">
-              Track your nutrition and calories
+              {trainerManagedCopy}
             </DrawerDescription>
           </DrawerHeader>
 
@@ -490,15 +573,51 @@ function RouteComponent() {
                 </TabsList>
               </Tabs>
 
-              {/* Camera Button */}
-              <Button variant="outline" className="w-full h-32 border-dashed">
-                <div className="flex flex-col items-center gap-2">
-                  <Camera className="h-8 w-8 text-muted-foreground" />
-                  <span className="text-sm text-muted-foreground">
-                    Add Photo
-                  </span>
-                </div>
-              </Button>
+              <div className="space-y-3">
+                <input
+                  ref={imageInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleImageChange}
+                />
+                <Button
+                  variant="outline"
+                  className="w-full h-32 border-dashed p-0"
+                  onClick={handlePickImage}
+                  disabled={isUploadingImage}
+                >
+                  {imagePreviewUrl ? (
+                    <img
+                      src={imagePreviewUrl}
+                      alt="Meal preview"
+                      className="h-full w-full rounded-md object-cover"
+                    />
+                  ) : (
+                    <div className="flex flex-col items-center gap-2">
+                      <Camera className="h-8 w-8 text-muted-foreground" />
+                      <span className="text-sm text-muted-foreground">
+                        {isUploadingImage ? 'Uploading...' : 'Add Photo'}
+                      </span>
+                    </div>
+                  )}
+                </Button>
+                {imagePreviewUrl && (
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-muted-foreground truncate">
+                      {selectedImageFile?.name ?? 'Selected image'}
+                    </span>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={clearImageState}
+                    >
+                      Remove
+                    </Button>
+                  </div>
+                )}
+              </div>
 
               {/* Title Input */}
               <div className="space-y-2">
@@ -590,7 +709,8 @@ function RouteComponent() {
               disabled={
                 !dietTitle.trim() ||
                 (needsCalories &&
-                  (!calories || parseFloat(calories) <= 0))
+                  (!calories || parseFloat(calories) <= 0)) ||
+                isUploadingImage
               }
             >
               <UtensilsCrossed className="mr-2 h-4 w-4" />

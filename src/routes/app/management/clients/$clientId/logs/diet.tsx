@@ -1,6 +1,12 @@
 import { useEffect, useState } from 'react'
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
-import { ArrowLeft, UtensilsCrossed, Calendar, Flame } from 'lucide-react'
+import {
+  ArrowLeft,
+  UtensilsCrossed,
+  Calendar,
+  Flame,
+  Camera,
+} from 'lucide-react'
 import { useMutation, useQuery } from 'convex/react'
 import { toast } from 'sonner'
 
@@ -147,32 +153,31 @@ function DietLogsRoute() {
                     </div>
                   </div>
 
-                  {log.items && log.items.length > 0 && (
-                    <div className="space-y-2">
-                      <p className="text-sm font-medium text-muted-foreground">
-                        Items ({log.items.length})
+                  <div className="space-y-2">
+                    <p className="text-base font-semibold">{log.title}</p>
+                    {log.description && (
+                      <p className="text-sm text-muted-foreground">
+                        {log.description}
                       </p>
-                      <div className="space-y-1">
-                        {log.items.map((item, idx) => (
-                          <div
-                            key={idx}
-                            className="text-sm p-2 bg-muted rounded flex items-center justify-between"
-                          >
-                            <span>{item.name}</span>
-                            {item.calories && (
-                              <span className="text-muted-foreground text-xs">
-                                {item.calories} kcal
-                              </span>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
+                    )}
+                  </div>
 
-                  {log.notes && (
-                    <div className="bg-muted p-3 rounded-lg">
-                      <p className="text-sm">{log.notes}</p>
+                  {log.imageUrl && (
+                    <div className="space-y-2">
+                      <p className="text-sm text-muted-foreground">
+                        Meal photo
+                      </p>
+                      <div className="relative overflow-hidden rounded-lg border">
+                        <img
+                          src={log.imageUrl}
+                          alt="Meal"
+                          className="h-40 w-full object-cover"
+                        />
+                        <div className="absolute bottom-2 right-2 flex items-center gap-1 rounded-full bg-background/80 px-2 py-1 text-xs text-muted-foreground">
+                          <Camera className="h-3 w-3" />
+                          Photo
+                        </div>
+                      </div>
                     </div>
                   )}
 

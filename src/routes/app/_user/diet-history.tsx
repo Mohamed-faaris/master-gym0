@@ -37,6 +37,7 @@ type HistoryLog = {
 
 function RouteComponent() {
   const { user } = useAuth()
+  const isTrainerManaged = user?.role === 'trainerManagedCustomer'
   const [cursor, setCursor] = useState<number | null>(null)
   const [nextCursor, setNextCursor] = useState<number | null>(null)
   const [isLoadingMore, setIsLoadingMore] = useState(false)
@@ -155,10 +156,25 @@ function RouteComponent() {
                     </CardDescription>
                   </div>
                   <div className="text-right">
-                    <div className="text-lg font-bold">
-                      {log.calories ?? 0}
-                    </div>
-                    <div className="text-xs text-muted-foreground">kcal</div>
+                    {log.calories != null ? (
+                      <>
+                        <div className="text-lg font-bold">
+                          {log.calories}
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          kcal
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <div className="text-sm font-semibold text-muted-foreground">
+                          {isTrainerManaged ? 'Pending' : '0'}
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          {isTrainerManaged ? 'Trainer review' : 'kcal'}
+                        </div>
+                      </>
+                    )}
                   </div>
                 </div>
               </CardHeader>

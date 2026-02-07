@@ -47,7 +47,14 @@ export const getDietLogsByUser = query({
       ? await query.take(args.limit)
       : await query.collect()
 
-    return dietLogs
+    const logsWithUrl = await Promise.all(
+      dietLogs.map(async (log) => ({
+        ...log,
+        imageUrl: log.imageId ? await ctx.storage.getUrl(log.imageId) : null,
+      })),
+    )
+
+    return logsWithUrl
   },
 })
 

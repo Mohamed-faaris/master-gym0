@@ -51,6 +51,9 @@ function DietPlanRoute() {
   const planOwnerId = user?.trainerId ?? user?._id
   const isTrainerManaged = user?.role === 'trainerManagedCustomer'
   const needsCalories = !isTrainerManaged
+  const trainerManagedCopy = isTrainerManaged
+    ? 'Calories will be added by your trainer after review.'
+    : 'Track your nutrition and calories'
 
   const [dietDrawerOpen, setDietDrawerOpen] = useState(false)
   const [mealType, setMealType] =
@@ -306,7 +309,7 @@ function DietPlanRoute() {
                 Log Your Meal
               </DrawerTitle>
               <DrawerDescription className="text-center">
-                Track your nutrition and calories
+                {trainerManagedCopy}
               </DrawerDescription>
             </DrawerHeader>
 

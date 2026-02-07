@@ -38,6 +38,9 @@ function RouteComponent() {
   const { user } = useAuth()
   const isTrainerManaged = user?.role === 'trainerManagedCustomer'
   const needsCalories = !isTrainerManaged
+  const trainerManagedCopy = isTrainerManaged
+    ? 'Calories will be added by your trainer after review.'
+    : null
   const [isAddingMeal, setIsAddingMeal] = useState(false)
   const [mealType, setMealType] = useState<MealType>('breakfast')
   const [title, setTitle] = useState('')
@@ -175,7 +178,7 @@ function RouteComponent() {
                 />
               </div>
 
-              {/* {needsCalories && (
+              {needsCalories && (
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Calories</label>
                   <Input
@@ -186,7 +189,13 @@ function RouteComponent() {
                     required
                   />
                 </div>
-              )} */}
+              )}
+
+              {trainerManagedCopy && (
+                <p className="text-xs text-muted-foreground">
+                  {trainerManagedCopy}
+                </p>
+              )}
 
               <div className="flex gap-2">
                 <Button type="submit" className="flex-1">
@@ -226,8 +235,25 @@ function RouteComponent() {
                     </CardDescription>
                   </div>
                   <div className="text-right">
-                    <div className="text-lg font-bold">{log.calories}</div>
-                    <div className="text-xs text-muted-foreground">kcal</div>
+                    {log.calories != null ? (
+                      <>
+                        <div className="text-lg font-bold">
+                          {log.calories}
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          kcal
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <div className="text-sm font-semibold text-muted-foreground">
+                          Pending
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          Trainer review
+                        </div>
+                      </>
+                    )}
                   </div>
                 </div>
               </CardHeader>
