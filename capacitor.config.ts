@@ -1,9 +1,13 @@
-import type { CapacitorConfig } from '@capacitor/cli';
+import type { CapacitorConfig } from '@capacitor/cli'
 
 const config: CapacitorConfig = {
   appId: 'com.yourcompany.mastergym',
   appName: 'Master Gym',
-  webDir: '.output/public'
-};
+  webDir: '.output/public',
+  server: {
+    androidScheme: 'https',
+    iosScheme: 'capacitor',
+  },
+}
 
-export default config;
+export default config

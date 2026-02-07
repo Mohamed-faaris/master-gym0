@@ -16,13 +16,20 @@
     "db:pull": "drizzle-kit pull",
     "db:studio": "drizzle-kit studio",
     "convex:seed": "convex run seed:seedDatabase",
-    "convex:clear": "convex run seed:clearDatabase"
+    "convex:clear": "convex run seed:clearDatabase",
+    "cap:sync": "npx cap sync",
+    "cap:open:ios": "npx cap open ios",
+    "cap:open:android": "npx cap open android",
+    "cap:build": "npm run build && npm run cap:sync",
+    "cap:run:android": "npx cap run android",
+    "cap:run:ios": "npx cap run ios"
   },
   "dependencies": {
     "@base-ui-components/react": "1.0.0-rc.0",
     "@capacitor/android": "^8.0.2",
     "@capacitor/cli": "^8.0.2",
     "@capacitor/core": "^8.0.2",
+    "@capacitor/status-bar": "^8.0.0",
     "@convex-dev/react-query": "0.1.0",
     "@modelcontextprotocol/sdk": "^1.25.3",
     "@radix-ui/react-dialog": "^1.1.15",

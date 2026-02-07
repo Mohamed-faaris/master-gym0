@@ -7,6 +7,7 @@ import {
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { TanStackDevtools } from '@tanstack/react-devtools'
 import React from 'react'
+import { StatusBar } from '@capacitor/status-bar'
 
 import ConvexProvider from '../integrations/convex/provider'
 
@@ -50,11 +51,15 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 
 function RootDocument({ children }: { children: React.ReactNode }) {
   React.useEffect(() => {
+    // Configure Capacitor status bar for mobile apps
+    StatusBar.setOverlaysWebView({ overlay: false })
+
     // Block pinch zoom
     document.addEventListener(
       'touchmove',
       function (event) {
-        if (event.scale !== 1) {
+        const touchEvent = event as TouchEvent & { scale?: number }
+        if (touchEvent.scale !== 1) {
           event.preventDefault()
         }
       },
