@@ -80,9 +80,17 @@ export function WorkoutSessionRouteComponent() {
 
   React.useEffect(() => {
     if (existingSession) {
+      const completed = new Set<string>()
+      existingSession.exercises.forEach((exercise, exIndex) => {
+        exercise.sets.forEach((set, setIndex) => {
+          if (set.completed) {
+            completed.add(`${exIndex}-${setIndex}`)
+          }
+        })
+      })
       setSessionId(existingSession._id)
       setWorkoutTime(existingSession.totalTime || 0)
-      setCompletedSets(new Set(existingSession.completedSets || []))
+      setCompletedSets(completed)
       if (existingSession.status === 'completed') {
         setIsPaused(true)
       }
@@ -119,10 +127,10 @@ export function WorkoutSessionRouteComponent() {
               reps: set.reps,
               weight: set.weight,
               notes: set.notes,
-              completed: updatedSets.has(`${idx}-${setIdx + 1}`),
+              completed: updatedSets.has(`${idx}-${setIdx}`),
             }))
           : Array.from({ length: setCount }).map((_, setIdx) => ({
-              completed: updatedSets.has(`${idx}-${setIdx + 1}`),
+              completed: updatedSets.has(`${idx}-${setIdx}`),
             }))
 
       return {
@@ -135,7 +143,7 @@ export function WorkoutSessionRouteComponent() {
   const toggleSet = async (exerciseIndex: number, setIndex: number) => {
     if (!sessionId || !todaysWorkout) return
 
-    const key = `${exerciseIndex}-${setIndex + 1}`
+    const key = `${exerciseIndex}-${setIndex}`
     const updatedSets = new Set(completedSets)
     if (updatedSets.has(key)) {
       updatedSets.delete(key)
@@ -183,10 +191,6 @@ export function WorkoutSessionRouteComponent() {
     }
   }
 
-  const handleToggleSet = async (exerciseIndex: number, setNumber: number) => {
-    await toggleSet(exerciseIndex, setNumber - 1)
-  }
-
   const handleCompleteSession = async () => {
     if (!sessionId) return
 
@@ -195,7 +199,6 @@ export function WorkoutSessionRouteComponent() {
         sessionId,
         totalTime: workoutTime,
         totalCaloriesBurned: Math.round((workoutTime / 60) * 5),
-        completedSets: Array.from(completedSets),
       })
       toast.success('Workout completed!')
       navigate({ to: '/app' })
@@ -306,7 +309,7 @@ export function WorkoutSessionRouteComponent() {
               <div className="space-y-2">
                 {Array.from({ length: getSetCount(exercise) }).map(
                   (_, setIndex) => {
-                  const key = `${exerciseIndex}-${setIndex + 1}`
+                  const key = `${exerciseIndex}-${setIndex}`
                   const isCompleted = completedSets.has(key)
                   return (
                     <Card
