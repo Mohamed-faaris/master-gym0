@@ -73,9 +73,7 @@ function ClientsRoute() {
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
             <h1 className="text-2xl font-semibold">Clients</h1>
-            <p className="text-muted-foreground">
-              Manage your athlete roster and track progress.
-            </p>
+            <p className="text-muted-foreground">Manage roster and progress.</p>
           </div>
           {user?.role === 'admin' && (
             <Button asChild size="sm" variant="outline">
