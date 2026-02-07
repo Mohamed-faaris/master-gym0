@@ -12,6 +12,7 @@ import type * as clientInsights from "../clientInsights.js";
 import type * as dietLogs from "../dietLogs.js";
 import type * as dietPlans from "../dietPlans.js";
 import type * as files from "../files.js";
+import type * as gallery from "../gallery.js";
 import type * as seed from "../seed.js";
 import type * as todos from "../todos.js";
 import type * as trainingPlans from "../trainingPlans.js";
@@ -30,6 +31,7 @@ declare const fullApi: ApiFromModules<{
   dietLogs: typeof dietLogs;
   dietPlans: typeof dietPlans;
   files: typeof files;
+  gallery: typeof gallery;
   seed: typeof seed;
   todos: typeof todos;
   trainingPlans: typeof trainingPlans;

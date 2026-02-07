@@ -22,6 +22,15 @@ export const MEAL_TYPES = [
   'postWorkout',
 ] as const
 
+export const GALLERY_STATUSES = [
+  'approved',
+  'subitted',
+  'rejrected',
+  'notSubmited',
+] as const
+
+export const GALLERY_ACCESS = ['private', 'public'] as const
+
 const DAYS_OF_WEEK = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'] as const
 
 const GOALS = [
@@ -107,6 +116,8 @@ function enumToValidator<T extends ReadonlyArray<string>>(values: T) {
 const RoleValidator = enumToValidator(ROLES)
 const WorkoutStatusValidator = enumToValidator(WORKOUT_STATUSES)
 const MealTypeValidator = enumToValidator(MEAL_TYPES)
+const GalleryStatusValidator = enumToValidator(GALLERY_STATUSES)
+const GalleryAccessValidator = enumToValidator(GALLERY_ACCESS)
 const DayOfWeekValidator = enumToValidator(DAYS_OF_WEEK)
 const GoalValidator = enumToValidator(GOALS)
 const ExerciseNameValidator = enumToValidator(EXERCISE_NAMES)
@@ -300,6 +311,20 @@ const workoutSessions = defineTable({
   .index('by_user_day', ['userId', 'dayOfWeek'])
   .index('by_user_status', ['userId', 'status'])
 
+/* -------------------- GALLERY -------------------- */
+
+const gallery = defineTable({
+  userId: v.id('users'),
+  imgUrl: v.string(),
+  storageId: v.optional(v.id('_storage')),
+  status: GalleryStatusValidator,
+  access: GalleryAccessValidator,
+  createdAt: v.number(),
+  updatedAt: v.number(),
+})
+  .index('by_user', ['userId'])
+  .index('by_access', ['access'])
+
 /* ======================================================= */
 
 export default defineSchema({
@@ -311,4 +336,5 @@ export default defineSchema({
   trainingPlans,
   dietPlans,
   workoutSessions,
+  gallery,
 })

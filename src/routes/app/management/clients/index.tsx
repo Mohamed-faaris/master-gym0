@@ -67,17 +67,21 @@ function ClientsRoute() {
     <div className="space-y-6 p-4 pb-20">
       {/* --------------------------- Header --------------------------- */}
       <header className="space-y-3">
-      
         <p className="text-xs uppercase tracking-wide text-muted-foreground">
           Client roster · {todayLabel}
         </p>
-        <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
             <h1 className="text-2xl font-semibold">Clients</h1>
             <p className="text-muted-foreground">
               Manage your athlete roster and track progress.
             </p>
           </div>
+          {user?.role === 'admin' && (
+            <Button asChild size="sm" variant="outline">
+              <Link to="/app/admin">Admin</Link>
+            </Button>
+          )}
         </div>
       </header>
 

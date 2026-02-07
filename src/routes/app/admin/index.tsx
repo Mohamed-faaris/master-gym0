@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useMutation, useQuery } from 'convex/react'
 import {
   Activity,
@@ -336,7 +336,14 @@ function SuperAdminDashboard() {
         <p className="text-xs text-muted-foreground uppercase tracking-wide">
           Super Admin Console · {todayLabel}
         </p>
-        <h1 className="text-xl font-semibold">Administration</h1>
+        <div className="flex items-center justify-between gap-4">
+          <h1 className="text-xl font-semibold">Administration</h1>
+          {user?.role === 'admin' && (
+            <Button asChild size="sm" variant="outline">
+              <Link to="/app/management">Trainer</Link>
+            </Button>
+          )}
+        </div>
       </header>
 
       {/* Content Area */}
