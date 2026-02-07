@@ -31,6 +31,35 @@ import type { Id } from '../../../../../convex/_generated/dataModel'
 
 const privilegedRoles = new Set(['trainer', 'admin'])
 
+const dayOrder = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'] as const
+type DayKey = (typeof dayOrder)[number]
+
+type MealTemplateEntry = {
+  day: DayKey
+  mealType: string
+  title: string
+  description: string
+  calories: number
+}
+
+const weekDayLabels: Record<DayKey, string> = {
+  mon: 'Monday',
+  tue: 'Tuesday',
+  wed: 'Wednesday',
+  thu: 'Thursday',
+  fri: 'Friday',
+  sat: 'Saturday',
+  sun: 'Sunday',
+}
+
+const mealTypeLabels: Record<string, string> = {
+  breakfast: 'Breakfast',
+  middaySnack: 'Midday Snack',
+  lunch: 'Lunch',
+  preWorkout: 'Pre-workout',
+  postWorkout: 'Post-workout',
+}
+
 export const Route = createFileRoute('/app/management/diet-plans/$planId')({
   component: DietPlanDetailRoute,
 })
@@ -45,6 +74,49 @@ function DietPlanDetailRoute() {
   })
 
   const deleteDietPlan = useMutation(api.dietPlans.deleteDietPlan)
+
+  const mealTemplate: MealTemplateEntry[] = dietPlan?.mealTemplate ?? []
+
+  const mealsByDay = useMemo(() => {
+    const base = dayOrder.reduce<Record<DayKey, MealTemplateEntry[]>>(
+      (acc, day) => {
+        acc[day] = []
+        return acc
+      },
+      {} as Record<DayKey, MealTemplateEntry[]>,
+    )
+
+    mealTemplate.forEach((meal) => {
+      base[meal.day].push(meal)
+    })
+
+    return base
+  }, [mealTemplate])
+
+  const availableDays = useMemo<DayKey[]>(
+    () => dayOrder.filter((day) => mealsByDay[day]?.length),
+    [mealsByDay],
+  )
+
+  const [activeDay, setActiveDay] = useState<DayKey>(
+    () => availableDays[0] ?? dayOrder[0],
+  )
+
+  useEffect(() => {
+    if (!availableDays.length) return
+    setActiveDay((prev) =>
+      availableDays.includes(prev) ? prev : availableDays[0],
+    )
+  }, [availableDays])
+
+  const dayTotals = useMemo<Record<DayKey, number>>(() => {
+    const totals = {} as Record<DayKey, number>
+    dayOrder.forEach((day) => {
+      const meals = mealsByDay[day] ?? []
+      totals[day] = meals.reduce((sum, meal) => sum + (meal.calories || 0), 0)
+    })
+    return totals
+  }, [mealsByDay])
 
   /* -------------------------------------------------------------------------- */
   /*                                 Auth Guard                                 */
@@ -81,54 +153,6 @@ function DietPlanDetailRoute() {
       </div>
     )
   }
-
-  const weekDayLabels: Record<string, string> = {
-    mon: 'Monday',
-    tue: 'Tuesday',
-    wed: 'Wednesday',
-    thu: 'Thursday',
-    fri: 'Friday',
-    sat: 'Saturday',
-    sun: 'Sunday',
-  }
-
-  const mealTypeLabels: Record<string, string> = {
-    breakfast: 'Breakfast',
-    middaySnack: 'Midday Snack',
-    lunch: 'Lunch',
-    preWorkout: 'Pre-workout',
-    postWorkout: 'Post-workout',
-  }
-
-  const dayOrder = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']
-
-  const mealsByDay = dietPlan.mealTemplate.reduce(
-    (acc, meal) => {
-      const dayKey = meal.day || 'unknown'
-      if (!acc[dayKey]) acc[dayKey] = []
-      acc[dayKey].push(meal)
-      return acc
-    },
-    {} as Record<string, typeof dietPlan.mealTemplate>,
-  )
-
-  const availableDays = dayOrder.filter((day) => mealsByDay[day]?.length)
-  const [activeDay, setActiveDay] = useState(availableDays[0] ?? dayOrder[0])
-
-  useEffect(() => {
-    if (!availableDays.length) return
-    setActiveDay((prev) =>
-      availableDays.includes(prev) ? prev : availableDays[0],
-    )
-  }, [availableDays])
-
-  const dayTotals = useMemo(() => {
-    const totals: Record<string, number> = {}
-    Object.entries(mealsByDay).forEach(([day, meals]) => {
-      totals[day] = meals.reduce((sum, meal) => sum + (meal.calories || 0), 0)
-    })
-    return totals
-  }, [mealsByDay])
 
   return (
     <div className="min-h-screen bg-background pb-24">
@@ -234,8 +258,8 @@ function DietPlanDetailRoute() {
               Meal Template
             </CardTitle>
             <CardDescription>
-              {dietPlan.mealTemplate.length} meal
-              {dietPlan.mealTemplate.length !== 1 ? 's' : ''} configured
+              {mealTemplate.length} meal
+              {mealTemplate.length !== 1 ? 's' : ''} configured
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -289,7 +313,7 @@ function DietPlanDetailRoute() {
               ))}
             </Tabs>
 
-            {dietPlan.mealTemplate.length === 0 && (
+            {mealTemplate.length === 0 && (
               <p className="text-sm text-muted-foreground text-center py-8">
                 No meals configured in this template
               </p>

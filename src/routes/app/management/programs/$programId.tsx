@@ -116,9 +116,13 @@ function ProgramDetailRoute() {
           {program.days.map((day, index) => (
             <Card key={index}>
               <CardHeader>
-                <CardTitle className="text-lg capitalize">{day.day}</CardTitle>
+                <CardTitle className="text-lg capitalize">
+                  {day.dayTitle || day.day}
+                </CardTitle>
                 <CardDescription>
-                  {day.exercises.length} exercises
+                  {day.dayDescription
+                    ? day.dayDescription
+                    : `${day.exercises.length} exercises`}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">

@@ -196,7 +196,9 @@ function RouteComponent() {
       navigate({ to: '/app/management/diet-plans' })
     } catch (error) {
       console.error('Failed to create diet plan:', error)
-      toast.error('Failed to create diet plan. Please try again.')
+      const errorMessage =
+        error instanceof Error ? error.message : 'Please try again.'
+      toast.error(`Failed to create diet plan: ${errorMessage}`)
     } finally {
       setIsSubmitting(false)
     }

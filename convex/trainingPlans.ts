@@ -25,6 +25,8 @@ const ExerciseValidator = v.object({
 
 const DayPlanValidator = v.object({
   day: DayOfWeekValidator,
+  dayTitle: v.optional(v.string()),
+  dayDescription: v.optional(v.string()),
   exercises: v.array(ExerciseValidator),
 })
 

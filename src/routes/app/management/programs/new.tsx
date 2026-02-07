@@ -1,28 +1,182 @@
-import { useEffect } from 'react'
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
-import { ArrowLeft, ClipboardList } from 'lucide-react'
+import { useEffect, useMemo, useState } from 'react'
+import {
+  ArrowLeft,
+  CalendarDays,
+  ChevronLeft,
+  ChevronRight,
+  ClipboardList,
+  Dumbbell,
+  Plus,
+  Trash2,
+} from 'lucide-react'
+import { useMutation as useConvexMutation } from 'convex/react'
+import { toast } from 'sonner'
 import { useAuth } from '@/components/auth/useAuth'
 import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Progress } from '@/components/ui/progress'
+import { cn } from '@/lib/utils'
+import { api } from '@convex/_generated/api'
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
-
-const privilegedRoles = new Set(['trainer', 'admin'])
+  Tabs,
+  TabsContent,
+  TabsContents,
+  TabsList,
+  TabsTrigger,
+} from '@/components/animate-ui/components/radix/tabs'
 
 export const Route = createFileRoute('/app/management/programs/new')({
   component: RouteComponent,
 })
 
+type SetEntry = {
+  reps: string
+  weight: string
+  notes: string
+}
+
+type ExerciseEntry = {
+  exerciseName: string
+  sets: SetEntry[]
+}
+
+type DayMeta = {
+  title: string
+  description: string
+}
+
+const weekDays = [
+  { key: 'mon', label: 'Mon' },
+  { key: 'tue', label: 'Tue' },
+  { key: 'wed', label: 'Wed' },
+  { key: 'thu', label: 'Thu' },
+  { key: 'fri', label: 'Fri' },
+  { key: 'sat', label: 'Sat' },
+  { key: 'sun', label: 'Sun' },
+] as const
+
+type DayKey = (typeof weekDays)[number]['key']
+
+const EXERCISE_NAMES = [
+  // CHEST (8)
+  'Barbell Bench Press',
+  'Incline Dumbbell Press',
+  'Decline Bench Press',
+  'Dumbbell Fly',
+  'Cable Chest Fly',
+  'Push-Ups',
+  'Dumbbell Pullover',
+  'Smith Machine Bench Press',
+  // BACK (8)
+  'Lat Pulldown',
+  'Pull-Ups / Assisted Pull-Ups',
+  'Seated Cable Row',
+  'Bent-Over Barbell Row',
+  'One-Arm Dumbbell Row',
+  'T-Bar Row',
+  'Deadlift',
+  'Straight-Arm Pulldown',
+  // SHOULDERS (7)
+  'Barbell Overhead Press',
+  'Dumbbell Lateral Raise',
+  'Front Raise',
+  'Rear Delt Fly',
+  'Arnold Press',
+  'Upright Row',
+  'Face Pull',
+  // BICEPS (6)
+  'Barbell Curl',
+  'Dumbbell Curl',
+  'Hammer Curl',
+  'Preacher Curl',
+  'Concentration Curl',
+  'Cable Biceps Curl',
+  // TRICEPS (6)
+  'Cable Triceps Pushdown',
+  'Skull Crushers',
+  'Overhead Dumbbell Triceps Extension',
+  'Bench Dips',
+  'Close-Grip Bench Press',
+  'Triceps Kickbacks',
+  // LEGS (10)
+  'Barbell Squat',
+  'Leg Press',
+  'Walking Lunges',
+  'Leg Extension',
+  'Leg Curl',
+  'Romanian Deadlift',
+  'Standing Calf Raises',
+  'Seated Calf Raises',
+  'Bulgarian Split Squat',
+  'Hack Squat',
+  // CORE / ABS (5)
+  'Hanging Leg Raises',
+  'Cable Crunch',
+  'Ab Wheel Rollout',
+  'Plank',
+  'Russian Twist',
+] as const
+
+const steps = [
+  { key: 'details', label: 'Program details' },
+  { key: 'schedule', label: 'Schedule' },
+  { key: 'workouts', label: 'Workouts' },
+  { key: 'review', label: 'Review' },
+]
+
+const privilegedRoles = new Set(['trainer', 'admin'])
+
+const createEmptySet = (): SetEntry => ({
+  reps: '',
+  weight: '',
+  notes: '',
+})
+
+const createEmptyExercise = (): ExerciseEntry => ({
+  exerciseName: '',
+  sets: [createEmptySet()],
+})
+
 function RouteComponent() {
   const navigate = useNavigate()
   const { user, isLoading } = useAuth()
+  const createTrainingPlan = useConvexMutation(
+    api.trainingPlans.createTrainingPlan,
+  )
+
+  const [stepIndex, setStepIndex] = useState(0)
+  const [planName, setPlanName] = useState('')
+  const [planDescription, setPlanDescription] = useState('')
+  const [durationWeeks, setDurationWeeks] = useState('4')
+  const [selectedDays, setSelectedDays] = useState<string[]>([])
+  const [activeWorkoutDay, setActiveWorkoutDay] = useState<DayKey | null>(null)
+  const [workoutsByDay, setWorkoutsByDay] = useState<
+    Record<DayKey, ExerciseEntry[]>
+  >(() =>
+    weekDays.reduce(
+      (acc, day) => {
+        acc[day.key] = []
+        return acc
+      },
+      {} as Record<DayKey, ExerciseEntry[]>,
+    ),
+  )
+  const [dayMetaByDay, setDayMetaByDay] = useState<Record<DayKey, DayMeta>>(
+    () =>
+      weekDays.reduce(
+        (acc, day) => {
+          acc[day.key] = { title: '', description: '' }
+          return acc
+        },
+        {} as Record<DayKey, DayMeta>,
+      ),
+  )
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   /* -------------------------------------------------------------------------- */
-  /*                                    Auth                                    */
+  /*                                 Auth Guard                                 */
   /* -------------------------------------------------------------------------- */
 
   useEffect(() => {
@@ -32,63 +186,776 @@ function RouteComponent() {
       return
     }
     if (!privilegedRoles.has(user.role)) {
-      navigate({ to: '/app' })
+      navigate({ to: '/app/_user' })
     }
   }, [user, isLoading, navigate])
 
+  useEffect(() => {
+    if (selectedDays.length === 0) {
+      setActiveWorkoutDay(null)
+      return
+    }
+    const current = activeWorkoutDay
+    if (!current || !selectedDays.includes(current)) {
+      setActiveWorkoutDay(selectedDays[0] as DayKey)
+    }
+  }, [selectedDays, activeWorkoutDay])
+
+  const progressValue = useMemo(
+    () => ((stepIndex + 1) / steps.length) * 100,
+    [stepIndex],
+  )
+  const topRightDestination =
+    user?.role === 'admin' ? '/app/admin' : '/app/management'
+  const topRightLabel =
+    user?.role === 'admin' ? 'Admin dashboard' : 'Management home'
+
+  const toggleDay = (dayKey: string) => {
+    setSelectedDays((prev) =>
+      prev.includes(dayKey)
+        ? prev.filter((day) => day !== dayKey)
+        : [...prev, dayKey],
+    )
+  }
+
+  const addExercise = (dayKey: DayKey) => {
+    setWorkoutsByDay((prev) => ({
+      ...prev,
+      [dayKey]: [...prev[dayKey], createEmptyExercise()],
+    }))
+  }
+
+  const updateDayMeta = (
+    dayKey: DayKey,
+    field: keyof DayMeta,
+    value: string,
+  ) => {
+    setDayMetaByDay((prev) => ({
+      ...prev,
+      [dayKey]: { ...prev[dayKey], [field]: value },
+    }))
+  }
+
+  const removeExercise = (dayKey: DayKey, exerciseIndex: number) => {
+    setWorkoutsByDay((prev) => ({
+      ...prev,
+      [dayKey]: prev[dayKey].filter((_, index) => index !== exerciseIndex),
+    }))
+  }
+
+  const updateExerciseName = (
+    dayKey: DayKey,
+    exerciseIndex: number,
+    value: string,
+  ) => {
+    setWorkoutsByDay((prev) => ({
+      ...prev,
+      [dayKey]: prev[dayKey].map((exercise, index) =>
+        index === exerciseIndex ? { ...exercise, exerciseName: value } : exercise,
+      ),
+    }))
+  }
+
+  const addSet = (dayKey: DayKey, exerciseIndex: number) => {
+    setWorkoutsByDay((prev) => ({
+      ...prev,
+      [dayKey]: prev[dayKey].map((exercise, index) =>
+        index === exerciseIndex
+          ? { ...exercise, sets: [...exercise.sets, createEmptySet()] }
+          : exercise,
+      ),
+    }))
+  }
+
+  const removeSet = (
+    dayKey: DayKey,
+    exerciseIndex: number,
+    setIndex: number,
+  ) => {
+    setWorkoutsByDay((prev) => ({
+      ...prev,
+      [dayKey]: prev[dayKey].map((exercise, index) =>
+        index === exerciseIndex
+          ? {
+              ...exercise,
+              sets: exercise.sets.filter((_, idx) => idx !== setIndex),
+            }
+          : exercise,
+      ),
+    }))
+  }
+
+  const updateSetField = (
+    dayKey: DayKey,
+    exerciseIndex: number,
+    setIndex: number,
+    field: keyof SetEntry,
+    value: string,
+  ) => {
+    setWorkoutsByDay((prev) => ({
+      ...prev,
+      [dayKey]: prev[dayKey].map((exercise, index) =>
+        index === exerciseIndex
+          ? {
+              ...exercise,
+              sets: exercise.sets.map((setEntry, idx) =>
+                idx === setIndex ? { ...setEntry, [field]: value } : setEntry,
+              ),
+            }
+          : exercise,
+      ),
+    }))
+  }
+
+  const handleSubmit = async () => {
+    if (!user) {
+      toast.error('You must be logged in to create a program')
+      return
+    }
+
+    if (!planName.trim()) {
+      toast.error('Program name is required')
+      return
+    }
+
+    const parsedDuration = parseInt(durationWeeks, 10)
+    if (!parsedDuration || parsedDuration < 1) {
+      toast.error('Duration must be at least 1 week')
+      return
+    }
+
+    if (selectedDays.length === 0) {
+      toast.error('Please select at least one workout day')
+      return
+    }
+
+    const unnamedExercises = selectedDays.flatMap((dayKey) => {
+      const exercises = workoutsByDay[dayKey as DayKey]
+      return exercises
+        .map((exercise, index) =>
+          exercise.exerciseName.trim() === ''
+            ? { dayKey, index: index + 1 }
+            : null,
+        )
+        .filter(Boolean) as Array<{ dayKey: string; index: number }>
+    })
+
+    if (unnamedExercises.length > 0) {
+      const byDay = unnamedExercises.reduce<Record<string, number[]>>(
+        (acc, entry) => {
+          acc[entry.dayKey] = acc[entry.dayKey] || []
+          acc[entry.dayKey].push(entry.index)
+          return acc
+        },
+        {},
+      )
+      const message = Object.entries(byDay)
+        .map(([dayKey, indexes]) => {
+          const label =
+            weekDays.find((entry) => entry.key === dayKey)?.label || dayKey
+          return `${label} (ex ${indexes.join(', ')})`
+        })
+        .join(', ')
+      toast.error(`Name all exercises before saving: ${message}`)
+      return
+    }
+
+    const emptyDays = selectedDays.filter((dayKey) => {
+      const exercises = workoutsByDay[dayKey as DayKey]
+      return !exercises.some((exercise) => exercise.exerciseName.trim() !== '')
+    })
+
+    if (emptyDays.length > 0) {
+      const missingLabels = emptyDays
+        .map((day) => weekDays.find((entry) => entry.key === day)?.label || day)
+        .join(', ')
+      toast.error(`Add at least one exercise for: ${missingLabels}`)
+      return
+    }
+
+    const daysPayload = selectedDays.map((dayKey) => {
+      const dayMeta = dayMetaByDay[dayKey as DayKey]
+      const exercises = workoutsByDay[dayKey as DayKey]
+        .filter((exercise) => exercise.exerciseName.trim() !== '')
+        .map((exercise) => ({
+          exerciseName: exercise.exerciseName,
+          noOfSets: exercise.sets.length,
+          sets: exercise.sets.map((setEntry) => ({
+            reps: setEntry.reps ? parseInt(setEntry.reps, 10) : undefined,
+            weight: setEntry.weight ? parseFloat(setEntry.weight) : undefined,
+            notes: setEntry.notes.trim() || undefined,
+          })),
+        }))
+      return {
+        day: dayKey as any,
+        dayTitle: dayMeta.title.trim() || undefined,
+        dayDescription: dayMeta.description.trim() || undefined,
+        exercises,
+      }
+    })
+
+    setIsSubmitting(true)
+
+    try {
+      await createTrainingPlan({
+        name: planName,
+        description: planDescription || 'No description provided.',
+        days: daysPayload as any,
+        durationWeeks: parsedDuration,
+        createdBy: user._id,
+      })
+
+      toast.success('Program created successfully!')
+      navigate({ to: '/app/management/programs' })
+    } catch (error) {
+      console.error('Failed to create program:', error)
+      const errorMessage =
+        error instanceof Error ? error.message : 'Please try again.'
+      toast.error(`Failed to create program: ${errorMessage}`)
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const isFirstStep = stepIndex === 0
+  const isLastStep = stepIndex === steps.length - 1
+
   if (isLoading) {
-    return <div className="p-4">Loading...</div>
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <p className="text-muted-foreground">Loading...</p>
+      </div>
+    )
   }
-
-  if (!user || !privilegedRoles.has(user.role)) {
-    return null
-  }
-
-  /* -------------------------------------------------------------------------- */
-  /*                                   Render                                   */
-  /* -------------------------------------------------------------------------- */
 
   return (
-    <div className="space-y-6 p-4">
-      {/* --------------------------- Header --------------------------- */}
-      <header className="space-y-3">
-        <Link
-          to="/app/management/programs"
-          className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Back to programs
-        </Link>
-        <div>
-          <h1 className="text-2xl font-semibold">Create Program</h1>
-          <p className="text-muted-foreground">Design a new training program</p>
-        </div>
-      </header>
-
-      {/* ----------------------------- Content ----------------------------- */}
-      <Card>
-        <CardHeader>
-          <CardTitle>New Program</CardTitle>
-          <CardDescription>
-            Create a custom training program for your athletes
-          </CardDescription>
-        </CardHeader>
-
-        <CardContent className="space-y-4">
-          <div className="text-center py-12 space-y-4">
-            <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
-              <ClipboardList className="h-8 w-8 text-primary" />
-            </div>
-            <div className="space-y-2">
-              <h3 className="font-semibold">Program Creation Coming Soon</h3>
-              <p className="text-sm text-muted-foreground max-w-sm mx-auto">
-                Program builder will be integrated with Convex backend. Design
-                day-by-day workouts with exercises, sets, and reps.
-              </p>
-            </div>
+    <div className="min-h-screen bg-background pb-24">
+      <div className="px-4 pt-6 pb-4 space-y-4">
+        <header className="space-y-3">
+          <Link
+            to="/app/management/programs"
+            className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back to programs
+          </Link>
+          <div className="flex items-center justify-between">
+            <span className="text-xs uppercase tracking-wide text-muted-foreground">
+              Step {stepIndex + 1} of {steps.length}
+            </span>
+            {user && privilegedRoles.has(user.role) && (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => navigate({ to: topRightDestination })}
+              >
+                {topRightLabel}
+              </Button>
+            )}
           </div>
-        </CardContent>
-      </Card>
+        </header>
+
+        <div className="space-y-2">
+          <h1 className="text-2xl font-semibold">Create program</h1>
+          <p className="text-sm text-muted-foreground">
+            Build a training plan with day-by-day exercises and sets.
+          </p>
+          <Progress value={progressValue} />
+        </div>
+
+        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+          {steps.map((step, index) => (
+            <span
+              key={step.key}
+              className={cn(
+                'rounded-full border border-border px-3 py-1',
+                index === stepIndex
+                  ? 'bg-primary text-primary-foreground border-primary'
+                  : 'bg-muted/40',
+              )}
+            >
+              {step.label}
+            </span>
+          ))}
+        </div>
+      </div>
+
+      <div className="px-4 pb-10 space-y-4">
+        {stepIndex === 0 && (
+          <Card>
+            <CardHeader className="space-y-1">
+              <CardTitle className="flex items-center gap-2">
+                <ClipboardList className="h-5 w-5 text-primary" />
+                Program details
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Program name</label>
+                <Input
+                  placeholder="e.g. Strength Foundations"
+                  value={planName}
+                  onChange={(event) => setPlanName(event.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Description</label>
+                <textarea
+                  className="w-full min-h-[110px] rounded-lg border border-border bg-background px-3 py-2 text-sm"
+                  placeholder="Outline intent, goals, or notes."
+                  value={planDescription}
+                  onChange={(event) => setPlanDescription(event.target.value)}
+                />
+              </div>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">
+                    Duration (weeks)
+                  </label>
+                  <Input
+                    type="number"
+                    min={1}
+                    value={durationWeeks}
+                    onChange={(event) => setDurationWeeks(event.target.value)}
+                  />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {stepIndex === 1 && (
+          <Card>
+            <CardHeader className="space-y-1">
+              <CardTitle className="flex items-center gap-2">
+                <CalendarDays className="h-5 w-5 text-primary" />
+                Schedule cadence
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-5">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Workout days</label>
+                <div className="grid grid-cols-7 gap-2">
+                  {weekDays.map((day) => {
+                    const isSelected = selectedDays.includes(day.key)
+                    return (
+                      <button
+                        key={day.key}
+                        type="button"
+                        onClick={() => toggleDay(day.key)}
+                        className={cn(
+                          'rounded-lg border px-2 py-3 text-xs font-semibold uppercase transition',
+                          isSelected
+                            ? 'border-primary bg-primary text-primary-foreground'
+                            : 'border-border bg-background text-muted-foreground',
+                        )}
+                      >
+                        {day.label}
+                      </button>
+                    )
+                  })}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Pick the days this program should cover.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {stepIndex === 2 && (
+          <Card>
+            <CardHeader className="space-y-1">
+              <CardTitle className="flex items-center gap-2">
+                <Dumbbell className="h-5 w-5 text-primary" />
+                Workouts template
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p className="text-sm text-muted-foreground">
+                Build workouts for each selected day.
+              </p>
+
+              {selectedDays.length === 0 ? (
+                <div className="rounded-2xl border border-dashed border-border bg-muted/20 p-6 text-sm text-muted-foreground">
+                  Select workout days first to add exercises.
+                </div>
+              ) : (
+                <Tabs
+                  value={activeWorkoutDay ?? undefined}
+                  onValueChange={(value) =>
+                    setActiveWorkoutDay(value as DayKey)
+                  }
+                  className="gap-4"
+                >
+                  <TabsList className="w-full flex-wrap">
+                    {weekDays
+                      .filter((day) => selectedDays.includes(day.key))
+                      .map((day) => (
+                        <TabsTrigger key={day.key} value={day.key}>
+                          {day.label}
+                        </TabsTrigger>
+                      ))}
+                  </TabsList>
+                  <TabsContents>
+                    {weekDays
+                      .filter((day) => selectedDays.includes(day.key))
+                      .map((day) => (
+                        <TabsContent key={day.key} value={day.key}>
+                          <div className="space-y-3">
+                            <div className="flex items-center justify-between">
+                              <p className="text-sm font-semibold">
+                                {day.label}
+                              </p>
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={() => addExercise(day.key)}
+                              >
+                                <Plus className="mr-2 h-4 w-4" />
+                                Add exercise
+                              </Button>
+                            </div>
+
+                            <div className="rounded-2xl border border-border bg-muted/20 p-4 space-y-3">
+                              <div className="space-y-2">
+                                <label className="text-xs font-medium uppercase text-muted-foreground">
+                                  Day title
+                                </label>
+                                <Input
+                                  placeholder="e.g. Lower body strength"
+                                  value={dayMetaByDay[day.key].title}
+                                  onChange={(event) =>
+                                    updateDayMeta(
+                                      day.key,
+                                      'title',
+                                      event.target.value,
+                                    )
+                                  }
+                                />
+                              </div>
+                              <div className="space-y-2">
+                                <label className="text-xs font-medium uppercase text-muted-foreground">
+                                  Day description
+                                </label>
+                                <textarea
+                                  className="w-full min-h-[90px] rounded-lg border border-border bg-background px-3 py-2 text-sm"
+                                  placeholder="Focus cues, intensity targets, or notes."
+                                  value={dayMetaByDay[day.key].description}
+                                  onChange={(event) =>
+                                    updateDayMeta(
+                                      day.key,
+                                      'description',
+                                      event.target.value,
+                                    )
+                                  }
+                                />
+                              </div>
+                            </div>
+
+                            {workoutsByDay[day.key].length === 0 ? (
+                              <div className="rounded-xl border border-dashed border-border bg-muted/20 p-4 text-xs text-muted-foreground">
+                                No exercises yet for {day.label}.
+                              </div>
+                            ) : (
+                              <div className="space-y-4">
+                                {workoutsByDay[day.key].map(
+                                  (exercise, index) => (
+                                    <div
+                                      key={`${day.key}-${index}`}
+                                      className="rounded-2xl border border-border bg-muted/30 p-4 space-y-3"
+                                    >
+                                      <div className="flex items-center justify-between">
+                                        <span className="text-sm font-semibold">
+                                          Exercise {index + 1}
+                                        </span>
+                                        <Button
+                                          type="button"
+                                          variant="ghost"
+                                          size="sm"
+                                          onClick={() =>
+                                            removeExercise(day.key, index)
+                                          }
+                                        >
+                                          <Trash2 className="h-4 w-4" />
+                                        </Button>
+                                      </div>
+                                      <div className="space-y-2">
+                                        <label className="text-xs font-medium uppercase text-muted-foreground">
+                                          Exercise name
+                                        </label>
+                                        <Input
+                                          placeholder="e.g. Back squat"
+                                          value={exercise.exerciseName}
+                                          list="exercise-name-options"
+                                          onChange={(event) =>
+                                            updateExerciseName(
+                                              day.key,
+                                              index,
+                                              event.target.value,
+                                            )
+                                          }
+                                        />
+                                      </div>
+
+                                      <div className="space-y-2">
+                                        <div className="flex items-center justify-between">
+                                          <label className="text-xs font-medium uppercase text-muted-foreground">
+                                            Sets
+                                          </label>
+                                          <Button
+                                            type="button"
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() =>
+                                              addSet(day.key, index)
+                                            }
+                                          >
+                                            <Plus className="mr-2 h-4 w-4" />
+                                            Add set
+                                          </Button>
+                                        </div>
+                                        <div className="space-y-2">
+                                          {exercise.sets.map(
+                                            (setEntry, setIndex) => (
+                                              <div
+                                                key={`${day.key}-${index}-${setIndex}`}
+                                                className="rounded-xl border border-border bg-background p-3 space-y-2"
+                                              >
+                                                <div className="flex items-center justify-between">
+                                                  <span className="text-xs font-semibold text-muted-foreground">
+                                                    Set {setIndex + 1}
+                                                  </span>
+                                                  {exercise.sets.length > 1 && (
+                                                    <Button
+                                                      type="button"
+                                                      variant="ghost"
+                                                      size="sm"
+                                                      onClick={() =>
+                                                        removeSet(
+                                                          day.key,
+                                                          index,
+                                                          setIndex,
+                                                        )
+                                                      }
+                                                    >
+                                                      <Trash2 className="h-4 w-4" />
+                                                    </Button>
+                                                  )}
+                                                </div>
+                                                <div className="grid gap-2 sm:grid-cols-3">
+                                                  <div className="space-y-1">
+                                                    <label className="text-[10px] font-medium uppercase text-muted-foreground">
+                                                      Reps
+                                                    </label>
+                                                    <Input
+                                                      type="number"
+                                                      min={0}
+                                                      placeholder="8"
+                                                      value={setEntry.reps}
+                                                      onChange={(event) =>
+                                                        updateSetField(
+                                                          day.key,
+                                                          index,
+                                                          setIndex,
+                                                          'reps',
+                                                          event.target.value,
+                                                        )
+                                                      }
+                                                    />
+                                                  </div>
+                                                  <div className="space-y-1">
+                                                    <label className="text-[10px] font-medium uppercase text-muted-foreground">
+                                                      Weight
+                                                    </label>
+                                                    <Input
+                                                      type="number"
+                                                      min={0}
+                                                      placeholder="60"
+                                                      value={setEntry.weight}
+                                                      onChange={(event) =>
+                                                        updateSetField(
+                                                          day.key,
+                                                          index,
+                                                          setIndex,
+                                                          'weight',
+                                                          event.target.value,
+                                                        )
+                                                      }
+                                                    />
+                                                  </div>
+                                                  <div className="space-y-1">
+                                                    <label className="text-[10px] font-medium uppercase text-muted-foreground">
+                                                      Notes
+                                                    </label>
+                                                    <Input
+                                                      placeholder="Tempo or cue"
+                                                      value={setEntry.notes}
+                                                      onChange={(event) =>
+                                                        updateSetField(
+                                                          day.key,
+                                                          index,
+                                                          setIndex,
+                                                          'notes',
+                                                          event.target.value,
+                                                        )
+                                                      }
+                                                    />
+                                                  </div>
+                                                </div>
+                                              </div>
+                                            ),
+                                          )}
+                                        </div>
+                                      </div>
+                                    </div>
+                                  ),
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        </TabsContent>
+                      ))}
+                  </TabsContents>
+                </Tabs>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
+        {stepIndex === 3 && (
+          <Card>
+            <CardHeader className="space-y-1">
+              <CardTitle className="flex items-center gap-2">
+                <ClipboardList className="h-5 w-5 text-primary" />
+                Review
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="rounded-2xl border border-border bg-muted/30 p-4 space-y-2">
+                <p className="text-sm font-semibold">Program summary</p>
+                <p className="text-sm text-muted-foreground">
+                  {planName || 'Untitled program'} · {durationWeeks || '--'}{' '}
+                  weeks
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {planDescription || 'Add a description to guide athletes.'}
+                </p>
+              </div>
+
+              <div className="rounded-2xl border border-border bg-muted/30 p-4 space-y-2">
+                <p className="text-sm font-semibold">Schedule</p>
+                <p className="text-sm text-muted-foreground">
+                  {selectedDays.length
+                    ? selectedDays
+                        .map(
+                          (day) =>
+                            weekDays.find((entry) => entry.key === day)?.label,
+                        )
+                        .join(', ')
+                    : 'No days selected yet'}
+                </p>
+              </div>
+
+              <div className="rounded-2xl border border-border bg-muted/30 p-4 space-y-3">
+                <p className="text-sm font-semibold">Workouts snapshot</p>
+                {selectedDays.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">
+                    No days selected yet.
+                  </p>
+                ) : (
+                  <div className="grid gap-4">
+                    {weekDays
+                      .filter((day) => selectedDays.includes(day.key))
+                      .map((day) => (
+                        <div key={day.key} className="space-y-2">
+                          <p className="text-xs font-semibold uppercase text-muted-foreground">
+                            {day.label}
+                          </p>
+                          {(dayMetaByDay[day.key].title ||
+                            dayMetaByDay[day.key].description) && (
+                            <div className="text-sm text-muted-foreground space-y-1">
+                              {dayMetaByDay[day.key].title && (
+                                <p className="font-medium text-foreground">
+                                  {dayMetaByDay[day.key].title}
+                                </p>
+                              )}
+                              {dayMetaByDay[day.key].description && (
+                                <p>{dayMetaByDay[day.key].description}</p>
+                              )}
+                            </div>
+                          )}
+                          {workoutsByDay[day.key].length === 0 ? (
+                            <p className="text-sm text-muted-foreground">
+                              No exercises yet.
+                            </p>
+                          ) : (
+                            <div className="space-y-2">
+                              {workoutsByDay[day.key].map(
+                                (exercise, index) => (
+                                  <div
+                                    key={`${day.key}-summary-${index}`}
+                                    className="text-sm"
+                                  >
+                                    <span className="font-medium">
+                                      {exercise.exerciseName || 'Untitled'}
+                                    </span>
+                                    <span className="text-xs text-muted-foreground">
+                                      {' '}
+                                      · {exercise.sets.length} sets
+                                    </span>
+                                  </div>
+                                ),
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        <div className="flex items-center justify-between gap-3">
+          <Button
+            variant="outline"
+            className="flex-1"
+            onClick={() => setStepIndex((prev) => Math.max(prev - 1, 0))}
+            disabled={isFirstStep || isSubmitting}
+          >
+            <ChevronLeft className="mr-2 h-4 w-4" />
+            Back
+          </Button>
+          <Button
+            className="flex-1"
+            onClick={() => {
+              if (isLastStep) {
+                handleSubmit()
+              } else {
+                setStepIndex((prev) => Math.min(prev + 1, steps.length - 1))
+              }
+            }}
+            disabled={isSubmitting}
+          >
+            {isLastStep
+              ? isSubmitting
+                ? 'Saving...'
+                : 'Save Program'
+              : 'Continue'}
+            <ChevronRight className="ml-2 h-4 w-4" />
+          </Button>
+        </div>
+
+        <datalist id="exercise-name-options">
+          {EXERCISE_NAMES.map((name) => (
+            <option key={name} value={name} />
+          ))}
+        </datalist>
+      </div>
     </div>
   )
 }

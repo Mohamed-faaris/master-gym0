@@ -207,6 +207,8 @@ const trainingPlans = defineTable({
   days: v.array(
     v.object({
       day: DayOfWeekValidator,
+      dayTitle: v.optional(v.string()),
+      dayDescription: v.optional(v.string()),
       exercises: v.array(
         v.object({
           exerciseName: v.string(),
