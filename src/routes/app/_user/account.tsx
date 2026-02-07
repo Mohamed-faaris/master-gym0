@@ -182,9 +182,8 @@ function RouteComponent() {
           {/* About Description */}
           <div className="p-4 rounded-lg bg-muted/30">
             <p className="text-sm text-muted-foreground leading-relaxed">
-              We are an elite fitness destination dedicated to sculpting bodies
-              and minds. Our state-of-the-art facility and expert guidance
-              ensure you surpass your limits.
+              Master Fitness started on 22.08.2022 and continues till now.
+              We have 3 branches, including one dedicated for womens.
             </p>
           </div>
 
@@ -206,6 +205,23 @@ function RouteComponent() {
               nutrition, Nagaraj has transformed over 500+ lives. A certified
               master trainer and nutrition specialist dedicated to excellence.
             </p>
+            <div className="mt-4 space-y-2 text-sm text-muted-foreground">
+              <div className="font-medium text-foreground">Achievements</div>
+              <ul className="list-disc pl-5 space-y-1">
+                <li>17 years in sports field</li>
+                <li>Weight lifting (University medal bronze)</li>
+                <li>Power (Gold)</li>
+                <li>
+                  Body building - Mr Tamil Nadu Mens Physic gold, VNR - body
+                  building silver, Mr South Indian/Mr India participation
+                </li>
+                <li>
+                  MMA - Silambam national gold, international gold,
+                  international referee, Tamil Nadu team coach
+                </li>
+                <li>10 years in fitness field</li>
+              </ul>
+            </div>
           </div>
 
           {/* Success Stories */}
