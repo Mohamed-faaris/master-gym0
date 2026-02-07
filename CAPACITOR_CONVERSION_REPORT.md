@@ -320,6 +320,75 @@ adb install -r android/app/build/outputs/apk/debug/app-debug.apk
 
 ---
 
+## APK Signing Setup
+
+For production deployment, APKs must be digitally signed. The project includes scripts and CI/CD configuration for automated signing.
+
+### Scripts Created
+
+1. **`scripts/generate-keystore.sh`**
+   - Generates signing keystore for release builds
+   - Creates `master-gym.keystore` file
+   - **Do not commit this file to git!**
+
+2. **`scripts/build-sign-install-release.sh`**
+   - Builds release APK
+   - Signs APK with apksigner
+   - Installs and launches on device
+
+3. **`scripts/prepare-github-secrets.sh`**
+   - Generates base64 encoding of keystore for GitHub Actions
+   - Shows required GitHub secrets
+
+### GitHub Actions Workflow
+
+The `.github/workflows/build-release.yml` automatically:
+
+- Builds release APK on push to `release` branch
+- Signs APK using GitHub secrets
+- Creates GitHub release with signed APK
+- Uploads signed APK as artifact
+
+### Required GitHub Secrets
+
+Go to **GitHub → Settings → Secrets and variables → Actions** and add:
+
+| Secret              | Value                                           |
+| ------------------- | ----------------------------------------------- |
+| `KEYSTORE_BASE64`   | Base64 encoded content of `master-gym.keystore` |
+| `KEYSTORE_PASSWORD` | `mastergym123` (or your custom password)        |
+| `KEY_ALIAS`         | `mastergym`                                     |
+| `VITE_CONVEX_URL`   | Your Convex deployment URL                      |
+
+**To get KEYSTORE_BASE64:**
+
+```bash
+base64 -i master-gym.keystore
+```
+
+### Security Notes
+
+- **Keystore file is in `.gitignore`** - never commit it!
+- Keep your keystore file backed up safely
+- Store keystore password securely
+- For production apps, use a strong unique password
+
+### Usage
+
+**Local signed build:**
+
+```bash
+./scripts/build-sign-install-release.sh
+```
+
+**GitHub Actions automated build:**
+
+```bash
+git push origin release
+```
+
+---
+
 ## Conclusion
 
 The conversion from TanStack Start web app to Capacitor mobile app was successful. The app maintains its full functionality including:
