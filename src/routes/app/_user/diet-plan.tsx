@@ -1,4 +1,4 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { Link, createFileRoute } from '@tanstack/react-router'
 import { useEffect, useMemo, useRef, useState, type ChangeEvent } from 'react'
 import { useMutation, useQuery } from 'convex/react'
 import {
@@ -252,11 +252,16 @@ function DietPlanRoute() {
   if (!dietPlan) {
     return (
       <div className="p-4 pb-24 space-y-4">
-        <div>
-          <h1 className="text-2xl font-bold">Diet Plan</h1>
-          <p className="text-muted-foreground">
-            Your assigned nutrition plan will appear here.
-          </p>
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <h1 className="text-2xl font-bold">Diet Plan</h1>
+            <p className="text-muted-foreground">
+              Your assigned nutrition plan will appear here.
+            </p>
+          </div>
+          <Button asChild variant="outline" size="sm">
+            <Link to="/app/diet-history">History</Link>
+          </Button>
         </div>
 
         <Card>
@@ -475,11 +480,16 @@ function DietPlanRoute() {
   return (
     <div className="min-h-screen bg-background pb-24">
       <div className="px-4 pt-6 pb-4 space-y-4">
-        <header className="space-y-1">
-          <h1 className="text-2xl font-semibold">{dietPlan.name}</h1>
-          <p className="text-sm text-muted-foreground">
-            {dietPlan.description}
-          </p>
+        <header className="flex items-start justify-between gap-3">
+          <div className="space-y-1">
+            <h1 className="text-2xl font-semibold">{dietPlan.name}</h1>
+            <p className="text-sm text-muted-foreground">
+              {dietPlan.description}
+            </p>
+          </div>
+          <Button asChild variant="outline" size="sm">
+            <Link to="/app/diet-history">History</Link>
+          </Button>
         </header>
 
         <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">

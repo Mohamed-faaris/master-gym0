@@ -51,6 +51,44 @@ export const getDietLogsByUser = query({
   },
 })
 
+// Get diet log history with pagination
+export const getDietLogsHistory = query({
+  args: {
+    userId: v.id('users'),
+    limit: v.optional(v.number()),
+    cursor: v.optional(v.number()),
+  },
+  handler: async (ctx, args) => {
+    const limit = args.limit ?? 10
+
+    let query = ctx.db
+      .query('dietLogs')
+      .withIndex('by_user', (q) => q.eq('userId', args.userId))
+      .order('desc')
+
+    if (args.cursor !== undefined) {
+      query = query.filter((q) => q.lt(q.field('createdAt'), args.cursor!))
+    }
+
+    const logs = await query.take(limit)
+
+    const logsWithUrl = await Promise.all(
+      logs.map(async (log) => ({
+        ...log,
+        imageUrl: log.imageId ? await ctx.storage.getUrl(log.imageId) : null,
+      })),
+    )
+
+    const nextCursor =
+      logs.length === limit ? logs[logs.length - 1].createdAt : null
+
+    return {
+      logs: logsWithUrl,
+      nextCursor,
+    }
+  },
+})
+
 // Get diet logs for today
 export const getTodayDietLogs = query({
   args: {
