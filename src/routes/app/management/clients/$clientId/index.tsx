@@ -240,8 +240,19 @@ function ClientDetailRoute() {
           <ArrowLeft className="h-4 w-4" />
           Back to clients
         </Link>
-        <div>
+        <div className="flex items-start justify-between gap-3">
           <h1 className="text-3xl font-semibold">{client.name}</h1>
+          <Button
+            onClick={() =>
+              navigate({
+                to: `/app/management/clients/${clientId}/pattern`,
+              })
+            }
+            variant="outline"
+            className="shrink-0"
+          >
+            Pattern
+          </Button>
         </div>
       </header>
 

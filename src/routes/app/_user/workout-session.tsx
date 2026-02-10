@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import * as React from 'react'
-import { Play, Pause, CheckCircle2, X, Clock } from 'lucide-react'
+import { Play, Pause, CheckCircle2, Clock } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { useMutation, useQuery } from 'convex/react'
@@ -24,7 +24,6 @@ export function WorkoutSessionRouteComponent() {
   const startSession = useMutation(api.workoutSessions.startSession)
   const updateSession = useMutation(api.workoutSessions.updateSessionProgress)
   const completeSession = useMutation(api.workoutSessions.completeSession)
-  const cancelSession = useMutation(api.workoutSessions.cancelSession)
 
   const userWithMeta = useQuery(
     api.users.getUserWithMeta,
@@ -208,19 +207,6 @@ export function WorkoutSessionRouteComponent() {
     }
   }
 
-  const handleCancelSession = async () => {
-    if (!sessionId) return
-
-    try {
-      await cancelSession({ sessionId })
-      toast.success('Workout session canceled')
-      navigate({ to: '/app' })
-    } catch (error) {
-      console.error(error)
-      toast.error('Failed to cancel workout')
-    }
-  }
-
   if (!todaysWorkout) {
     return (
       <div className="p-4">
@@ -263,50 +249,10 @@ export function WorkoutSessionRouteComponent() {
   }
 
   return (
-    <div className="p-4 pb-20 space-y-6 max-w-4xl mx-auto">
+    <div className="p-4 pb-48 space-y-6 max-w-4xl mx-auto">
       <header className="space-y-2">
         <h1 className="text-2xl font-semibold">{todaysWorkout.name}</h1>
-        <div className="flex items-center gap-3 text-sm text-muted-foreground">
-          <Clock className="w-4 h-4" />
-          {formatTime(workoutTime)} elapsed
-        </div>
       </header>
-
-      <div className="flex items-center gap-3">
-        {!sessionId ? (
-          <Button onClick={handleStartSession} className="gap-2">
-            <Play className="w-4 h-4" />
-            Start Session
-          </Button>
-        ) : (
-          <>
-            <Button
-              onClick={() => setIsPaused((prev) => !prev)}
-              variant="outline"
-              className="gap-2"
-            >
-              {isPaused ? <Play className="w-4 h-4" /> : <Pause className="w-4 h-4" />}
-              {isPaused ? 'Resume' : 'Pause'}
-            </Button>
-            <Button
-              onClick={handleCompleteSession}
-              className="gap-2"
-              variant="default"
-            >
-              <CheckCircle2 className="w-4 h-4" />
-              Complete
-            </Button>
-            <Button
-              onClick={handleCancelSession}
-              className="gap-2"
-              variant="destructive"
-            >
-              <X className="w-4 h-4" />
-              Cancel
-            </Button>
-          </>
-        )}
-      </div>
 
       <div className="space-y-4">
         {todaysWorkout.exercises.map((exercise, exerciseIndex) => (
@@ -392,6 +338,43 @@ export function WorkoutSessionRouteComponent() {
             </CardContent>
           </Card>
         ))}
+      </div>
+
+      <div className="fixed bottom-16 inset-x-0 border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/90">
+        <div className="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <Clock className="w-4 h-4" />
+            {formatTime(workoutTime)} elapsed
+          </div>
+
+          <div className="flex items-center gap-2">
+            {!sessionId ? (
+              <Button onClick={handleStartSession} className="gap-2">
+                <Play className="w-4 h-4" />
+                Start Session
+              </Button>
+            ) : (
+              <>
+                <Button
+                  onClick={() => setIsPaused((prev) => !prev)}
+                  variant="outline"
+                  className="gap-2"
+                >
+                  {isPaused ? <Play className="w-4 h-4" /> : <Pause className="w-4 h-4" />}
+                  {isPaused ? 'Resume' : 'Pause'}
+                </Button>
+                <Button
+                  onClick={handleCompleteSession}
+                  className="gap-2"
+                  variant="default"
+                >
+                  <CheckCircle2 className="w-4 h-4" />
+                  Complete
+                </Button>
+              </>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   )

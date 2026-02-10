@@ -141,6 +141,7 @@ export function ActivityTimeCard() {
         <ResponsiveContainer width="100%" height="100%">
           <BarChart
             data={chartData}
+            accessibilityLayer={false}
             margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
           >
             <CartesianGrid

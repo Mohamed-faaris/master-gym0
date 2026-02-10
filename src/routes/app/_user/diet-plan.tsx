@@ -545,7 +545,7 @@ function DietPlanRoute() {
           </CardContent>
         </Card> */}
 
-        {dietPlan.coachNote && (
+        {/* {dietPlan.coachNote && (
           <Card>
             <CardHeader>
               <CardTitle>Coach Guidance</CardTitle>
@@ -556,7 +556,7 @@ function DietPlanRoute() {
               </p>
             </CardContent>
           </Card>
-        )}
+        )} */}
 
         <Card>
           <CardHeader>
