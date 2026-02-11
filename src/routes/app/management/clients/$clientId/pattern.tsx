@@ -10,7 +10,6 @@ import {
 import { useMutation, useQuery } from 'convex/react'
 
 import { api } from '@convex/_generated/api'
-import type {DateScope} from '@/components/date-context-selector';
 import { useAuth } from '@/components/auth/useAuth'
 import { Button } from '@/components/ui/button'
 import {
@@ -20,10 +19,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-import {
-  DateContextSelector
-  
-} from '@/components/date-context-selector'
 
 const privilegedRoles = new Set(['trainer', 'admin'])
 
@@ -39,9 +34,10 @@ function PatternRoute() {
   const navigate = useNavigate()
 
   // State
-  const [dateScope, setDateScope] = useState<DateScope>('today')
   const [selectedTrainingPlan, setSelectedTrainingPlan] = useState('')
   const [selectedDietPlan, setSelectedDietPlan] = useState('')
+  const [assignedTrainingPlanId, setAssignedTrainingPlanId] = useState('')
+  const [assignedDietPlanId, setAssignedDietPlanId] = useState('')
 
   const client = useQuery(
     api.users.getUserById,
@@ -57,6 +53,9 @@ function PatternRoute() {
   // Mutations
   const assignTrainingPlan = useMutation(
     api.trainingPlans.assignTrainingPlanToUser,
+  )
+  const unassignTrainingPlan = useMutation(
+    api.trainingPlans.unassignTrainingPlanFromUser,
   )
 
   // Get client's assigned plans (would need API endpoint)
@@ -75,6 +74,16 @@ function PatternRoute() {
       navigate({ to: '/app' })
     }
   }, [user, isLoading, navigate])
+
+  useEffect(() => {
+    if (!client?.trainingPlanId) return
+    setAssignedTrainingPlanId(client.trainingPlanId)
+  }, [client?.trainingPlanId])
+
+  const assignedTrainingPlan = trainingPlans?.find(
+    (plan) => plan._id === assignedTrainingPlanId,
+  )
+  const assignedDietPlan = dietPlans?.find((plan) => plan._id === assignedDietPlanId)
 
   if (isLoading) {
     return <div className="p-4">Loading...</div>
@@ -110,10 +119,40 @@ function PatternRoute() {
         </div>
       </header>
 
-      {/* Date Context for Plan Review */}
-      <div className="flex items-center justify-between">
-        <h2 className="font-semibold">Plan Duration</h2>
-        <DateContextSelector value={dateScope} onChange={setDateScope} />
+      <div className="grid gap-4 md:grid-cols-2">
+        <div className="space-y-2">
+          <h2 className="font-semibold">Assigned Workout</h2>
+          <select
+            className="w-full rounded-lg border border-border bg-background px-4 py-2 text-sm"
+            value={assignedTrainingPlanId}
+            onChange={(e) => setAssignedTrainingPlanId(e.target.value)}
+            aria-label="Assigned workout plan"
+          >
+            <option value="">No workout plan assigned</option>
+            {trainingPlans?.map((plan) => (
+              <option key={plan._id} value={plan._id}>
+                {plan.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="space-y-2">
+          <h2 className="font-semibold">Assigned Diet</h2>
+          <select
+            className="w-full rounded-lg border border-border bg-background px-4 py-2 text-sm"
+            value={assignedDietPlanId}
+            onChange={(e) => setAssignedDietPlanId(e.target.value)}
+            aria-label="Assigned diet plan"
+          >
+            <option value="">No diet plan assigned</option>
+            {dietPlans?.map((plan) => (
+              <option key={plan._id} value={plan._id}>
+                {plan.name}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
 
       {/* Assign Workout Plan */}
@@ -124,10 +163,7 @@ function PatternRoute() {
             Assign Workout Plan
           </CardTitle>
           <CardDescription>
-            Select a training plan to assign to this client
-            {dateScope !== 'today' &&
-              ` for ${dateScope === 'this-week' ? 'this week' : 'last week'}`}
-            .
+            Select a training plan to assign to this client.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -172,6 +208,7 @@ function PatternRoute() {
                   userId: clientId as any,
                   trainingPlanId: selectedTrainingPlan as any,
                 })
+                setAssignedTrainingPlanId(selectedTrainingPlan)
                 setSelectedTrainingPlan('')
                 // Show success toast here
               } catch (error) {
@@ -199,16 +236,15 @@ function PatternRoute() {
         </CardHeader>
         <CardContent>
           <div className="space-y-2">
-            {trainingPlans && trainingPlans.length > 0 ? (
-              trainingPlans.map((plan) => (
+            {assignedTrainingPlan ? (
                 <div
-                  key={plan._id}
+                  key={assignedTrainingPlan._id}
                   className="flex items-start justify-between p-3 rounded-lg bg-muted hover:bg-muted/80 transition-colors"
                 >
                   <div className="flex-1">
-                    <p className="font-medium text-sm">{plan.name}</p>
+                    <p className="font-medium text-sm">{assignedTrainingPlan.name}</p>
                     <p className="text-xs text-muted-foreground">
-                      {plan.description}
+                      {assignedTrainingPlan.description}
                     </p>
                   </div>
                   <Button
@@ -216,118 +252,118 @@ function PatternRoute() {
                     size="sm"
                     className="h-8 w-8 p-0"
                     onClick={async () => {
-                      // Unassign logic here
+                      try {
+                        await unassignTrainingPlan({ userId: clientId as any })
+                        setAssignedTrainingPlanId('')
+                      } catch (error) {
+                        console.error('Failed to unassign workout plan:', error)
+                      }
                     }}
                   >
                     <Trash2 className="w-4 h-4 text-destructive" />
                   </Button>
                 </div>
-              ))
             ) : (
               <p className="text-sm text-muted-foreground text-center py-4">
-                No workout plans assigned
-              </p>
-            )}
-          </div>
-        </CardContent>
-      </Card>
+                  No workout plans assignedb  
+                </p>
+              )}
+            </div>
+          </CardContent>
+        </Card>
 
-      {/* Assign Diet Plan */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <UtensilsCrossed className="w-5 h-5" />
-            Assign Diet Plan
-          </CardTitle>
-          <CardDescription>
-            Select a diet plan to assign to this client
-            {dateScope !== 'today' &&
-              ` for ${dateScope === 'this-week' ? 'this week' : 'last week'}`}
-            .
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <select
-            className="w-full rounded-lg border border-border bg-background px-4 py-2 text-sm"
-            value={selectedDietPlan}
-            onChange={(e) => setSelectedDietPlan(e.target.value)}
-            aria-label="Select a diet plan"
-          >
-            <option value="">Select a diet plan...</option>
-            {dietPlans?.map((plan) => (
-              <option key={plan._id} value={plan._id}>
-                {plan.name}
-              </option>
-            ))}
-          </select>
+        {/* Assign Diet Plan */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <UtensilsCrossed className="w-5 h-5" />
+              Assign Diet Plan
+            </CardTitle>
+            <CardDescription>
+              Select a diet plan to assign to this client.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <select
+              className="w-full rounded-lg border border-border bg-background px-4 py-2 text-sm"
+              value={selectedDietPlan}
+              onChange={(e) => setSelectedDietPlan(e.target.value)}
+              aria-label="Select a diet plan"
+            >
+              <option value="">Select a diet plan...</option>
+              {dietPlans?.map((plan) => (
+                <option key={plan._id} value={plan._id}>
+                  {plan.name}
+                </option>
+              ))}
+            </select>
 
-          {selectedDietPlan && (
-            <Card className="bg-muted border-0">
-              <CardContent className="pt-4">
-                <div className="space-y-2">
-                  <p className="text-sm font-medium">
-                    {dietPlans?.find((p) => p._id === selectedDietPlan)?.name ||
-                      'Selected Plan'}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    {dietPlans?.find((p) => p._id === selectedDietPlan)
-                      ?.description || 'No description'}
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          <Button
-            className="w-full"
-            disabled={!selectedDietPlan}
-            onClick={async () => {
-              if (!selectedDietPlan) return
-              // Assign diet plan logic here
-              setSelectedDietPlan('')
-            }}
-          >
-            <Check className="w-4 h-4 mr-2" />
-            Assign Plan
-          </Button>
-        </CardContent>
-      </Card>
-
-      {/* Current Assigned Diet Plans */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base flex items-center gap-2">
-            <UtensilsCrossed className="w-4 h-4" />
-            Currently Assigned
-          </CardTitle>
-          <CardDescription>Active diet plans for this client</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-2">
-            {dietPlans && dietPlans.length > 0 ? (
-              dietPlans.map((plan) => (
-                <div
-                  key={plan._id}
-                  className="flex items-start justify-between p-3 rounded-lg bg-muted hover:bg-muted/80 transition-colors"
-                >
-                  <div className="flex-1">
-                    <p className="font-medium text-sm">{plan.name}</p>
+            {selectedDietPlan && (
+              <Card className="bg-muted border-0">
+                <CardContent className="pt-4">
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium">
+                      {dietPlans?.find((p) => p._id === selectedDietPlan)?.name ||
+                        'Selected Plan'}
+                    </p>
                     <p className="text-xs text-muted-foreground">
-                      {plan.description}
+                      {dietPlans?.find((p) => p._id === selectedDietPlan)
+                        ?.description || 'No description'}
                     </p>
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-8 w-8 p-0"
-                    onClick={async () => {
-                      // Unassign diet plan logic here
-                    }}
+                </CardContent>
+              </Card>
+            )}
+
+            <Button
+              className="w-full"
+              disabled={!selectedDietPlan}
+              onClick={async () => {
+                if (!selectedDietPlan) return
+                // Assign diet plan logic here
+                setAssignedDietPlanId(selectedDietPlan)
+                setSelectedDietPlan('')
+              }}
+            >
+              <Check className="w-4 h-4 mr-2" />
+              Assign Plan
+            </Button>
+          </CardContent>
+        </Card>
+
+        {/* Current Assigned Diet Plans */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base flex items-center gap-2">
+              <UtensilsCrossed className="w-4 h-4" />
+              Currently Assigned
+            </CardTitle>
+            <CardDescription>Active diet plans for this client</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              {assignedDietPlan ? (
+                  <div
+                    key={assignedDietPlan._id}
+                    className="flex items-start justify-between p-3 rounded-lg bg-muted hover:bg-muted/80 transition-colors"
                   >
-                    <Trash2 className="w-4 h-4 text-destructive" />
-                  </Button>
-                </div>
-              ))
+                    <div className="flex-1">
+                      <p className="font-medium text-sm">{assignedDietPlan.name}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {assignedDietPlan.description}
+                      </p>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-8 w-8 p-0"
+                      onClick={async () => {
+                        setAssignedDietPlanId('')
+                      }}
+                    >
+                      <Trash2 className="w-4 h-4 text-destructive" />
+                    </Button>
+                  </div>
             ) : (
               <p className="text-sm text-muted-foreground text-center py-4">
                 No diet plans assigned
@@ -341,9 +377,8 @@ function PatternRoute() {
       <Card className="bg-muted/50 border-muted">
         <CardContent className="pt-6">
           <p className="text-xs text-muted-foreground leading-relaxed">
-            Plans assigned with different date scopes allow you to rotate or
-            adjust training and diet based on time periods. Use the date
-            selector above to review and modify plans for specific time windows.
+            Use the assigned dropdowns above to quickly view which workout and
+            diet plans are currently selected for this client.
           </p>
         </CardContent>
       </Card>
