@@ -182,8 +182,8 @@ function RouteComponent() {
           {/* About Description */}
           <div className="p-4 rounded-lg bg-muted/30">
             <p className="text-sm text-muted-foreground leading-relaxed">
-              Master Fitness started on 22.08.2022 and continues till now.
-              We have 3 branches, including one dedicated for womens.
+              Master Fitness started on 22.08.2022 and continues till now. We
+              have 3 branches, including one dedicated for womens.
             </p>
           </div>
 
@@ -200,11 +200,7 @@ function RouteComponent() {
                 </p>
               </div>
             </div>
-            <p className="text-sm text-muted-foreground leading-relaxed">
-              With over 15 years of experience in strength training and
-              nutrition, Nagaraj has transformed over 500+ lives. A certified
-              master trainer and nutrition specialist dedicated to excellence.
-            </p>
+
             <div className="mt-4 space-y-2 text-sm text-muted-foreground">
               <div className="font-medium text-foreground">Achievements</div>
               <ul className="list-disc pl-5 space-y-1">
@@ -224,6 +220,11 @@ function RouteComponent() {
             </div>
           </div>
 
+          <p className="text-sm text-muted-foreground leading-relaxed">
+            With over 15 years of experience in strength training and nutrition,
+            Nagaraj has transformed over 500+ lives. A certified master trainer
+            and nutrition specialist dedicated to excellence.
+          </p>
           {/* Success Stories */}
           <div>
             <h3 className="font-semibold mb-3">Success Stories</h3>
@@ -265,7 +266,7 @@ function RouteComponent() {
           </button>
 
           {/* Gym Details */}
-          <div className="p-4 rounded-lg bg-muted/30 space-y-3 text-sm">
+          {/* <div className="p-4 rounded-lg bg-muted/30 space-y-3 text-sm">
             <div>
               <div className="font-semibold mb-1">Master Gym</div>
               <div className="text-muted-foreground">
@@ -315,7 +316,7 @@ function RouteComponent() {
                 <br />• Free parking
               </div>
             </div>
-          </div>
+          </div> */}
         </CardContent>
       </Card>
 

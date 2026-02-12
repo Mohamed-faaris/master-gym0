@@ -500,10 +500,8 @@ export const seedDatabase = mutation({
       updatedAt: now,
     })
 
-    await ctx.db.patch(client3Id, {
-      trainingPlanId: cardioEndurancePlanId,
-      updatedAt: now,
-    })
+    // Note: client3 is selfManagedCustomer and does not get an assigned training plan
+    // Self-managed customers manage their own training independently
 
     // Create diet plans
     const allDays = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'] as const
