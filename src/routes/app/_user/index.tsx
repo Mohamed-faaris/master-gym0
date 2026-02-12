@@ -531,8 +531,8 @@ function RouteComponent() {
 
       {/* Diet Log Drawer */}
       <Drawer open={dietDrawerOpen} onOpenChange={setDietDrawerOpen}>
-        <DrawerContent>
-          <DrawerHeader>
+        <DrawerContent className="flex max-h-[85vh] flex-col">
+          <DrawerHeader className="shrink-0">
             <Button
               variant="ghost"
               size="icon"
@@ -552,7 +552,7 @@ function RouteComponent() {
             </DrawerDescription>
           </DrawerHeader>
 
-          <div className="px-4 pb-4">
+          <div className="flex-1 overflow-y-auto px-4 pb-4">
             <div className="space-y-4">
               {/* Meal Type Tabs */}
               <Tabs
@@ -701,7 +701,7 @@ function RouteComponent() {
             </div>
           </div>
 
-          <DrawerFooter className="pt-2">
+          <DrawerFooter className="shrink-0 border-t bg-background pt-2">
             <Button
               onClick={handleLogDiet}
               size="lg"

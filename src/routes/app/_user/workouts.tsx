@@ -565,8 +565,8 @@ function RouteComponent() {
         open={isAddExerciseDrawerOpen}
         onOpenChange={setIsAddExerciseDrawerOpen}
       >
-        <DrawerContent>
-          <DrawerHeader>
+        <DrawerContent className="flex max-h-[85vh] flex-col">
+          <DrawerHeader className="shrink-0">
             <Button
               variant="ghost"
               size="icon"
@@ -581,7 +581,7 @@ function RouteComponent() {
             </DrawerDescription>
           </DrawerHeader>
 
-          <div className="px-4 pb-4 space-y-4">
+          <div className="flex-1 overflow-y-auto px-4 pb-4 space-y-4">
             <div className="space-y-2">
               <label className="text-sm font-medium">Exercise</label>
               <Input
@@ -661,7 +661,7 @@ function RouteComponent() {
             </div>
           </div>
 
-          <DrawerFooter>
+          <DrawerFooter className="shrink-0 border-t bg-background">
             <Button onClick={handleAddExercise}>Save Exercise</Button>
             <Button
               variant="outline"
