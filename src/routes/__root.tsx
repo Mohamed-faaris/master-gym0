@@ -3,11 +3,14 @@ import {
   Scripts,
   createRootRouteWithContext,
   Link,
+  useRouter,
 } from '@tanstack/react-router'
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { TanStackDevtools } from '@tanstack/react-devtools'
 import React from 'react'
 import { StatusBar } from '@capacitor/status-bar'
+import { App } from '@capacitor/app'
+import { Capacitor } from '@capacitor/core'
 
 import ConvexProvider from '../integrations/convex/provider'
 
@@ -50,10 +53,60 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 })
 
 function RootDocument({ children }: { children: React.ReactNode }) {
+  const router = useRouter()
+
   React.useEffect(() => {
     // Configure Capacitor status bar for mobile apps
     StatusBar.setOverlaysWebView({ overlay: false })
   }, [])
+
+  React.useEffect(() => {
+    if (Capacitor.getPlatform() !== 'android') {
+      return
+    }
+
+    const closeOpenOverlay = () => {
+      const openOverlaySelector = [
+        '[data-vaul-overlay][data-state="open"]',
+        '[data-radix-dialog-overlay][data-state="open"]',
+        '[data-state="open"][role="dialog"]',
+      ].join(',')
+
+      const overlay = document.querySelector<HTMLElement>(openOverlaySelector)
+
+      if (!overlay) {
+        return false
+      }
+
+      overlay.click()
+      document.dispatchEvent(
+        new KeyboardEvent('keydown', {
+          key: 'Escape',
+          code: 'Escape',
+          bubbles: true,
+        }),
+      )
+
+      return true
+    }
+
+    const backButtonListener = App.addListener('backButton', async () => {
+      if (closeOpenOverlay()) {
+        return
+      }
+
+      if (router.history.canGoBack()) {
+        router.history.back()
+        return
+      }
+
+      await App.exitApp()
+    })
+
+    return () => {
+      void backButtonListener.then((listener) => listener.remove())
+    }
+  }, [router])
 
   return (
     <html lang="en">
