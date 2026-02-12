@@ -266,7 +266,7 @@ function ClientDetailRoute() {
         <>
           {/* TODAY MODE: Action-First Layout */}
 
-          {/* Client Info */}          
+          {/* Client Info */}
 
           <Card>
             <CardContent className="pt-6">
@@ -332,7 +332,7 @@ function ClientDetailRoute() {
               className="h-12 w-full"
             >
               <UtensilsCrossed className="w-4 h-4 mr-2" />
-              Log Diet Entry
+              View Diet Entry
             </Button>
 
             <Button
@@ -345,11 +345,9 @@ function ClientDetailRoute() {
               className="h-12 w-full"
             >
               <BarChart3 className="w-4 h-4 mr-2" />
-              Log Weight
+              View Weight
             </Button>
           </div>
-
-    
         </>
       ) : (
         <>
@@ -476,8 +474,7 @@ function ClientDetailRoute() {
               <div>
                 <p className="text-sm text-muted-foreground">Days Logged</p>
                 <p className="text-2xl font-bold">
-                  {daysData.filter((d) => d.diets > 0).length}/
-                  {daysData.length}
+                  {daysData.filter((d) => d.diets > 0).length}/{daysData.length}
                 </p>
               </div>
               <div className="pt-4 border-t">
