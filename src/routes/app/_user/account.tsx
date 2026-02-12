@@ -221,7 +221,7 @@ function RouteComponent() {
                   Master Fitness started on 22.08.2022 and continues to grow. We
                   currently have 3 branches, including one dedicated to women.
                 </p>
-                <div className="flex flex-wrap gap-2">
+                {/* <div className="flex flex-wrap gap-2">
                   {gymBranches.map((branch) => (
                     <span
                       key={branch}
@@ -230,7 +230,7 @@ function RouteComponent() {
                       {branch}
                     </span>
                   ))}
-                </div>
+                </div> */}
               </div>
             </div>
           </div>
@@ -287,7 +287,7 @@ function RouteComponent() {
             </div>
           </div>
 
-          <div className="rounded-xl border p-4 sm:p-5 space-y-4">
+          {/* <div className="rounded-xl border p-4 sm:p-5 space-y-4">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-full bg-chart-3/10 flex items-center justify-center">
                 <Info className="w-4 h-4 text-chart-3" />
@@ -315,7 +315,7 @@ function RouteComponent() {
                 </div>
               </div>
             </div>
-          </div>
+          </div> */}
 
           {/* Gym Details */}
           {/* <div className="p-4 rounded-lg bg-muted/30 space-y-3 text-sm">

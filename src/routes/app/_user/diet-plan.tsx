@@ -1,17 +1,19 @@
 import { Link, createFileRoute } from '@tanstack/react-router'
-import { useEffect, useMemo, useRef, useState, type ChangeEvent } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useMutation, useQuery } from 'convex/react'
 import {
   Calendar,
+  Camera,
   Droplets,
   Target,
-  UtensilsCrossed,
   Utensils,
-  Camera,
+  UtensilsCrossed,
   X,
 } from 'lucide-react'
+import { toast } from 'sonner'
 
 import { api } from '@convex/_generated/api'
+import type { ChangeEvent } from 'react'
 import { useAuth } from '@/components/auth/useAuth'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -31,13 +33,12 @@ import {
 import {
   Drawer,
   DrawerContent,
-  DrawerHeader,
-  DrawerTitle,
   DrawerDescription,
   DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
 } from '@/components/ui/drawer'
 import { MEAL_TYPES } from '@/lib/constants'
-import { toast } from 'sonner'
 
 export const Route = createFileRoute('/app/_user/diet-plan')({
   component: DietPlanRoute,
@@ -50,6 +51,7 @@ function DietPlanRoute() {
 
   const planOwnerId = user?.trainerId ?? user?._id
   const isTrainerManaged = user?.role === 'trainerManagedCustomer'
+  const isSelfManaged = user?.role === 'selfManagedCustomer'
   const needsCalories = !isTrainerManaged
   const trainerManagedCopy = isTrainerManaged
     ? 'Calories will be added by your trainer after review.'
@@ -65,6 +67,9 @@ function DietPlanRoute() {
   const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null)
   const [imageStorageId, setImageStorageId] = useState<string | null>(null)
   const [isUploadingImage, setIsUploadingImage] = useState(false)
+  const [selectedHistoryImageUrl, setSelectedHistoryImageUrl] = useState<
+    string | null
+  >(null)
   const imageInputRef = useRef<HTMLInputElement | null>(null)
 
   const addDietLog = useMutation(api.dietLogs.addDietLog)
@@ -73,6 +78,10 @@ function DietPlanRoute() {
   const dietPlans = useQuery(
     api.dietPlans.getDietPlansByUser,
     planOwnerId ? { userId: planOwnerId } : 'skip',
+  )
+  const selfDietHistory = useQuery(
+    api.dietLogs.getDietLogsByUser,
+    user && isSelfManaged ? { userId: user._id, limit: 10 } : 'skip',
   )
 
   const dietPlan = dietPlans?.[0] ?? null
@@ -99,15 +108,13 @@ function DietPlanRoute() {
 
   const mealsByDay = useMemo(() => {
     if (!dietPlan) return {} as Record<string, typeof dietPlan.mealTemplate>
-    return dietPlan.mealTemplate.reduce(
-      (acc, meal) => {
-        const dayKey = meal.day || 'unknown'
-        if (!acc[dayKey]) acc[dayKey] = []
-        acc[dayKey].push(meal)
-        return acc
-      },
-      {} as Record<string, typeof dietPlan.mealTemplate>,
-    )
+    const grouped: Partial<Record<string, typeof dietPlan.mealTemplate>> = {}
+    dietPlan.mealTemplate.forEach((meal) => {
+      const dayKey = meal.day
+      const mealsForDay = grouped[dayKey] ?? []
+      grouped[dayKey] = [...mealsForDay, meal]
+    })
+    return grouped as Record<string, typeof dietPlan.mealTemplate>
   }, [dietPlan])
 
   const availableDays = dayOrder.filter((day) => mealsByDay[day]?.length)
@@ -262,26 +269,85 @@ function DietPlanRoute() {
               Your assigned nutrition plan will appear here.
             </p>
           </div>
-          <Button asChild variant="outline" size="sm">
-            <Link to="/app/diet-history">History</Link>
-          </Button>
+          {!isSelfManaged && (
+            <Button asChild variant="outline" size="sm">
+              <Link to="/app/diet-history">History</Link>
+            </Button>
+          )}
         </div>
 
-        <Card>
-          <CardContent className="py-12">
-            <div className="text-center space-y-4">
-              <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
-                <Utensils className="h-8 w-8 text-primary" />
+        {!isSelfManaged && (
+          <Card>
+            <CardContent className="py-12">
+              <div className="text-center space-y-4">
+                <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
+                  <Utensils className="h-8 w-8 text-primary" />
+                </div>
+                <div className="space-y-2">
+                  <h3 className="font-semibold">No plan assigned</h3>
+                  <p className="text-sm text-muted-foreground max-w-sm mx-auto">
+                    Ask your trainer to assign a diet plan.
+                  </p>
+                </div>
               </div>
-              <div className="space-y-2">
-                <h3 className="font-semibold">No plan assigned</h3>
-                <p className="text-sm text-muted-foreground max-w-sm mx-auto">
-                  Ask your trainer to assign a diet plan.
+            </CardContent>
+          </Card>
+        )}
+
+        {isSelfManaged && (
+          <Card>
+            <CardHeader>
+              <CardTitle>History</CardTitle>
+              <CardDescription>Your recent logged meals</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {!selfDietHistory?.length && (
+                <p className="text-sm text-muted-foreground">
+                  No history yet. Start logging meals to see history here.
                 </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+              )}
+              {selfDietHistory?.map((log) => (
+                <div
+                  key={log._id}
+                  className={`rounded-xl border border-border bg-muted/30 p-3 space-y-2 ${
+                    log.imageUrl ? 'cursor-pointer' : ''
+                  }`}
+                  onClick={() => {
+                    if (log.imageUrl) {
+                      setSelectedHistoryImageUrl(log.imageUrl)
+                    }
+                  }}
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="font-medium">{log.title}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {mealTypeLabels[log.mealType] || log.mealType}
+                      </p>
+                    </div>
+                    <div className="text-right text-xs text-muted-foreground">
+                      {log.calories != null ? `${log.calories} kcal` : 'Pending'}
+                    </div>
+                  </div>
+                  {log.description && (
+                    <p className="text-sm text-muted-foreground">
+                      {log.description}
+                    </p>
+                  )}
+                  <div className="flex items-center justify-between text-xs text-muted-foreground">
+                    <span>{new Date(log.createdAt).toLocaleDateString()}</span>
+                    {log.imageUrl && (
+                      <span className="inline-flex items-center gap-1">
+                        <Camera className="h-3 w-3" />
+                        Photo
+                      </span>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        )}
 
         <Button
           onClick={() => setDietDrawerOpen(true)}
@@ -476,6 +542,29 @@ function DietPlanRoute() {
             </DrawerFooter>
           </DrawerContent>
         </Drawer>
+
+        <Drawer
+          open={selectedHistoryImageUrl !== null}
+          onOpenChange={(open) => {
+            if (!open) setSelectedHistoryImageUrl(null)
+          }}
+        >
+          <DrawerContent className="flex max-h-[85vh] flex-col">
+            <DrawerHeader>
+              <DrawerTitle>Meal Photo</DrawerTitle>
+              <DrawerDescription>Logged meal image</DrawerDescription>
+            </DrawerHeader>
+            <div className="px-4 pb-6">
+              {selectedHistoryImageUrl && (
+                <img
+                  src={selectedHistoryImageUrl}
+                  alt="Meal"
+                  className="w-full rounded-lg object-cover"
+                />
+              )}
+            </div>
+          </DrawerContent>
+        </Drawer>
       </div>
     )
   }
@@ -490,9 +579,11 @@ function DietPlanRoute() {
               {dietPlan.description}
             </p>
           </div>
-          <Button asChild variant="outline" size="sm">
-            <Link to="/app/diet-history">History</Link>
-          </Button>
+          {!isSelfManaged && (
+            <Button asChild variant="outline" size="sm">
+              <Link to="/app/diet-history">History</Link>
+            </Button>
+          )}
         </header>
 
         <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
@@ -574,7 +665,7 @@ function DietPlanRoute() {
               <TabsList className="grid w-full grid-cols-7">
                 {availableDays.map((day) => (
                   <TabsTrigger key={day} value={day}>
-                    {weekDayLabels[day]?.slice(0, 3) ?? day}
+                    {weekDayLabels[day].slice(0, 3)}
                   </TabsTrigger>
                 ))}
               </TabsList>
@@ -627,6 +718,61 @@ function DietPlanRoute() {
             )}
           </CardContent>
         </Card>
+
+        {isSelfManaged && (
+          <Card>
+            <CardHeader>
+              <CardTitle>History</CardTitle>
+              <CardDescription>Your recent logged meals</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {!selfDietHistory?.length && (
+                <p className="text-sm text-muted-foreground">
+                  No history yet. Start logging meals to see history here.
+                </p>
+              )}
+              {selfDietHistory?.map((log) => (
+                <div
+                  key={log._id}
+                  className={`rounded-xl border border-border bg-muted/30 p-3 space-y-2 ${
+                    log.imageUrl ? 'cursor-pointer' : ''
+                  }`}
+                  onClick={() => {
+                    if (log.imageUrl) {
+                      setSelectedHistoryImageUrl(log.imageUrl)
+                    }
+                  }}
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="font-medium">{log.title}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {mealTypeLabels[log.mealType] || log.mealType}
+                      </p>
+                    </div>
+                    <div className="text-right text-xs text-muted-foreground">
+                      {log.calories != null ? `${log.calories} kcal` : 'Pending'}
+                    </div>
+                  </div>
+                  {log.description && (
+                    <p className="text-sm text-muted-foreground">
+                      {log.description}
+                    </p>
+                  )}
+                  <div className="flex items-center justify-between text-xs text-muted-foreground">
+                    <span>{new Date(log.createdAt).toLocaleDateString()}</span>
+                    {log.imageUrl && (
+                      <span className="inline-flex items-center gap-1">
+                        <Camera className="h-3 w-3" />
+                        Photo
+                      </span>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        )}
       </div>
 
       <Button
@@ -818,6 +964,29 @@ function DietPlanRoute() {
               Log Meal
             </Button>
           </DrawerFooter>
+        </DrawerContent>
+      </Drawer>
+
+      <Drawer
+        open={selectedHistoryImageUrl !== null}
+        onOpenChange={(open) => {
+          if (!open) setSelectedHistoryImageUrl(null)
+        }}
+      >
+        <DrawerContent className="flex max-h-[85vh] flex-col">
+          <DrawerHeader>
+            <DrawerTitle>Meal Photo</DrawerTitle>
+            <DrawerDescription>Logged meal image</DrawerDescription>
+          </DrawerHeader>
+          <div className="px-4 pb-6">
+            {selectedHistoryImageUrl && (
+              <img
+                src={selectedHistoryImageUrl}
+                alt="Meal"
+                className="w-full rounded-lg object-cover"
+              />
+            )}
+          </div>
         </DrawerContent>
       </Drawer>
     </div>

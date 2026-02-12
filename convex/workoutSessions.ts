@@ -1,6 +1,16 @@
 import { v } from 'convex/values'
 import { mutation, query } from './_generated/server'
 
+const DayOfWeekValidator = v.union(
+  v.literal('mon'),
+  v.literal('tue'),
+  v.literal('wed'),
+  v.literal('thu'),
+  v.literal('fri'),
+  v.literal('sat'),
+  v.literal('sun'),
+)
+
 /**
  * Start a new workout session
  */
@@ -10,15 +20,7 @@ export const startSession = mutation({
     trainingPlanId: v.optional(v.id('trainingPlans')),
     dayStart: v.number(),
     dayEnd: v.number(),
-    dayOfWeek: v.union(
-      v.literal('mon'),
-      v.literal('tue'),
-      v.literal('wed'),
-      v.literal('thu'),
-      v.literal('fri'),
-      v.literal('sat'),
-      v.literal('sun'),
-    ),
+    dayOfWeek: DayOfWeekValidator,
     exercises: v.optional(
       v.array(
         v.object({
@@ -95,6 +97,78 @@ export const startSession = mutation({
       createdAt: Date.now(),
       updatedAt: Date.now(),
     })
+    return sessionId
+  },
+})
+
+/**
+ * Add self-managed exercise to today's workout session.
+ * Creates an ongoing session for the day if one does not exist.
+ */
+export const addSelfManagedExerciseToToday = mutation({
+  args: {
+    userId: v.id('users'),
+    dayOfWeek: DayOfWeekValidator,
+    dayStart: v.number(),
+    dayEnd: v.number(),
+    exerciseName: v.string(),
+    sets: v.array(
+      v.object({
+        reps: v.optional(v.number()),
+        weight: v.optional(v.number()),
+      }),
+    ),
+  },
+  handler: async (ctx, args) => {
+    const existingSession = await ctx.db
+      .query('workoutSessions')
+      .withIndex('by_user_day', (q) =>
+        q.eq('userId', args.userId).eq('dayOfWeek', args.dayOfWeek),
+      )
+      .filter((q) =>
+        q.and(
+          q.gte(q.field('startTime'), args.dayStart),
+          q.lt(q.field('startTime'), args.dayEnd),
+        ),
+      )
+      .order('desc')
+      .first()
+
+    const now = Date.now()
+    const exerciseToAppend = {
+      exerciseName: args.exerciseName,
+      noOfSets: args.sets.length,
+      sets: args.sets.map((set) => ({
+        reps: set.reps,
+        weight: set.weight,
+        completed: false,
+      })),
+    }
+
+    if (existingSession) {
+      await ctx.db.patch(existingSession._id, {
+        exercises: [...existingSession.exercises, exerciseToAppend],
+        status: 'ongoing',
+        totalTime: existingSession.totalTime,
+        totalCaloriesBurned: existingSession.totalCaloriesBurned,
+        updatedAt: now,
+      })
+      return existingSession._id
+    }
+
+    const sessionId = await ctx.db.insert('workoutSessions', {
+      userId: args.userId,
+      trainingPlanId: undefined,
+      dayOfWeek: args.dayOfWeek,
+      status: 'ongoing',
+      startTime: now,
+      exercises: [exerciseToAppend],
+      totalTime: 0,
+      totalCaloriesBurned: 0,
+      createdAt: now,
+      updatedAt: now,
+    })
+
     return sessionId
   },
 })
@@ -198,17 +272,7 @@ export const getOngoingSession = query({
 export const getLatestSessionForDay = query({
   args: {
     userId: v.id('users'),
-    dayOfWeek: v.optional(
-      v.union(
-        v.literal('mon'),
-        v.literal('tue'),
-        v.literal('wed'),
-        v.literal('thu'),
-        v.literal('fri'),
-        v.literal('sat'),
-        v.literal('sun'),
-      ),
-    ),
+    dayOfWeek: v.optional(DayOfWeekValidator),
     dayStart: v.optional(v.number()),
     dayEnd: v.optional(v.number()),
     startTime: v.optional(v.number()),
