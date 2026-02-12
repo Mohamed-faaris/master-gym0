@@ -1,16 +1,18 @@
 import { useQuery } from 'convex/react'
 import { api } from 'convex/_generated/api'
-import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
+import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
 import {
-  User,
   Bell,
-  Info,
-  LogOut,
-  ChevronRight,
-  Mail,
-  Phone,
   Camera,
+  ChevronRight,
+  Clock,
+  Info,
   Loader2,
+  LogOut,
+  Mail,
+  MapPin,
+  Phone,
+  User,
 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -50,11 +52,41 @@ function RouteComponent() {
 
   const expiresInDays =
     typeof expiresIn === 'number'
-      ? Math.max(
-          0,
-          Math.ceil((expiresIn - Date.now()) / (1000 * 60 * 60 * 24)),
-        )
+      ? Math.max(0, Math.ceil((expiresIn - Date.now()) / (1000 * 60 * 60 * 24)))
       : null
+
+  const ceoAchievements = [
+    '17 years in sports field',
+    'Weight lifting (University medal bronze)',
+    'Powerlifting gold medal',
+    "Mr Tamil Nadu Men's Physique (Gold)",
+    'VNR bodybuilding (Silver)',
+    'Mr South India / Mr India participation',
+    'MMA: Silambam national & international gold',
+    'International referee and Tamil Nadu team coach',
+    '10 years in fitness coaching',
+  ]
+
+  const successStories = [
+    {
+      title: '12 Week',
+      subtitle: 'Cut',
+      color: 'from-chart-1/20 to-chart-1/5',
+    },
+    {
+      title: 'Muscle',
+      subtitle: 'Gain',
+      color: 'from-chart-2/20 to-chart-2/5',
+    },
+    {
+      title: 'Post',
+      subtitle: 'Pregnancy',
+      color: 'from-chart-3/20 to-chart-3/5',
+    },
+  ]
+
+  const gymBranches = ['Main Branch', 'West Branch', "Women's Exclusive Branch"]
+
   return (
     <div className="p-4 space-y-6">
       {/* Header */}
@@ -102,7 +134,7 @@ function RouteComponent() {
       </Card>
 
       {/* Stats and Gallery */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {/* Stats Summary */}
         <Card>
           <CardHeader>
@@ -178,92 +210,112 @@ function RouteComponent() {
         <CardHeader>
           <CardTitle>About Us</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          {/* About Description */}
-          <div className="p-4 rounded-lg bg-muted/30">
-            <p className="text-sm text-muted-foreground leading-relaxed">
-              Master Fitness started on 22.08.2022 and continues till now. We
-              have 3 branches, including one dedicated for womens.
-            </p>
+        <CardContent className="space-y-5">
+          <div className="rounded-xl bg-muted/30 p-4 sm:p-5">
+            <div className="flex items-start gap-3">
+              <div className="mt-0.5 w-8 h-8 rounded-full bg-chart-3/10 flex items-center justify-center">
+                <Info className="w-4 h-4 text-chart-3" />
+              </div>
+              <div className="space-y-2">
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  Master Fitness started on 22.08.2022 and continues to grow. We
+                  currently have 3 branches, including one dedicated to women.
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {gymBranches.map((branch) => (
+                    <span
+                      key={branch}
+                      className="rounded-full border bg-background px-3 py-1 text-xs text-muted-foreground"
+                    >
+                      {branch}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
           </div>
 
-          {/* CEO Section */}
-          <div className="p-4 rounded-lg border bg-card">
-            <div className="flex items-start gap-4 mb-3">
-              <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+          <div className="rounded-xl border bg-card p-4 sm:p-5 space-y-4">
+            <div className="flex items-start gap-4">
+              <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
                 <User className="w-8 h-8 text-primary" />
               </div>
-              <div>
-                <h3 className="font-semibold text-lg">CEO Nagaraj</h3>
+              <div className="space-y-1">
+                <h3 className="font-semibold text-lg leading-none">
+                  CEO Nagaraj
+                </h3>
                 <p className="text-sm text-muted-foreground">
                   Founder & Head Coach
+                </p>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  With over 15 years of experience in strength training and
+                  nutrition, Nagaraj has transformed 500+ lives as a certified
+                  master trainer.
                 </p>
               </div>
             </div>
 
-            <div className="mt-4 space-y-2 text-sm text-muted-foreground">
-              <div className="font-medium text-foreground">Achievements</div>
-              <ul className="list-disc pl-5 space-y-1">
-                <li>17 years in sports field</li>
-                <li>Weight lifting (University medal bronze)</li>
-                <li>Power (Gold)</li>
-                <li>
-                  Body building - Mr Tamil Nadu Mens Physic gold, VNR - body
-                  building silver, Mr South Indian/Mr India participation
-                </li>
-                <li>
-                  MMA - Silambam national gold, international gold,
-                  international referee, Tamil Nadu team coach
-                </li>
-                <li>10 years in fitness field</li>
+            <div className="space-y-2">
+              <div className="font-medium text-sm">Achievements</div>
+              <ul className="space-y-1.5 text-sm text-muted-foreground">
+                {ceoAchievements.map((achievement) => (
+                  <li key={achievement} className="flex items-start gap-2">
+                    <span className="mt-1 h-1.5 w-1.5 rounded-full bg-primary/70" />
+                    <span>{achievement}</span>
+                  </li>
+                ))}
               </ul>
             </div>
           </div>
 
-          <p className="text-sm text-muted-foreground leading-relaxed">
-            With over 15 years of experience in strength training and nutrition,
-            Nagaraj has transformed over 500+ lives. A certified master trainer
-            and nutrition specialist dedicated to excellence.
-          </p>
-          {/* Success Stories */}
           <div>
             <h3 className="font-semibold mb-3">Success Stories</h3>
             <div className="grid grid-cols-3 gap-3">
-              <div className="aspect-square rounded-lg bg-gradient-to-br from-chart-1/20 to-chart-1/5 flex items-center justify-center border">
-                <div className="text-center p-2">
-                  <div className="text-xs font-medium">12 Week</div>
-                  <div className="text-xs text-muted-foreground">Cut</div>
+              {successStories.map((story) => (
+                <div
+                  key={`${story.title}-${story.subtitle}`}
+                  className={`aspect-square rounded-lg bg-linear-to-br ${story.color} flex items-center justify-center border`}
+                >
+                  <div className="text-center p-2">
+                    <div className="text-xs font-medium">{story.title}</div>
+                    <div className="text-xs text-muted-foreground">
+                      {story.subtitle}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="rounded-xl border p-4 sm:p-5 space-y-4">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-full bg-chart-3/10 flex items-center justify-center">
+                <Info className="w-4 h-4 text-chart-3" />
+              </div>
+              <h3 className="font-medium">Gym Information</h3>
+            </div>
+
+            <div className="grid gap-3 text-sm text-muted-foreground">
+              <div className="flex items-start gap-2">
+                <Clock className="w-4 h-4 mt-0.5 text-foreground/70" />
+                <div>
+                  <div className="font-medium text-foreground">Hours</div>
+                  <div>Mon - Fri: 5:00 AM - 11:00 PM</div>
+                  <div>Sat - Sun: 7:00 AM - 9:00 PM</div>
                 </div>
               </div>
-              <div className="aspect-square rounded-lg bg-gradient-to-br from-chart-2/20 to-chart-2/5 flex items-center justify-center border">
-                <div className="text-center p-2">
-                  <div className="text-xs font-medium">Muscle</div>
-                  <div className="text-xs text-muted-foreground">Gain</div>
-                </div>
-              </div>
-              <div className="aspect-square rounded-lg bg-gradient-to-br from-chart-3/20 to-chart-3/5 flex items-center justify-center border">
-                <div className="text-center p-2">
-                  <div className="text-xs font-medium">Post</div>
-                  <div className="text-xs text-muted-foreground">Pregnancy</div>
+
+              <div className="flex items-start gap-2">
+                <MapPin className="w-4 h-4 mt-0.5 text-foreground/70" />
+                <div>
+                  <div className="font-medium text-foreground">Locations</div>
+                  <div>
+                    Main Branch • West Branch • Women\'s Exclusive Branch
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-
-          <button className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-muted/50 transition-colors border">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-chart-3/10 flex items-center justify-center">
-                <Info className="w-5 h-5 text-chart-3" />
-              </div>
-              <div className="text-left">
-                <div className="font-medium">Gym Information</div>
-                <div className="text-xs text-muted-foreground">
-                  Hours, location, and contact
-                </div>
-              </div>
-            </div>
-            <ChevronRight className="w-5 h-5 text-muted-foreground" />
-          </button>
 
           {/* Gym Details */}
           {/* <div className="p-4 rounded-lg bg-muted/30 space-y-3 text-sm">
