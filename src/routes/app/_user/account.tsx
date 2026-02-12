@@ -1,21 +1,31 @@
-import { useQuery } from 'convex/react'
+import { useMutation, useQuery } from 'convex/react'
 import { api } from 'convex/_generated/api'
 import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
+import { useState } from 'react'
 import {
   Bell,
   Camera,
   ChevronRight,
-  Clock,
   Info,
   Loader2,
   LogOut,
   Mail,
-  MapPin,
   Phone,
   User,
+  X,
 } from 'lucide-react'
+import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import {
+  Drawer,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+} from '@/components/ui/drawer'
 import { useAuth } from '@/components/auth/useAuth'
 
 export const Route = createFileRoute('/app/_user/account')({
@@ -25,6 +35,16 @@ export const Route = createFileRoute('/app/_user/account')({
 function RouteComponent() {
   const { user, signOut, deleteAt: expiresIn } = useAuth()
   const navigate = useNavigate()
+  const updateUser = useMutation(api.users.updateUser)
+  const [isEditDrawerOpen, setIsEditDrawerOpen] = useState(false)
+  const [editName, setEditName] = useState('')
+  const [editEmail, setEditEmail] = useState('')
+
+  const liveUser = useQuery(
+    api.users.getUserById,
+    user ? { userId: user._id } : 'skip',
+  )
+  const profileUser = liveUser ?? user
 
   // Fetch user stats
   const workoutStats = useQuery(
@@ -44,7 +64,7 @@ function RouteComponent() {
   }
 
   const memberSince = user
-    ? new Date(user.createdAt).toLocaleDateString('en-US', {
+    ? new Date((profileUser ?? user).createdAt).toLocaleDateString('en-US', {
         month: 'short',
         year: 'numeric',
       })
@@ -87,6 +107,37 @@ function RouteComponent() {
 
   const gymBranches = ['Main Branch', 'West Branch', "Women's Exclusive Branch"]
 
+  const openEditDrawer = () => {
+    if (!profileUser) return
+    setEditName(profileUser.name)
+    setEditEmail(profileUser.email ?? '')
+    setIsEditDrawerOpen(true)
+  }
+
+  const handleSaveProfile = async () => {
+    if (!profileUser) return
+
+    const trimmedName = editName.trim()
+    const trimmedEmail = editEmail.trim()
+
+    if (!trimmedName) {
+      toast.error('Name is required')
+      return
+    }
+
+    try {
+      await updateUser({
+        userId: profileUser._id,
+        name: trimmedName,
+        email: trimmedEmail || undefined,
+      })
+      toast.success('Profile updated')
+      setIsEditDrawerOpen(false)
+    } catch {
+      toast.error('Failed to update profile')
+    }
+  }
+
   return (
     <div className="p-4 space-y-6">
       {/* Header */}
@@ -115,7 +166,7 @@ function RouteComponent() {
                 </p>
               ) : null}
             </div>
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" onClick={openEditDrawer}>
               Edit
             </Button>
           </div>
@@ -123,11 +174,11 @@ function RouteComponent() {
           <div className="mt-6 space-y-3">
             <div className="flex items-center gap-3 text-sm">
               <Mail className="w-4 h-4 text-muted-foreground" />
-              <span>{user?.email ?? 'No email'}</span>
+              <span>{profileUser?.email ?? 'No email'}</span>
             </div>
             <div className="flex items-center gap-3 text-sm">
               <Phone className="w-4 h-4 text-muted-foreground" />
-              <span>{user?.phoneNumber ?? 'No phone'}</span>
+              <span>{profileUser?.phoneNumber ?? 'No phone'}</span>
             </div>
           </div>
         </CardContent>
@@ -398,6 +449,59 @@ function RouteComponent() {
 
       {/* Extra padding for bottom nav */}
       <div className="h-4" />
+
+      <Drawer open={isEditDrawerOpen} onOpenChange={setIsEditDrawerOpen}>
+        <DrawerContent>
+          <DrawerHeader>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute right-4 top-4"
+              onClick={() => setIsEditDrawerOpen(false)}
+            >
+              <X className="h-4 w-4" />
+            </Button>
+            <DrawerTitle>Edit Profile</DrawerTitle>
+            <DrawerDescription>Update your account details</DrawerDescription>
+          </DrawerHeader>
+
+          <div className="px-4 pb-4 space-y-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Name</label>
+              <Input
+                value={editName}
+                onChange={(event) => setEditName(event.target.value)}
+                placeholder="Your name"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Email</label>
+              <Input
+                type="email"
+                value={editEmail}
+                onChange={(event) => setEditEmail(event.target.value)}
+                placeholder="you@example.com"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Phone</label>
+              <Input value={profileUser?.phoneNumber ?? ''} readOnly />
+            </div>
+          </div>
+
+          <DrawerFooter>
+            <Button onClick={handleSaveProfile}>Save</Button>
+            <Button
+              variant="outline"
+              onClick={() => setIsEditDrawerOpen(false)}
+            >
+              Cancel
+            </Button>
+          </DrawerFooter>
+        </DrawerContent>
+      </Drawer>
     </div>
   )
 }
