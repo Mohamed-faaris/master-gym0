@@ -8,9 +8,9 @@ import {
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { TanStackDevtools } from '@tanstack/react-devtools'
 import React from 'react'
-import { StatusBar } from '@capacitor/status-bar'
-import { App } from '@capacitor/app'
 import { Capacitor } from '@capacitor/core'
+import { App } from '@capacitor/app'
+import { StatusBar, Style } from '@capacitor/status-bar'
 
 import ConvexProvider from '../integrations/convex/provider'
 
@@ -34,7 +34,7 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
       {
         name: 'viewport',
         content:
-          'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no',
+          'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover',
       },
       {
         title: 'TanStack Start Starter',
@@ -56,8 +56,16 @@ function RootDocument({ children }: { children: React.ReactNode }) {
   const router = useRouter()
 
   React.useEffect(() => {
-    // Configure Capacitor status bar for mobile apps
-    StatusBar.setOverlaysWebView({ overlay: false })
+    async function setupStatusBar() {
+      if (Capacitor.getPlatform() === 'web') {
+        return
+      }
+
+      await StatusBar.setOverlaysWebView({ overlay: true })
+      await StatusBar.setStyle({ style: Style.Light })
+    }
+
+    void setupStatusBar()
   }, [])
 
   React.useEffect(() => {
@@ -90,17 +98,22 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       return true
     }
 
-    const backButtonListener = App.addListener('backButton', async () => {
+    const onBackButton = async () => {
       if (closeOpenOverlay()) {
-        return
+        return true
       }
 
       if (router.history.canGoBack()) {
         router.history.back()
-        return
+        return true
       }
 
       await App.exitApp()
+      return false
+    }
+
+    const backButtonListener = App.addListener('backButton', async () => {
+      await onBackButton()
     })
 
     return () => {
@@ -118,7 +131,10 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       <body className="dark">
         <ConvexProvider>
           <AuthProvider>
-            <div vaul-drawer-wrapper="" className="min-h-screen bg-background">
+            <div
+              vaul-drawer-wrapper=""
+              className="min-h-dvh safe-area bg-background"
+            >
               {children}
             </div>
             <TanStackDevtools

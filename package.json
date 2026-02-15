@@ -20,7 +20,7 @@
     "cap:sync": "npx cap sync",
     "cap:open:ios": "npx cap open ios",
     "cap:open:android": "npx cap open android",
-    "cap:build": "npm run build && npm run cap:sync",
+    "cap:build": "npm run build && cp .output/public/_shell.html .output/public/index.html && npm run cap:sync",
     "cap:run:android": "npx cap run android",
     "cap:run:ios": "npx cap run ios"
   },
