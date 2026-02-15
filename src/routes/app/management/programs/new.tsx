@@ -10,7 +10,7 @@ import {
   Plus,
   Trash2,
 } from 'lucide-react'
-import { useMutation as useConvexMutation } from 'convex/react'
+import { useMutation as useConvexMutation, useQuery } from 'convex/react'
 import { toast } from 'sonner'
 import { useAuth } from '@/components/auth/useAuth'
 import { Button } from '@/components/ui/button'
@@ -19,6 +19,7 @@ import { Input } from '@/components/ui/input'
 import { Progress } from '@/components/ui/progress'
 import { cn } from '@/lib/utils'
 import { api } from '@convex/_generated/api'
+import type { Id } from '@convex/_generated/dataModel'
 import {
   Tabs,
   TabsContent,
@@ -139,40 +140,62 @@ const createEmptyExercise = (): ExerciseEntry => ({
   sets: [createEmptySet()],
 })
 
+const createEmptyWorkoutsByDay = (): Record<DayKey, ExerciseEntry[]> =>
+  weekDays.reduce(
+    (acc, day) => {
+      acc[day.key] = []
+      return acc
+    },
+    {} as Record<DayKey, ExerciseEntry[]>,
+  )
+
+const createEmptyDayMetaByDay = (): Record<DayKey, DayMeta> =>
+  weekDays.reduce(
+    (acc, day) => {
+      acc[day.key] = { title: '', description: '' }
+      return acc
+    },
+    {} as Record<DayKey, DayMeta>,
+  )
+
+type ProgramFormMode = 'create' | 'edit'
+
+interface ProgramFormScreenProps {
+  mode: ProgramFormMode
+  programId?: Id<'trainingPlans'>
+}
+
 function RouteComponent() {
+  return <ProgramFormScreen mode="create" />
+}
+
+export function ProgramFormScreen({ mode, programId }: ProgramFormScreenProps) {
   const navigate = useNavigate()
   const { user, isLoading } = useAuth()
   const createTrainingPlan = useConvexMutation(
     api.trainingPlans.createTrainingPlan,
+  )
+  const updateTrainingPlan = useConvexMutation(
+    api.trainingPlans.updateTrainingPlan,
+  )
+  const trainingPlan = useQuery(
+    api.trainingPlans.getTrainingPlanById,
+    mode === 'edit' && programId ? { trainingPlanId: programId } : 'skip',
   )
 
   const [stepIndex, setStepIndex] = useState(0)
   const [planName, setPlanName] = useState('')
   const [planDescription, setPlanDescription] = useState('')
   const [durationWeeks, setDurationWeeks] = useState('4')
-  const [selectedDays, setSelectedDays] = useState<string[]>([])
+  const [selectedDays, setSelectedDays] = useState<DayKey[]>([])
   const [activeWorkoutDay, setActiveWorkoutDay] = useState<DayKey | null>(null)
   const [workoutsByDay, setWorkoutsByDay] = useState<
     Record<DayKey, ExerciseEntry[]>
-  >(() =>
-    weekDays.reduce(
-      (acc, day) => {
-        acc[day.key] = []
-        return acc
-      },
-      {} as Record<DayKey, ExerciseEntry[]>,
-    ),
+  >(() => createEmptyWorkoutsByDay())
+  const [dayMetaByDay, setDayMetaByDay] = useState<Record<DayKey, DayMeta>>(() =>
+    createEmptyDayMetaByDay(),
   )
-  const [dayMetaByDay, setDayMetaByDay] = useState<Record<DayKey, DayMeta>>(
-    () =>
-      weekDays.reduce(
-        (acc, day) => {
-          acc[day.key] = { title: '', description: '' }
-          return acc
-        },
-        {} as Record<DayKey, DayMeta>,
-      ),
-  )
+  const [didHydrateEditData, setDidHydrateEditData] = useState(mode === 'create')
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   /* -------------------------------------------------------------------------- */
@@ -186,9 +209,55 @@ function RouteComponent() {
       return
     }
     if (!privilegedRoles.has(user.role)) {
-      navigate({ to: '/app/_user' })
+      navigate({ to: '/app' })
     }
   }, [user, isLoading, navigate])
+
+  useEffect(() => {
+    if (mode !== 'edit' || !trainingPlan || didHydrateEditData) return
+
+    setPlanName(trainingPlan.name)
+    setPlanDescription(trainingPlan.description)
+    setDurationWeeks(String(trainingPlan.durationWeeks))
+
+    const nextSelectedDays = trainingPlan.days.map((day) => day.day as DayKey)
+    setSelectedDays(nextSelectedDays)
+
+    const nextWorkoutsByDay = createEmptyWorkoutsByDay()
+    const nextDayMetaByDay = createEmptyDayMetaByDay()
+
+    trainingPlan.days.forEach((day) => {
+      const key = day.day as DayKey
+      nextDayMetaByDay[key] = {
+        title: day.dayTitle ?? '',
+        description: day.dayDescription ?? '',
+      }
+      nextWorkoutsByDay[key] =
+        day.exercises.length > 0
+          ? day.exercises.map((exercise) => ({
+              exerciseName: exercise.exerciseName,
+              sets:
+                exercise.sets.length > 0
+                  ? exercise.sets.map((setEntry) => ({
+                      reps:
+                        typeof setEntry.reps === 'number'
+                          ? String(setEntry.reps)
+                          : '',
+                      weight:
+                        typeof setEntry.weight === 'number'
+                          ? String(setEntry.weight)
+                          : '',
+                      notes: setEntry.notes ?? '',
+                    }))
+                  : [createEmptySet()],
+            }))
+          : []
+    })
+
+    setWorkoutsByDay(nextWorkoutsByDay)
+    setDayMetaByDay(nextDayMetaByDay)
+    setDidHydrateEditData(true)
+  }, [mode, trainingPlan, didHydrateEditData])
 
   useEffect(() => {
     if (selectedDays.length === 0) {
@@ -197,7 +266,7 @@ function RouteComponent() {
     }
     const current = activeWorkoutDay
     if (!current || !selectedDays.includes(current)) {
-      setActiveWorkoutDay(selectedDays[0] as DayKey)
+      setActiveWorkoutDay(selectedDays[0])
     }
   }, [selectedDays, activeWorkoutDay])
 
@@ -210,7 +279,7 @@ function RouteComponent() {
   const topRightLabel =
     user?.role === 'admin' ? 'Admin dashboard' : 'Management home'
 
-  const toggleDay = (dayKey: string) => {
+  const toggleDay = (dayKey: DayKey) => {
     setSelectedDays((prev) =>
       prev.includes(dayKey)
         ? prev.filter((day) => day !== dayKey)
@@ -309,7 +378,11 @@ function RouteComponent() {
 
   const handleSubmit = async () => {
     if (!user) {
-      toast.error('You must be logged in to create a program')
+      toast.error(
+        mode === 'edit'
+          ? 'You must be logged in to edit a program'
+          : 'You must be logged in to create a program',
+      )
       return
     }
 
@@ -330,7 +403,7 @@ function RouteComponent() {
     }
 
     const unnamedExercises = selectedDays.flatMap((dayKey) => {
-      const exercises = workoutsByDay[dayKey as DayKey]
+      const exercises = workoutsByDay[dayKey]
       return exercises
         .map((exercise, index) =>
           exercise.exerciseName.trim() === ''
@@ -361,7 +434,7 @@ function RouteComponent() {
     }
 
     const emptyDays = selectedDays.filter((dayKey) => {
-      const exercises = workoutsByDay[dayKey as DayKey]
+      const exercises = workoutsByDay[dayKey]
       return !exercises.some((exercise) => exercise.exerciseName.trim() !== '')
     })
 
@@ -374,8 +447,8 @@ function RouteComponent() {
     }
 
     const daysPayload = selectedDays.map((dayKey) => {
-      const dayMeta = dayMetaByDay[dayKey as DayKey]
-      const exercises = workoutsByDay[dayKey as DayKey]
+      const dayMeta = dayMetaByDay[dayKey]
+      const exercises = workoutsByDay[dayKey]
         .filter((exercise) => exercise.exerciseName.trim() !== '')
         .map((exercise) => ({
           exerciseName: exercise.exerciseName,
@@ -387,7 +460,7 @@ function RouteComponent() {
           })),
         }))
       return {
-        day: dayKey as any,
+        day: dayKey,
         dayTitle: dayMeta.title.trim() || undefined,
         dayDescription: dayMeta.description.trim() || undefined,
         exercises,
@@ -397,21 +470,42 @@ function RouteComponent() {
     setIsSubmitting(true)
 
     try {
-      await createTrainingPlan({
-        name: planName,
-        description: planDescription || 'No description provided.',
-        days: daysPayload as any,
-        durationWeeks: parsedDuration,
-        createdBy: user._id,
-      })
-
-      toast.success('Program created successfully!')
+      if (mode === 'edit') {
+        if (!programId) {
+          toast.error('Program id is missing')
+          return
+        }
+        await updateTrainingPlan({
+          trainingPlanId: programId,
+          name: planName,
+          description: planDescription || 'No description provided.',
+          days: daysPayload as any,
+          durationWeeks: parsedDuration,
+        })
+        toast.success('Program updated successfully!')
+      } else {
+        await createTrainingPlan({
+          name: planName,
+          description: planDescription || 'No description provided.',
+          days: daysPayload as any,
+          durationWeeks: parsedDuration,
+          createdBy: user._id,
+        })
+        toast.success('Program created successfully!')
+      }
       navigate({ to: '/app/management/programs' })
     } catch (error) {
-      console.error('Failed to create program:', error)
+      console.error(
+        mode === 'edit' ? 'Failed to update program:' : 'Failed to create program:',
+        error,
+      )
       const errorMessage =
         error instanceof Error ? error.message : 'Please try again.'
-      toast.error(`Failed to create program: ${errorMessage}`)
+      toast.error(
+        `${
+          mode === 'edit' ? 'Failed to update program' : 'Failed to create program'
+        }: ${errorMessage}`,
+      )
     } finally {
       setIsSubmitting(false)
     }
@@ -419,11 +513,40 @@ function RouteComponent() {
 
   const isFirstStep = stepIndex === 0
   const isLastStep = stepIndex === steps.length - 1
+  const isEditing = mode === 'edit'
 
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <p className="text-muted-foreground">Loading...</p>
+      </div>
+    )
+  }
+
+  if (mode === 'edit' && trainingPlan === undefined) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <p className="text-muted-foreground">Loading program...</p>
+      </div>
+    )
+  }
+
+  if (mode === 'edit' && trainingPlan === null) {
+    return (
+      <div className="min-h-screen bg-background p-4">
+        <Card>
+          <CardHeader>
+            <CardTitle>Program not found</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Button
+              variant="outline"
+              onClick={() => navigate({ to: '/app/management/programs' })}
+            >
+              Back to programs
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     )
   }
@@ -457,9 +580,13 @@ function RouteComponent() {
         </header>
 
         <div className="space-y-2">
-          <h1 className="text-2xl font-semibold">Create program</h1>
+          <h1 className="text-2xl font-semibold">
+            {isEditing ? 'Edit program' : 'Create program'}
+          </h1>
           <p className="text-sm text-muted-foreground">
-            Build a training plan with day-by-day exercises and sets.
+            {isEditing
+              ? 'Update this training plan with day-by-day exercises and sets.'
+              : 'Build a training plan with day-by-day exercises and sets.'}
           </p>
           <Progress value={progressValue} />
         </div>
@@ -943,8 +1070,12 @@ function RouteComponent() {
           >
             {isLastStep
               ? isSubmitting
-                ? 'Saving...'
-                : 'Save Program'
+                ? isEditing
+                  ? 'Saving changes...'
+                  : 'Saving...'
+                : isEditing
+                  ? 'Save changes'
+                  : 'Save Program'
               : 'Continue'}
             <ChevronRight className="ml-2 h-4 w-4" />
           </Button>

@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
-import { ArrowLeft, ClipboardList, Calendar, Dumbbell } from 'lucide-react'
+import { ArrowLeft, ClipboardList, Calendar, Dumbbell, Pencil } from 'lucide-react'
 import { useQuery } from 'convex/react'
 
 import { useAuth } from '@/components/auth/useAuth'
@@ -13,11 +13,11 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { api } from '@convex/_generated/api'
-import type { Id } from '../../../../../convex/_generated/dataModel'
+import type { Id } from '../../../../../../convex/_generated/dataModel'
 
 const privilegedRoles = new Set(['trainer', 'admin'])
 
-export const Route = createFileRoute('/app/management/programs/$programId')({
+export const Route = createFileRoute('/app/management/programs/$programId/')({
   component: ProgramDetailRoute,
 })
 
@@ -73,6 +73,19 @@ function ProgramDetailRoute() {
           <h1 className="text-2xl font-semibold">Program Details</h1>
           <p className="text-muted-foreground">ID: {programId}</p>
         </div>
+        <Button
+          size="sm"
+          className="gap-2"
+          onClick={() =>
+            navigate({
+              to: '/app/management/programs/$programId/edit',
+              params: { programId },
+            })
+          }
+        >
+          <Pencil className="h-4 w-4" />
+          Edit program
+        </Button>
       </header>
 
       {/* ----------------------------- Content ----------------------------- */}

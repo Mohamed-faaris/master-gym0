@@ -136,6 +136,8 @@ export const seedDatabase = mutation({
       description:
         'A comprehensive 8-week strength training program for beginners',
       durationWeeks: 8,
+      isCopy: false,
+      isAssigned: false,
       days: [
         {
           day: 'mon',
@@ -360,6 +362,8 @@ export const seedDatabase = mutation({
       name: 'Cardio & Endurance Builder',
       description: '6-week cardio and endurance focused training program',
       durationWeeks: 6,
+      isCopy: false,
+      isAssigned: false,
       days: [
         {
           day: 'mon',

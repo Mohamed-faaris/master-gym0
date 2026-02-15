@@ -4,6 +4,8 @@ import {
   ArrowLeft,
   Check,
   Dumbbell,
+  Eye,
+  Pencil,
   Trash2,
   UtensilsCrossed,
 } from 'lucide-react'
@@ -254,21 +256,51 @@ function PatternRoute() {
                       {assignedTrainingPlan.description}
                     </p>
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-8 w-8 p-0"
-                    onClick={async () => {
-                      try {
-                        await unassignTrainingPlan({ userId: clientId as any })
-                        setAssignedTrainingPlanId('')
-                      } catch (error) {
-                        console.error('Failed to unassign workout plan:', error)
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="gap-1"
+                      onClick={() =>
+                        navigate({
+                          to: '/app/management/programs/$programId',
+                          params: { programId: assignedTrainingPlan._id },
+                        })
                       }
-                    }}
-                  >
-                    <Trash2 className="w-4 h-4 text-destructive" />
-                  </Button>
+                    >
+                      <Eye className="w-4 h-4" />
+                      View
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="gap-1"
+                      onClick={() =>
+                        navigate({
+                          to: '/app/management/programs/$programId/edit',
+                          params: { programId: assignedTrainingPlan._id },
+                        })
+                      }
+                    >
+                      <Pencil className="w-4 h-4" />
+                      Edit
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-8 w-8 p-0"
+                      onClick={async () => {
+                        try {
+                          await unassignTrainingPlan({ userId: clientId as any })
+                          setAssignedTrainingPlanId('')
+                        } catch (error) {
+                          console.error('Failed to unassign workout plan:', error)
+                        }
+                      }}
+                    >
+                      <Trash2 className="w-4 h-4 text-destructive" />
+                    </Button>
+                  </div>
                 </div>
             ) : (
               <p className="text-sm text-muted-foreground text-center py-4">
@@ -369,23 +401,53 @@ function PatternRoute() {
                         {assignedDietPlan.description}
                       </p>
                     </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-8 w-8 p-0"
-                      onClick={async () => {
-                        try {
-                          await unassignDietPlan({ userId: clientId as any })
-                          setAssignedDietPlanId('')
-                          toast.success('Diet plan unassigned')
-                        } catch (error) {
-                          console.error('Failed to unassign diet plan:', error)
-                          toast.error('Failed to unassign diet plan')
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="gap-1"
+                        onClick={() =>
+                          navigate({
+                            to: '/app/management/diet-plans/$planId',
+                            params: { planId: assignedDietPlan._id },
+                          })
                         }
-                      }}
-                    >
-                      <Trash2 className="w-4 h-4 text-destructive" />
-                    </Button>
+                      >
+                        <Eye className="w-4 h-4" />
+                        View
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="gap-1"
+                        onClick={() =>
+                          navigate({
+                            to: '/app/management/diet-plans/$planId',
+                            params: { planId: assignedDietPlan._id },
+                          })
+                        }
+                      >
+                        <Pencil className="w-4 h-4" />
+                        Edit
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 w-8 p-0"
+                        onClick={async () => {
+                          try {
+                            await unassignDietPlan({ userId: clientId as any })
+                            setAssignedDietPlanId('')
+                            toast.success('Diet plan unassigned')
+                          } catch (error) {
+                            console.error('Failed to unassign diet plan:', error)
+                            toast.error('Failed to unassign diet plan')
+                          }
+                        }}
+                      >
+                        <Trash2 className="w-4 h-4 text-destructive" />
+                      </Button>
+                    </div>
                   </div>
             ) : (
               <p className="text-sm text-muted-foreground text-center py-4">

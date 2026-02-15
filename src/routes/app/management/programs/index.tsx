@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
-import { ClipboardList, Plus, ArrowLeft, Calendar, Users } from 'lucide-react'
+import { ClipboardList, Plus, ArrowLeft, Calendar, Pencil } from 'lucide-react'
 import { useQuery } from 'convex/react'
 
 import { useAuth } from '@/components/auth/useAuth'
@@ -38,7 +38,7 @@ function ProgramsRoute() {
       return
     }
     if (!privilegedRoles.has(user.role)) {
-      navigate({ to: '/app/_user' })
+      navigate({ to: '/app' })
     }
   }, [user, isLoading, navigate])
 
@@ -152,39 +152,54 @@ function ProgramsRoute() {
           {trainingPlans && trainingPlans.length > 0 && (
             <div className="space-y-3">
               {trainingPlans.map((program) => (
-                <Link
+                <Card
                   key={program._id}
-                  to="/app/management/programs/$programId"
-                  params={{ programId: program._id }}
-                  className="block"
+                  className="hover:border-primary transition-colors cursor-pointer"
+                  onClick={() =>
+                    navigate({
+                      to: '/app/management/programs/$programId',
+                      params: { programId: program._id },
+                    })
+                  }
                 >
-                  <Card className="hover:border-primary transition-colors cursor-pointer">
-                    <CardHeader>
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <CardTitle className="text-lg">
-                            {program.name}
-                          </CardTitle>
-                          <CardDescription className="mt-1">
-                            {program.description}
-                          </CardDescription>
-                        </div>
+                  <CardHeader>
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex-1">
+                        <CardTitle className="text-lg">{program.name}</CardTitle>
+                        <CardDescription className="mt-1">
+                          {program.description}
+                        </CardDescription>
                       </div>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
-                        <div className="flex items-center gap-1.5">
-                          <Calendar className="h-4 w-4" />
-                          {program.durationWeeks} weeks
-                        </div>
-                        <div className="flex items-center gap-1.5">
-                          <ClipboardList className="h-4 w-4" />
-                          {program.days.length} workout days
-                        </div>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="gap-2"
+                        onClick={(event) => {
+                          event.stopPropagation()
+                          navigate({
+                            to: '/app/management/programs/$programId/edit',
+                            params: { programId: program._id },
+                          })
+                        }}
+                      >
+                        <Pencil className="h-4 w-4" />
+                        Edit
+                      </Button>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
+                      <div className="flex items-center gap-1.5">
+                        <Calendar className="h-4 w-4" />
+                        {program.durationWeeks} weeks
                       </div>
-                    </CardContent>
-                  </Card>
-                </Link>
+                      <div className="flex items-center gap-1.5">
+                        <ClipboardList className="h-4 w-4" />
+                        {program.days.length} workout days
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
               ))}
             </div>
           )}

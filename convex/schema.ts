@@ -215,6 +215,9 @@ const weightLogs = defineTable({
 const trainingPlans = defineTable({
   name: v.string(),
   description: v.string(),
+  isCopy: v.boolean(), 
+  isAssigned: v.boolean(), 
+  
 
   days: v.array(
     v.object({

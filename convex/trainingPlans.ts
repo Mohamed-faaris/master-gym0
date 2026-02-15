@@ -45,6 +45,8 @@ export const createTrainingPlan = mutation({
     const trainingPlanId = await ctx.db.insert('trainingPlans', {
       name: args.name,
       description: args.description,
+      isCopy: false,
+      isAssigned: false,
       days: args.days,
       durationWeeks: args.durationWeeks,
       createdBy: args.createdBy,
@@ -164,12 +166,35 @@ export const assignTrainingPlanToUser = mutation({
     trainingPlanId: v.id('trainingPlans'),
   },
   handler: async (ctx, args) => {
-    await ctx.db.patch(args.userId, {
-      trainingPlanId: args.trainingPlanId,
-      updatedAt: Date.now(),
+    const sourceTrainingPlan = await ctx.db.get(args.trainingPlanId)
+    if (!sourceTrainingPlan) {
+      throw new Error('Training plan not found')
+    }
+
+    const userInfo = await ctx.db.get(args.userId)
+    if (!userInfo) {
+      throw new Error('User not found')
+    }
+
+    const now = Date.now()
+    const copiedTrainingPlanId = await ctx.db.insert('trainingPlans', {
+      name: `${sourceTrainingPlan.name} ${userInfo.name}`,
+      description: sourceTrainingPlan.description,
+      isCopy: true,
+      isAssigned: true,
+      days: sourceTrainingPlan.days,
+      durationWeeks: sourceTrainingPlan.durationWeeks,
+      createdBy: sourceTrainingPlan.createdBy,
+      createdAt: now,
+      updatedAt: now,
     })
 
-    return { success: true }
+    await ctx.db.patch(args.userId, {
+      trainingPlanId: copiedTrainingPlanId,
+      updatedAt: now,
+    })
+
+    return { success: true, trainingPlanId: copiedTrainingPlanId }
   },
 })
 
