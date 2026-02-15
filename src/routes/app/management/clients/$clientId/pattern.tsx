@@ -92,6 +92,11 @@ function PatternRoute() {
   const assignedTrainingPlan = trainingPlans?.find(
     (plan) => plan._id === assignedTrainingPlanId,
   )
+  const nonCopyTrainingPlans = trainingPlans?.filter((plan) => !plan.isCopy) ?? []
+  const assignedWorkoutDropdownPlans =
+    assignedTrainingPlan && assignedTrainingPlan.isCopy
+      ? [assignedTrainingPlan, ...nonCopyTrainingPlans]
+      : nonCopyTrainingPlans
   const assignedDietPlan = dietPlans?.find((plan) => plan._id === assignedDietPlanId)
 
   if (isLoading) {
@@ -138,7 +143,7 @@ function PatternRoute() {
             aria-label="Assigned workout plan"
           >
             <option value="">No workout plan assigned</option>
-            {trainingPlans?.map((plan) => (
+            {assignedWorkoutDropdownPlans.map((plan) => (
               <option key={plan._id} value={plan._id}>
                 {plan.name}
               </option>
@@ -183,7 +188,7 @@ function PatternRoute() {
             aria-label="Select a workout plan"
           >
             <option value="">Select a workout plan...</option>
-            {trainingPlans?.map((plan) => (
+            {nonCopyTrainingPlans.map((plan) => (
               <option key={plan._id} value={plan._id}>
                 {plan.name}
               </option>
@@ -195,11 +200,11 @@ function PatternRoute() {
               <CardContent className="pt-4">
                 <div className="space-y-2">
                   <p className="text-sm font-medium">
-                    {trainingPlans?.find((p) => p._id === selectedTrainingPlan)
+                    {nonCopyTrainingPlans.find((p) => p._id === selectedTrainingPlan)
                       ?.name || 'Selected Plan'}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    {trainingPlans?.find((p) => p._id === selectedTrainingPlan)
+                    {nonCopyTrainingPlans.find((p) => p._id === selectedTrainingPlan)
                       ?.description || 'No description'}
                   </p>
                 </div>

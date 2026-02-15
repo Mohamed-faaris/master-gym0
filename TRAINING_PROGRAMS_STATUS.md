@@ -25,7 +25,6 @@ The Convex backend **already has full support** for training programs:
 ### Available Functions (`convex/trainingPlans.ts`):
 
 - ✅ `createTrainingPlan` - Create new training program
-- ✅ `getTrainingPlansByCreator` - Get programs by creator
 - ✅ `getAllTrainingPlans` - Get all programs
 - ✅ `getTrainingPlanById` - Get specific program
 - ✅ `updateTrainingPlan` - Update program details

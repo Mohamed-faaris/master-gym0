@@ -26,6 +26,7 @@ function ProgramsRoute() {
 
   // Fetch training plans
   const trainingPlans = useQuery(api.trainingPlans.getAllTrainingPlans)
+  const visibleTrainingPlans = trainingPlans?.filter((plan) => !plan.isCopy)
 
   /* -------------------------------------------------------------------------- */
   /*                                 Auth Guard                                 */
@@ -98,7 +99,7 @@ function ProgramsRoute() {
           <div>
             <h1 className="text-2xl font-semibold">Programs</h1>
             <p className="text-muted-foreground">
-              {trainingPlans?.length || 0} training programs
+              {visibleTrainingPlans?.length || 0} training programs
             </p>
           </div>
           <div className="flex gap-2">
@@ -129,7 +130,7 @@ function ProgramsRoute() {
             </div>
           )}
 
-          {trainingPlans && trainingPlans.length === 0 && (
+          {trainingPlans && visibleTrainingPlans?.length === 0 && (
             <div className="text-center py-12 space-y-4">
               <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
                 <ClipboardList className="h-8 w-8 text-primary" />
@@ -149,9 +150,9 @@ function ProgramsRoute() {
             </div>
           )}
 
-          {trainingPlans && trainingPlans.length > 0 && (
+          {trainingPlans && visibleTrainingPlans && visibleTrainingPlans.length > 0 && (
             <div className="space-y-3">
-              {trainingPlans.map((program) => (
+              {visibleTrainingPlans.map((program) => (
                 <Card
                   key={program._id}
                   className="hover:border-primary transition-colors cursor-pointer"

@@ -108,7 +108,6 @@ The backend is now fully integrated with all features including:
 ### Training Plans (`convex/trainingPlans.ts`)
 
 - `createTrainingPlan` - Create new training plan
-- `getTrainingPlansByCreator` - Get plans by creator
 - `getAllTrainingPlans` - Get all training plans
 - `getTrainingPlanById` - Get specific plan
 - `updateTrainingPlan` - Update training plan
