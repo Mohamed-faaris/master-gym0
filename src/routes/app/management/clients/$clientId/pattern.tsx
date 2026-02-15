@@ -8,6 +8,7 @@ import {
   UtensilsCrossed,
 } from 'lucide-react'
 import { useMutation, useQuery } from 'convex/react'
+import { toast } from 'sonner'
 
 import { api } from '@convex/_generated/api'
 import { useAuth } from '@/components/auth/useAuth'
@@ -57,6 +58,8 @@ function PatternRoute() {
   const unassignTrainingPlan = useMutation(
     api.trainingPlans.unassignTrainingPlanFromUser,
   )
+  const assignDietPlan = useMutation(api.dietPlans.assignDietPlanToUser)
+  const unassignDietPlan = useMutation(api.dietPlans.unassignDietPlanFromUser)
 
   // Get client's assigned plans (would need API endpoint)
   // const clientAssignedPlans = useQuery(
@@ -79,6 +82,10 @@ function PatternRoute() {
     if (!client?.trainingPlanId) return
     setAssignedTrainingPlanId(client.trainingPlanId)
   }, [client?.trainingPlanId])
+
+  useEffect(() => {
+    setAssignedDietPlanId(client?.dietPlanId ?? '')
+  }, [client?.dietPlanId])
 
   const assignedTrainingPlan = trainingPlans?.find(
     (plan) => plan._id === assignedTrainingPlanId,
@@ -320,9 +327,18 @@ function PatternRoute() {
               disabled={!selectedDietPlan}
               onClick={async () => {
                 if (!selectedDietPlan) return
-                // Assign diet plan logic here
-                setAssignedDietPlanId(selectedDietPlan)
-                setSelectedDietPlan('')
+                try {
+                  await assignDietPlan({
+                    userId: clientId as any,
+                    dietPlanId: selectedDietPlan as any,
+                  })
+                  setAssignedDietPlanId(selectedDietPlan)
+                  setSelectedDietPlan('')
+                  toast.success('Diet plan assigned')
+                } catch (error) {
+                  console.error('Failed to assign diet plan:', error)
+                  toast.error('Failed to assign diet plan')
+                }
               }}
             >
               <Check className="w-4 h-4 mr-2" />
@@ -358,7 +374,14 @@ function PatternRoute() {
                       size="sm"
                       className="h-8 w-8 p-0"
                       onClick={async () => {
-                        setAssignedDietPlanId('')
+                        try {
+                          await unassignDietPlan({ userId: clientId as any })
+                          setAssignedDietPlanId('')
+                          toast.success('Diet plan unassigned')
+                        } catch (error) {
+                          console.error('Failed to unassign diet plan:', error)
+                          toast.error('Failed to unassign diet plan')
+                        }
                       }}
                     >
                       <Trash2 className="w-4 h-4 text-destructive" />

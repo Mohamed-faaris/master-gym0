@@ -117,6 +117,37 @@ export const deleteDietPlan = mutation({
   },
 })
 
+// Assign diet plan to user
+export const assignDietPlanToUser = mutation({
+  args: {
+    userId: v.id('users'),
+    dietPlanId: v.id('dietPlans'),
+  },
+  handler: async (ctx, args) => {
+    await ctx.db.patch(args.userId, {
+      dietPlanId: args.dietPlanId,
+      updatedAt: Date.now(),
+    })
+
+    return { success: true }
+  },
+})
+
+// Unassign diet plan from user
+export const unassignDietPlanFromUser = mutation({
+  args: {
+    userId: v.id('users'),
+  },
+  handler: async (ctx, args) => {
+    await ctx.db.patch(args.userId, {
+      dietPlanId: undefined,
+      updatedAt: Date.now(),
+    })
+
+    return { success: true }
+  },
+})
+
 export const backfillDietPlanMealDays = mutation({
   args: {},
   handler: async (ctx) => {

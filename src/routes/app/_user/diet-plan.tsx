@@ -13,6 +13,7 @@ import {
 import { toast } from 'sonner'
 
 import { api } from '@convex/_generated/api'
+import type { Doc, Id } from '@convex/_generated/dataModel'
 import type { ChangeEvent } from 'react'
 import { useAuth } from '@/components/auth/useAuth'
 import { Button } from '@/components/ui/button'
@@ -49,7 +50,7 @@ const MAX_IMAGE_SIZE = 5 * 1024 * 1024
 function DietPlanRoute() {
   const { user } = useAuth()
 
-  const planOwnerId = user?.trainerId ?? user?._id
+  type DietPlanDoc = Doc<'dietPlans'>
   const isTrainerManaged = user?.role === 'trainerManagedCustomer'
   const isSelfManaged = user?.role === 'selfManagedCustomer'
   const needsCalories = !isTrainerManaged
@@ -65,7 +66,9 @@ function DietPlanRoute() {
   const [calories, setCalories] = useState('')
   const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null)
   const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null)
-  const [imageStorageId, setImageStorageId] = useState<string | null>(null)
+  const [imageStorageId, setImageStorageId] = useState<Id<'_storage'> | null>(
+    null,
+  )
   const [isUploadingImage, setIsUploadingImage] = useState(false)
   const [selectedHistoryImageUrl, setSelectedHistoryImageUrl] = useState<
     string | null
@@ -75,16 +78,22 @@ function DietPlanRoute() {
   const addDietLog = useMutation(api.dietLogs.addDietLog)
   const generateUploadUrl = useMutation(api.files.generateUploadUrl)
 
-  const dietPlans = useQuery(
-    api.dietPlans.getDietPlansByUser,
-    planOwnerId ? { userId: planOwnerId } : 'skip',
+  const liveUser = useQuery(
+    api.users.getUserById,
+    user ? { userId: user._id } : 'skip',
   )
+  const effectiveUser = liveUser ?? user
+  const dietPlanResult = useQuery(
+    api.dietPlans.getDietPlanById,
+    effectiveUser?.dietPlanId
+      ? { dietPlanId: effectiveUser.dietPlanId }
+      : 'skip',
+  )
+  const dietPlan = dietPlanResult ?? null
   const selfDietHistory = useQuery(
     api.dietLogs.getDietLogsByUser,
     user && isSelfManaged ? { userId: user._id, limit: 10 } : 'skip',
   )
-
-  const dietPlan = dietPlans?.[0] ?? null
 
   const weekDayLabels: Record<string, string> = {
     mon: 'Monday',
@@ -106,15 +115,15 @@ function DietPlanRoute() {
 
   const dayOrder = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']
 
-  const mealsByDay = useMemo(() => {
-    if (!dietPlan) return {} as Record<string, typeof dietPlan.mealTemplate>
-    const grouped: Partial<Record<string, typeof dietPlan.mealTemplate>> = {}
+  const mealsByDay = useMemo<Record<string, DietPlanDoc['mealTemplate']>>(() => {
+    if (!dietPlan) return {}
+    const grouped: Record<string, DietPlanDoc['mealTemplate']> = {}
     dietPlan.mealTemplate.forEach((meal) => {
       const dayKey = meal.day
       const mealsForDay = grouped[dayKey] ?? []
       grouped[dayKey] = [...mealsForDay, meal]
     })
-    return grouped as Record<string, typeof dietPlan.mealTemplate>
+    return grouped
   }, [dietPlan])
 
   const availableDays = dayOrder.filter((day) => mealsByDay[day]?.length)
@@ -135,7 +144,11 @@ function DietPlanRoute() {
   const dayTotals = useMemo(() => {
     const totals: Record<string, number> = {}
     Object.entries(mealsByDay).forEach(([day, meals]) => {
-      totals[day] = meals.reduce((sum, meal) => sum + (meal.calories || 0), 0)
+      totals[day] = meals.reduce(
+        (sum: number, meal: DietPlanDoc['mealTemplate'][number]) =>
+          sum + (meal.calories || 0),
+        0,
+      )
     })
     return totals
   }, [mealsByDay])
@@ -201,7 +214,7 @@ function DietPlanRoute() {
       }
 
       const data = await response.json()
-      setImageStorageId(data.storageId)
+      setImageStorageId(data.storageId as Id<'_storage'>)
     } catch {
       toast.error('Failed to upload image')
       clearImageState()
@@ -251,7 +264,7 @@ function DietPlanRoute() {
     }
   }
 
-  if (!dietPlans) {
+  if (effectiveUser?.dietPlanId && dietPlan === undefined) {
     return (
       <div className="p-4">
         <p className="text-muted-foreground">Loading diet plan...</p>

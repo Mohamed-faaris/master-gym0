@@ -136,6 +136,7 @@ export const updateUser = mutation({
     goal: v.optional(GoalValidator),
     trainerId: v.optional(v.id('users')),
     trainingPlanId: v.optional(v.id('trainingPlans')),
+    dietPlanId: v.optional(v.id('dietPlans')),
   },
   handler: async (ctx, args) => {
     const { userId, ...updates } = args

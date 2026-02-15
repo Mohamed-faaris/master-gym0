@@ -140,6 +140,7 @@ const users = defineTable({
 
   trainerId: v.optional(v.id('users')),
   trainingPlanId: v.optional(v.id('trainingPlans')),
+  dietPlanId: v.optional(v.id('dietPlans')),
 
   createdAt: v.number(),
   updatedAt: v.number(),
