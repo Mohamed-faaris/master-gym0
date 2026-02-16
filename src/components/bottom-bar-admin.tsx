@@ -1,15 +1,13 @@
-import { useState, type ComponentType } from 'react'
 import { Link, useRouterState } from '@tanstack/react-router'
 import {
-  Activity,
   ClipboardList,
-  Menu,
-  NotebookPen,
   Plus,
+  User,
   Users,
   UtensilsCrossed,
-  User,
 } from 'lucide-react'
+import { useState } from 'react'
+import type { ComponentType } from 'react'
 
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
@@ -27,11 +25,11 @@ type AdminNavItem = {
   icon: ComponentType<{ className?: string }>
 }
 
-const primaryNav: AdminNavItem[] = [
+const primaryNav: Array<AdminNavItem> = [
   { to: '/app/management/clients', label: 'Clients', icon: Users },
 ]
 
-const secondaryNav: AdminNavItem[] = [
+const secondaryNav: Array<AdminNavItem> = [
   { to: '/app/management/profile', label: 'Profile', icon: User },
 ]
 
@@ -58,7 +56,7 @@ export function BottomBarAdmin({
   }
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-40 bg-background border-t border-border shadow-lg pb-safe">
+    <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/95 shadow-lg backdrop-blur supports-[backdrop-filter]:bg-background/90 pb-safe">
       <div className="flex items-center justify-around h-16 max-w-screen-sm mx-auto px-2">
         {primaryNav.map((item) => (
           <Link

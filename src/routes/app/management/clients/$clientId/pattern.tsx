@@ -257,15 +257,16 @@ function PatternRoute() {
                 >
                   <div className="flex-1">
                     <p className="font-medium text-sm">{assignedTrainingPlan.name}</p>
-                    <p className="text-xs text-muted-foreground">
+                    {/* <p className="text-xs text-muted-foreground">
                       {assignedTrainingPlan.description}
-                    </p>
+                    </p> */}
                   </div>
                   <div className="flex items-center gap-2">
                     <Button
                       variant="outline"
                       size="sm"
-                      className="gap-1"
+                      className="h-8 w-8 p-0"
+                      aria-label="View workout plan"
                       onClick={() =>
                         navigate({
                           to: '/app/management/programs/$programId',
@@ -274,12 +275,12 @@ function PatternRoute() {
                       }
                     >
                       <Eye className="w-4 h-4" />
-                      View
                     </Button>
                     <Button
                       variant="outline"
                       size="sm"
-                      className="gap-1"
+                      className="h-8 w-8 p-0"
+                      aria-label="Edit workout plan"
                       onClick={() =>
                         navigate({
                           to: '/app/management/programs/$programId/edit',
@@ -288,7 +289,6 @@ function PatternRoute() {
                       }
                     >
                       <Pencil className="w-4 h-4" />
-                      Edit
                     </Button>
                     <Button
                       variant="ghost"
@@ -410,7 +410,8 @@ function PatternRoute() {
                       <Button
                         variant="outline"
                         size="sm"
-                        className="gap-1"
+                        className="h-8 w-8 p-0"
+                        aria-label="View diet plan"
                         onClick={() =>
                           navigate({
                             to: '/app/management/diet-plans/$planId',
@@ -419,12 +420,12 @@ function PatternRoute() {
                         }
                       >
                         <Eye className="w-4 h-4" />
-                        View
                       </Button>
                       <Button
                         variant="outline"
                         size="sm"
-                        className="gap-1"
+                        className="h-8 w-8 p-0"
+                        aria-label="Edit diet plan"
                         onClick={() =>
                           navigate({
                             to: '/app/management/diet-plans/$planId',
@@ -433,7 +434,6 @@ function PatternRoute() {
                         }
                       >
                         <Pencil className="w-4 h-4" />
-                        Edit
                       </Button>
                       <Button
                         variant="ghost"
