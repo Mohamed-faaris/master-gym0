@@ -149,10 +149,9 @@ export function WorkoutSessionRouteComponent() {
       : 'skip',
   )
 
-  const activeExercises =
-    existingSession?.exercises.length
-      ? existingSession.exercises
-      : todaysWorkout?.exercises ?? []
+  const activeExercises = existingSession?.exercises.length
+    ? existingSession.exercises
+    : (todaysWorkout?.exercises ?? [])
 
   React.useEffect(() => {
     if (existingSession) {
@@ -314,7 +313,9 @@ export function WorkoutSessionRouteComponent() {
   const handleAddExercise = async () => {
     if (!user || !isSelfManaged) return
 
-    if (!EXERCISE_NAMES.includes(exerciseName as (typeof EXERCISE_NAMES)[number])) {
+    if (
+      !EXERCISE_NAMES.includes(exerciseName as (typeof EXERCISE_NAMES)[number])
+    ) {
       toast.error('Select an exercise from the list')
       return
     }
@@ -338,9 +339,7 @@ export function WorkoutSessionRouteComponent() {
 
       const parsedWeight = Number.parseFloat(trimmedWeight)
       if (Number.isNaN(parsedWeight) || parsedWeight < 0) {
-        throw new Error(
-          `Set ${index + 1} weight must be a non-negative number`,
-        )
+        throw new Error(`Set ${index + 1} weight must be a non-negative number`)
       }
       return parsedWeight
     })
@@ -394,7 +393,7 @@ export function WorkoutSessionRouteComponent() {
     return {
       repsLabel: setData?.reps ? `${setData.reps} reps` : 'Reps TBD',
       weightLabel: setData?.weight ? `${setData.weight} lbs` : 'Weight TBD',
-      notesLabel: setData?.notes?.trim() ? setData.notes :"",
+      notesLabel: setData?.notes?.trim() ? setData.notes : '',
     }
   }
 
@@ -422,7 +421,9 @@ export function WorkoutSessionRouteComponent() {
         {activeExercises.length === 0 && (
           <Card>
             <CardContent className="pt-6 text-center">
-              <p className="text-muted-foreground">No workout scheduled today.</p>
+              <p className="text-muted-foreground">
+                No workout scheduled today.
+              </p>
             </CardContent>
           </Card>
         )}
@@ -442,77 +443,81 @@ export function WorkoutSessionRouteComponent() {
               <div className="space-y-2">
                 {Array.from({ length: getSetCount(exercise) }).map(
                   (_, setIndex) => {
-                  const key = `${exerciseIndex}-${setIndex}`
-                  const isCompleted = completedSets.has(key)
-                  const { repsLabel, weightLabel, notesLabel } = getSetDetails(
-                    exercise,
-                    setIndex,
-                  )
-                  return (
-                    <Card
-                      key={key}
-                      ref={
-                        exerciseIndex === 0 && setIndex === 0
-                          ? currentExerciseRef
-                          : undefined
-                      }
-                      className={`transition-all ${
-                        isCompleted
-                          ? 'border-green-500 bg-green-500/5'
-                          : 'border-border'
-                      } cursor-pointer`}
-                      onClick={() => toggleSet(exerciseIndex, setIndex)}
-                    >
-                      <CardContent className="p-3">
-                        <div className="flex items-center gap-3">
-                          <div className="flex items-center justify-center flex-shrink-0">
-                            <Checkbox
-                              checked={isCompleted}
-                              onCheckedChange={() =>
-                                toggleSet(exerciseIndex, setIndex)
-                              }
-                              aria-label={`Mark set ${setIndex + 1}`}
-                              onClick={(event) => event.stopPropagation()}
-                              className="size-5 flex justify-center items-center border [&[data-state=checked],&[data-state=indeterminate]]:bg-primary [&[data-state=checked],&[data-state=indeterminate]]:text-primary-foreground transition-colors duration-500"
-                            >
-                              <CheckboxIndicator className="size-3.5" />
-                            </Checkbox>
+                    const key = `${exerciseIndex}-${setIndex}`
+                    const isCompleted = completedSets.has(key)
+                    const { repsLabel, weightLabel, notesLabel } =
+                      getSetDetails(exercise, setIndex)
+                    return (
+                      <Card
+                        key={key}
+                        ref={
+                          exerciseIndex === 0 && setIndex === 0
+                            ? currentExerciseRef
+                            : undefined
+                        }
+                        className={`transition-all ${
+                          isCompleted
+                            ? 'border-green-500 bg-green-500/5'
+                            : 'border-border'
+                        } cursor-pointer`}
+                        onClick={() => toggleSet(exerciseIndex, setIndex)}
+                      >
+                        <CardContent className="p-3">
+                          <div className="flex items-center gap-3">
+                            <div className="flex items-center justify-center flex-shrink-0">
+                              <Checkbox
+                                checked={isCompleted}
+                                onCheckedChange={() =>
+                                  toggleSet(exerciseIndex, setIndex)
+                                }
+                                aria-label={`Mark set ${setIndex + 1}`}
+                                onClick={(event) => event.stopPropagation()}
+                                className="size-5 flex justify-center items-center border [&[data-state=checked],&[data-state=indeterminate]]:bg-primary [&[data-state=checked],&[data-state=indeterminate]]:text-primary-foreground transition-colors duration-500"
+                              >
+                                <CheckboxIndicator className="size-3.5" />
+                              </Checkbox>
+                            </div>
+                            <div className="flex-1">
+                              <div
+                                className={`font-semibold ${
+                                  isCompleted
+                                    ? 'line-through text-muted-foreground'
+                                    : ''
+                                }`}
+                              >
+                                Set {setIndex + 1}
+                              </div>
+                              <div
+                                className={`text-sm text-muted-foreground ${
+                                  isCompleted ? 'line-through' : ''
+                                }`}
+                              >
+                                {repsLabel} · {weightLabel}
+                              </div>
+                              <div
+                                className={`text-xs text-muted-foreground mt-1 ${
+                                  isCompleted ? 'line-through' : ''
+                                }`}
+                              >
+                                {notesLabel}
+                              </div>
+                            </div>
                           </div>
-                          <div className="flex-1">
-                            <div
-                              className={`font-semibold ${
-                                isCompleted ? 'line-through text-muted-foreground' : ''
-                              }`}
-                            >
-                              Set {setIndex + 1}
-                            </div>
-                            <div
-                              className={`text-sm text-muted-foreground ${
-                                isCompleted ? 'line-through' : ''
-                              }`}
-                            >
-                              {repsLabel} · {weightLabel}
-                            </div>
-                            <div
-                              className={`text-xs text-muted-foreground mt-1 ${
-                                isCompleted ? 'line-through' : ''
-                              }`}
-                            >
-                              {notesLabel}
-                            </div>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  )
-                })}
+                        </CardContent>
+                      </Card>
+                    )
+                  },
+                )}
               </div>
             </CardContent>
           </Card>
         ))}
       </div>
 
-      <div className="fixed bottom-16 inset-x-0 border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/90">
+      <div
+        className="fixed inset-x-0 border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/90"
+        style={{ bottom: 'calc(4rem + var(--safe-bottom))' }}
+      >
         <div className="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <Clock className="w-4 h-4" />
@@ -528,22 +533,26 @@ export function WorkoutSessionRouteComponent() {
             ) : (
               sessionId && (
                 <>
-                <Button
-                  onClick={() => setIsPaused((prev) => !prev)}
-                  variant="outline"
-                  className="gap-2"
-                >
-                  {isPaused ? <Play className="w-4 h-4" /> : <Pause className="w-4 h-4" />}
-                  {isPaused ? 'Resume' : 'Pause'}
-                </Button>
-                <Button
-                  onClick={handleCompleteSession}
-                  className="gap-2"
-                  variant="default"
-                >
-                  <CheckCircle2 className="w-4 h-4" />
-                  Complete
-                </Button>
+                  <Button
+                    onClick={() => setIsPaused((prev) => !prev)}
+                    variant="outline"
+                    className="gap-2"
+                  >
+                    {isPaused ? (
+                      <Play className="w-4 h-4" />
+                    ) : (
+                      <Pause className="w-4 h-4" />
+                    )}
+                    {isPaused ? 'Resume' : 'Pause'}
+                  </Button>
+                  <Button
+                    onClick={handleCompleteSession}
+                    className="gap-2"
+                    variant="default"
+                  >
+                    <CheckCircle2 className="w-4 h-4" />
+                    Complete
+                  </Button>
                 </>
               )
             )}

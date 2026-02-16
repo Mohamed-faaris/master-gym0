@@ -40,7 +40,7 @@ export function BottomNavigation() {
 
   return (
     <>
-      <nav className="fixed bottom-0 left-0 right-0 z-40 bg-background border-t border-border shadow-lg">
+      <nav className="fixed bottom-0 left-0 right-0 z-40 bg-background border-t border-border shadow-lg pb-safe">
         <div className="flex items-center justify-around h-16 max-w-screen-sm mx-auto px-2">
           {navItems.map((item) => (
             <Link
@@ -57,7 +57,6 @@ export function BottomNavigation() {
               <span className="font-medium">{item.label}</span>
             </Link>
           ))}
-
         </div>
       </nav>
     </>

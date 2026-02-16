@@ -115,7 +115,9 @@ function DietPlanRoute() {
 
   const dayOrder = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']
 
-  const mealsByDay = useMemo<Record<string, DietPlanDoc['mealTemplate']>>(() => {
+  const mealsByDay = useMemo<
+    Record<string, DietPlanDoc['mealTemplate']>
+  >(() => {
     if (!dietPlan) return {}
     const grouped: Record<string, DietPlanDoc['mealTemplate']> = {}
     dietPlan.mealTemplate.forEach((meal) => {
@@ -386,7 +388,9 @@ function DietPlanRoute() {
                       </p>
                     </div>
                     <div className="text-right text-xs text-muted-foreground">
-                      {log.calories != null ? `${log.calories} kcal` : 'Pending'}
+                      {log.calories != null
+                        ? `${log.calories} kcal`
+                        : 'Pending'}
                     </div>
                   </div>
                   {log.description && (
@@ -411,7 +415,8 @@ function DietPlanRoute() {
 
         <Button
           onClick={() => setDietDrawerOpen(true)}
-          className="h-14 w-[calc(100%-2rem)] max-w-screen-sm rounded-full shadow-lg fixed left-1/2 -translate-x-1/2 bottom-20 z-30"
+          className="h-14 w-[calc(100%-2rem)] max-w-screen-sm rounded-full shadow-lg fixed left-1/2 -translate-x-1/2 z-30"
+          style={{ bottom: 'calc(5rem + var(--safe-bottom))' }}
         >
           <UtensilsCrossed className="w-5 h-5 mr-2" />
           Log Diet
@@ -457,9 +462,9 @@ function DietPlanRoute() {
                           ? 'Snack'
                           : type === 'preWorkout'
                             ? 'Pre'
-                          : type === 'postWorkout'
-                            ? 'Post'
-                            : type}
+                            : type === 'postWorkout'
+                              ? 'Post'
+                              : type}
                       </TabsTrigger>
                     ))}
                   </TabsList>
@@ -817,7 +822,9 @@ function DietPlanRoute() {
                       </p>
                     </div>
                     <div className="text-right text-xs text-muted-foreground">
-                      {log.calories != null ? `${log.calories} kcal` : 'Pending'}
+                      {log.calories != null
+                        ? `${log.calories} kcal`
+                        : 'Pending'}
                     </div>
                   </div>
                   {log.description && (
@@ -843,7 +850,8 @@ function DietPlanRoute() {
 
       <Button
         onClick={() => setDietDrawerOpen(true)}
-        className="h-14 w-[calc(100%-2rem)] max-w-screen-sm rounded-full shadow-lg fixed left-1/2 -translate-x-1/2 bottom-20 z-30"
+        className="h-14 w-[calc(100%-2rem)] max-w-screen-sm rounded-full shadow-lg fixed left-1/2 -translate-x-1/2 z-30"
+        style={{ bottom: 'calc(5rem + var(--safe-bottom))' }}
       >
         <UtensilsCrossed className="w-5 h-5 mr-2" />
         Log Diet
