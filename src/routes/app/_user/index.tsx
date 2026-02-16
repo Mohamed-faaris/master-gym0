@@ -264,7 +264,7 @@ function RouteComponent() {
 
       const photo = await cameraModule.Camera.getPhoto({
         quality: 80,
-        source: cameraModule.CameraSource.Prompt,
+        source: cameraModule.CameraSource.Camera,
         resultType: cameraModule.CameraResultType.Uri,
       })
 
