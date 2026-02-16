@@ -92,12 +92,15 @@ function PatternRoute() {
   const assignedTrainingPlan = trainingPlans?.find(
     (plan) => plan._id === assignedTrainingPlanId,
   )
-  const nonCopyTrainingPlans = trainingPlans?.filter((plan) => !plan.isCopy) ?? []
+  const nonCopyTrainingPlans =
+    trainingPlans?.filter((plan) => !plan.isCopy) ?? []
   const assignedWorkoutDropdownPlans =
     assignedTrainingPlan && assignedTrainingPlan.isCopy
       ? [assignedTrainingPlan, ...nonCopyTrainingPlans]
       : nonCopyTrainingPlans
-  const assignedDietPlan = dietPlans?.find((plan) => plan._id === assignedDietPlanId)
+  const assignedDietPlan = dietPlans?.find(
+    (plan) => plan._id === assignedDietPlanId,
+  )
 
   if (isLoading) {
     return <div className="p-4">Loading...</div>
@@ -129,7 +132,6 @@ function PatternRoute() {
               Assign and manage plans for {client.name}
             </p>
           </div>
-          
         </div>
       </header>
 
@@ -200,12 +202,14 @@ function PatternRoute() {
               <CardContent className="pt-4">
                 <div className="space-y-2">
                   <p className="text-sm font-medium">
-                    {nonCopyTrainingPlans.find((p) => p._id === selectedTrainingPlan)
-                      ?.name || 'Selected Plan'}
+                    {nonCopyTrainingPlans.find(
+                      (p) => p._id === selectedTrainingPlan,
+                    )?.name || 'Selected Plan'}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    {nonCopyTrainingPlans.find((p) => p._id === selectedTrainingPlan)
-                      ?.description || 'No description'}
+                    {nonCopyTrainingPlans.find(
+                      (p) => p._id === selectedTrainingPlan,
+                    )?.description || 'No description'}
                   </p>
                 </div>
               </CardContent>
@@ -251,209 +255,211 @@ function PatternRoute() {
         <CardContent>
           <div className="space-y-2">
             {assignedTrainingPlan ? (
-                <div
-                  key={assignedTrainingPlan._id}
-                  className="flex items-start justify-between p-3 rounded-lg bg-muted hover:bg-muted/80 transition-colors"
-                >
-                  <div className="flex-1">
-                    <p className="font-medium text-sm">{assignedTrainingPlan.name}</p>
-                    {/* <p className="text-xs text-muted-foreground">
+              <div
+                key={assignedTrainingPlan._id}
+                className="flex items-start justify-between p-3 rounded-lg bg-muted hover:bg-muted/80 transition-colors"
+              >
+                <div className="flex-1">
+                  <p className="font-medium text-sm">
+                    {assignedTrainingPlan.name}
+                  </p>
+                  {/* <p className="text-xs text-muted-foreground">
                       {assignedTrainingPlan.description}
                     </p> */}
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="h-8 w-8 p-0"
-                      aria-label="View workout plan"
-                      onClick={() =>
-                        navigate({
-                          to: '/app/management/programs/$programId',
-                          params: { programId: assignedTrainingPlan._id },
-                        })
-                      }
-                    >
-                      <Eye className="w-4 h-4" />
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="h-8 w-8 p-0"
-                      aria-label="Edit workout plan"
-                      onClick={() =>
-                        navigate({
-                          to: '/app/management/programs/$programId/edit',
-                          params: { programId: assignedTrainingPlan._id },
-                        })
-                      }
-                    >
-                      <Pencil className="w-4 h-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-8 w-8 p-0"
-                      onClick={async () => {
-                        try {
-                          await unassignTrainingPlan({ userId: clientId as any })
-                          setAssignedTrainingPlanId('')
-                        } catch (error) {
-                          console.error('Failed to unassign workout plan:', error)
-                        }
-                      }}
-                    >
-                      <Trash2 className="w-4 h-4 text-destructive" />
-                    </Button>
-                  </div>
                 </div>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-8 w-8 p-0"
+                    aria-label="View workout plan"
+                    onClick={() =>
+                      navigate({
+                        to: '/app/management/programs/$programId',
+                        params: { programId: assignedTrainingPlan._id },
+                      })
+                    }
+                  >
+                    <Eye className="w-4 h-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-8 w-8 p-0"
+                    aria-label="Edit workout plan"
+                    onClick={() =>
+                      navigate({
+                        to: '/app/management/programs/$programId/edit',
+                        params: { programId: assignedTrainingPlan._id },
+                      })
+                    }
+                  >
+                    <Pencil className="w-4 h-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 w-8 p-0"
+                    onClick={async () => {
+                      try {
+                        await unassignTrainingPlan({ userId: clientId as any })
+                        setAssignedTrainingPlanId('')
+                      } catch (error) {
+                        console.error('Failed to unassign workout plan:', error)
+                      }
+                    }}
+                  >
+                    <Trash2 className="w-4 h-4 text-destructive" />
+                  </Button>
+                </div>
+              </div>
             ) : (
               <p className="text-sm text-muted-foreground text-center py-4">
-                  No workout plans assignedb  
-                </p>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Assign Diet Plan */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <UtensilsCrossed className="w-5 h-5" />
-              Assign Diet Plan
-            </CardTitle>
-            <CardDescription>
-              Select a diet plan to assign to this client.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <select
-              className="w-full rounded-lg border border-border bg-background px-4 py-2 text-sm"
-              value={selectedDietPlan}
-              onChange={(e) => setSelectedDietPlan(e.target.value)}
-              aria-label="Select a diet plan"
-            >
-              <option value="">Select a diet plan...</option>
-              {dietPlans?.map((plan) => (
-                <option key={plan._id} value={plan._id}>
-                  {plan.name}
-                </option>
-              ))}
-            </select>
-
-            {selectedDietPlan && (
-              <Card className="bg-muted border-0">
-                <CardContent className="pt-4">
-                  <div className="space-y-2">
-                    <p className="text-sm font-medium">
-                      {dietPlans?.find((p) => p._id === selectedDietPlan)?.name ||
-                        'Selected Plan'}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {dietPlans?.find((p) => p._id === selectedDietPlan)
-                        ?.description || 'No description'}
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
+                No workout plans assignedb
+              </p>
             )}
+          </div>
+        </CardContent>
+      </Card>
 
-            <Button
-              className="w-full"
-              disabled={!selectedDietPlan}
-              onClick={async () => {
-                if (!selectedDietPlan) return
-                try {
-                  await assignDietPlan({
-                    userId: clientId as any,
-                    dietPlanId: selectedDietPlan as any,
-                  })
-                  setAssignedDietPlanId(selectedDietPlan)
-                  setSelectedDietPlan('')
-                  toast.success('Diet plan assigned')
-                } catch (error) {
-                  console.error('Failed to assign diet plan:', error)
-                  toast.error('Failed to assign diet plan')
-                }
-              }}
-            >
-              <Check className="w-4 h-4 mr-2" />
-              Assign Plan
-            </Button>
-          </CardContent>
-        </Card>
+      {/* Assign Diet Plan */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <UtensilsCrossed className="w-5 h-5" />
+            Assign Diet Plan
+          </CardTitle>
+          <CardDescription>
+            Select a diet plan to assign to this client.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <select
+            className="w-full rounded-lg border border-border bg-background px-4 py-2 text-sm"
+            value={selectedDietPlan}
+            onChange={(e) => setSelectedDietPlan(e.target.value)}
+            aria-label="Select a diet plan"
+          >
+            <option value="">Select a diet plan...</option>
+            {dietPlans?.map((plan) => (
+              <option key={plan._id} value={plan._id}>
+                {plan.name}
+              </option>
+            ))}
+          </select>
 
-        {/* Current Assigned Diet Plans */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base flex items-center gap-2">
-              <UtensilsCrossed className="w-4 h-4" />
-              Currently Assigned
-            </CardTitle>
-            <CardDescription>Active diet plans for this client</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              {assignedDietPlan ? (
-                  <div
-                    key={assignedDietPlan._id}
-                    className="flex items-start justify-between p-3 rounded-lg bg-muted hover:bg-muted/80 transition-colors"
+          {selectedDietPlan && (
+            <Card className="bg-muted border-0">
+              <CardContent className="pt-4">
+                <div className="space-y-2">
+                  <p className="text-sm font-medium">
+                    {dietPlans?.find((p) => p._id === selectedDietPlan)?.name ||
+                      'Selected Plan'}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {dietPlans?.find((p) => p._id === selectedDietPlan)
+                      ?.description || 'No description'}
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          <Button
+            className="w-full"
+            disabled={!selectedDietPlan}
+            onClick={async () => {
+              if (!selectedDietPlan) return
+              try {
+                await assignDietPlan({
+                  userId: clientId as any,
+                  dietPlanId: selectedDietPlan as any,
+                })
+                setAssignedDietPlanId(selectedDietPlan)
+                setSelectedDietPlan('')
+                toast.success('Diet plan assigned')
+              } catch (error) {
+                console.error('Failed to assign diet plan:', error)
+                toast.error('Failed to assign diet plan')
+              }
+            }}
+          >
+            <Check className="w-4 h-4 mr-2" />
+            Assign Plan
+          </Button>
+        </CardContent>
+      </Card>
+
+      {/* Current Assigned Diet Plans */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base flex items-center gap-2">
+            <UtensilsCrossed className="w-4 h-4" />
+            Currently Assigned
+          </CardTitle>
+          <CardDescription>Active diet plans for this client</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-2">
+            {assignedDietPlan ? (
+              <div
+                key={assignedDietPlan._id}
+                className="flex items-start justify-between p-3 rounded-lg bg-muted hover:bg-muted/80 transition-colors"
+              >
+                <div className="flex-1">
+                  <p className="font-medium text-sm">{assignedDietPlan.name}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {assignedDietPlan.description}
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-8 w-8 p-0"
+                    aria-label="View diet plan"
+                    onClick={() =>
+                      navigate({
+                        to: '/app/management/diet-plans/$planId',
+                        params: { planId: assignedDietPlan._id },
+                      })
+                    }
                   >
-                    <div className="flex-1">
-                      <p className="font-medium text-sm">{assignedDietPlan.name}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {assignedDietPlan.description}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="h-8 w-8 p-0"
-                        aria-label="View diet plan"
-                        onClick={() =>
-                          navigate({
-                            to: '/app/management/diet-plans/$planId',
-                            params: { planId: assignedDietPlan._id },
-                          })
-                        }
-                      >
-                        <Eye className="w-4 h-4" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="h-8 w-8 p-0"
-                        aria-label="Edit diet plan"
-                        onClick={() =>
-                          navigate({
-                            to: '/app/management/diet-plans/$planId',
-                            params: { planId: assignedDietPlan._id },
-                          })
-                        }
-                      >
-                        <Pencil className="w-4 h-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-8 w-8 p-0"
-                        onClick={async () => {
-                          try {
-                            await unassignDietPlan({ userId: clientId as any })
-                            setAssignedDietPlanId('')
-                            toast.success('Diet plan unassigned')
-                          } catch (error) {
-                            console.error('Failed to unassign diet plan:', error)
-                            toast.error('Failed to unassign diet plan')
-                          }
-                        }}
-                      >
-                        <Trash2 className="w-4 h-4 text-destructive" />
-                      </Button>
-                    </div>
-                  </div>
+                    <Eye className="w-4 h-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-8 w-8 p-0"
+                    aria-label="Edit diet plan"
+                    onClick={() =>
+                      navigate({
+                        to: '/app/management/diet-plans/$planId',
+                        params: { planId: assignedDietPlan._id },
+                      })
+                    }
+                  >
+                    <Pencil className="w-4 h-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 w-8 p-0"
+                    onClick={async () => {
+                      try {
+                        await unassignDietPlan({ userId: clientId as any })
+                        setAssignedDietPlanId('')
+                        toast.success('Diet plan unassigned')
+                      } catch (error) {
+                        console.error('Failed to unassign diet plan:', error)
+                        toast.error('Failed to unassign diet plan')
+                      }
+                    }}
+                  >
+                    <Trash2 className="w-4 h-4 text-destructive" />
+                  </Button>
+                </div>
+              </div>
             ) : (
               <p className="text-sm text-muted-foreground text-center py-4">
                 No diet plans assigned

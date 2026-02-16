@@ -456,15 +456,9 @@ function DietPlanRoute() {
                       <TabsTrigger
                         key={type}
                         value={type}
-                        className="text-xs capitalize"
+                        className="text-xs capitalize whitespace-nowrap"
                       >
-                        {type === 'middaySnack'
-                          ? 'Snack'
-                          : type === 'preWorkout'
-                            ? 'Pre'
-                            : type === 'postWorkout'
-                              ? 'Post'
-                              : type}
+                        {mealTypeLabels[type]}
                       </TabsTrigger>
                     ))}
                   </TabsList>
@@ -875,7 +869,7 @@ function DietPlanRoute() {
               Log Your Meal
             </DrawerTitle>
             <DrawerDescription className="text-center">
-              Track your nutrition and calories
+              {trainerManagedCopy}
             </DrawerDescription>
           </DrawerHeader>
 
@@ -891,9 +885,9 @@ function DietPlanRoute() {
                     <TabsTrigger
                       key={type}
                       value={type}
-                      className="text-xs capitalize"
+                      className="text-xs capitalize whitespace-nowrap"
                     >
-                      {type === 'postWorkout' ? 'Post' : type}
+                      {mealTypeLabels[type]}
                     </TabsTrigger>
                   ))}
                 </TabsList>
