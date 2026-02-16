@@ -37,6 +37,7 @@ function RouteComponent() {
   const navigate = useNavigate()
   const updateUser = useMutation(api.users.updateUser)
   const [isEditDrawerOpen, setIsEditDrawerOpen] = useState(false)
+  const [isAboutDrawerOpen, setIsAboutDrawerOpen] = useState(false)
   const [editName, setEditName] = useState('')
   const [editEmail, setEditEmail] = useState('')
 
@@ -261,32 +262,8 @@ function RouteComponent() {
         <CardHeader>
           <CardTitle>About Us</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-5">
-          <div className="rounded-xl bg-muted/30 p-4 sm:p-5">
-            <div className="flex items-start gap-3">
-              <div className="mt-0.5 w-8 h-8 rounded-full bg-chart-3/10 flex items-center justify-center">
-                <Info className="w-4 h-4 text-chart-3" />
-              </div>
-              <div className="space-y-2">
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  Master Fitness started on 22.08.2022 and continues to grow. We
-                  currently have 3 branches, including one dedicated to women.
-                </p>
-                {/* <div className="flex flex-wrap gap-2">
-                  {gymBranches.map((branch) => (
-                    <span
-                      key={branch}
-                      className="rounded-full border bg-background px-3 py-1 text-xs text-muted-foreground"
-                    >
-                      {branch}
-                    </span>
-                  ))}
-                </div> */}
-              </div>
-            </div>
-          </div>
-
-          <div className="rounded-xl border bg-card p-4 sm:p-5 space-y-4">
+        <CardContent className="space-y-4">
+          <div className="rounded-xl border bg-card p-4 sm:p-5">
             <div className="flex items-start gap-4">
               <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
                 <User className="w-8 h-8 text-primary" />
@@ -299,127 +276,20 @@ function RouteComponent() {
                   Founder & Head Coach
                 </p>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  With over 15 years of experience in strength training and
-                  nutrition, Nagaraj has transformed 500+ lives as a certified
-                  master trainer.
+                  15+ years of fitness coaching with expertise in strength
+                  training and nutrition.
                 </p>
               </div>
             </div>
-
-            <div className="space-y-2">
-              <div className="font-medium text-sm">Achievements</div>
-              <ul className="space-y-1.5 text-sm text-muted-foreground">
-                {ceoAchievements.map((achievement) => (
-                  <li key={achievement} className="flex items-start gap-2">
-                    <span className="mt-1 h-1.5 w-1.5 rounded-full bg-primary/70" />
-                    <span>{achievement}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
           </div>
 
-          <div>
-            <h3 className="font-semibold mb-3">Success Stories</h3>
-            <div className="grid grid-cols-3 gap-3">
-              {successStories.map((story) => (
-                <div
-                  key={`${story.title}-${story.subtitle}`}
-                  className={`aspect-square rounded-lg bg-linear-to-br ${story.color} flex items-center justify-center border`}
-                >
-                  <div className="text-center p-2">
-                    <div className="text-xs font-medium">{story.title}</div>
-                    <div className="text-xs text-muted-foreground">
-                      {story.subtitle}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* <div className="rounded-xl border p-4 sm:p-5 space-y-4">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full bg-chart-3/10 flex items-center justify-center">
-                <Info className="w-4 h-4 text-chart-3" />
-              </div>
-              <h3 className="font-medium">Gym Information</h3>
-            </div>
-
-            <div className="grid gap-3 text-sm text-muted-foreground">
-              <div className="flex items-start gap-2">
-                <Clock className="w-4 h-4 mt-0.5 text-foreground/70" />
-                <div>
-                  <div className="font-medium text-foreground">Hours</div>
-                  <div>Mon - Fri: 5:00 AM - 11:00 PM</div>
-                  <div>Sat - Sun: 7:00 AM - 9:00 PM</div>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-2">
-                <MapPin className="w-4 h-4 mt-0.5 text-foreground/70" />
-                <div>
-                  <div className="font-medium text-foreground">Locations</div>
-                  <div>
-                    Main Branch • West Branch • Women\'s Exclusive Branch
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div> */}
-
-          {/* Gym Details */}
-          {/* <div className="p-4 rounded-lg bg-muted/30 space-y-3 text-sm">
-            <div>
-              <div className="font-semibold mb-1">Master Gym</div>
-              <div className="text-muted-foreground">
-                Your premier fitness destination
-              </div>
-            </div>
-
-            <div>
-              <div className="font-medium mb-1">Hours</div>
-              <div className="text-muted-foreground">
-                Mon - Fri: 5:00 AM - 11:00 PM
-                <br />
-                Sat - Sun: 7:00 AM - 9:00 PM
-              </div>
-            </div>
-
-            <div>
-              <div className="font-medium mb-1">Location</div>
-              <div className="text-muted-foreground">
-                123 Fitness Street
-                <br />
-                New York, NY 10001
-              </div>
-            </div>
-
-            <div>
-              <div className="font-medium mb-1">Contact</div>
-              <div className="text-muted-foreground">
-                Phone: (555) 987-6543
-                <br />
-                Email: info@mastergym.com
-              </div>
-            </div>
-
-            <div>
-              <div className="font-medium mb-1">Amenities</div>
-              <div className="text-muted-foreground">
-                • Free weights & machines
-                <br />
-                • Cardio equipment
-                <br />
-                • Group classes
-                <br />
-                • Personal training
-                <br />
-                • Locker rooms & showers
-                <br />• Free parking
-              </div>
-            </div>
-          </div> */}
+          <Button
+            variant="outline"
+            className="w-full"
+            onClick={() => setIsAboutDrawerOpen(true)}
+          >
+            View Full About Us
+          </Button>
         </CardContent>
       </Card>
 
@@ -449,6 +319,83 @@ function RouteComponent() {
 
       {/* Extra padding for bottom nav */}
       <div className="h-4" />
+
+      <Drawer open={isAboutDrawerOpen} onOpenChange={setIsAboutDrawerOpen}>
+        <DrawerContent>
+          <DrawerHeader>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute right-4 top-4"
+              onClick={() => setIsAboutDrawerOpen(false)}
+            >
+              <X className="h-4 w-4" />
+            </Button>
+            <DrawerTitle>About Us</DrawerTitle>
+            <DrawerDescription>
+              Company details, achievements, and success stories
+            </DrawerDescription>
+          </DrawerHeader>
+
+          <div className="px-4 pb-4 space-y-5 max-h-[70vh] overflow-y-auto">
+            <div className="rounded-xl bg-muted/30 p-4 sm:p-5">
+              <div className="flex items-start gap-3">
+                <div className="mt-0.5 w-8 h-8 rounded-full bg-chart-3/10 flex items-center justify-center">
+                  <Info className="w-4 h-4 text-chart-3" />
+                </div>
+                <div className="space-y-2">
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    Master Fitness started on 22.08.2022 and continues to grow.
+                    We currently have 3 branches, including one dedicated to
+                    women.
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {gymBranches.map((branch) => (
+                      <span
+                        key={branch}
+                        className="rounded-full border bg-background px-3 py-1 text-xs text-muted-foreground"
+                      >
+                        {branch}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <div className="font-medium text-sm">CEO Achievements</div>
+              <ul className="space-y-1.5 text-sm text-muted-foreground">
+                {ceoAchievements.map((achievement) => (
+                  <li key={achievement} className="flex items-start gap-2">
+                    <span className="mt-1 h-1.5 w-1.5 rounded-full bg-primary/70" />
+                    <span>{achievement}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div>
+              <h3 className="font-semibold mb-3">Success Stories</h3>
+              <div className="grid grid-cols-3 gap-3">
+                {successStories.map((story) => (
+                  <div
+                    key={`${story.title}-${story.subtitle}`}
+                    className={`aspect-square rounded-lg bg-linear-to-br ${story.color} flex items-center justify-center border`}
+                  >
+                    <div className="text-center p-2">
+                      <div className="text-xs font-medium">{story.title}</div>
+                      <div className="text-xs text-muted-foreground">
+                        {story.subtitle}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </DrawerContent>
+      </Drawer>
 
       <Drawer open={isEditDrawerOpen} onOpenChange={setIsEditDrawerOpen}>
         <DrawerContent>

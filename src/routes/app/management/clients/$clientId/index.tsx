@@ -230,7 +230,7 @@ function ClientDetailRoute() {
   })
 
   return (
-    <div className="space-y-6 p-4 pb-20 max-w-4xl mx-auto">
+    <div className="mx-auto w-full max-w-4xl space-y-6 p-4 pb-20">
       {/* Header */}
       <header className="space-y-3">
         <Link
@@ -240,8 +240,10 @@ function ClientDetailRoute() {
           <ArrowLeft className="h-4 w-4" />
           Back to clients
         </Link>
-        <div className="flex items-start justify-between gap-3">
-          <h1 className="text-3xl font-semibold">{client.name}</h1>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <h1 className="min-w-0 text-3xl font-semibold break-words">
+            {client.name}
+          </h1>
           <Button
             onClick={() =>
               navigate({
@@ -249,7 +251,7 @@ function ClientDetailRoute() {
               })
             }
             variant="outline"
-            className="shrink-0"
+            className="w-full shrink-0 sm:w-auto"
           >
             Pattern
           </Button>
@@ -257,7 +259,7 @@ function ClientDetailRoute() {
       </header>
 
       {/* Date Context Selector */}
-      <div className="flex items-center justify-between">
+      <div className="flex w-full items-center justify-between">
         <DateContextSelector value={dateScope} onChange={setDateScope} />
       </div>
 
@@ -270,8 +272,8 @@ function ClientDetailRoute() {
 
           <Card>
             <CardContent className="pt-6">
-              <div className="grid grid-cols-3 gap-4 text-center">
-                <div>
+              <div className="grid grid-cols-1 gap-3 text-center min-[430px]:grid-cols-3">
+                <div className="min-w-0 rounded-lg border border-border/60 p-3">
                   <p className="text-xs text-muted-foreground">
                     Workout Progress
                   </p>
@@ -279,13 +281,13 @@ function ClientDetailRoute() {
                     {workoutProgressPercent}%
                   </p>
                 </div>
-                <div>
+                <div className="min-w-0 rounded-lg border border-border/60 p-3">
                   <p className="text-xs text-muted-foreground">Diet Progress</p>
                   <p className="text-2xl font-bold text-chart-2">
                     {dietProgressPercent}%
                   </p>
                 </div>
-                <div>
+                <div className="min-w-0 rounded-lg border border-border/60 p-3">
                   <p className="text-xs text-muted-foreground">
                     Active Duration
                   </p>

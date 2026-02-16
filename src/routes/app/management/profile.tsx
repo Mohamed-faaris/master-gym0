@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { User, Mail, Phone, MapPin, Calendar } from 'lucide-react'
+import { Calendar, Mail, MapPin, Phone, User } from 'lucide-react'
 
 import { useAuth } from '@/components/auth/useAuth'
 import {
@@ -139,30 +139,6 @@ function RouteComponent() {
           </CardContent>
         </Card>
 
-        {/* Statistics */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Statistics</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <div className="grid grid-cols-3 gap-4">
-              <div className="text-center p-4 rounded-lg bg-muted">
-                <p className="text-2xl font-bold text-primary">-</p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Active Clients
-                </p>
-              </div>
-              <div className="text-center p-4 rounded-lg bg-muted">
-                <p className="text-2xl font-bold text-chart-2">-</p>
-                <p className="text-xs text-muted-foreground mt-1">Programs</p>
-              </div>
-              <div className="text-center p-4 rounded-lg bg-muted">
-                <p className="text-2xl font-bold text-emerald-600">-</p>
-                <p className="text-xs text-muted-foreground mt-1">Diet Plans</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
       </div>
     </div>
   )

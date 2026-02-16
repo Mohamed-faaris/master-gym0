@@ -1,4 +1,13 @@
-import { ChevronRight, Dumbbell, Edit2, Lock, Phone } from 'lucide-react'
+import { Link } from '@tanstack/react-router'
+import {
+  BarChart3,
+  ChevronRight,
+  Dumbbell,
+  Edit2,
+  Lock,
+  Phone,
+  UtensilsCrossed,
+} from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
@@ -163,6 +172,32 @@ export function ClientDetailView({
               </p>
             </div>
           </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Quick View</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <Button asChild variant="outline" className="h-11 w-full">
+            <Link to={`/app/management/clients/${client._id}/view-work`}>
+              <Dumbbell className="w-4 h-4 mr-2" />
+              View Workout Sessions
+            </Link>
+          </Button>
+          <Button asChild variant="outline" className="h-11 w-full">
+            <Link to={`/app/management/clients/${client._id}/logs/diet`}>
+              <UtensilsCrossed className="w-4 h-4 mr-2" />
+              View Diet Entry
+            </Link>
+          </Button>
+          <Button asChild variant="outline" className="h-11 w-full">
+            <Link to={`/app/management/clients/${client._id}/logs/weight`}>
+              <BarChart3 className="w-4 h-4 mr-2" />
+              View Weight
+            </Link>
+          </Button>
         </CardContent>
       </Card>
 
