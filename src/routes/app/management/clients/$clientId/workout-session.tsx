@@ -512,7 +512,9 @@ function TrainerWorkoutSessionRoute() {
                             <div className="flex-1">
                               <div
                                 className={`font-semibold ${
-                                  isCompleted ? 'line-through text-muted-foreground' : ''
+                                  isCompleted
+                                    ? 'line-through text-muted-foreground'
+                                    : ''
                                 }`}
                               >
                                 Set {setIndex + 1}
@@ -545,7 +547,10 @@ function TrainerWorkoutSessionRoute() {
       </div>
 
       {/* Fixed Bottom Timer Bar */}
-      <div className="fixed bottom-16 left-0 right-0 bg-background border-t shadow-lg z-20">
+      <div
+        className="fixed left-0 right-0 bg-background border-t shadow-lg z-20"
+        style={{ bottom: 'calc(4rem + var(--safe-bottom))' }}
+      >
         <div className="p-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">

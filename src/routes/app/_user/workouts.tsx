@@ -123,9 +123,9 @@ function RouteComponent() {
       : 'skip',
   )
 
-  const dayOfWeek = (['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'] as const)[
-    today.getDay()
-  ]
+  const dayOfWeek = (
+    ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'] as const
+  )[today.getDay()]
   const dayStart = new Date(today)
   dayStart.setHours(0, 0, 0, 0)
   const dayEnd = new Date(today)
@@ -200,10 +200,7 @@ function RouteComponent() {
     () => sortedDays.map((day) => day.day),
     [sortedDays],
   )
-  const availableDaySet = useMemo(
-    () => new Set(availableDays),
-    [availableDays],
-  )
+  const availableDaySet = useMemo(() => new Set(availableDays), [availableDays])
   const [activeDay, setActiveDay] = useState<string | undefined>(todayKey)
 
   useEffect(() => {
@@ -245,7 +242,9 @@ function RouteComponent() {
   const handleAddExercise = async () => {
     if (!user || !isSelfManaged) return
 
-    if (!EXERCISE_NAMES.includes(exerciseName as (typeof EXERCISE_NAMES)[number])) {
+    if (
+      !EXERCISE_NAMES.includes(exerciseName as (typeof EXERCISE_NAMES)[number])
+    ) {
       toast.error('Select an exercise from the list')
       return
     }
@@ -263,9 +262,7 @@ function RouteComponent() {
       if (!trimmedWeight) return undefined
       const parsedWeight = Number.parseFloat(trimmedWeight)
       if (Number.isNaN(parsedWeight) || parsedWeight < 0) {
-        throw new Error(
-          `Set ${index + 1} weight must be a non-negative number`,
-        )
+        throw new Error(`Set ${index + 1} weight must be a non-negative number`)
       }
       return parsedWeight
     })
@@ -415,7 +412,10 @@ function RouteComponent() {
             <CardContent className="space-y-3">
               {todaysSession?.exercises.length ? (
                 todaysSession.exercises.map((exercise, exIndex) => (
-                  <div key={exIndex} className="border rounded-lg p-4 space-y-2">
+                  <div
+                    key={exIndex}
+                    className="border rounded-lg p-4 space-y-2"
+                  >
                     <h4 className="font-medium">{exercise.exerciseName}</h4>
                     <div className="text-sm text-muted-foreground">
                       {exercise.noOfSets} sets
@@ -552,7 +552,8 @@ function RouteComponent() {
       {user && (
         <Link
           to="/app/workout-session"
-          className="fixed left-1/2 -translate-x-1/2 bottom-20 z-30 w-[calc(100%-2rem)] max-w-screen-sm"
+          className="fixed left-1/2 -translate-x-1/2 z-30 w-[calc(100%-2rem)] max-w-screen-sm"
+          style={{ bottom: 'calc(5rem + var(--safe-bottom))' }}
         >
           <Button className="h-14 w-full rounded-full shadow-lg">
             <Dumbbell className="w-5 h-5 mr-2" />
@@ -675,7 +676,6 @@ function RouteComponent() {
           </DrawerFooter>
         </DrawerContent>
       </Drawer>
-
     </div>
   )
 }

@@ -210,7 +210,10 @@ function RouteComponent() {
       </div>
 
       {/* Upload Button - Fixed above navbar */}
-      <div className="fixed bottom-20 left-0 right-0 flex justify-center pb-4">
+      <div
+        className="fixed left-0 right-0 flex justify-center pb-4"
+        style={{ bottom: 'calc(5rem + var(--safe-bottom))' }}
+      >
         <Button
           onClick={() => setUploadDrawerOpen(true)}
           size="lg"

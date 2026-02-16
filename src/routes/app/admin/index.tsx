@@ -395,7 +395,7 @@ function SuperAdminDashboard() {
       </main>
 
       {/* Tab Navigation Bar - Bottom */}
-      <nav className="fixed bottom-0 left-0 right-0 flex items-center justify-between border-t border-border bg-muted/30">
+      <nav className="fixed bottom-0 left-0 right-0 flex items-center justify-between border-t border-border bg-muted/30 pb-safe">
         <div className="flex flex-1">
           {/* Clients Tab */}
           <button

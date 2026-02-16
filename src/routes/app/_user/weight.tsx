@@ -1,13 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
 import { useMutation, useQuery } from 'convex/react'
-import {
-  Area,
-  AreaChart,
-  CartesianGrid,
-  XAxis,
-  YAxis,
-} from 'recharts'
+import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from 'recharts'
 import { Scale, TrendingDown, X } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -120,13 +114,7 @@ function WeightRoute() {
             >
               <AreaChart data={weightChartData} accessibilityLayer>
                 <defs>
-                  <linearGradient
-                    id="fillWeight"
-                    x1="0"
-                    y1="0"
-                    x2="0"
-                    y2="1"
-                  >
+                  <linearGradient id="fillWeight" x1="0" y1="0" x2="0" y2="1">
                     <stop
                       offset="5%"
                       stopColor="var(--color-weight)"
@@ -217,9 +205,7 @@ function WeightRoute() {
                           year: 'numeric',
                         })}
                       </div>
-                      <div className="text-2xl font-bold">
-                        {log.weight} kg
-                      </div>
+                      <div className="text-2xl font-bold">{log.weight} kg</div>
                     </div>
                     {change !== 0 && (
                       <div
@@ -243,7 +229,8 @@ function WeightRoute() {
 
       <Button
         onClick={() => setWeightDrawerOpen(true)}
-        className="h-14 w-[calc(100%-2rem)] max-w-screen-sm rounded-full shadow-lg fixed left-1/2 -translate-x-1/2 bottom-20 z-30"
+        className="h-14 w-[calc(100%-2rem)] max-w-screen-sm rounded-full shadow-lg fixed left-1/2 -translate-x-1/2 z-30"
+        style={{ bottom: 'calc(5rem + var(--safe-bottom))' }}
       >
         <Scale className="w-5 h-5 mr-2" />
         Log Weight
