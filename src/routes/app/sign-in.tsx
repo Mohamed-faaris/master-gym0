@@ -95,9 +95,13 @@ function SignInPage() {
               <Input
                 id="pin"
                 type="password"
-                placeholder="Enter your PIN"
+                inputMode="numeric"
+                maxLength={4}
+                placeholder="Enter 4-digit PIN"
                 value={pin}
-                onChange={(e) => setPin(e.target.value)}
+                onChange={(e) =>
+                  setPin(e.target.value.replace(/\D/g, '').slice(0, 4))
+                }
                 required
                 disabled={isLoading}
               />
