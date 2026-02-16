@@ -107,10 +107,10 @@ function DietPlanRoute() {
 
   const mealTypeLabels: Record<string, string> = {
     breakfast: 'Breakfast',
-    middaySnack: 'Midday Snack',
+    middaySnack: 'Snack',
     lunch: 'Lunch',
-    preWorkout: 'Pre-workout',
-    postWorkout: 'Post-workout',
+    preWorkout: 'Pre',
+    postWorkout: 'Post',
   }
 
   const dayOrder = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']
@@ -173,14 +173,7 @@ function DietPlanRoute() {
     }
   }
 
-  const handlePickImage = () => {
-    imageInputRef.current?.click()
-  }
-
-  const handleImageChange = async (event: ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0]
-    if (!file) return
-
+  const uploadImageFile = async (file: File) => {
     if (!file.type.startsWith('image/')) {
       toast.error('Please select an image file')
       clearImageState()
@@ -221,6 +214,60 @@ function DietPlanRoute() {
     } finally {
       setIsUploadingImage(false)
     }
+  }
+
+  const handlePickImage = async () => {
+    if (isUploadingImage) return
+
+    try {
+      const [{ Capacitor }, cameraModule] = await Promise.all([
+        import('@capacitor/core'),
+        import('@capacitor/camera'),
+      ])
+
+      if (Capacitor.getPlatform() === 'web') {
+        imageInputRef.current?.click()
+        return
+      }
+
+      const photo = await cameraModule.Camera.getPhoto({
+        quality: 80,
+        source: cameraModule.CameraSource.Prompt,
+        resultType: cameraModule.CameraResultType.Uri,
+      })
+
+      if (!photo.webPath) {
+        toast.error('Failed to read image')
+        return
+      }
+
+      const imageResponse = await fetch(photo.webPath)
+      const imageBlob = await imageResponse.blob()
+      const extension = imageBlob.type === 'image/png' ? 'png' : 'jpg'
+      const imageFile = new File(
+        [imageBlob],
+        `meal-photo-${Date.now()}.${extension}`,
+        { type: imageBlob.type || 'image/jpeg' },
+      )
+
+      await uploadImageFile(imageFile)
+    } catch (error) {
+      if (
+        error instanceof Error &&
+        error.message.toLowerCase().includes('cancel')
+      ) {
+        return
+      }
+      toast.error('Failed to open camera')
+      imageInputRef.current?.click()
+    }
+  }
+
+  const handleImageChange = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+
+    await uploadImageFile(file)
   }
 
   const handleLogDiet = async () => {
@@ -406,7 +453,13 @@ function DietPlanRoute() {
                         value={type}
                         className="text-xs capitalize"
                       >
-                        {type === 'postWorkout' ? 'Post' : type}
+                        {type === 'middaySnack'
+                          ? 'Snack'
+                          : type === 'preWorkout'
+                            ? 'Pre'
+                          : type === 'postWorkout'
+                            ? 'Post'
+                            : type}
                       </TabsTrigger>
                     ))}
                   </TabsList>

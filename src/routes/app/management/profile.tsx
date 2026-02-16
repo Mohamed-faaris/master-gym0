@@ -19,7 +19,7 @@ export const Route = createFileRoute('/app/management/profile')({
 })
 
 function RouteComponent() {
-  const { user, isLoading } = useAuth()
+  const { user, isLoading, signOut } = useAuth()
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -34,6 +34,11 @@ function RouteComponent() {
       navigate({ to: '/app' })
     }
   }, [user, isLoading, navigate])
+
+  const handleLogout = () => {
+    signOut()
+    navigate({ to: '/' })
+  }
 
   if (isLoading) {
     return (
@@ -58,7 +63,7 @@ function RouteComponent() {
         {/* Profile Header */}
         <Card>
           <CardHeader className="pb-4">
-            <div className="flex items-start justify-between">
+            <div className="flex flex-wrap items-start justify-between gap-3">
               <div className="flex items-center gap-4">
                 <div className="w-16 h-16 rounded-lg bg-primary/10 flex items-center justify-center">
                   <User className="w-8 h-8 text-primary" />
@@ -72,9 +77,14 @@ function RouteComponent() {
                   </CardDescription>
                 </div>
               </div>
-              <Button variant="outline" size="sm">
-                Edit Profile
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button variant="outline" size="sm">
+                  Edit Profile
+                </Button>
+                <Button variant="destructive" size="sm" onClick={handleLogout}>
+                  Logout
+                </Button>
+              </div>
             </div>
           </CardHeader>
         </Card>

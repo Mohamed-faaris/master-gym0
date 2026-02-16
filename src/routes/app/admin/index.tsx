@@ -52,7 +52,7 @@ export const Route = createFileRoute('/app/admin/')({
 })
 
 function SuperAdminDashboard() {
-  const { user, isLoading } = useAuth()
+  const { user, isLoading, signOut } = useAuth()
   const navigate = useNavigate()
 
   const [activeTab, setActiveTab] = useState<Tab>('clients')
@@ -128,6 +128,11 @@ function SuperAdminDashboard() {
       navigate({ to: '/app/management' })
     }
   }, [user, isLoading, navigate])
+
+  const handleLogout = () => {
+    signOut()
+    navigate({ to: '/' })
+  }
 
   if (isLoading) {
     return (
@@ -336,13 +341,18 @@ function SuperAdminDashboard() {
         <p className="text-xs text-muted-foreground uppercase tracking-wide">
           Super Admin Console · {todayLabel}
         </p>
-        <div className="flex items-center justify-between gap-4">
+        <div className="flex flex-wrap items-center justify-between gap-2">
           <h1 className="text-xl font-semibold">Administration</h1>
-          {user?.role === 'admin' && (
-            <Button asChild size="sm" variant="outline">
-              <Link to="/app/management">Trainer</Link>
+          <div className="flex items-center gap-2">
+            {user?.role === 'admin' && (
+              <Button asChild size="sm" variant="outline">
+                <Link to="/app/management">Trainer</Link>
+              </Button>
+            )}
+            <Button variant="destructive" size="sm" onClick={handleLogout}>
+              Logout
             </Button>
-          )}
+          </div>
         </div>
       </header>
 
