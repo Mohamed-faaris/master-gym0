@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">Master Gym</string>
-    <string name="title_activity_main">Master Gym</string>
+    <string name="app_name">Master Fit</string>
+    <string name="title_activity_main">Master Fit</string>
     <string name="package_name">com.yourcompany.mastergym</string>
     <string name="custom_url_scheme">com.yourcompany.mastergym</string>
 </resources>
