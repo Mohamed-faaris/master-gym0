@@ -1170,6 +1170,60 @@ export const seedDatabase = mutation({
   },
 })
 
+// Seed script to create/update only admin credentials
+export const seedAdminOnly = mutation({
+  handler: async (ctx) => {
+    const now = Date.now()
+
+    const existingAdmin = await ctx.db
+      .query('users')
+      .withIndex('by_phone', (q) => q.eq('phoneNumber', '1000000000'))
+      .first()
+
+    if (existingAdmin) {
+      await ctx.db.patch(existingAdmin._id, {
+        name: 'Admin User',
+        email: 'admin@gym.com',
+        pin: '1234',
+        role: 'admin',
+        goal: 'generalFitness',
+        updatedAt: now,
+      })
+
+      return {
+        success: true,
+        message: 'Admin credentials updated successfully',
+        created: false,
+        credentials: {
+          phoneNumber: '1000000000',
+          pin: '1234',
+        },
+      }
+    }
+
+    await ctx.db.insert('users', {
+      name: 'Admin User',
+      phoneNumber: '1000000000',
+      email: 'admin@gym.com',
+      pin: '1234',
+      role: 'admin',
+      goal: 'generalFitness',
+      createdAt: now,
+      updatedAt: now,
+    })
+
+    return {
+      success: true,
+      message: 'Admin credentials seeded successfully',
+      created: true,
+      credentials: {
+        phoneNumber: '1000000000',
+        pin: '1234',
+      },
+    }
+  },
+})
+
 // Clear all data from the database (use with caution!)
 export const clearDatabase = mutation({
   handler: async (ctx) => {

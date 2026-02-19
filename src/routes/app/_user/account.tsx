@@ -107,6 +107,14 @@ function RouteComponent() {
   ]
 
   const gymBranches = ['Main Branch', 'West Branch', "Women's Exclusive Branch"]
+  const transformationImages = [
+    '/transformation/0.jpg',
+    '/transformation/1.jpg',
+    '/transformation/2.jpg',
+    '/transformation/3.jpg',
+    '/transformation/4.jpg',
+    '/transformation/5.jpg',
+  ]
 
   const openEditDrawer = () => {
     if (!profileUser) return
@@ -389,6 +397,25 @@ function RouteComponent() {
                         {story.subtitle}
                       </div>
                     </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <h3 className="font-semibold mb-3">Transformations</h3>
+              <div className="grid grid-cols-2 gap-3">
+                {transformationImages.map((imagePath, index) => (
+                  <div
+                    key={imagePath}
+                    className="rounded-lg border bg-muted/20 p-1"
+                  >
+                    <img
+                      src={imagePath}
+                      alt={`Transformation ${index + 1}`}
+                      className="h-auto w-full object-contain"
+                      loading="lazy"
+                    />
                   </div>
                 ))}
               </div>
