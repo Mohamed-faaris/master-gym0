@@ -8,7 +8,6 @@ import {
   Dumbbell,
   Flame,
   Plus,
-  X,
 } from 'lucide-react'
 import { useMutation, useQuery } from 'convex/react'
 import { toast } from 'sonner'
@@ -22,15 +21,6 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import {
-  Drawer,
-  DrawerContent,
-  DrawerDescription,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerTitle,
-} from '@/components/ui/drawer'
-import { Input } from '@/components/ui/input'
 import { useAuth } from '@/components/auth/useAuth'
 import {
   Tabs,
@@ -39,59 +29,10 @@ import {
   TabsList,
   TabsTrigger,
 } from '@/components/animate-ui/components/radix/tabs'
-
-const EXERCISE_NAMES = [
-  'Barbell Bench Press',
-  'Incline Dumbbell Press',
-  'Decline Bench Press',
-  'Dumbbell Fly',
-  'Cable Chest Fly',
-  'Push-Ups',
-  'Dumbbell Pullover',
-  'Smith Machine Bench Press',
-  'Lat Pulldown',
-  'Pull-Ups / Assisted Pull-Ups',
-  'Seated Cable Row',
-  'Bent-Over Barbell Row',
-  'One-Arm Dumbbell Row',
-  'T-Bar Row',
-  'Deadlift',
-  'Straight-Arm Pulldown',
-  'Barbell Overhead Press',
-  'Dumbbell Lateral Raise',
-  'Front Raise',
-  'Rear Delt Fly',
-  'Arnold Press',
-  'Upright Row',
-  'Face Pull',
-  'Barbell Curl',
-  'Dumbbell Curl',
-  'Hammer Curl',
-  'Preacher Curl',
-  'Concentration Curl',
-  'Cable Biceps Curl',
-  'Cable Triceps Pushdown',
-  'Skull Crushers',
-  'Overhead Dumbbell Triceps Extension',
-  'Bench Dips',
-  'Close-Grip Bench Press',
-  'Triceps Kickbacks',
-  'Barbell Squat',
-  'Leg Press',
-  'Walking Lunges',
-  'Leg Extension',
-  'Leg Curl',
-  'Romanian Deadlift',
-  'Standing Calf Raises',
-  'Seated Calf Raises',
-  'Bulgarian Split Squat',
-  'Hack Squat',
-  'Hanging Leg Raises',
-  'Cable Crunch',
-  'Ab Wheel Rollout',
-  'Plank',
-  'Russian Twist',
-] as const
+import {
+  AddExerciseDrawer,
+  type ExerciseData,
+} from '@/components/add-exercise-drawer'
 
 export const Route = createFileRoute('/app/_user/workouts')({
   component: RouteComponent,
@@ -102,10 +43,6 @@ function RouteComponent() {
   const { user } = useAuth()
   const isSelfManaged = user?.role === 'selfManagedCustomer'
   const [isAddExerciseDrawerOpen, setIsAddExerciseDrawerOpen] = useState(false)
-  const [exerciseName, setExerciseName] = useState('')
-  const [setCount, setSetCount] = useState(1)
-  const [setReps, setSetReps] = useState([''])
-  const [setWeights, setSetWeights] = useState([''])
   const addSelfManagedExercise = useMutation(
     api.workoutSessions.addSelfManagedExerciseToToday,
   )
@@ -212,60 +149,8 @@ function RouteComponent() {
     })
   }, [availableDays, availableDaySet, todayKey])
 
-  useEffect(() => {
-    setSetReps((previous) => {
-      if (previous.length === setCount) return previous
-      if (previous.length < setCount) {
-        return [...previous, ...Array(setCount - previous.length).fill('')]
-      }
-      return previous.slice(0, setCount)
-    })
-  }, [setCount])
-
-  useEffect(() => {
-    setSetWeights((previous) => {
-      if (previous.length === setCount) return previous
-      if (previous.length < setCount) {
-        return [...previous, ...Array(setCount - previous.length).fill('')]
-      }
-      return previous.slice(0, setCount)
-    })
-  }, [setCount])
-
-  const resetDrawerForm = () => {
-    setExerciseName('')
-    setSetCount(1)
-    setSetReps([''])
-    setSetWeights([''])
-  }
-
-  const handleAddExercise = async () => {
+  const handleAddExercise = async (data: ExerciseData) => {
     if (!user || !isSelfManaged) return
-
-    if (
-      !EXERCISE_NAMES.includes(exerciseName as (typeof EXERCISE_NAMES)[number])
-    ) {
-      toast.error('Select an exercise from the list')
-      return
-    }
-
-    const repsValues = setReps.map((reps, index) => {
-      const parsedReps = Number.parseInt(reps, 10)
-      if (Number.isNaN(parsedReps) || parsedReps <= 0) {
-        throw new Error(`Set ${index + 1} reps must be a positive number`)
-      }
-      return parsedReps
-    })
-
-    const weightValues = setWeights.map((weight, index) => {
-      const trimmedWeight = weight.trim()
-      if (!trimmedWeight) return undefined
-      const parsedWeight = Number.parseFloat(trimmedWeight)
-      if (Number.isNaN(parsedWeight) || parsedWeight < 0) {
-        throw new Error(`Set ${index + 1} weight must be a non-negative number`)
-      }
-      return parsedWeight
-    })
 
     try {
       await addSelfManagedExercise({
@@ -273,15 +158,10 @@ function RouteComponent() {
         dayOfWeek,
         dayStart: dayStart.getTime(),
         dayEnd: dayEnd.getTime(),
-        exerciseName,
-        sets: repsValues.map((reps, index) => ({
-          reps,
-          weight: weightValues[index],
-        })),
+        exerciseName: data.exerciseName,
+        sets: data.sets,
       })
       toast.success("Exercise added to today's session")
-      setIsAddExerciseDrawerOpen(false)
-      resetDrawerForm()
     } catch (error) {
       if (error instanceof Error) {
         toast.error(error.message)
@@ -562,120 +442,11 @@ function RouteComponent() {
         </Link>
       )}
 
-      <Drawer
+      <AddExerciseDrawer
         open={isAddExerciseDrawerOpen}
         onOpenChange={setIsAddExerciseDrawerOpen}
-      >
-        <DrawerContent className="flex max-h-[85vh] flex-col">
-          <DrawerHeader className="shrink-0">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="absolute right-4 top-4"
-              onClick={() => setIsAddExerciseDrawerOpen(false)}
-            >
-              <X className="h-4 w-4" />
-            </Button>
-            <DrawerTitle>Add Exercise for Today</DrawerTitle>
-            <DrawerDescription>
-              Add sets and reps to your current day session
-            </DrawerDescription>
-          </DrawerHeader>
-
-          <div className="flex-1 overflow-y-auto px-4 pb-4 space-y-4">
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Exercise</label>
-              <Input
-                list="workouts-exercise-options"
-                value={exerciseName}
-                onChange={(event) => setExerciseName(event.target.value)}
-                placeholder="Search and select exercise"
-              />
-              <datalist id="workouts-exercise-options">
-                {EXERCISE_NAMES.map((name) => (
-                  <option key={name} value={name} />
-                ))}
-              </datalist>
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Number of Sets</label>
-              <Input
-                type="number"
-                min={1}
-                value={setCount}
-                onChange={(event) =>
-                  setSetCount(
-                    Math.max(
-                      1,
-                      Number.parseInt(event.target.value || '1', 10) || 1,
-                    ),
-                  )
-                }
-              />
-            </div>
-
-            <div className="space-y-2">
-              <p className="text-sm font-medium">Set Details</p>
-              {setReps.map((reps, index) => (
-                <div key={index} className="space-y-2 rounded-lg border p-3">
-                  <p className="text-xs text-muted-foreground font-medium">
-                    Set {index + 1}
-                  </p>
-                  <div className="grid grid-cols-2 gap-2">
-                    <div className="space-y-1">
-                      <label className="text-xs text-muted-foreground">
-                        Reps
-                      </label>
-                      <Input
-                        type="number"
-                        min={1}
-                        placeholder="e.g. 10"
-                        value={reps}
-                        onChange={(event) => {
-                          const updatedReps = [...setReps]
-                          updatedReps[index] = event.target.value
-                          setSetReps(updatedReps)
-                        }}
-                      />
-                    </div>
-                    <div className="space-y-1">
-                      <label className="text-xs text-muted-foreground">
-                        Weight (kg)
-                      </label>
-                      <Input
-                        type="number"
-                        min={0}
-                        step="0.5"
-                        placeholder="Optional"
-                        value={setWeights[index] ?? ''}
-                        onChange={(event) => {
-                          const updatedWeights = [...setWeights]
-                          updatedWeights[index] = event.target.value
-                          setSetWeights(updatedWeights)
-                        }}
-                      />
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <DrawerFooter className="shrink-0 border-t bg-background">
-            <Button onClick={handleAddExercise}>Save Exercise</Button>
-            <Button
-              variant="outline"
-              onClick={() => {
-                setIsAddExerciseDrawerOpen(false)
-                resetDrawerForm()
-              }}
-            >
-              Cancel
-            </Button>
-          </DrawerFooter>
-        </DrawerContent>
-      </Drawer>
+        onSave={handleAddExercise}
+      />
     </div>
   )
 }
