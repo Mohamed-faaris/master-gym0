@@ -8,13 +8,7 @@ const RoleValidator = v.union(
   v.literal('admin'),
 )
 
-const GoalValidator = v.union(
-  v.literal('weightLoss'),
-  v.literal('muscleGain'),
-  v.literal('endurance'),
-  v.literal('flexibility'),
-  v.literal('generalFitness'),
-)
+const GoalValidator = v.string()
 
 // Sign in query
 export const signInQuery = query({
@@ -38,7 +32,7 @@ export const createUser = mutation({
     email: v.optional(v.string()),
     pin: v.string(),
     role: RoleValidator,
-    goal: GoalValidator,
+    goal: v.optional(GoalValidator),
     trainerId: v.optional(v.id('users')),
   },
   handler: async (ctx, args) => {

@@ -36,6 +36,7 @@ interface AdminConsoleContextValue {
   openCreateDrawer: () => void
   openEditDrawer: (userId: string) => void
   openChangePinDrawer: (userId: string) => void
+  deleteUserById: (userId: string) => Promise<void>
   signOut: () => void
 }
 
@@ -68,6 +69,7 @@ export function AdminShell() {
 
   const createUser = useMutation(api.users.createUser)
   const updateUser = useMutation(api.users.updateUser)
+  const deleteUser = useMutation(api.users.deleteUser)
   const updateUserMeta = useMutation(api.users.updateUserMeta)
   const saveMeasurements = useMutation(api.users.saveMeasurements)
 
@@ -79,6 +81,7 @@ export function AdminShell() {
   const [newClientPhone, setNewClientPhone] = useState('')
   const [newClientPin, setNewClientPin] = useState('')
   const [newClientRole, setNewClientRole] = useState<AdminRole>(DEFAULT_ROLE)
+  const [newClientGoal, setNewClientGoal] = useState('')
   const [selectedFormTrainerId, setSelectedFormTrainerId] = useState<string>('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [clientAge, setClientAge] = useState('')
@@ -134,6 +137,7 @@ export function AdminShell() {
     setNewClientPhone('')
     setNewClientPin('')
     setNewClientRole(DEFAULT_ROLE)
+    setNewClientGoal('')
     setSelectedFormTrainerId('')
     setClientAge('')
     setCurrentWeight('')
@@ -155,55 +159,60 @@ export function AdminShell() {
     setOnboardDrawerOpen(true)
   }
 
-  const openEditDrawer = (clientId: string) => {
-    const client = clients.find((c) => c._id === clientId)
-    if (!client) return
+  const openEditDrawer = (userId: string) => {
+    const target = allUsers.find((entry) => entry._id === userId)
+    if (!target) return
 
     setDrawerMode('edit')
-    setEditingUserId(clientId)
-    setNewClientName(client.name ?? '')
-    setNewClientPhone(client.phoneNumber ?? '')
-    setNewClientPin(client.pin ?? '')
-    setNewClientRole(client.role ?? DEFAULT_ROLE)
-    setSelectedFormTrainerId(client.trainerId ?? '')
-    setClientAge(client.meta?.age !== undefined ? String(client.meta.age) : '')
+    setEditingUserId(userId)
+    setNewClientName(target.name ?? '')
+    setNewClientPhone(target.phoneNumber ?? '')
+    setNewClientPin(target.pin ?? '')
+    setNewClientRole(target.role ?? DEFAULT_ROLE)
+    setNewClientGoal(target.goal ?? '')
+    setSelectedFormTrainerId(target.trainerId ?? '')
+    setClientAge(target.meta?.age !== undefined ? String(target.meta.age) : '')
     setCurrentWeight(
-      client.meta?.currentWeight !== undefined
-        ? String(client.meta.currentWeight)
+      target.meta?.currentWeight !== undefined
+        ? String(target.meta.currentWeight)
         : '',
     )
     setTargetWeight(
-      client.meta?.targetWeight !== undefined
-        ? String(client.meta.targetWeight)
+      target.meta?.targetWeight !== undefined
+        ? String(target.meta.targetWeight)
         : '',
     )
     setMeasurements({
       chest:
-        client.measurements?.chest !== undefined
-          ? String(client.measurements.chest)
+        target.measurements?.chest !== undefined
+          ? String(target.measurements.chest)
           : '',
       shoulder:
-        client.measurements?.shoulder !== undefined
-          ? String(client.measurements.shoulder)
+        target.measurements?.shoulder !== undefined
+          ? String(target.measurements.shoulder)
           : '',
       hip:
-        client.measurements?.hip !== undefined
-          ? String(client.measurements.hip)
+        target.measurements?.hip !== undefined
+          ? String(target.measurements.hip)
           : '',
       arms:
-        client.measurements?.arms !== undefined
-          ? String(client.measurements.arms)
+        target.measurements?.arms !== undefined
+          ? String(target.measurements.arms)
           : '',
       legs:
-        client.measurements?.legs !== undefined
-          ? String(client.measurements.legs)
+        target.measurements?.legs !== undefined
+          ? String(target.measurements.legs)
           : '',
       timeSpanWeeks:
-        client.measurements?.timeSpanWeeks !== undefined
-          ? String(client.measurements.timeSpanWeeks)
+        target.measurements?.timeSpanWeeks !== undefined
+          ? String(target.measurements.timeSpanWeeks)
           : '',
     })
     setOnboardDrawerOpen(true)
+  }
+
+  const deleteUserById = async (userId: string) => {
+    await deleteUser({ userId: userId as Id<'users'> })
   }
 
   const openChangePinDrawer = (userId: string) => {
@@ -232,7 +241,7 @@ export function AdminShell() {
               phoneNumber: newClientPhone,
               pin: newClientPin,
               role: newClientRole,
-              goal: 'generalFitness',
+              goal: newClientGoal || undefined,
               trainerId: selectedFormTrainerId
                 ? (selectedFormTrainerId as Id<'users'>)
                 : undefined,
@@ -246,6 +255,7 @@ export function AdminShell() {
           phoneNumber: newClientPhone,
           pin: newClientPin,
           role: newClientRole,
+          goal: newClientGoal || undefined,
           trainerId: selectedFormTrainerId
             ? (selectedFormTrainerId as Id<'users'>)
             : undefined,
@@ -327,6 +337,7 @@ export function AdminShell() {
     openCreateDrawer,
     openEditDrawer,
     openChangePinDrawer,
+    deleteUserById,
     signOut: handleLogout,
   }
 
@@ -501,6 +512,15 @@ export function AdminShell() {
                       <SelectItem value="admin">{roleLabelMap.admin}</SelectItem>
                     </SelectContent>
                   </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Goal</label>
+                  <Input
+                    placeholder="e.g. Weight loss, muscle gain, or custom goal"
+                    value={newClientGoal}
+                    onChange={(e) => setNewClientGoal(e.target.value)}
+                  />
                 </div>
 
                 {newClientRole === 'trainerManagedCustomer' && (

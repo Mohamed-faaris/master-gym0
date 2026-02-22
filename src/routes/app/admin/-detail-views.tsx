@@ -2,10 +2,12 @@ import { Link } from '@tanstack/react-router'
 import {
   BarChart3,
   ChevronRight,
+  ClipboardList,
   Dumbbell,
   Edit2,
   Lock,
   Phone,
+  Trash2,
   UtensilsCrossed,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -47,6 +49,7 @@ export interface ClientDetailViewProps {
   }>
   onBack: () => void
   onEditClient?: (clientId: string) => void
+  onDeleteClient?: (clientId: string) => void
 }
 
 export function ClientDetailView({
@@ -54,35 +57,43 @@ export function ClientDetailView({
   trainers,
   onBack,
   onEditClient,
+  onDeleteClient,
 }: ClientDetailViewProps) {
   const trainerName = trainers.find((t) => t._id === client.trainerId)?.name
 
   return (
     <div className="space-y-4">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-4">
+      <div className="space-y-2">
         <button
           onClick={onBack}
-          className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+          className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
         >
           <ChevronRight className="w-4 h-4 rotate-180" />
           Back
         </button>
-        <h2 className="text-lg font-semibold">{client.name}</h2>
-        <div className="w-10" /> {/* Spacer for alignment */}
+        <h2 className="text-xl font-semibold">{client.name}</h2>
       </div>
 
       {/* Client Details */}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle className="text-base">Client Information</CardTitle>
-          <Button
-            onClick={() => onEditClient?.(client._id)}
-            variant="outline"
-            size="sm"
-          >
-            Edit
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              onClick={() => onEditClient?.(client._id)}
+              variant="outline"
+              size="sm"
+            >
+              Edit
+            </Button>
+            <Button
+              onClick={() => onDeleteClient?.(client._id)}
+              variant="destructive"
+              size="sm"
+            >
+              <Trash2 className="w-4 h-4" />
+            </Button>
+          </div>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 gap-4">
@@ -113,6 +124,13 @@ export function ClientDetailView({
                   ? 'Trainer Managed'
                   : 'Self Managed'}
               </p>
+            </div>
+
+            <div>
+              <p className="text-xs font-medium text-muted-foreground mb-1">
+                Goal
+              </p>
+              <p className="text-sm font-medium">{client.goal || 'Not set'}</p>
             </div>
 
             {/* Trainer */}
@@ -181,21 +199,27 @@ export function ClientDetailView({
         </CardHeader>
         <CardContent className="space-y-3">
           <Button asChild variant="outline" className="h-11 w-full">
-            <Link to={`/app/management/clients/${client._id}/view-work`}>
+            <Link to={`/app/admin/list/view-work/${client._id}`}>
               <Dumbbell className="w-4 h-4 mr-2" />
               View Workout Sessions
             </Link>
           </Button>
           <Button asChild variant="outline" className="h-11 w-full">
-            <Link to={`/app/management/clients/${client._id}/logs/diet`}>
+            <Link to={`/app/admin/list/logs/diet/${client._id}`}>
               <UtensilsCrossed className="w-4 h-4 mr-2" />
               View Diet Entry
             </Link>
           </Button>
           <Button asChild variant="outline" className="h-11 w-full">
-            <Link to={`/app/management/clients/${client._id}/logs/weight`}>
+            <Link to={`/app/admin/list/logs/weight/${client._id}`}>
               <BarChart3 className="w-4 h-4 mr-2" />
               View Weight
+            </Link>
+          </Button>
+          <Button asChild variant="outline" className="h-11 w-full">
+            <Link to={`/app/admin/list/pattern/${client._id}`}>
+              <ClipboardList className="w-4 h-4 mr-2" />
+              Manage Pattern
             </Link>
           </Button>
         </CardContent>
@@ -303,6 +327,8 @@ export interface TrainerDetailViewProps {
   }>
   onBack: () => void
   onChangePin?: (userId: string) => void
+  onEditTrainer?: (trainerId: string) => void
+  onDeleteTrainer?: (trainerId: string) => void
 }
 
 export function TrainerDetailView({
@@ -311,6 +337,8 @@ export function TrainerDetailView({
   clients,
   onBack,
   onChangePin,
+  onEditTrainer,
+  onDeleteTrainer,
 }: TrainerDetailViewProps) {
   const trainerClients = clients.filter(
     (client) => client.trainerId === trainer._id,
@@ -318,23 +346,37 @@ export function TrainerDetailView({
 
   return (
     <div className="space-y-4">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-4">
+      <div className="space-y-2">
         <button
           onClick={onBack}
-          className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+          className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
         >
           <ChevronRight className="w-4 h-4 rotate-180" />
           Back
         </button>
-        <h2 className="text-lg font-semibold">{trainer.name}</h2>
-        <div className="w-10" /> {/* Spacer for alignment */}
+        <h2 className="text-xl font-semibold">{trainer.name}</h2>
       </div>
 
       {/* Trainer Details */}
       <Card>
-        <CardHeader>
+        <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle className="text-base">Trainer Information</CardTitle>
+          <div className="flex items-center gap-2">
+            <Button
+              onClick={() => onEditTrainer?.(trainer._id)}
+              variant="outline"
+              size="sm"
+            >
+              Edit
+            </Button>
+            <Button
+              onClick={() => onDeleteTrainer?.(trainer._id)}
+              variant="destructive"
+              size="sm"
+            >
+              <Trash2 className="w-4 h-4" />
+            </Button>
+          </div>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 gap-4">

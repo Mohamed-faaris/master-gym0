@@ -16,7 +16,8 @@ interface PeopleListProps {
   emptyLabel: string
   people: AdminUser[]
   isLoading: boolean
-  onSelect: (id: string) => void
+  onSelect?: (id: string) => void
+  getTo?: (id: string) => string
   kind: 'client' | 'trainer'
 }
 
@@ -28,6 +29,7 @@ export function PeopleList({
   people,
   isLoading,
   onSelect,
+  getTo,
   kind,
 }: PeopleListProps) {
   return (
@@ -60,25 +62,50 @@ export function PeopleList({
         ) : (
           <div className="space-y-2">
             {people.map((person) => (
-              <button
-                key={person._id}
-                type="button"
-                onClick={() => onSelect(person._id)}
-                className="flex w-full items-center justify-between rounded-xl border border-border bg-background px-4 py-3 text-left transition-colors hover:bg-muted/50"
-              >
-                <div className="flex items-center gap-3">
-                  <span className="grid h-10 w-10 place-items-center rounded-xl bg-primary/10 text-primary">
-                    <UserRound className="h-5 w-5" />
-                  </span>
-                  <div>
-                    <p className="font-medium text-foreground">{person.name}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {person.phoneNumber}
-                    </p>
+              getTo ? (
+                <Link
+                  key={person._id}
+                  to={getTo(person._id)}
+                  className="flex w-full items-center justify-between rounded-xl border border-border bg-background px-4 py-3 text-left transition-colors hover:bg-muted/50"
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="grid h-10 w-10 place-items-center rounded-xl bg-primary/10 text-primary">
+                      <UserRound className="h-5 w-5" />
+                    </span>
+                    <div>
+                      <p className="font-medium text-foreground">
+                        {person.name}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {person.phoneNumber}
+                      </p>
+                    </div>
                   </div>
-                </div>
-                <ChevronRight className="h-4 w-4 text-muted-foreground" />
-              </button>
+                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                </Link>
+              ) : (
+                <button
+                  key={person._id}
+                  type="button"
+                  onClick={() => onSelect?.(person._id)}
+                  className="flex w-full items-center justify-between rounded-xl border border-border bg-background px-4 py-3 text-left transition-colors hover:bg-muted/50"
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="grid h-10 w-10 place-items-center rounded-xl bg-primary/10 text-primary">
+                      <UserRound className="h-5 w-5" />
+                    </span>
+                    <div>
+                      <p className="font-medium text-foreground">
+                        {person.name}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {person.phoneNumber}
+                      </p>
+                    </div>
+                  </div>
+                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                </button>
+              )
             ))}
           </div>
         )}

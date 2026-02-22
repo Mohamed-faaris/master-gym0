@@ -1,6 +1,7 @@
 import * as React from 'react'
 import { Plus, Trash2, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { ExerciseNameField } from '@/components/exercise-name-field'
 import {
   Drawer,
   DrawerContent,
@@ -108,10 +109,8 @@ export function AddExerciseDrawer({
   }
 
   const handleSave = async () => {
-    if (
-      !EXERCISE_NAMES.includes(exerciseName as (typeof EXERCISE_NAMES)[number])
-    ) {
-      throw new Error('Select an exercise from the list')
+    if (!exerciseName.trim()) {
+      throw new Error('Exercise name is required')
     }
 
     const repsValues = setReps.map((reps, index) => {
@@ -182,17 +181,12 @@ export function AddExerciseDrawer({
         <div className="flex-1 overflow-y-auto px-4 pb-4 space-y-4">
           <div className="space-y-2">
             <label className="text-sm font-medium">Exercise</label>
-            <Input
-              list="add-exercise-options"
+            <ExerciseNameField
               value={exerciseName}
-              onChange={(event) => setExerciseName(event.target.value)}
-              placeholder="Search and select exercise"
+              options={EXERCISE_NAMES}
+              onValueChange={setExerciseName}
+              placeholder="Type exercise name"
             />
-            <datalist id="add-exercise-options">
-              {EXERCISE_NAMES.map((name) => (
-                <option key={name} value={name} />
-              ))}
-            </datalist>
           </div>
 
           <div className="space-y-2">

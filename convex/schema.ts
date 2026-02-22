@@ -33,13 +33,6 @@ export const GALLERY_ACCESS = ['private', 'public'] as const
 
 const DAYS_OF_WEEK = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'] as const
 
-const GOALS = [
-  'weightLoss',
-  'muscleGain',
-  'endurance',
-  'flexibility',
-  'generalFitness',
-] as const
 
 const EXERCISE_NAMES = [
   // CHEST (8)
@@ -119,7 +112,6 @@ const MealTypeValidator = enumToValidator(MEAL_TYPES)
 const GalleryStatusValidator = enumToValidator(GALLERY_STATUSES)
 const GalleryAccessValidator = enumToValidator(GALLERY_ACCESS)
 const DayOfWeekValidator = enumToValidator(DAYS_OF_WEEK)
-const GoalValidator = enumToValidator(GOALS)
 const ExerciseNameValidator = enumToValidator(EXERCISE_NAMES)
 
 /* ======================================================
@@ -136,7 +128,7 @@ const users = defineTable({
 
   role: RoleValidator,
 
-  goal: GoalValidator,
+  goal: v.optional(v.string()),
 
   trainerId: v.optional(v.id('users')),
   trainingPlanId: v.optional(v.id('trainingPlans')),

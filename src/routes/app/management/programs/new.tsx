@@ -13,6 +13,7 @@ import {
 import { useMutation as useConvexMutation, useQuery } from 'convex/react'
 import { toast } from 'sonner'
 import { useAuth } from '@/components/auth/useAuth'
+import { ExerciseNameField } from '@/components/exercise-name-field'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -166,14 +167,20 @@ type ProgramFormMode = 'create' | 'edit'
 interface ProgramFormScreenProps {
   mode: ProgramFormMode
   programId?: Id<'trainingPlans'>
+  initialStep?: number
 }
 
 function RouteComponent() {
-  return <ProgramFormScreen mode="create" />
+  const search = Route.useSearch()
+  return <ProgramFormScreen mode="create" initialStep={search.step} />
 }
 
-export function ProgramFormScreen({ mode, programId }: ProgramFormScreenProps) {
-  const navigate = useNavigate({ from: '/app/management/programs/new' })
+export function ProgramFormScreen({
+  mode,
+  programId,
+  initialStep = 0,
+}: ProgramFormScreenProps) {
+  const navigate = useNavigate()
   const { user, isLoading } = useAuth()
   const createTrainingPlan = useConvexMutation(
     api.trainingPlans.createTrainingPlan,
@@ -186,8 +193,9 @@ export function ProgramFormScreen({ mode, programId }: ProgramFormScreenProps) {
     mode === 'edit' && programId ? { trainingPlanId: programId } : 'skip',
   )
 
-  const search = Route.useSearch()
-  const stepIndex = Math.min(Math.max(search.step ?? 0, 0), steps.length - 1)
+  const [stepIndex, setStepIndex] = useState(() =>
+    Math.min(Math.max(initialStep, 0), steps.length - 1),
+  )
   const [planName, setPlanName] = useState('')
   const [durationWeeks, setDurationWeeks] = useState('4')
   const [selectedDays, setSelectedDays] = useState<DayKey[]>([])
@@ -802,15 +810,14 @@ export function ProgramFormScreen({ mode, programId }: ProgramFormScreenProps) {
                                         <label className="text-xs font-medium uppercase text-muted-foreground">
                                           Exercise name
                                         </label>
-                                        <Input
-                                          placeholder="e.g. Back squat"
+                                        <ExerciseNameField
                                           value={exercise.exerciseName}
-                                          list="exercise-name-options"
-                                          onChange={(event) =>
+                                          options={EXERCISE_NAMES}
+                                          onValueChange={(value) =>
                                             updateExerciseName(
                                               day.key,
                                               index,
-                                              event.target.value,
+                                              value,
                                             )
                                           }
                                         />
@@ -1029,14 +1036,7 @@ export function ProgramFormScreen({ mode, programId }: ProgramFormScreenProps) {
           <Button
             variant="outline"
             className="flex-1"
-            onClick={() =>
-              navigate({
-                search: (prev) => ({
-                  ...prev,
-                  step: Math.max(stepIndex - 1, 0),
-                }),
-              })
-            }
+            onClick={() => setStepIndex((prev) => Math.max(prev - 1, 0))}
             disabled={isFirstStep || isSubmitting}
           >
             <ChevronLeft className="mr-2 h-4 w-4" />
@@ -1048,12 +1048,7 @@ export function ProgramFormScreen({ mode, programId }: ProgramFormScreenProps) {
               if (isLastStep) {
                 handleSubmit()
               } else {
-                navigate({
-                  search: (prev) => ({
-                    ...prev,
-                    step: Math.min(stepIndex + 1, steps.length - 1),
-                  }),
-                })
+                setStepIndex((prev) => Math.min(prev + 1, steps.length - 1))
               }
             }}
             disabled={isSubmitting}
@@ -1070,12 +1065,6 @@ export function ProgramFormScreen({ mode, programId }: ProgramFormScreenProps) {
             <ChevronRight className="ml-2 h-4 w-4" />
           </Button>
         </div>
-
-        <datalist id="exercise-name-options">
-          {EXERCISE_NAMES.map((name) => (
-            <option key={name} value={name} />
-          ))}
-        </datalist>
       </div>
     </div>
   )
