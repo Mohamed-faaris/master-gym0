@@ -14,7 +14,6 @@ import {
   User,
   X,
 } from 'lucide-react'
-import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -301,6 +300,31 @@ function RouteComponent() {
         </CardContent>
       </Card>
 
+      <Card>
+        <CardHeader>
+          <CardTitle>Transformations</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3 pr-0">
+          <div className="overflow-x-auto pb-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+            <div className="flex gap-0 snap-x snap-mandatory pr-4">
+              {transformationImages.map((imagePath, index) => (
+                <div
+                  key={imagePath}
+                  className="mr-2 shrink-0 snap-start"
+                >
+                  <img
+                    src={imagePath}
+                    alt={`Transformation ${index + 1}`}
+                    className="h-44 w-full object-contain"
+                    loading="lazy"
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* App Info */}
       <div className="space-y-2">
         <button className="w-full p-3 rounded-lg border text-left hover:bg-muted/50 transition-colors">
@@ -402,24 +426,6 @@ function RouteComponent() {
               </div>
             </div>
 
-            <div>
-              <h3 className="font-semibold mb-3">Transformations</h3>
-              <div className="grid grid-cols-2 gap-3">
-                {transformationImages.map((imagePath, index) => (
-                  <div
-                    key={imagePath}
-                    className="rounded-lg border bg-muted/20 p-1"
-                  >
-                    <img
-                      src={imagePath}
-                      alt={`Transformation ${index + 1}`}
-                      className="h-auto w-full object-contain"
-                      loading="lazy"
-                    />
-                  </div>
-                ))}
-              </div>
-            </div>
           </div>
         </DrawerContent>
       </Drawer>
