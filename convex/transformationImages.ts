@@ -124,7 +124,16 @@ export const deleteTransformationImage = mutation({
   handler: async (ctx, args) => {
     const existing = await ctx.db.get(args.imageId)
     if (existing?.imageStorageId) {
-      await ctx.storage.delete(existing.imageStorageId)
+      try {
+        await ctx.storage.delete(existing.imageStorageId)
+      } catch (error) {
+        // Storage object may already be deleted; don't block record cleanup.
+        console.warn('Failed to delete transformation image storage object', {
+          imageId: args.imageId,
+          imageStorageId: existing.imageStorageId,
+          error,
+        })
+      }
     }
 
     await ctx.db.delete(args.imageId)

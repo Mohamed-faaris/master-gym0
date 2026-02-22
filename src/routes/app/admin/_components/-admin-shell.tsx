@@ -352,9 +352,9 @@ export function AdminShell() {
       <div className="min-h-screen bg-background text-foreground">
         <div className="mx-auto max-w-screen-sm pb-24">
           <header className="space-y-2 border-b border-border px-4 py-5">
-            <p className="text-[0.65rem] uppercase tracking-[0.3em] text-muted-foreground">
+            {/* <p className="text-[0.65rem] uppercase tracking-[0.3em] text-muted-foreground">
               Super Admin Console · {todayLabel}
-            </p>
+            </p> */}
             <div className="flex items-center justify-between gap-3">
               <h1 className="text-2xl font-semibold">Administration</h1>
               {/* <Button asChild variant="outline" size="sm">

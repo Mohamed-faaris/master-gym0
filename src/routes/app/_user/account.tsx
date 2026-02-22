@@ -125,11 +125,20 @@ function RouteComponent() {
   return (
     <div className="p-4 space-y-6">
       {/* Header */}
-      <div className="pt-4">
-        <h1 className="text-2xl font-bold">Account</h1>
-        <p className="text-muted-foreground">
-          Manage your profile and settings
-        </p>
+      <div className="pt-4 flex items-start justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-bold">Account</h1>
+          <p className="text-muted-foreground">
+            Manage your profile and settings
+          </p>
+        </div>
+        <button
+          className="shrink-0 rounded-lg border p-2 hover:bg-muted/50 transition-colors"
+          type="button"
+          aria-label="Notifications"
+        >
+          <Bell className="w-4 h-4 text-primary" />
+        </button>
       </div>
 
       {/* Profile Card */}
@@ -216,29 +225,6 @@ function RouteComponent() {
           </Card>
         </Link>
       </div>
-
-      {/* Settings */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Settings</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-2">
-          <button className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-muted/50 transition-colors">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                <Bell className="w-5 h-5 text-primary" />
-              </div>
-              <div className="text-left">
-                <div className="font-medium">Notifications</div>
-                <div className="text-xs text-muted-foreground">
-                  Manage notification preferences
-                </div>
-              </div>
-            </div>
-            <ChevronRight className="w-5 h-5 text-muted-foreground" />
-          </button>
-        </CardContent>
-      </Card>
 
       {/* About Section */}
       <Card>

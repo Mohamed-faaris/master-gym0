@@ -345,17 +345,30 @@ function ProfileImagesPage() {
               onClick={async () => {
                 try {
                   if (editingImageId) {
-                    await updateTransformationImage({
+                    const updatePayload: {
+                      imageId: any
+                      title?: string
+                      imageStorageId?: any
+                    } = {
                       imageId: editingImageId as any,
                       title: imageTitle || undefined,
-                      imageStorageId: transformationStorageId as any,
-                    })
+                    }
+                    if (transformationStorageId) {
+                      updatePayload.imageStorageId = transformationStorageId as any
+                    }
+
+                    await updateTransformationImage(updatePayload)
                     await setTransformationImageStatus({
                       imageId: editingImageId as any,
                       status: imageStatus,
                     })
                     toast.success('Image updated')
                   } else {
+                    if (!transformationStorageId) {
+                      toast.error('Please upload an image first')
+                      return
+                    }
+
                     const nextOrder =
                       sortedImages.length > 0
                         ? Math.max(...sortedImages.map((item) => item.order)) + 1
