@@ -179,7 +179,7 @@ function TrainerWorkoutSessionRoute() {
               ? ex.sets.map((set, setIdx) => ({
                   reps: set.reps,
                   weight: set.weight,
-                  notes: set.notes,
+                  restTime: set.restTime,
                   completed: completedSets.has(`${idx}-${setIdx}`),
                 }))
               : Array.from({ length: setCount }).map((_, setIdx) => ({
@@ -255,7 +255,7 @@ function TrainerWorkoutSessionRoute() {
               ? ex.sets.map((set, setIdx) => ({
                   reps: set.reps,
                   weight: set.weight,
-                  notes: set.notes,
+                  restTime: set.restTime,
                   completed: newCompleted.has(`${idx}-${setIdx}`),
                 }))
               : Array.from({ length: setTotal }).map((_, setIdx) => ({
@@ -476,9 +476,9 @@ function TrainerWorkoutSessionRoute() {
                   const weightLabel = setData?.weight
                     ? `${setData.weight} lbs`
                     : 'Weight TBD'
-                  const notesLabel = setData?.notes?.trim()
-                    ? setData.notes
-                    : 'No notes'
+                  const restTimeLabel = setData?.restTime
+                    ? `${setData.restTime}s rest`
+                    : ''
 
                   return (
                     <Card
@@ -531,7 +531,7 @@ function TrainerWorkoutSessionRoute() {
                                   isCompleted ? 'line-through' : ''
                                 }`}
                               >
-                                {notesLabel}
+                                {restTimeLabel}
                               </div>
                             </div>
                           </div>

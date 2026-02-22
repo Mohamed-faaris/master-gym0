@@ -529,9 +529,9 @@ function RouteComponent() {
                                   </span>
                                   <span>{set.reps} reps</span>
                                   {set.weight && <span>@ {set.weight}kg</span>}
-                                  {set.notes && (
-                                    <span className="text-muted-foreground italic">
-                                      ({set.notes})
+                                  {set.restTime && (
+                                    <span className="text-muted-foreground">
+                                      ({set.restTime}s rest)
                                     </span>
                                   )}
                                 </div>

@@ -72,7 +72,7 @@ export const startSession = mutation({
           sets: exercise.sets.map((set) => ({
             reps: set.reps,
             weight: set.weight,
-            notes: set.notes,
+            restTime: set.restTime,
             completed: false,
           })),
         }))

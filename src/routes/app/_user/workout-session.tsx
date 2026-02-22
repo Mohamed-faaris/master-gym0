@@ -211,7 +211,7 @@ export function WorkoutSessionRouteComponent() {
     exercises: Array<{
       exerciseName: string
       noOfSets?: number
-      sets?: Array<{ reps?: number; weight?: number; notes?: string }>
+      sets?: Array<{ reps?: number; weight?: number; restTime?: number }>
     }>,
   ) =>
     exercises.map((ex, idx) => {
@@ -221,7 +221,7 @@ export function WorkoutSessionRouteComponent() {
           ? ex.sets.map((set, setIdx) => ({
               reps: set.reps,
               weight: set.weight,
-              notes: set.notes,
+              restTime: set.restTime,
               completed: updatedSets.has(`${idx}-${setIdx}`),
             }))
           : Array.from({ length: exerciseSetCount }).map((_, setIdx) => ({
@@ -384,7 +384,7 @@ export function WorkoutSessionRouteComponent() {
 
   const getSetDetails = (
     exercise: {
-      sets?: Array<{ reps?: number; weight?: number; notes?: string }>
+      sets?: Array<{ reps?: number; weight?: number; restTime?: number }>
     },
     setIndex: number,
   ) => {
@@ -393,7 +393,7 @@ export function WorkoutSessionRouteComponent() {
     return {
       repsLabel: setData?.reps ? `${setData.reps} reps` : 'Reps TBD',
       weightLabel: setData?.weight ? `${setData.weight} lbs` : 'Weight TBD',
-      notesLabel: setData?.notes?.trim() ? setData.notes : '',
+      restTimeLabel: setData?.restTime ? `${setData.restTime}s rest` : '',
     }
   }
 
@@ -445,7 +445,7 @@ export function WorkoutSessionRouteComponent() {
                   (_, setIndex) => {
                     const key = `${exerciseIndex}-${setIndex}`
                     const isCompleted = completedSets.has(key)
-                    const { repsLabel, weightLabel, notesLabel } =
+                    const { repsLabel, weightLabel, restTimeLabel } =
                       getSetDetails(exercise, setIndex)
                     return (
                       <Card
@@ -499,7 +499,7 @@ export function WorkoutSessionRouteComponent() {
                                   isCompleted ? 'line-through' : ''
                                 }`}
                               >
-                                {notesLabel}
+                                {restTimeLabel}
                               </div>
                             </div>
                           </div>

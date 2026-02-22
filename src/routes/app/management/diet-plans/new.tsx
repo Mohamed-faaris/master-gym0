@@ -22,6 +22,9 @@ import { Link } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/app/management/diet-plans/new')({
   component: RouteComponent,
+  validateSearch: (search: Record<string, unknown>) => ({
+    step: typeof search.step === 'number' ? search.step : 0,
+  }),
 })
 
 type MealEntry = {
@@ -67,11 +70,12 @@ const steps = [
 const privilegedRoles = new Set(['trainer', 'admin'])
 
 function RouteComponent() {
-  const navigate = useNavigate()
+  const navigate = useNavigate({ from: '/app/management/diet-plans/new' })
   const { user, isLoading } = useAuth()
   const createDietPlan = useConvexMutation(api.dietPlans.createDietPlan)
 
-  const [stepIndex, setStepIndex] = useState(0)
+  const search = Route.useSearch()
+  const stepIndex = Math.min(Math.max(search.step, 0), steps.length - 1)
   const [planName, setPlanName] = useState('')
   const [planDescription, setPlanDescription] = useState('')
   const [goal, setGoal] = useState('')
@@ -112,7 +116,7 @@ function RouteComponent() {
       return
     }
     if (!privilegedRoles.has(user.role)) {
-      navigate({ to: '/app/_user' })
+      navigate({ to: '/app/management' })
     }
   }, [user, isLoading, navigate])
 
@@ -177,7 +181,7 @@ function RouteComponent() {
     setIsSubmitting(true)
 
     try {
-      const dietPlanId = await createDietPlan({
+      await createDietPlan({
         name: planName,
         description: planDescription,
         goal: goal || undefined,
@@ -601,7 +605,14 @@ function RouteComponent() {
           <Button
             variant="outline"
             className="flex-1"
-            onClick={() => setStepIndex((prev) => Math.max(prev - 1, 0))}
+            onClick={() =>
+              navigate({
+                search: (prev) => ({
+                  ...prev,
+                  step: Math.max(stepIndex - 1, 0),
+                }),
+              })
+            }
             disabled={isFirstStep || isSubmitting}
           >
             <ChevronLeft className="mr-2 h-4 w-4" />
@@ -613,7 +624,12 @@ function RouteComponent() {
               if (isLastStep) {
                 handleSubmit()
               } else {
-                setStepIndex((prev) => Math.min(prev + 1, steps.length - 1))
+                navigate({
+                  search: (prev) => ({
+                    ...prev,
+                    step: Math.min(stepIndex + 1, steps.length - 1),
+                  }),
+                })
               }
             }}
             disabled={isSubmitting}

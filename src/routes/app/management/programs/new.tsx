@@ -30,6 +30,9 @@ import {
 
 export const Route = createFileRoute('/app/management/programs/new')({
   component: RouteComponent,
+  validateSearch: (search: Record<string, unknown>) => ({
+    step: typeof search.step === 'number' ? search.step : 0,
+  }),
 })
 
 type SetEntry = {
@@ -170,7 +173,7 @@ function RouteComponent() {
 }
 
 export function ProgramFormScreen({ mode, programId }: ProgramFormScreenProps) {
-  const navigate = useNavigate()
+  const navigate = useNavigate({ from: '/app/management/programs/new' })
   const { user, isLoading } = useAuth()
   const createTrainingPlan = useConvexMutation(
     api.trainingPlans.createTrainingPlan,
@@ -183,7 +186,8 @@ export function ProgramFormScreen({ mode, programId }: ProgramFormScreenProps) {
     mode === 'edit' && programId ? { trainingPlanId: programId } : 'skip',
   )
 
-  const [stepIndex, setStepIndex] = useState(0)
+  const search = Route.useSearch()
+  const stepIndex = Math.min(Math.max(search.step, 0), steps.length - 1)
   const [planName, setPlanName] = useState('')
   const [planDescription, setPlanDescription] = useState('')
   const [durationWeeks, setDurationWeeks] = useState('4')
@@ -1064,7 +1068,14 @@ export function ProgramFormScreen({ mode, programId }: ProgramFormScreenProps) {
           <Button
             variant="outline"
             className="flex-1"
-            onClick={() => setStepIndex((prev) => Math.max(prev - 1, 0))}
+            onClick={() =>
+              navigate({
+                search: (prev) => ({
+                  ...prev,
+                  step: Math.max(stepIndex - 1, 0),
+                }),
+              })
+            }
             disabled={isFirstStep || isSubmitting}
           >
             <ChevronLeft className="mr-2 h-4 w-4" />
@@ -1076,7 +1087,12 @@ export function ProgramFormScreen({ mode, programId }: ProgramFormScreenProps) {
               if (isLastStep) {
                 handleSubmit()
               } else {
-                setStepIndex((prev) => Math.min(prev + 1, steps.length - 1))
+                navigate({
+                  search: (prev) => ({
+                    ...prev,
+                    step: Math.min(stepIndex + 1, steps.length - 1),
+                  }),
+                })
               }
             }}
             disabled={isSubmitting}

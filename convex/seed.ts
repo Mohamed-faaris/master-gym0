@@ -339,16 +339,12 @@ export const seedDatabase = mutation({
             {
               exerciseName: 'Light Cardio - Treadmill',
               noOfSets: 1,
-              sets: [
-                { notes: '30 minutes at moderate pace' },
-              ],
+              sets: [{ restTime: 60 }],
             },
             {
               exerciseName: 'Stretching & Flexibility',
               noOfSets: 1,
-              sets: [
-                { notes: '20 minutes full body stretch' },
-              ],
+              sets: [{ restTime: 60 }],
             },
           ],
         },
@@ -371,7 +367,7 @@ export const seedDatabase = mutation({
             {
               exerciseName: 'Treadmill Running',
               noOfSets: 1,
-              sets: [{ notes: '30 minutes steady state' }],
+              sets: [{ restTime: 60 }],
             },
             {
               exerciseName: 'Burpees',
@@ -387,20 +383,16 @@ export const seedDatabase = mutation({
               exerciseName: 'Walking Lunges',
               noOfSets: 4,
               sets: [
-                { reps: 20, notes: 'Each leg' },
-                { reps: 20, notes: 'Each leg' },
-                { reps: 20, notes: 'Each leg' },
-                { reps: 20, notes: 'Each leg' },
+                { reps: 20, restTime: 60 },
+                { reps: 20, restTime: 60 },
+                { reps: 20, restTime: 60 },
+                { reps: 20, restTime: 60 },
               ],
             },
             {
               exerciseName: 'Plank',
               noOfSets: 3,
-              sets: [
-                { notes: '30 seconds' },
-                { notes: '45 seconds' },
-                { notes: '60 seconds' },
-              ],
+              sets: [{ restTime: 30 }, { restTime: 45 }, { restTime: 60 }],
             },
           ],
         },
@@ -410,12 +402,12 @@ export const seedDatabase = mutation({
             {
               exerciseName: 'Cycling',
               noOfSets: 1,
-              sets: [{ notes: '40 minutes moderate intensity' }],
+              sets: [{ restTime: 60 }],
             },
             {
               exerciseName: 'Jump Rope',
               noOfSets: 3,
-              sets: [{ notes: '2 minutes' }, { notes: '2 minutes' }, { notes: '2 minutes' }],
+              sets: [{ restTime: 60 }, { restTime: 60 }, { restTime: 60 }],
             },
           ],
         },
@@ -426,9 +418,9 @@ export const seedDatabase = mutation({
               exerciseName: 'Bulgarian Split Squat',
               noOfSets: 3,
               sets: [
-                { reps: 12, weight: 20, notes: 'Each leg' },
-                { reps: 10, weight: 25, notes: 'Each leg' },
-                { reps: 8, weight: 30, notes: 'Each leg' },
+                { reps: 12, weight: 20, restTime: 60 },
+                { reps: 10, weight: 25, restTime: 60 },
+                { reps: 8, weight: 30, restTime: 60 },
               ],
             },
             {
@@ -448,7 +440,7 @@ export const seedDatabase = mutation({
             {
               exerciseName: 'Stair Climber',
               noOfSets: 1,
-              sets: [{ notes: '20 minutes' }],
+              sets: [{ restTime: 60 }],
             },
             {
               exerciseName: 'Mountain Climbers',
@@ -478,12 +470,12 @@ export const seedDatabase = mutation({
             {
               exerciseName: 'Long Steady Run',
               noOfSets: 1,
-              sets: [{ notes: '45-60 minutes easy pace' }],
+              sets: [{ restTime: 60 }],
             },
             {
               exerciseName: 'Yoga & Recovery',
               noOfSets: 1,
-              sets: [{ notes: '20 minutes' }],
+              sets: [{ restTime: 60 }],
             },
           ],
         },
@@ -520,8 +512,7 @@ export const seedDatabase = mutation({
       {
         mealType: 'middaySnack',
         title: 'Grilled Chicken Salad',
-        description:
-          'Grilled chicken breast, mixed greens, olive oil dressing',
+        description: 'Grilled chicken breast, mixed greens, olive oil dressing',
         calories: 450,
       },
       {
@@ -968,8 +959,6 @@ export const seedDatabase = mutation({
       calories: 350,
       createdAt: now - 2 * 24 * 60 * 60 * 1000 - 12 * 60 * 60 * 1000,
     })
-
-
 
     // Create weight logs
     // Client 1 (Priya Selvaraj) - Weight loss journey
