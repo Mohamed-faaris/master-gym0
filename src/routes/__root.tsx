@@ -69,6 +69,14 @@ function RootDocument({ children }: { children: React.ReactNode }) {
   }, [])
 
   React.useEffect(() => {
+    if (typeof window === 'undefined') return
+    if (!('serviceWorker' in navigator)) return
+    if (Capacitor.getPlatform() !== 'web') return
+
+    void navigator.serviceWorker.register('/sw.js')
+  }, [])
+
+  React.useEffect(() => {
     if (Capacitor.getPlatform() !== 'android') {
       return
     }
