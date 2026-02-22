@@ -27,21 +27,27 @@ export function ActivityTimeCard() {
   const [activeTab, setActiveTab] = useState<TabType>('duration')
   const [timeRange, setTimeRange] = useState<TimeRange>('thisWeek')
 
-  // Fetch workout sessions
+  // Fetch workout sessions (for duration)
   const sessions = useQuery(
     api.workoutSessions.getSessionHistory,
     user ? { userId: user._id, limit: 100 } : 'skip',
+  )
+  // Fetch diet logs (for calories taken)
+  const dietLogs = useQuery(
+    api.dietLogs.getDietLogsByUser,
+    user ? { userId: user._id, limit: 200 } : 'skip',
   )
 
   // Debug: inspect Convex data at runtime
   if (import.meta.env.DEV) {
     console.log('[ActivityTimeCard] user:', user)
     console.log('[ActivityTimeCard] sessions:', sessions)
+    console.log('[ActivityTimeCard] dietLogs:', dietLogs)
   }
 
   // Calculate chart data based on time range
   const chartData = useMemo(() => {
-    if (!sessions) return []
+    if (!sessions && !dietLogs) return []
 
     const now = new Date()
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
@@ -59,7 +65,7 @@ export function ActivityTimeCard() {
     const weekEnd = new Date(weekStart)
     weekEnd.setDate(weekStart.getDate() + 7)
 
-    // Group sessions by day
+    // Group duration and calories by day
     const dayData: Record<number, { duration: number; calories: number }> = {
       0: { duration: 0, calories: 0 },
       1: { duration: 0, calories: 0 },
@@ -70,24 +76,31 @@ export function ActivityTimeCard() {
       6: { duration: 0, calories: 0 },
     }
 
-    sessions.forEach((session) => {
-      if (session.startTime) {
-        const sessionDate = new Date(session.startTime)
-        if (sessionDate >= weekStart && sessionDate < weekEnd) {
-          const day = sessionDate.getDay()
-          const endTime = session.endTime ?? session.updatedAt ?? Date.now()
-          const durationSeconds = Math.max(0, (endTime - session.startTime) / 1000)
-          if (import.meta.env.DEV) {
-            console.log('[ActivityTimeCard] session duration seconds:', {
-              sessionId: session._id,
-              startTime: session.startTime,
-              endTime,
-              durationSeconds,
-            })
-          }
-          dayData[day].duration += durationSeconds
-          dayData[day].calories += session.totalCaloriesBurned || 0
+    sessions?.forEach((session) => {
+      if (!session.startTime) return
+
+      const sessionDate = new Date(session.startTime)
+      if (sessionDate >= weekStart && sessionDate < weekEnd) {
+        const day = sessionDate.getDay()
+        const endTime = session.endTime ?? session.updatedAt ?? Date.now()
+        const durationSeconds = Math.max(0, (endTime - session.startTime) / 1000)
+        if (import.meta.env.DEV) {
+          console.log('[ActivityTimeCard] session duration seconds:', {
+            sessionId: session._id,
+            startTime: session.startTime,
+            endTime,
+            durationSeconds,
+          })
         }
+        dayData[day].duration += durationSeconds
+      }
+    })
+
+    dietLogs?.forEach((log) => {
+      const logDate = new Date(log.createdAt)
+      if (logDate >= weekStart && logDate < weekEnd) {
+        const day = logDate.getDay()
+        dayData[day].calories += log.calories || 0
       }
     })
 
@@ -97,7 +110,7 @@ export function ActivityTimeCard() {
       duration: Math.ceil(dayData[index].duration / 60), // seconds -> minutes
       calories: dayData[index].calories,
     }))
-  }, [sessions, timeRange])
+  }, [sessions, dietLogs, timeRange])
 
   const totalDuration = chartData.reduce((sum, item) => sum + item.duration, 0)
   const hours = Math.floor(totalDuration / 60)
@@ -203,7 +216,7 @@ export function ActivityTimeCard() {
               : 'border-b-2 border-transparent text-muted-foreground hover:text-foreground'
           }`}
         >
-          <span className="text-sm font-medium">Calories</span>
+          <span className="text-sm font-medium">Calories Taken</span>
         </button>
       </div>
     </div>

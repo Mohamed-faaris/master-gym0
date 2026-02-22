@@ -333,7 +333,7 @@ function RouteComponent() {
         </CardHeader>
         <CardContent className="space-y-6">
           <div>
-            <h3 className="text-sm font-medium mb-3">Calories Burned</h3>
+            <h3 className="text-sm font-medium mb-3">Calories Taken</h3>
             <div className="flex items-end justify-between h-32 gap-2">
               {weeklyStats.days.map(({ day, calories }) => {
                 const maxCalories = Math.max(
