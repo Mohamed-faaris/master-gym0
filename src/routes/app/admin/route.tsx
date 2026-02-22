@@ -1,13 +1,7 @@
-import { Outlet, createFileRoute } from '@tanstack/react-router'
+import { createFileRoute } from '@tanstack/react-router'
+
+import { AdminShell } from './_components/-admin-shell'
 
 export const Route = createFileRoute('/app/admin')({
-  component: SuperAdminLayout,
+  component: AdminShell,
 })
-
-function SuperAdminLayout() {
-  return (
-    <div className="min-h-screen bg-background">
-      <Outlet />
-    </div>
-  )
-}
