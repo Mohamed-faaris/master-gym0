@@ -8,14 +8,17 @@
  * @module
  */
 
+import type * as aboutContent from "../aboutContent.js";
 import type * as clientInsights from "../clientInsights.js";
 import type * as dietLogs from "../dietLogs.js";
 import type * as dietPlans from "../dietPlans.js";
 import type * as files from "../files.js";
 import type * as gallery from "../gallery.js";
 import type * as seed from "../seed.js";
+import type * as successStories from "../successStories.js";
 import type * as todos from "../todos.js";
 import type * as trainingPlans from "../trainingPlans.js";
+import type * as transformationImages from "../transformationImages.js";
 import type * as users from "../users.js";
 import type * as weightLogs from "../weightLogs.js";
 import type * as workoutSessions from "../workoutSessions.js";
@@ -27,14 +30,17 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  aboutContent: typeof aboutContent;
   clientInsights: typeof clientInsights;
   dietLogs: typeof dietLogs;
   dietPlans: typeof dietPlans;
   files: typeof files;
   gallery: typeof gallery;
   seed: typeof seed;
+  successStories: typeof successStories;
   todos: typeof todos;
   trainingPlans: typeof trainingPlans;
+  transformationImages: typeof transformationImages;
   users: typeof users;
   weightLogs: typeof weightLogs;
   workoutSessions: typeof workoutSessions;

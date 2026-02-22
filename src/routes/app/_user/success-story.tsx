@@ -1,37 +1,54 @@
 import { Link, createFileRoute } from '@tanstack/react-router'
-import { ArrowLeft, CalendarDays, Quote, Sparkles, Trophy } from 'lucide-react'
+import { useQuery } from 'convex/react'
+import { ArrowLeft, CalendarDays, Quote } from 'lucide-react'
+import { api } from 'convex/_generated/api'
 import { Card, CardContent } from '@/components/ui/card'
 
 export const Route = createFileRoute('/app/_user/success-story')({
+  validateSearch: (search: Record<string, unknown>) => ({
+    slug: typeof search.slug === 'string' ? search.slug : undefined,
+  }),
   component: RouteComponent,
 })
 
-const storyHighlights = [
-  {
-    title: '12 Week Cut',
-    summary:
-      'A structured fat-loss block with progressive resistance and steady nutrition control.',
-  },
-  {
-    title: 'Muscle Gain Block',
-    summary:
-      'Lean bulk phases focused on strength milestones and form-first training quality.',
-  },
-  {
-    title: 'Post Pregnancy Rebuild',
-    summary:
-      'A careful return-to-strength system with coaching support and flexible progress checks.',
-  },
-]
-
-const milestones = [
-  'Master Fitness opened on 22 Aug 2022.',
-  'Expanded to 3 active branches across the city.',
-  'Built specialized coaching tracks for women, working professionals, and beginners.',
-  'Created a hybrid coaching model: in-gym monitoring + app-based progress tracking.',
-]
-
 function RouteComponent() {
+  const { slug } = Route.useSearch()
+  const activeStories = useQuery(api.successStories.listActiveStories)
+
+  const selectedStory =
+    (slug
+      ? activeStories?.find((story) => story.slug === slug)
+      : undefined) ?? activeStories?.[0]
+
+  if (!activeStories) {
+    return (
+      <div className="px-4 pb-8 pt-5">
+        <Card>
+          <CardContent className="py-8 text-center text-sm text-muted-foreground">
+            Loading story...
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
+  if (!selectedStory) {
+    return (
+      <div className="px-4 pb-8 pt-5">
+        <Card>
+          <CardContent className="space-y-4 py-8 text-center">
+            <p className="text-sm text-muted-foreground">
+              No success stories are published yet.
+            </p>
+            <Link to="/app/account" className="text-sm font-medium text-primary">
+              Back to account
+            </Link>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
   return (
     <div className="px-4 pb-8 pt-5">
       <article className="overflow-hidden rounded-2xl border bg-card shadow-sm">
@@ -50,63 +67,33 @@ function RouteComponent() {
               <CalendarDays className="h-3.5 w-3.5" />
               Published for members
             </div>
-            <h1 className="text-3xl font-bold tracking-tight">Success Story</h1>
+            <h1 className="text-3xl font-bold tracking-tight">{selectedStory.title}</h1>
             <p className="max-w-xl text-sm leading-relaxed text-muted-foreground">
-              The Master Fitness journey from one focused gym floor to a
-              complete coaching ecosystem for transformation, consistency, and
-              long-term health.
+              {selectedStory.paragraph}
             </p>
           </div>
         </header>
 
         <div className="space-y-8 px-5 py-6">
-          <section className="space-y-4 text-sm leading-7 text-muted-foreground">
-            <p>
-              Master Fitness began with one simple idea: most people do not fail
-              because of effort, they fail because they do not have a clear
-              system. From day one, the focus has been building structure that
-              members can actually follow.
-            </p>
-            <p>
-              Under CEO Nagaraj and the coaching team, each member journey is
-              tracked with purpose. Strength, fat loss, mobility, recovery, and
-              food habits are reviewed together so progress stays realistic and
-              sustainable.
-            </p>
-          </section>
+          {selectedStory.imageUrl ? (
+            <section className="overflow-hidden rounded-xl border">
+              <img
+                src={selectedStory.imageUrl}
+                alt={selectedStory.title}
+                className="h-56 w-full object-cover"
+              />
+            </section>
+          ) : null}
 
           <section>
-            <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold">
-              <Trophy className="h-4 w-4 text-primary" />
-              Key Milestones
-            </h2>
+            <h2 className="mb-4 text-lg font-semibold">Key Points</h2>
             <div className="space-y-3">
-              {milestones.map((item) => (
-                <Card key={item}>
+              {selectedStory.points.map((point) => (
+                <Card key={point}>
                   <CardContent className="px-4 py-3 text-sm text-muted-foreground">
-                    {item}
+                    {point.startsWith('•') ? point : `• ${point}`}
                   </CardContent>
                 </Card>
-              ))}
-            </div>
-          </section>
-
-          <section>
-            <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold">
-              <Sparkles className="h-4 w-4 text-chart-2" />
-              Featured Transformations
-            </h2>
-            <div className="space-y-4">
-              {storyHighlights.map((story) => (
-                <div
-                  key={story.title}
-                  className="rounded-xl border bg-muted/20 p-4"
-                >
-                  <h3 className="text-base font-semibold">{story.title}</h3>
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    {story.summary}
-                  </p>
-                </div>
               ))}
             </div>
           </section>
@@ -115,8 +102,7 @@ function RouteComponent() {
             <div className="flex items-start gap-3">
               <Quote className="mt-1 h-4 w-4 shrink-0 text-primary" />
               <p className="text-sm italic text-muted-foreground">
-                Transformation is not a 30-day event. It is a repeatable
-                routine, supported by coaching, accountability, and patience.
+                Consistency turns training into transformation.
               </p>
             </div>
           </section>

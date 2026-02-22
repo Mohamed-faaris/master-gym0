@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from 'react'
 import { useMutation, useQuery } from 'convex/react'
 import { useNavigate } from '@tanstack/react-router'
 import {
-  AlertTriangle,
   Calendar,
   LogOut,
   Mail,
@@ -61,6 +60,10 @@ function InfoRow({
 export function ProfileForm({ userId, onSignOut }: ProfileFormProps) {
   const navigate = useNavigate()
   const profile = useQuery(api.users.getUserWithMeta, { userId })
+  const aboutPreview = useQuery(api.aboutContent.getActiveAbout)
+  const transformationPreview = useQuery(
+    api.transformationImages.listActiveTransformationImages,
+  )
   const updateUser = useMutation(api.users.updateUser)
   const updateUserMeta = useMutation(api.users.updateUserMeta)
 
@@ -68,8 +71,6 @@ export function ProfileForm({ userId, onSignOut }: ProfileFormProps) {
   const [email, setEmail] = useState('')
   const [phoneNumber, setPhoneNumber] = useState('')
   const [address, setAddress] = useState('')
-  const [emergencyContactName, setEmergencyContactName] = useState('')
-  const [emergencyContactPhone, setEmergencyContactPhone] = useState('')
   const [isSaving, setIsSaving] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
 
@@ -79,8 +80,6 @@ export function ProfileForm({ userId, onSignOut }: ProfileFormProps) {
     setEmail(profile.email ?? '')
     setPhoneNumber(profile.phoneNumber ?? '')
     setAddress(profile.meta?.address ?? '')
-    setEmergencyContactName(profile.meta?.emergencyContactName ?? '')
-    setEmergencyContactPhone(profile.meta?.emergencyContactPhone ?? '')
   }, [profile])
 
   const canSave = useMemo(() => {
@@ -93,8 +92,6 @@ export function ProfileForm({ userId, onSignOut }: ProfileFormProps) {
     setEmail(profile.email ?? '')
     setPhoneNumber(profile.phoneNumber ?? '')
     setAddress(profile.meta?.address ?? '')
-    setEmergencyContactName(profile.meta?.emergencyContactName ?? '')
-    setEmergencyContactPhone(profile.meta?.emergencyContactPhone ?? '')
   }
 
   const handleSave = async () => {
@@ -112,8 +109,6 @@ export function ProfileForm({ userId, onSignOut }: ProfileFormProps) {
       await updateUserMeta({
         userId,
         address: address.trim() || undefined,
-        emergencyContactName: emergencyContactName.trim() || undefined,
-        emergencyContactPhone: emergencyContactPhone.trim() || undefined,
       })
 
       setIsEditing(false)
@@ -260,39 +255,39 @@ export function ProfileForm({ userId, onSignOut }: ProfileFormProps) {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">Emergency Contact</CardTitle>
+          <CardTitle className="text-lg">About Us Preview</CardTitle>
           <CardDescription>
-            Critical contact details used for urgent situations.
+            Live preview from active content.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
-          {isEditing ? (
-            <div className="grid gap-3">
-              <Input
-                placeholder="Emergency contact name"
-                value={emergencyContactName}
-                onChange={(e) => setEmergencyContactName(e.target.value)}
-              />
-              <Input
-                placeholder="Emergency contact phone"
-                value={emergencyContactPhone}
-                onChange={(e) => setEmergencyContactPhone(e.target.value)}
-              />
+          <div className="rounded-lg border border-border bg-background px-3 py-3">
+            <p className="text-sm font-medium">
+              {aboutPreview?.title ?? 'No active About Us yet'}
+            </p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              {aboutPreview?.paragraph ?? 'Publish About Us content to preview here.'}
+            </p>
+          </div>
+          <div className="overflow-x-auto pb-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+            <div className="flex gap-2 pr-1">
+              {(transformationPreview ?? []).map((image, index) => (
+                <div key={image._id} className="shrink-0 overflow-hidden rounded-md border">
+                  <img
+                    src={image.imageUrl}
+                    alt={`Preview ${index + 1}`}
+                    className="h-24 w-24 object-cover"
+                    loading="lazy"
+                  />
+                </div>
+              ))}
+              {!transformationPreview?.length ? (
+                <div className="rounded-md border px-3 py-6 text-xs text-muted-foreground">
+                  No active transformation images.
+                </div>
+              ) : null}
             </div>
-          ) : (
-            <>
-              <InfoRow
-                icon={AlertTriangle}
-                label="Contact Name"
-                value={valueOrDash(emergencyContactName)}
-              />
-              <InfoRow
-                icon={Phone}
-                label="Contact Phone"
-                value={valueOrDash(emergencyContactPhone)}
-              />
-            </>
-          )}
+          </div>
         </CardContent>
       </Card>
     </section>

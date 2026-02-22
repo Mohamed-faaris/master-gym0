@@ -1144,6 +1144,103 @@ export const seedDatabase = mutation({
       createdAt: now - 1 * 24 * 60 * 60 * 1000,
     })
 
+    // Seed dynamic content: About Us
+    await ctx.db.insert('aboutContent', {
+      title: 'About Us',
+      subtitle: 'Master Fitness',
+      paragraph:
+        'Master Fitness started on 22.08.2022 and continues to grow. We currently have 3 branches, including one dedicated to women.',
+      branchNames: ['Main Branch', 'West Branch', "Women's Exclusive Branch"],
+      achievements: [
+        '17 years in sports field',
+        'Weight lifting (University medal bronze)',
+        'Powerlifting gold medal',
+        "Mr Tamil Nadu Men's Physique (Gold)",
+        'VNR bodybuilding (Silver)',
+        'Mr South India / Mr India participation',
+        'MMA: Silambam national & international gold',
+        'International referee and Tamil Nadu team coach',
+        '10 years in fitness coaching',
+      ],
+      founderName: 'CEO Nagaraj',
+      founderRole: 'Founder & Head Coach',
+      founderBio:
+        '15+ years of fitness coaching with expertise in strength training and nutrition.',
+      status: 'active',
+      createdAt: now,
+      updatedAt: now,
+    })
+
+    // Seed dynamic content: Success Stories (simple blog structure)
+    await ctx.db.insert('successStories', {
+      slug: '12-week-cut',
+      title: '12 Week Cut',
+      paragraph:
+        'A focused 12-week cut with progressive training and consistent nutrition tracking.',
+      points: [
+        '• Started with strength baseline testing',
+        '• Maintained high-protein meal structure',
+        '• Weekly check-ins improved consistency',
+      ],
+      status: 'active',
+      order: 1,
+      createdAt: now,
+      updatedAt: now,
+    })
+
+    await ctx.db.insert('successStories', {
+      slug: 'muscle-gain',
+      title: 'Muscle Gain',
+      paragraph:
+        'Lean muscle gain achieved through overload progression and recovery-focused routines.',
+      points: [
+        '• Increased training volume block by block',
+        '• Technique-first compound lifts',
+        '• Recovery and sleep were tracked weekly',
+      ],
+      status: 'active',
+      order: 2,
+      createdAt: now,
+      updatedAt: now,
+    })
+
+    await ctx.db.insert('successStories', {
+      slug: 'post-pregnancy',
+      title: 'Post Pregnancy',
+      paragraph:
+        'A safe and supportive return-to-fitness roadmap built around gradual strength rebuilding.',
+      points: [
+        '• Mobility and core reactivation first',
+        '• Low-impact progression with supervision',
+        '• Measurable confidence and strength gains',
+      ],
+      status: 'active',
+      order: 3,
+      createdAt: now,
+      updatedAt: now,
+    })
+
+    // Seed dynamic content: transformation carousel images (existing static assets)
+    const transformationUrls = [
+      '/transformation/0.jpg',
+      '/transformation/1.jpg',
+      '/transformation/2.jpg',
+      '/transformation/3.jpg',
+      '/transformation/4.jpg',
+      '/transformation/5.jpg',
+    ]
+
+    for (let index = 0; index < transformationUrls.length; index++) {
+      await ctx.db.insert('transformationImages', {
+        title: `Transformation ${index + 1}`,
+        imageUrl: transformationUrls[index],
+        order: index + 1,
+        status: 'active',
+        createdAt: now,
+        updatedAt: now,
+      })
+    }
+
     return {
       success: true,
       message: 'Database seeded successfully',
@@ -1154,6 +1251,9 @@ export const seedDatabase = mutation({
         dietPlans: 2,
         dietLogs: 40,
         weightLogs: 30,
+        aboutContent: 1,
+        successStories: 3,
+        transformationImages: 6,
       },
     }
   },
@@ -1225,6 +1325,10 @@ export const clearDatabase = mutation({
       'weightLogs',
       'trainingPlans',
       'dietPlans',
+      'gallery',
+      'aboutContent',
+      'successStories',
+      'transformationImages',
     ] as const
 
     let totalDeleted = 0

@@ -32,12 +32,22 @@ export const Route = createFileRoute('/app/_user/account')({
   component: RouteComponent,
 })
 
+const STORY_TILE_COLORS = [
+  'from-chart-1/20 to-chart-1/5',
+  'from-chart-2/20 to-chart-2/5',
+  'from-chart-3/20 to-chart-3/5',
+] as const
+
 function RouteComponent() {
   const { user, signOut, deleteAt: expiresIn } = useAuth()
   const navigate = useNavigate()
   const updateUser = useMutation(api.users.updateUser)
   const [isEditDrawerOpen, setIsEditDrawerOpen] = useState(false)
   const [isAboutDrawerOpen, setIsAboutDrawerOpen] = useState(false)
+  const [fullScreenImage, setFullScreenImage] = useState<{
+    url: string
+    alt: string
+  } | null>(null)
   const [editName, setEditName] = useState('')
   const [editEmail, setEditEmail] = useState('')
 
@@ -51,6 +61,11 @@ function RouteComponent() {
   const workoutStats = useQuery(
     api.workoutSessions.getSessionStats,
     user ? { userId: user._id } : 'skip',
+  )
+  const about = useQuery(api.aboutContent.getActiveAbout)
+  const activeStories = useQuery(api.successStories.listActiveStories)
+  const activeTransformationImages = useQuery(
+    api.transformationImages.listActiveTransformationImages,
   )
 
   const handleLogout = () => {
@@ -75,46 +90,6 @@ function RouteComponent() {
     typeof expiresIn === 'number'
       ? Math.max(0, Math.ceil((expiresIn - Date.now()) / (1000 * 60 * 60 * 24)))
       : null
-
-  const ceoAchievements = [
-    '17 years in sports field',
-    'Weight lifting (University medal bronze)',
-    'Powerlifting gold medal',
-    "Mr Tamil Nadu Men's Physique (Gold)",
-    'VNR bodybuilding (Silver)',
-    'Mr South India / Mr India participation',
-    'MMA: Silambam national & international gold',
-    'International referee and Tamil Nadu team coach',
-    '10 years in fitness coaching',
-  ]
-
-  const successStories = [
-    {
-      title: '12 Week',
-      subtitle: 'Cut',
-      color: 'from-chart-1/20 to-chart-1/5',
-    },
-    {
-      title: 'Muscle',
-      subtitle: 'Gain',
-      color: 'from-chart-2/20 to-chart-2/5',
-    },
-    {
-      title: 'Post',
-      subtitle: 'Pregnancy',
-      color: 'from-chart-3/20 to-chart-3/5',
-    },
-  ]
-
-  const gymBranches = ['Main Branch', 'West Branch', "Women's Exclusive Branch"]
-  const transformationImages = [
-    '/transformation/0.jpg',
-    '/transformation/1.jpg',
-    '/transformation/2.jpg',
-    '/transformation/3.jpg',
-    '/transformation/4.jpg',
-    '/transformation/5.jpg',
-  ]
 
   const openEditDrawer = () => {
     if (!profileUser) return
@@ -278,14 +253,14 @@ function RouteComponent() {
               </div>
               <div className="space-y-1">
                 <h3 className="font-semibold text-lg leading-none">
-                  CEO Nagaraj
+                  {about?.founderName ?? 'Master Fitness Team'}
                 </h3>
                 <p className="text-sm text-muted-foreground">
-                  Founder & Head Coach
+                  {about?.founderRole ?? 'Founder & Head Coach'}
                 </p>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  15+ years of fitness coaching with expertise in strength
-                  training and nutrition.
+                  {about?.founderBio ??
+                    'Fitness coaching with expertise in strength training and nutrition.'}
                 </p>
               </div>
             </div>
@@ -308,19 +283,34 @@ function RouteComponent() {
         <CardContent className="space-y-3 pr-0">
           <div className="overflow-x-auto pb-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
             <div className="flex gap-0 snap-x snap-mandatory pr-4">
-              {transformationImages.map((imagePath, index) => (
+              {(activeTransformationImages ?? []).map((image, index) => (
                 <div
-                  key={imagePath}
+                  key={image._id}
                   className="mr-2 shrink-0 snap-start"
                 >
-                  <img
-                    src={imagePath}
-                    alt={`Transformation ${index + 1}`}
-                    className="h-44 w-full object-contain"
-                    loading="lazy"
-                  />
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setFullScreenImage({
+                        url: image.imageUrl,
+                        alt: `Transformation ${index + 1}`,
+                      })
+                    }
+                  >
+                    <img
+                      src={image.imageUrl}
+                      alt={`Transformation ${index + 1}`}
+                      className="h-44 w-full object-contain"
+                      loading="lazy"
+                    />
+                  </button>
                 </div>
               ))}
+              {!activeTransformationImages?.length ? (
+                <div className="px-4 py-6 text-sm text-muted-foreground">
+                  No transformation images yet.
+                </div>
+              ) : null}
             </div>
           </div>
         </CardContent>
@@ -378,12 +368,11 @@ function RouteComponent() {
                 </div>
                 <div className="space-y-2">
                   <p className="text-sm text-muted-foreground leading-relaxed">
-                    Master Fitness started on 22.08.2022 and continues to grow.
-                    We currently have 3 branches, including one dedicated to
-                    women.
+                    {about?.paragraph ??
+                      'No about content published yet. Please ask admin to publish About Us.'}
                   </p>
                   <div className="flex flex-wrap gap-2">
-                    {gymBranches.map((branch) => (
+                    {(about?.branchNames ?? []).map((branch) => (
                       <span
                         key={branch}
                         className="rounded-full border bg-background px-3 py-1 text-xs text-muted-foreground"
@@ -399,35 +388,43 @@ function RouteComponent() {
             <div className="space-y-2">
               <div className="font-medium text-sm">CEO Achievements</div>
               <ul className="space-y-1.5 text-sm text-muted-foreground">
-                {ceoAchievements.map((achievement) => (
+                {(about?.achievements ?? []).map((achievement) => (
                   <li key={achievement} className="flex items-start gap-2">
                     <span className="mt-1 h-1.5 w-1.5 rounded-full bg-primary/70" />
                     <span>{achievement}</span>
                   </li>
                 ))}
+                {!about?.achievements?.length ? (
+                  <li className="text-muted-foreground">No achievements yet.</li>
+                ) : null}
               </ul>
             </div>
 
             <div>
               <h3 className="font-semibold mb-3">Success Stories</h3>
               <div className="grid grid-cols-3 gap-3">
-                {successStories.map((story) => (
+                {(activeStories ?? []).map((story, index) => (
                   <Link
-                    key={`${story.title}-${story.subtitle}`}
+                    key={story._id}
                     to="/app/success-story"
-                    className={`aspect-square rounded-lg bg-linear-to-br ${story.color} flex items-center justify-center border`}
+                    search={{ slug: story.slug }}
+                    className={`aspect-square rounded-lg bg-linear-to-br ${
+                      STORY_TILE_COLORS[index % STORY_TILE_COLORS.length]
+                    } flex items-center justify-center border`}
                   >
                     <div className="text-center p-2">
                       <div className="text-xs font-medium">{story.title}</div>
-                      <div className="text-xs text-muted-foreground">
-                        {story.subtitle}
-                      </div>
+                      <div className="text-xs text-muted-foreground">Story</div>
                     </div>
                   </Link>
                 ))}
               </div>
+              {!activeStories?.length ? (
+                <p className="text-xs text-muted-foreground">No stories published yet.</p>
+              ) : null}
               <Link
                 to="/app/success-story"
+                search={{ slug: undefined }}
                 className="mt-3 inline-flex items-center text-sm font-medium text-primary"
               >
                 Read full success stories
@@ -491,6 +488,30 @@ function RouteComponent() {
           </DrawerFooter>
         </DrawerContent>
       </Drawer>
+
+      {fullScreenImage ? (
+        <div
+          className="fixed inset-0 z-50 bg-black/90 p-4"
+          onClick={() => setFullScreenImage(null)}
+        >
+          <Button
+            variant="outline"
+            size="icon"
+            className="absolute right-4 top-4"
+            onClick={() => setFullScreenImage(null)}
+          >
+            <X className="h-4 w-4" />
+          </Button>
+          <div className="flex h-full w-full items-center justify-center">
+            <img
+              src={fullScreenImage.url}
+              alt={fullScreenImage.alt}
+              className="max-h-full max-w-full object-contain"
+              onClick={(event) => event.stopPropagation()}
+            />
+          </div>
+        </div>
+      ) : null}
     </div>
   )
 }

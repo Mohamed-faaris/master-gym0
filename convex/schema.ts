@@ -30,6 +30,7 @@ export const GALLERY_STATUSES = [
 ] as const
 
 export const GALLERY_ACCESS = ['private', 'public'] as const
+export const CONTENT_STATUSES = ['active', 'draft', 'inactive'] as const
 
 const DAYS_OF_WEEK = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'] as const
 
@@ -111,6 +112,7 @@ const WorkoutStatusValidator = enumToValidator(WORKOUT_STATUSES)
 const MealTypeValidator = enumToValidator(MEAL_TYPES)
 const GalleryStatusValidator = enumToValidator(GALLERY_STATUSES)
 const GalleryAccessValidator = enumToValidator(GALLERY_ACCESS)
+const ContentStatusValidator = enumToValidator(CONTENT_STATUSES)
 const DayOfWeekValidator = enumToValidator(DAYS_OF_WEEK)
 const ExerciseNameValidator = enumToValidator(EXERCISE_NAMES)
 
@@ -320,6 +322,56 @@ const gallery = defineTable({
   .index('by_user', ['userId'])
   .index('by_access', ['access'])
 
+/* -------------------- ABOUT CONTENT -------------------- */
+
+const aboutContent = defineTable({
+  title: v.string(),
+  subtitle: v.optional(v.string()),
+  paragraph: v.string(),
+  branchNames: v.array(v.string()),
+  achievements: v.array(v.string()),
+  founderName: v.optional(v.string()),
+  founderRole: v.optional(v.string()),
+  founderBio: v.optional(v.string()),
+  status: ContentStatusValidator,
+  createdAt: v.number(),
+  updatedAt: v.number(),
+})
+  .index('by_status', ['status'])
+  .index('by_updatedAt', ['updatedAt'])
+
+/* -------------------- SUCCESS STORIES -------------------- */
+
+const successStories = defineTable({
+  slug: v.string(),
+  title: v.string(),
+  imageStorageId: v.optional(v.id('_storage')),
+  imageUrl: v.optional(v.string()),
+  paragraph: v.string(),
+  points: v.array(v.string()),
+  status: ContentStatusValidator,
+  order: v.number(),
+  createdAt: v.number(),
+  updatedAt: v.number(),
+})
+  .index('by_status', ['status'])
+  .index('by_status_order', ['status', 'order'])
+  .index('by_slug', ['slug'])
+
+/* -------------------- TRANSFORMATION IMAGES -------------------- */
+
+const transformationImages = defineTable({
+  title: v.optional(v.string()),
+  imageStorageId: v.optional(v.id('_storage')),
+  imageUrl: v.string(),
+  order: v.number(),
+  status: ContentStatusValidator,
+  createdAt: v.number(),
+  updatedAt: v.number(),
+})
+  .index('by_status', ['status'])
+  .index('by_status_order', ['status', 'order'])
+
 /* ======================================================= */
 
 export default defineSchema({
@@ -332,4 +384,7 @@ export default defineSchema({
   dietPlans,
   workoutSessions,
   gallery,
+  aboutContent,
+  successStories,
+  transformationImages,
 })
