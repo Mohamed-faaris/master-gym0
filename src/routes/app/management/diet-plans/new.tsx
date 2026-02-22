@@ -23,7 +23,7 @@ import { Link } from '@tanstack/react-router'
 export const Route = createFileRoute('/app/management/diet-plans/new')({
   component: RouteComponent,
   validateSearch: (search: Record<string, unknown>) => ({
-    step: typeof search.step === 'number' ? search.step : 0,
+    step: typeof search.step === 'number' ? search.step : undefined,
   }),
 })
 
@@ -75,9 +75,8 @@ function RouteComponent() {
   const createDietPlan = useConvexMutation(api.dietPlans.createDietPlan)
 
   const search = Route.useSearch()
-  const stepIndex = Math.min(Math.max(search.step, 0), steps.length - 1)
+  const stepIndex = Math.min(Math.max(search.step ?? 0, 0), steps.length - 1)
   const [planName, setPlanName] = useState('')
-  const [planDescription, setPlanDescription] = useState('')
   const [goal, setGoal] = useState('')
   const [durationWeeks, setDurationWeeks] = useState('4')
   const [selectedDays, setSelectedDays] = useState<string[]>([])
@@ -183,7 +182,7 @@ function RouteComponent() {
     try {
       await createDietPlan({
         name: planName,
-        description: planDescription,
+        description: planName,
         goal: goal || undefined,
         durationWeeks: parseInt(durationWeeks) || undefined,
         activeDays: selectedDays as any,
@@ -278,15 +277,6 @@ function RouteComponent() {
                   placeholder="e.g. Lean strength cut"
                   value={planName}
                   onChange={(event) => setPlanName(event.target.value)}
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Description</label>
-                <textarea
-                  className="w-full min-h-[110px] rounded-lg border border-border bg-background px-3 py-2 text-sm"
-                  placeholder="Outline the intent, rules, or special notes."
-                  value={planDescription}
-                  onChange={(event) => setPlanDescription(event.target.value)}
                 />
               </div>
               <div className="grid gap-4 sm:grid-cols-2">
@@ -531,9 +521,6 @@ function RouteComponent() {
                 </p>
                 <p className="text-sm text-muted-foreground">
                   {goal || 'No primary goal yet'}
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  {planDescription || 'Add a description to guide the athlete.'}
                 </p>
               </div>
 

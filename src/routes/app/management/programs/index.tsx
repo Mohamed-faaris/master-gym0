@@ -106,7 +106,12 @@ function ProgramsRoute() {
             <Button
               size="sm"
               className="gap-2"
-              onClick={() => navigate({ to: '/app/management/programs/new' })}
+              onClick={() =>
+                navigate({
+                  to: '/app/management/programs/new',
+                  search: { step: undefined },
+                })
+              }
             >
               <Plus className="h-4 w-4" /> New
             </Button>
@@ -142,7 +147,12 @@ function ProgramsRoute() {
                 </p>
               </div>
               <Button
-                onClick={() => navigate({ to: '/app/management/programs/new' })}
+                onClick={() =>
+                  navigate({
+                    to: '/app/management/programs/new',
+                    search: { step: undefined },
+                  })
+                }
               >
                 <Plus className="h-4 w-4 mr-2" />
                 Create Program
@@ -150,60 +160,64 @@ function ProgramsRoute() {
             </div>
           )}
 
-          {trainingPlans && visibleTrainingPlans && visibleTrainingPlans.length > 0 && (
-            <div className="space-y-3">
-              {visibleTrainingPlans.map((program) => (
-                <Card
-                  key={program._id}
-                  className="hover:border-primary transition-colors cursor-pointer"
-                  onClick={() =>
-                    navigate({
-                      to: '/app/management/programs/$programId',
-                      params: { programId: program._id },
-                    })
-                  }
-                >
-                  <CardHeader>
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="flex-1">
-                        <CardTitle className="text-lg">{program.name}</CardTitle>
-                        <CardDescription className="mt-1">
-                          {program.description}
-                        </CardDescription>
+          {trainingPlans &&
+            visibleTrainingPlans &&
+            visibleTrainingPlans.length > 0 && (
+              <div className="space-y-3">
+                {visibleTrainingPlans.map((program) => (
+                  <Card
+                    key={program._id}
+                    className="hover:border-primary transition-colors cursor-pointer"
+                    onClick={() =>
+                      navigate({
+                        to: '/app/management/programs/$programId',
+                        params: { programId: program._id },
+                      })
+                    }
+                  >
+                    <CardHeader>
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex-1">
+                          <CardTitle className="text-lg">
+                            {program.name}
+                          </CardTitle>
+                          <CardDescription className="mt-1">
+                            {program.description}
+                          </CardDescription>
+                        </div>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="gap-2"
+                          onClick={(event) => {
+                            event.stopPropagation()
+                            navigate({
+                              to: '/app/management/programs/$programId/edit',
+                              params: { programId: program._id },
+                            })
+                          }}
+                        >
+                          <Pencil className="h-4 w-4" />
+                          Edit
+                        </Button>
                       </div>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="gap-2"
-                        onClick={(event) => {
-                          event.stopPropagation()
-                          navigate({
-                            to: '/app/management/programs/$programId/edit',
-                            params: { programId: program._id },
-                          })
-                        }}
-                      >
-                        <Pencil className="h-4 w-4" />
-                        Edit
-                      </Button>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
-                      <div className="flex items-center gap-1.5">
-                        <Calendar className="h-4 w-4" />
-                        {program.durationWeeks} weeks
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
+                        <div className="flex items-center gap-1.5">
+                          <Calendar className="h-4 w-4" />
+                          {program.durationWeeks} weeks
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <ClipboardList className="h-4 w-4" />
+                          {program.days.length} workout days
+                        </div>
                       </div>
-                      <div className="flex items-center gap-1.5">
-                        <ClipboardList className="h-4 w-4" />
-                        {program.days.length} workout days
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
         </CardContent>
       </Card>
     </div>

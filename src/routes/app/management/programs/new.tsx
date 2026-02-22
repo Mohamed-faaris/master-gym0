@@ -31,7 +31,7 @@ import {
 export const Route = createFileRoute('/app/management/programs/new')({
   component: RouteComponent,
   validateSearch: (search: Record<string, unknown>) => ({
-    step: typeof search.step === 'number' ? search.step : 0,
+    step: typeof search.step === 'number' ? search.step : undefined,
   }),
 })
 
@@ -187,9 +187,8 @@ export function ProgramFormScreen({ mode, programId }: ProgramFormScreenProps) {
   )
 
   const search = Route.useSearch()
-  const stepIndex = Math.min(Math.max(search.step, 0), steps.length - 1)
+  const stepIndex = Math.min(Math.max(search.step ?? 0, 0), steps.length - 1)
   const [planName, setPlanName] = useState('')
-  const [planDescription, setPlanDescription] = useState('')
   const [durationWeeks, setDurationWeeks] = useState('4')
   const [selectedDays, setSelectedDays] = useState<DayKey[]>([])
   const [activeWorkoutDay, setActiveWorkoutDay] = useState<DayKey | null>(null)
@@ -223,7 +222,6 @@ export function ProgramFormScreen({ mode, programId }: ProgramFormScreenProps) {
     if (mode !== 'edit' || !trainingPlan || didHydrateEditData) return
 
     setPlanName(trainingPlan.name)
-    setPlanDescription(trainingPlan.description)
     setDurationWeeks(String(trainingPlan.durationWeeks))
 
     const nextSelectedDays = trainingPlan.days.map((day) => day.day as DayKey)
@@ -491,7 +489,7 @@ export function ProgramFormScreen({ mode, programId }: ProgramFormScreenProps) {
         await updateTrainingPlan({
           trainingPlanId: programId,
           name: planName,
-          description: planDescription || 'No description provided.',
+          description: planName,
           days: daysPayload as any,
           durationWeeks: parsedDuration,
         })
@@ -499,7 +497,7 @@ export function ProgramFormScreen({ mode, programId }: ProgramFormScreenProps) {
       } else {
         await createTrainingPlan({
           name: planName,
-          description: planDescription || 'No description provided.',
+          description: planName,
           days: daysPayload as any,
           durationWeeks: parsedDuration,
           createdBy: user._id,
@@ -643,15 +641,6 @@ export function ProgramFormScreen({ mode, programId }: ProgramFormScreenProps) {
                   onChange={(event) => setPlanName(event.target.value)}
                 />
               </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Description</label>
-                <textarea
-                  className="w-full min-h-[110px] rounded-lg border border-border bg-background px-3 py-2 text-sm"
-                  placeholder="Outline intent, goals, or notes."
-                  value={planDescription}
-                  onChange={(event) => setPlanDescription(event.target.value)}
-                />
-              </div>
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
                   <label className="text-sm font-medium">
@@ -775,23 +764,6 @@ export function ProgramFormScreen({ mode, programId }: ProgramFormScreenProps) {
                                     updateDayMeta(
                                       day.key,
                                       'title',
-                                      event.target.value,
-                                    )
-                                  }
-                                />
-                              </div>
-                              <div className="space-y-2">
-                                <label className="text-xs font-medium uppercase text-muted-foreground">
-                                  Day description
-                                </label>
-                                <textarea
-                                  className="w-full min-h-[90px] rounded-lg border border-border bg-background px-3 py-2 text-sm"
-                                  placeholder="Focus cues, intensity targets, or notes."
-                                  value={dayMetaByDay[day.key].description}
-                                  onChange={(event) =>
-                                    updateDayMeta(
-                                      day.key,
-                                      'description',
                                       event.target.value,
                                     )
                                   }
@@ -986,9 +958,6 @@ export function ProgramFormScreen({ mode, programId }: ProgramFormScreenProps) {
                   {planName || 'Untitled program'} · {durationWeeks || '--'}{' '}
                   weeks
                 </p>
-                <p className="text-xs text-muted-foreground">
-                  {planDescription || 'Add a description to guide athletes.'}
-                </p>
               </div>
 
               <div className="rounded-2xl border border-border bg-muted/30 p-4 space-y-2">
@@ -1020,18 +989,10 @@ export function ProgramFormScreen({ mode, programId }: ProgramFormScreenProps) {
                           <p className="text-xs font-semibold uppercase text-muted-foreground">
                             {day.label}
                           </p>
-                          {(dayMetaByDay[day.key].title ||
-                            dayMetaByDay[day.key].description) && (
-                            <div className="text-sm text-muted-foreground space-y-1">
-                              {dayMetaByDay[day.key].title && (
-                                <p className="font-medium text-foreground">
-                                  {dayMetaByDay[day.key].title}
-                                </p>
-                              )}
-                              {dayMetaByDay[day.key].description && (
-                                <p>{dayMetaByDay[day.key].description}</p>
-                              )}
-                            </div>
+                          {dayMetaByDay[day.key].title && (
+                            <p className="text-sm font-medium">
+                              {dayMetaByDay[day.key].title}
+                            </p>
                           )}
                           {workoutsByDay[day.key].length === 0 ? (
                             <p className="text-sm text-muted-foreground">

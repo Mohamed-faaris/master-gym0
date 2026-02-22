@@ -113,7 +113,12 @@ function DietPlansRoute() {
             <Button
               size="sm"
               className="gap-2"
-              onClick={() => navigate({ to: '/app/management/diet-plans/new' })}
+              onClick={() =>
+                navigate({
+                  to: '/app/management/diet-plans/new',
+                  search: { step: undefined },
+                })
+              }
             >
               <Plus className="h-4 w-4" /> New
             </Button>
@@ -177,7 +182,10 @@ function DietPlansRoute() {
               <Button
                 className="gap-2"
                 onClick={() =>
-                  navigate({ to: '/app/management/diet-plans/new' })
+                  navigate({
+                    to: '/app/management/diet-plans/new',
+                    search: { step: undefined },
+                  })
                 }
               >
                 <Plus className="h-4 w-4" />
