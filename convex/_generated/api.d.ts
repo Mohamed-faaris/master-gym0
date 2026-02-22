@@ -10,11 +10,13 @@
 
 import type * as aboutContent from "../aboutContent.js";
 import type * as clientInsights from "../clientInsights.js";
+import type * as crons from "../crons.js";
 import type * as dietLogs from "../dietLogs.js";
 import type * as dietPlans from "../dietPlans.js";
 import type * as files from "../files.js";
 import type * as gallery from "../gallery.js";
 import type * as seed from "../seed.js";
+import type * as storageCleanup from "../storageCleanup.js";
 import type * as successStories from "../successStories.js";
 import type * as todos from "../todos.js";
 import type * as trainingPlans from "../trainingPlans.js";
@@ -32,11 +34,13 @@ import type {
 declare const fullApi: ApiFromModules<{
   aboutContent: typeof aboutContent;
   clientInsights: typeof clientInsights;
+  crons: typeof crons;
   dietLogs: typeof dietLogs;
   dietPlans: typeof dietPlans;
   files: typeof files;
   gallery: typeof gallery;
   seed: typeof seed;
+  storageCleanup: typeof storageCleanup;
   successStories: typeof successStories;
   todos: typeof todos;
   trainingPlans: typeof trainingPlans;
