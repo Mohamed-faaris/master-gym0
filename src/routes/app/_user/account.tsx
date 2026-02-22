@@ -26,6 +26,7 @@ import {
   DrawerTitle,
 } from '@/components/ui/drawer'
 import { useAuth } from '@/components/auth/useAuth'
+import { toast } from 'sonner'
 
 export const Route = createFileRoute('/app/_user/account')({
   component: RouteComponent,
@@ -411,8 +412,9 @@ function RouteComponent() {
               <h3 className="font-semibold mb-3">Success Stories</h3>
               <div className="grid grid-cols-3 gap-3">
                 {successStories.map((story) => (
-                  <div
+                  <Link
                     key={`${story.title}-${story.subtitle}`}
+                    to="/app/success-story"
                     className={`aspect-square rounded-lg bg-linear-to-br ${story.color} flex items-center justify-center border`}
                   >
                     <div className="text-center p-2">
@@ -421,9 +423,16 @@ function RouteComponent() {
                         {story.subtitle}
                       </div>
                     </div>
-                  </div>
+                  </Link>
                 ))}
               </div>
+              <Link
+                to="/app/success-story"
+                className="mt-3 inline-flex items-center text-sm font-medium text-primary"
+              >
+                Read full success stories
+                <ChevronRight className="ml-1 h-4 w-4" />
+              </Link>
             </div>
 
           </div>
