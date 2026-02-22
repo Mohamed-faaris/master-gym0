@@ -14,7 +14,7 @@ const DayOfWeekValidator = v.union(
 const ExerciseSetValidator = v.object({
   reps: v.optional(v.number()),
   weight: v.optional(v.number()),
-  notes: v.optional(v.string()),
+  restTime: v.optional(v.number()),
 })
 
 const ExerciseValidator = v.object({

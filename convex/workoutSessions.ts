@@ -30,7 +30,7 @@ export const startSession = mutation({
             v.object({
               reps: v.optional(v.number()),
               weight: v.optional(v.number()),
-              notes: v.optional(v.string()),
+              restTime: v.optional(v.number()),
               completed: v.boolean(),
             }),
           ),
@@ -187,7 +187,7 @@ export const updateSessionProgress = mutation({
           v.object({
             reps: v.optional(v.number()),
             weight: v.optional(v.number()),
-            notes: v.optional(v.string()),
+            restTime: v.optional(v.number()),
             completed: v.boolean(),
           }),
         ),
