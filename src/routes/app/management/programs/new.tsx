@@ -35,7 +35,7 @@ export const Route = createFileRoute('/app/management/programs/new')({
 type SetEntry = {
   reps: string
   weight: string
-  notes: string
+  restTime: string
 }
 
 type ExerciseEntry = {
@@ -132,7 +132,7 @@ const privilegedRoles = new Set(['trainer', 'admin'])
 const createEmptySet = (): SetEntry => ({
   reps: '',
   weight: '',
-  notes: '',
+  restTime: '',
 })
 
 const createEmptyExercise = (): ExerciseEntry => ({
@@ -192,10 +192,12 @@ export function ProgramFormScreen({ mode, programId }: ProgramFormScreenProps) {
   const [workoutsByDay, setWorkoutsByDay] = useState<
     Record<DayKey, ExerciseEntry[]>
   >(() => createEmptyWorkoutsByDay())
-  const [dayMetaByDay, setDayMetaByDay] = useState<Record<DayKey, DayMeta>>(() =>
-    createEmptyDayMetaByDay(),
+  const [dayMetaByDay, setDayMetaByDay] = useState<Record<DayKey, DayMeta>>(
+    () => createEmptyDayMetaByDay(),
   )
-  const [didHydrateEditData, setDidHydrateEditData] = useState(mode === 'create')
+  const [didHydrateEditData, setDidHydrateEditData] = useState(
+    mode === 'create',
+  )
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   /* -------------------------------------------------------------------------- */
@@ -247,7 +249,10 @@ export function ProgramFormScreen({ mode, programId }: ProgramFormScreenProps) {
                         typeof setEntry.weight === 'number'
                           ? String(setEntry.weight)
                           : '',
-                      notes: setEntry.notes ?? '',
+                      restTime:
+                        typeof setEntry.restTime === 'number'
+                          ? String(setEntry.restTime)
+                          : '',
                     }))
                   : [createEmptySet()],
             }))
@@ -320,7 +325,9 @@ export function ProgramFormScreen({ mode, programId }: ProgramFormScreenProps) {
     setWorkoutsByDay((prev) => ({
       ...prev,
       [dayKey]: prev[dayKey].map((exercise, index) =>
-        index === exerciseIndex ? { ...exercise, exerciseName: value } : exercise,
+        index === exerciseIndex
+          ? { ...exercise, exerciseName: value }
+          : exercise,
       ),
     }))
   }
@@ -456,7 +463,9 @@ export function ProgramFormScreen({ mode, programId }: ProgramFormScreenProps) {
           sets: exercise.sets.map((setEntry) => ({
             reps: setEntry.reps ? parseInt(setEntry.reps, 10) : undefined,
             weight: setEntry.weight ? parseFloat(setEntry.weight) : undefined,
-            notes: setEntry.notes.trim() || undefined,
+            restTime: setEntry.restTime
+              ? parseInt(setEntry.restTime, 10)
+              : undefined,
           })),
         }))
       return {
@@ -496,14 +505,18 @@ export function ProgramFormScreen({ mode, programId }: ProgramFormScreenProps) {
       navigate({ to: '/app/management/programs' })
     } catch (error) {
       console.error(
-        mode === 'edit' ? 'Failed to update program:' : 'Failed to create program:',
+        mode === 'edit'
+          ? 'Failed to update program:'
+          : 'Failed to create program:',
         error,
       )
       const errorMessage =
         error instanceof Error ? error.message : 'Please try again.'
       toast.error(
         `${
-          mode === 'edit' ? 'Failed to update program' : 'Failed to create program'
+          mode === 'edit'
+            ? 'Failed to update program'
+            : 'Failed to create program'
         }: ${errorMessage}`,
       )
     } finally {
@@ -915,17 +928,19 @@ export function ProgramFormScreen({ mode, programId }: ProgramFormScreenProps) {
                                                   </div>
                                                   <div className="space-y-1">
                                                     <label className="text-[10px] font-medium uppercase text-muted-foreground">
-                                                      Notes
+                                                      Rest (sec)
                                                     </label>
                                                     <Input
-                                                      placeholder="Tempo or cue"
-                                                      value={setEntry.notes}
+                                                      type="number"
+                                                      min={0}
+                                                      placeholder="60"
+                                                      value={setEntry.restTime}
                                                       onChange={(event) =>
                                                         updateSetField(
                                                           day.key,
                                                           index,
                                                           setIndex,
-                                                          'notes',
+                                                          'restTime',
                                                           event.target.value,
                                                         )
                                                       }
@@ -1020,22 +1035,20 @@ export function ProgramFormScreen({ mode, programId }: ProgramFormScreenProps) {
                             </p>
                           ) : (
                             <div className="space-y-2">
-                              {workoutsByDay[day.key].map(
-                                (exercise, index) => (
-                                  <div
-                                    key={`${day.key}-summary-${index}`}
-                                    className="text-sm"
-                                  >
-                                    <span className="font-medium">
-                                      {exercise.exerciseName || 'Untitled'}
-                                    </span>
-                                    <span className="text-xs text-muted-foreground">
-                                      {' '}
-                                      · {exercise.sets.length} sets
-                                    </span>
-                                  </div>
-                                ),
-                              )}
+                              {workoutsByDay[day.key].map((exercise, index) => (
+                                <div
+                                  key={`${day.key}-summary-${index}`}
+                                  className="text-sm"
+                                >
+                                  <span className="font-medium">
+                                    {exercise.exerciseName || 'Untitled'}
+                                  </span>
+                                  <span className="text-xs text-muted-foreground">
+                                    {' '}
+                                    · {exercise.sets.length} sets
+                                  </span>
+                                </div>
+                              ))}
                             </div>
                           )}
                         </div>

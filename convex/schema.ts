@@ -215,9 +215,8 @@ const weightLogs = defineTable({
 const trainingPlans = defineTable({
   name: v.string(),
   description: v.string(),
-  isCopy: v.boolean(), 
-  isAssigned: v.boolean(), 
-  
+  isCopy: v.boolean(),
+  isAssigned: v.boolean(),
 
   days: v.array(
     v.object({
@@ -232,7 +231,7 @@ const trainingPlans = defineTable({
             v.object({
               reps: v.optional(v.number()),
               weight: v.optional(v.number()),
-              notes: v.optional(v.string()),
+              restTime: v.optional(v.number()),
             }),
           ),
         }),
@@ -298,7 +297,7 @@ const workoutSessions = defineTable({
         v.object({
           reps: v.optional(v.number()),
           weight: v.optional(v.number()),
-          notes: v.optional(v.string()),
+          restTime: v.optional(v.number()),
           completed: v.boolean(),
         }),
       ),

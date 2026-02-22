@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
-import { ArrowLeft, ClipboardList, Calendar, Dumbbell, Pencil } from 'lucide-react'
+import { ArrowLeft, Calendar, Dumbbell, Pencil } from 'lucide-react'
 import { useQuery } from 'convex/react'
 
 import { useAuth } from '@/components/auth/useAuth'
@@ -153,14 +153,10 @@ function ProgramDetailRoute() {
                         <div key={setIndex} className="bg-muted p-2 rounded">
                           Set {setIndex + 1}: {set.reps} reps
                           {set.weight && ` @ ${set.weight}kg`}
+                          {set.restTime && ` · ${set.restTime}s rest`}
                         </div>
                       ))}
                     </div>
-                    {exercise.sets[0]?.notes && (
-                      <div className="text-xs text-muted-foreground italic">
-                        {exercise.sets[0].notes}
-                      </div>
-                    )}
                   </div>
                 ))}
               </CardContent>
