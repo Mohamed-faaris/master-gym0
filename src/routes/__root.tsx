@@ -20,6 +20,7 @@ import appCss from '../styles.css?url'
 
 import type { QueryClient } from '@tanstack/react-query'
 import { AuthProvider } from '@/components/auth/AuthProvider'
+import { PostHogProvider } from '@posthog/react'
 
 interface MyRouterContext {
   queryClient: QueryClient
@@ -51,6 +52,11 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
   shellComponent: RootDocument,
   notFoundComponent: NotFoundComponent,
 })
+
+const options = {
+  api_host: import.meta.env.VITE_PUBLIC_POSTHOG_HOST,
+  defaults: '2026-01-30',
+} as const
 
 function RootDocument({ children }: { children: React.ReactNode }) {
   const router = useRouter()
@@ -130,26 +136,31 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       </head>
       <body className="dark">
         <ConvexProvider>
-          <AuthProvider>
-            <div
-              vaul-drawer-wrapper=""
-              className="min-h-dvh safe-area bg-background"
-            >
-              {children}
-            </div>
-            <TanStackDevtools
-              config={{
-                position: 'bottom-right',
-              }}
-              plugins={[
-                {
-                  name: 'Tanstack Router',
-                  render: <TanStackRouterDevtoolsPanel />,
-                },
-                TanStackQueryDevtools,
-              ]}
-            />
-          </AuthProvider>
+          <PostHogProvider
+            apiKey={import.meta.env.VITE_PUBLIC_POSTHOG_KEY}
+            options={options}
+          >
+            <AuthProvider>
+              <div
+                vaul-drawer-wrapper=""
+                className="min-h-dvh safe-area bg-background"
+              >
+                {children}
+              </div>
+              <TanStackDevtools
+                config={{
+                  position: 'bottom-right',
+                }}
+                plugins={[
+                  {
+                    name: 'Tanstack Router',
+                    render: <TanStackRouterDevtoolsPanel />,
+                  },
+                  TanStackQueryDevtools,
+                ]}
+              />
+            </AuthProvider>
+          </PostHogProvider>
         </ConvexProvider>
         <Scripts />
       </body>
