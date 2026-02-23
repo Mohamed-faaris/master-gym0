@@ -1,10 +1,11 @@
-import { Link, createFileRoute } from '@tanstack/react-router'
+import { createFileRoute } from '@tanstack/react-router'
 import { useMutation, useQuery } from 'convex/react'
-import { useState, type ChangeEvent } from 'react'
+import { useState } from 'react'
 import { Plus, X } from 'lucide-react'
 import { toast } from 'sonner'
 
 import { api } from '@convex/_generated/api'
+import type { ChangeEvent } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
@@ -145,38 +146,46 @@ function ProfileStoriesPage() {
               <div className="font-medium">{story.title}</div>
               <div className="text-xs text-muted-foreground">slug: {story.slug}</div>
               <div className="text-xs text-muted-foreground">status: {story.status}</div>
-              <div className="mt-2 flex flex-wrap gap-2">
-                <Button size="sm" variant="outline" onClick={() => openEditDrawer(story)}>
+              <div className="mt-2 flex min-w-0 items-center gap-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="shrink-0 px-3"
+                  onClick={() => openEditDrawer(story)}
+                >
                   Edit Story
                 </Button>
-                <Select
-                  value={story.status}
-                  onValueChange={async (value) => {
-                    try {
-                      await setStoryStatus({
-                        storyId: story._id as any,
-                        status: value as ContentStatus,
-                      })
-                      toast.success('Story status changed')
-                    } catch {
-                      toast.error('Failed to change story status')
-                    }
-                  }}
-                >
-                  <SelectTrigger className="h-8 w-36">
-                    <SelectValue placeholder="Status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {STATUSES.map((status) => (
-                      <SelectItem key={status} value={status}>
-                        {status}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <div className="min-w-0 flex-1">
+                  <Select
+                    value={story.status}
+                    onValueChange={async (value) => {
+                      try {
+                        await setStoryStatus({
+                          storyId: story._id as any,
+                          status: value as ContentStatus,
+                        })
+                        toast.success('Story status changed')
+                      } catch {
+                        toast.error('Failed to change story status')
+                      }
+                    }}
+                  >
+                    <SelectTrigger className="h-8 w-full min-w-0">
+                      <SelectValue placeholder="Status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {STATUSES.map((status) => (
+                        <SelectItem key={status} value={status}>
+                          {status}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
                 <Button
                   size="sm"
                   variant="destructive"
+                  className="shrink-0 px-3"
                   onClick={async () => {
                     try {
                       await deleteStory({ storyId: story._id as any })
@@ -195,10 +204,6 @@ function ProfileStoriesPage() {
           {!stories.length ? (
             <p className="text-sm text-muted-foreground">No stories yet.</p>
           ) : null}
-
-          <Button asChild variant="secondary">
-            <Link to="/app/admin/profile">Back to Profile</Link>
-          </Button>
         </CardContent>
       </Card>
 

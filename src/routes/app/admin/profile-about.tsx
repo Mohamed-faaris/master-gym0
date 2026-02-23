@@ -30,11 +30,10 @@ function toLines(value: string) {
 }
 
 function ProfileAboutPage() {
-  const aboutRows = useQuery(api.aboutContent.getAllAbout) ?? []
-  const about = aboutRows[0]
+  const aboutRows = useQuery(api.aboutContent.getAllAbout)
+  const about = aboutRows?.[0]
 
   const upsertAbout = useMutation(api.aboutContent.upsertAbout)
-  const deleteAbout = useMutation(api.aboutContent.deleteAbout)
 
   const [aboutTitle, setAboutTitle] = useState('About Us')
   const [aboutSubtitle, setAboutSubtitle] = useState('Master Fitness')
@@ -48,6 +47,7 @@ function ProfileAboutPage() {
   const [isSaving, setIsSaving] = useState(false)
 
   useEffect(() => {
+    if (!about) return
     setAboutTitle(about.title)
     setAboutSubtitle(about.subtitle ?? '')
     setAboutParagraph(about.paragraph)
@@ -56,13 +56,13 @@ function ProfileAboutPage() {
     setAboutFounderName(about.founderName ?? '')
     setAboutFounderRole(about.founderRole ?? '')
     setAboutFounderBio(about.founderBio ?? '')
-  }, [about._id])
+  }, [about?._id])
 
   const handleSaveAbout = async () => {
     setIsSaving(true)
     try {
       await upsertAbout({
-        aboutId: about._id as any,
+        aboutId: (about?._id as any) ?? undefined,
         title: aboutTitle,
         subtitle: aboutSubtitle || undefined,
         paragraph: aboutParagraph,
@@ -108,19 +108,6 @@ function ProfileAboutPage() {
           <div className="flex flex-wrap gap-2">
             <Button onClick={() => setSaveDialogOpen(true)} disabled={isSaving}>
               Save About
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={async () => {
-                try {
-                  await deleteAbout({ aboutId: about._id as any })
-                  toast.success('About deleted')
-                } catch {
-                  toast.error('Failed to delete about')
-                }
-              }}
-            >
-              Delete About
             </Button>
             <Button asChild variant="secondary">
               <Link to="/app/admin/profile">Back to Profile</Link>
