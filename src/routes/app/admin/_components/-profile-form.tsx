@@ -191,7 +191,7 @@ export function ProfileForm({ userId, onSignOut }: ProfileFormProps) {
         </CardContent>
       </Card>
 
-      <Card>
+      {/* <Card>
         <CardHeader>
           <CardTitle className="text-lg">Contact Information</CardTitle>
           <CardDescription>Primary communication details.</CardDescription>
@@ -236,9 +236,9 @@ export function ProfileForm({ userId, onSignOut }: ProfileFormProps) {
             </>
           )}
         </CardContent>
-      </Card>
+      </Card> */}
 
-      <Card>
+      {/* <Card>
         <CardHeader>
           <CardTitle className="text-lg">Account Details</CardTitle>
           <CardDescription>Administrative account metadata.</CardDescription>
@@ -251,7 +251,7 @@ export function ProfileForm({ userId, onSignOut }: ProfileFormProps) {
           />
           <InfoRow icon={Calendar} label="Member Since" value={joinDate} />
         </CardContent>
-      </Card>
+      </Card> */}
 
       <Card>
         <CardHeader>

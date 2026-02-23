@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useMemo, useState } from 'react'
 import { Outlet, Link, useNavigate } from '@tanstack/react-router'
 import { useMutation, useQuery } from 'convex/react'
 import { Dumbbell, Lock, Phone, User } from 'lucide-react'
+import { toast } from 'sonner'
 
 import { api } from '@convex/_generated/api'
 import type { Id } from '@convex/_generated/dataModel'
@@ -310,6 +311,9 @@ export function AdminShell() {
       setOnboardDrawerOpen(false)
     } catch (error) {
       console.error('Failed to create user:', error)
+      if (drawerMode === 'create') {
+        toast.error('Failed to create user', { position: 'top-center' })
+      }
     } finally {
       setIsSubmitting(false)
     }
