@@ -233,7 +233,7 @@ const trainingPlans = defineTable({
     }),
   ),
 
-  durationDays: v.number(),
+  durationDays: v.optional(v.number()),
   durationWeeks: v.optional(v.number()),
   createdBy: v.id('users'),
   createdAt: v.number(),
