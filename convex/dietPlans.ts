@@ -235,3 +235,45 @@ export const migrateDurationWeeksToDays = mutation({
     return { dietPlanCount, trainingPlanCount, measurementCount }
   },
 })
+
+export const removeOldWeekFields = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const dietPlans = await ctx.db.query('dietPlans').collect()
+    const trainingPlans = await ctx.db.query('trainingPlans').collect()
+    const userMeasurements = await ctx.db.query('userMeasurement').collect()
+
+    let dietPlanCount = 0
+    let trainingPlanCount = 0
+    let measurementCount = 0
+
+    for (const plan of dietPlans) {
+      if ((plan as any).durationWeeks !== undefined) {
+        await ctx.db.patch(plan._id, {
+          durationWeeks: undefined,
+        } as any)
+        dietPlanCount++
+      }
+    }
+
+    for (const plan of trainingPlans) {
+      if ((plan as any).durationWeeks !== undefined) {
+        await ctx.db.patch(plan._id, {
+          durationWeeks: undefined,
+        } as any)
+        trainingPlanCount++
+      }
+    }
+
+    for (const measurement of userMeasurements) {
+      if ((measurement as any).timeSpanWeeks !== undefined) {
+        await ctx.db.patch(measurement._id, {
+          timeSpanWeeks: undefined,
+        } as any)
+        measurementCount++
+      }
+    }
+
+    return { dietPlanCount, trainingPlanCount, measurementCount }
+  },
+})
