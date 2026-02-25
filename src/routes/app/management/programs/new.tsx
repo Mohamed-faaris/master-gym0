@@ -52,6 +52,12 @@ type DayMeta = {
   description: string
 }
 
+type ParsedSetEntry = {
+  reps?: number
+  weight?: number
+  restTime?: number
+}
+
 const weekDays = [
   { key: 'mon', label: 'Mon' },
   { key: 'tue', label: 'Tue' },
@@ -144,6 +150,26 @@ const createEmptyExercise = (): ExerciseEntry => ({
   sets: [createEmptySet()],
 })
 
+const parseOptionalNumber = (
+  rawValue: string,
+  parser: (value: string) => number,
+) => {
+  const trimmedValue = rawValue.trim()
+  if (!trimmedValue) return { value: undefined as number | undefined }
+
+  const parsedValue = parser(trimmedValue)
+  if (!Number.isFinite(parsedValue)) {
+    return { error: true as const }
+  }
+
+  return { value: parsedValue }
+}
+
+const isSchemaValidationError = (message: string) =>
+  /argumentvalidationerror|validation error|does not match|missing required|invalid value|expected|validator/i.test(
+    message,
+  )
+
 const createEmptyWorkoutsByDay = (): Record<DayKey, ExerciseEntry[]> =>
   weekDays.reduce(
     (acc, day) => {
@@ -197,7 +223,7 @@ export function ProgramFormScreen({
     Math.min(Math.max(initialStep, 0), steps.length - 1),
   )
   const [planName, setPlanName] = useState('')
-  const [durationWeeks, setDurationWeeks] = useState('4')
+  const [durationWeeks, setDurationWeeks] = useState('')
   const [selectedDays, setSelectedDays] = useState<DayKey[]>([])
   const [activeWorkoutDay, setActiveWorkoutDay] = useState<DayKey | null>(null)
   const [workoutsByDay, setWorkoutsByDay] = useState<
@@ -364,7 +390,10 @@ export function ProgramFormScreen({
         index === exerciseIndex
           ? {
               ...exercise,
-              sets: exercise.sets.filter((_, idx) => idx !== setIndex),
+              sets:
+                exercise.sets.length > 1
+                  ? exercise.sets.filter((_, idx) => idx !== setIndex)
+                  : exercise.sets,
             }
           : exercise,
       ),
@@ -393,6 +422,92 @@ export function ProgramFormScreen({
     }))
   }
 
+  const getDayLabel = (dayKey: DayKey) =>
+    weekDays.find((entry) => entry.key === dayKey)?.label || dayKey
+
+  const validateStep = (currentStep: number) => {
+    if (currentStep === 0) {
+      if (!planName.trim()) {
+        toast.error('Program name is required')
+        return false
+      }
+
+      const parsedDuration = parseInt(durationWeeks, 10)
+      if (!parsedDuration || parsedDuration < 1) {
+        toast.error('Duration must be at least 1 day')
+        return false
+      }
+    }
+
+    if (currentStep === 1) {
+      if (selectedDays.length === 0) {
+        toast.error('Please select at least one workout day')
+        return false
+      }
+    }
+
+    if (currentStep === 2) {
+      const unnamedExercises = selectedDays.flatMap((dayKey) => {
+        const exercises = workoutsByDay[dayKey]
+        return exercises
+          .map((exercise, index) =>
+            exercise.exerciseName.trim() === ''
+              ? { dayKey, index: index + 1 }
+              : null,
+          )
+          .filter(Boolean) as Array<{ dayKey: DayKey; index: number }>
+      })
+
+      if (unnamedExercises.length > 0) {
+        const byDay = unnamedExercises.reduce<Record<string, Array<number>>>(
+          (acc, entry) => {
+            acc[entry.dayKey] = acc[entry.dayKey] || []
+            acc[entry.dayKey].push(entry.index)
+            return acc
+          },
+          {},
+        )
+        const message = Object.entries(byDay)
+          .map(([dayKey, indexes]) => `${getDayLabel(dayKey as DayKey)} (ex ${indexes.join(', ')})`)
+          .join(', ')
+        toast.error(`Name all exercises before saving: ${message}`)
+        return false
+      }
+
+      const emptyDays = selectedDays.filter((dayKey) => {
+        const exercises = workoutsByDay[dayKey]
+        return !exercises.some((exercise) => exercise.exerciseName.trim() !== '')
+      })
+
+      if (emptyDays.length > 0) {
+        const missingLabels = emptyDays.map((dayKey) => getDayLabel(dayKey)).join(', ')
+        toast.error(`Add at least one exercise for: ${missingLabels}`)
+        return false
+      }
+
+      const exercisesWithoutSets = selectedDays.flatMap((dayKey) => {
+        const exercises = workoutsByDay[dayKey]
+        return exercises
+          .map((exercise, index) =>
+            exercise.exerciseName.trim() !== '' && exercise.sets.length === 0
+              ? { dayKey, index: index + 1 }
+              : null,
+          )
+          .filter(Boolean) as Array<{ dayKey: DayKey; index: number }>
+      })
+
+      if (exercisesWithoutSets.length > 0) {
+        const message = exercisesWithoutSets
+          .map(({ dayKey, index }) => `${getDayLabel(dayKey)} (ex ${index})`)
+          .join(', ')
+        toast.error(`Each exercise must have at least one set: ${message}`)
+        return false
+      }
+    }
+
+    return true
+  }
+
   const handleSubmit = async () => {
     if (!user) {
       toast.error(
@@ -403,81 +518,47 @@ export function ProgramFormScreen({
       return
     }
 
-    if (!planName.trim()) {
-      toast.error('Program name is required')
+    if (!validateStep(0) || !validateStep(1) || !validateStep(2)) {
       return
     }
 
     const parsedDuration = parseInt(durationWeeks, 10)
-    if (!parsedDuration || parsedDuration < 1) {
-      toast.error('Duration must be at least 1 week')
-      return
-    }
 
-    if (selectedDays.length === 0) {
-      toast.error('Please select at least one workout day')
-      return
-    }
-
-    const unnamedExercises = selectedDays.flatMap((dayKey) => {
-      const exercises = workoutsByDay[dayKey]
-      return exercises
-        .map((exercise, index) =>
-          exercise.exerciseName.trim() === ''
-            ? { dayKey, index: index + 1 }
-            : null,
-        )
-        .filter(Boolean) as Array<{ dayKey: string; index: number }>
-    })
-
-    if (unnamedExercises.length > 0) {
-      const byDay = unnamedExercises.reduce<Record<string, number[]>>(
-        (acc, entry) => {
-          acc[entry.dayKey] = acc[entry.dayKey] || []
-          acc[entry.dayKey].push(entry.index)
-          return acc
-        },
-        {},
-      )
-      const message = Object.entries(byDay)
-        .map(([dayKey, indexes]) => {
-          const label =
-            weekDays.find((entry) => entry.key === dayKey)?.label || dayKey
-          return `${label} (ex ${indexes.join(', ')})`
-        })
-        .join(', ')
-      toast.error(`Name all exercises before saving: ${message}`)
-      return
-    }
-
-    const emptyDays = selectedDays.filter((dayKey) => {
-      const exercises = workoutsByDay[dayKey]
-      return !exercises.some((exercise) => exercise.exerciseName.trim() !== '')
-    })
-
-    if (emptyDays.length > 0) {
-      const missingLabels = emptyDays
-        .map((day) => weekDays.find((entry) => entry.key === day)?.label || day)
-        .join(', ')
-      toast.error(`Add at least one exercise for: ${missingLabels}`)
-      return
-    }
-
+    const invalidSetEntries: Array<{ dayKey: DayKey; exerciseIndex: number }> =
+      []
     const daysPayload = selectedDays.map((dayKey) => {
       const dayMeta = dayMetaByDay[dayKey]
       const exercises = workoutsByDay[dayKey]
         .filter((exercise) => exercise.exerciseName.trim() !== '')
-        .map((exercise) => ({
-          exerciseName: exercise.exerciseName,
-          noOfSets: exercise.sets.length,
-          sets: exercise.sets.map((setEntry) => ({
-            reps: setEntry.reps ? parseInt(setEntry.reps, 10) : undefined,
-            weight: setEntry.weight ? parseFloat(setEntry.weight) : undefined,
-            restTime: setEntry.restTime
-              ? parseInt(setEntry.restTime, 10)
-              : undefined,
-          })),
-        }))
+        .map((exercise, exerciseIndex) => {
+          const parsedSets: ParsedSetEntry[] = exercise.sets.map((setEntry) => {
+            const reps = parseOptionalNumber(setEntry.reps, (value) =>
+              parseInt(value, 10),
+            )
+            const weight = parseOptionalNumber(setEntry.weight, (value) =>
+              parseFloat(value),
+            )
+            const restTime = parseOptionalNumber(setEntry.restTime, (value) =>
+              parseInt(value, 10),
+            )
+
+            if (reps.error || weight.error || restTime.error) {
+              invalidSetEntries.push({ dayKey, exerciseIndex: exerciseIndex + 1 })
+            }
+
+            return {
+              reps: reps.value,
+              weight: weight.value,
+              restTime: restTime.value,
+            }
+          })
+
+          return {
+            exerciseName: exercise.exerciseName,
+            noOfSets: exercise.sets.length,
+            sets: parsedSets,
+          }
+        })
       return {
         day: dayKey,
         dayTitle: dayMeta.title.trim() || undefined,
@@ -485,6 +566,18 @@ export function ProgramFormScreen({
         exercises,
       }
     })
+
+    if (invalidSetEntries.length > 0) {
+      const invalidMessage = invalidSetEntries
+        .map(({ dayKey, exerciseIndex }) => {
+          const label =
+            weekDays.find((entry) => entry.key === dayKey)?.label || dayKey
+          return `${label} (ex ${exerciseIndex})`
+        })
+        .join(', ')
+      toast.error(`Invalid set values. Check schema fields: ${invalidMessage}`)
+      return
+    }
 
     setIsSubmitting(true)
 
@@ -522,6 +615,12 @@ export function ProgramFormScreen({
       )
       const errorMessage =
         error instanceof Error ? error.message : 'Please try again.'
+      if (isSchemaValidationError(errorMessage)) {
+        toast.error(
+          'Failed to save program. Please check schema fields and value types.',
+        )
+        return
+      }
       toast.error(
         `${
           mode === 'edit'
@@ -575,7 +674,7 @@ export function ProgramFormScreen({
   }
 
   return (
-    <div className="min-h-screen bg-background pb-24">
+    <div className="min-h-screen bg-background pb-32">
       <div className="px-4 pt-6 pb-4 space-y-4">
         <header className="space-y-3">
           <Link
@@ -614,24 +713,38 @@ export function ProgramFormScreen({
           <Progress value={progressValue} />
         </div>
 
-        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+        <div className="grid w-full grid-cols-4 gap-2 text-xs text-muted-foreground">
           {steps.map((step, index) => (
-            <span
+            <button
               key={step.key}
+              type="button"
+              onClick={() => {
+                if (index <= stepIndex) {
+                  setStepIndex(index)
+                  return
+                }
+                const canMoveForward = Array.from(
+                  { length: index - stepIndex },
+                  (_, offset) => stepIndex + offset,
+                ).every((stepToValidate) => validateStep(stepToValidate))
+                if (canMoveForward) {
+                  setStepIndex(index)
+                }
+              }}
               className={cn(
-                'rounded-full border border-border px-3 py-1',
+                'w-full rounded-full border border-border px-3 text-center transition-colors',
                 index === stepIndex
                   ? 'bg-primary text-primary-foreground border-primary'
-                  : 'bg-muted/40',
+                  : 'bg-muted/40 hover:bg-muted',
               )}
             >
               {step.label}
-            </span>
+            </button>
           ))}
         </div>
       </div>
 
-      <div className="px-4 pb-10 space-y-4">
+      <div className="px-4 pb-36 space-y-4">
         {stepIndex === 0 && (
           <Card>
             <CardHeader className="space-y-1">
@@ -652,7 +765,7 @@ export function ProgramFormScreen({
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
                   <label className="text-sm font-medium">
-                    Duration (weeks)
+                    Duration (days)
                   </label>
                   <Input
                     type="number"
@@ -745,20 +858,7 @@ export function ProgramFormScreen({
                       .map((day) => (
                         <TabsContent key={day.key} value={day.key}>
                           <div className="space-y-3">
-                            <div className="flex items-center justify-between">
-                              <p className="text-sm font-semibold">
-                                {day.label}
-                              </p>
-                              <Button
-                                type="button"
-                                variant="outline"
-                                size="sm"
-                                onClick={() => addExercise(day.key)}
-                              >
-                                <Plus className="mr-2 h-4 w-4" />
-                                Add exercise
-                              </Button>
-                            </div>
+                            <p className="text-sm font-semibold">{day.label}</p>
 
                             <div className="rounded-2xl border border-border bg-muted/20 p-4 space-y-3">
                               <div className="space-y-2">
@@ -940,6 +1040,16 @@ export function ProgramFormScreen({
                                 )}
                               </div>
                             )}
+
+                            <Button
+                              type="button"
+                              variant="outline"
+                              className="w-full"
+                              onClick={() => addExercise(day.key)}
+                            >
+                              <Plus className="mr-2 h-4 w-4" />
+                              Add exercise
+                            </Button>
                           </div>
                         </TabsContent>
                       ))}
@@ -963,7 +1073,7 @@ export function ProgramFormScreen({
                 <p className="text-sm font-semibold">Program summary</p>
                 <p className="text-sm text-muted-foreground">
                   {planName || 'Untitled program'} · {durationWeeks || '--'}{' '}
-                  weeks
+                  days
                 </p>
               </div>
 
@@ -1032,38 +1142,43 @@ export function ProgramFormScreen({
           </Card>
         )}
 
-        <div className="flex items-center justify-between gap-3">
-          <Button
-            variant="outline"
-            className="flex-1"
-            onClick={() => setStepIndex((prev) => Math.max(prev - 1, 0))}
-            disabled={isFirstStep || isSubmitting}
-          >
-            <ChevronLeft className="mr-2 h-4 w-4" />
-            Back
-          </Button>
-          <Button
-            className="flex-1"
-            onClick={() => {
-              if (isLastStep) {
-                handleSubmit()
-              } else {
-                setStepIndex((prev) => Math.min(prev + 1, steps.length - 1))
-              }
-            }}
-            disabled={isSubmitting}
-          >
-            {isLastStep
-              ? isSubmitting
-                ? isEditing
-                  ? 'Saving changes...'
-                  : 'Saving...'
-                : isEditing
-                  ? 'Save changes'
-                  : 'Save Program'
-              : 'Continue'}
-            <ChevronRight className="ml-2 h-4 w-4" />
-          </Button>
+      </div>
+
+      <div className="fixed inset-x-0 z-50 bottom-[calc(4rem+env(safe-area-inset-bottom))] border-t border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
+        <div className="mx-auto w-full max-w-screen-sm px-4 py-3">
+          <div className="flex items-center justify-between gap-3">
+            <Button
+              variant="outline"
+              className="flex-1"
+              onClick={() => setStepIndex((prev) => Math.max(prev - 1, 0))}
+              disabled={isFirstStep || isSubmitting}
+            >
+              <ChevronLeft className="mr-2 h-4 w-4" />
+              Back
+            </Button>
+            <Button
+              className="flex-1"
+              onClick={() => {
+                if (isLastStep) {
+                  handleSubmit()
+                } else if (validateStep(stepIndex)) {
+                  setStepIndex((prev) => Math.min(prev + 1, steps.length - 1))
+                }
+              }}
+              disabled={isSubmitting}
+            >
+              {isLastStep
+                ? isSubmitting
+                  ? isEditing
+                    ? 'Saving changes...'
+                    : 'Saving...'
+                  : isEditing
+                    ? 'Save changes'
+                    : 'Save Program'
+                : 'Continue'}
+              <ChevronRight className="ml-2 h-4 w-4" />
+            </Button>
+          </div>
         </div>
       </div>
     </div>
