@@ -166,7 +166,10 @@ export function ProfileForm({ userId, onSignOut }: ProfileFormProps) {
               </Button>
             </>
           ) : (
-            <></>
+            <Button variant="outline" onClick={() => setIsEditing(true)}>
+              <PencilLine className="mr-2 h-4 w-4" />
+              Edit
+            </Button>
           )}
         </div>
       </header>
