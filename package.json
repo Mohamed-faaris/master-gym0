@@ -17,6 +17,7 @@
     "db:studio": "drizzle-kit studio",
     "convex:seed": "convex run seed:seedDatabase",
     "convex:seed:admin": "convex run seed:seedAdminOnly",
+    "convex:seed:about": "convex run seed:seedAboutOnly",
     "convex:clear": "convex run seed:clearDatabase",
     "pnpm:basic-seed": "pnpm convex:clear && pnpm convex:seed:admin",
     "cap:sync": "npx cap sync",

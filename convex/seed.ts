@@ -1259,6 +1259,50 @@ export const seedDatabase = mutation({
   },
 })
 
+// Seed script to create/update only About Us content
+export const seedAboutOnly = mutation({
+  handler: async (ctx) => {
+    const now = Date.now()
+
+    // If an active about content exists, update it; otherwise insert a new one
+    const existing = await ctx.db
+      .query('aboutContent')
+      .withIndex('by_status', (q) => q.eq('status', 'active'))
+      .order('desc')
+      .first()
+
+    const payload = {
+      title: 'Master Gym',
+      subtitle: 'Your fitness partner',
+      paragraph:
+        'Master Gym is dedicated to helping individuals achieve their fitness goals through personalized training, expert coaching, and a supportive community.',
+      branchNames: ['Downtown', 'Uptown'],
+      achievements: ['1000+ members', 'Certified trainers', 'Proven results'],
+      founderName: 'Arjun Murthy',
+      founderRole: 'Founder & Head Trainer',
+      founderBio: 'Passionate about fitness and coaching for over 10 years.',
+      status: 'active',
+    }
+
+    if (existing) {
+      await ctx.db.patch(existing._id, {
+        ...payload,
+        updatedAt: now,
+      })
+
+      return { success: true, created: false, id: existing._id }
+    }
+
+    const id = await ctx.db.insert('aboutContent', {
+      ...payload,
+      createdAt: now,
+      updatedAt: now,
+    })
+
+    return { success: true, created: true, id }
+  },
+})
+
 // Seed script to create/update only admin credentials
 export const seedAdminOnly = mutation({
   handler: async (ctx) => {
