@@ -177,7 +177,6 @@ const userMeasurement = defineTable({
   legs: v.optional(v.number()),
 
   timeSpanDays: v.optional(v.number()),
-  timeSpanWeeks: v.optional(v.number()),
 
   createdAt: v.number(),
   updatedAt: v.number(),
@@ -234,7 +233,6 @@ const trainingPlans = defineTable({
   ),
 
   durationDays: v.optional(v.number()),
-  durationWeeks: v.optional(v.number()),
   createdBy: v.id('users'),
   createdAt: v.number(),
   updatedAt: v.number(),
@@ -245,7 +243,6 @@ export const dietPlans = defineTable({
   description: v.string(),
   goal: v.optional(v.string()),
   durationDays: v.optional(v.number()),
-  durationWeeks: v.optional(v.number()),
 
   // Days that are active in this plan
   activeDays: v.array(DayOfWeekValidator),

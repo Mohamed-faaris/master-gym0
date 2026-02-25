@@ -126,26 +126,24 @@ export function ProfileForm({ userId, onSignOut }: ProfileFormProps) {
 
   return (
     <section className="space-y-5">
-      <header className="flex flex-wrap items-end justify-between gap-3">
-        <div className="flex items-center gap-3">
-          <div>
-            <h1 className="text-3xl font-semibold text-foreground">Profile</h1>
-            <p className="text-sm text-muted-foreground">
-              Review account information and update only when needed.
-            </p>
-          </div>
-
-          <Button
-            variant="outline"
-            onClick={() => {
-              onSignOut()
-              navigate({ to: '/app/sign-in' })
-            }}
-          >
-            <LogOut className="mr-2 h-4 w-4" />
-            Logout
-          </Button>
+      <header className="flex items-center justify-between gap-3">
+        <div>
+          <h1 className="text-3xl font-semibold text-foreground">Profile</h1>
+          <p className="text-sm text-muted-foreground">
+            Review account information and update only when needed.
+          </p>
         </div>
+
+        <Button
+          variant="outline"
+          onClick={() => {
+            onSignOut()
+            navigate({ to: '/app/sign-in' })
+          }}
+        >
+          <LogOut className="mr-2 h-4 w-4" />
+          Logout
+        </Button>
 
         <div className="flex items-center gap-2">
           {isEditing ? (
