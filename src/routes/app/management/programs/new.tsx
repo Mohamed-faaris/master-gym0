@@ -769,6 +769,7 @@ export function ProgramFormScreen({
                   </label>
                   <Input
                     type="number"
+                    placeholder='e.g. 28'
                     min={1}
                     value={durationWeeks}
                     onChange={(event) => setDurationWeeks(event.target.value)}
