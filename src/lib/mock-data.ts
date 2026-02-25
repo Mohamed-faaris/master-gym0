@@ -389,7 +389,7 @@ export interface TrainerProgramSummary {
   name: string
   focus: string
   level: 'Beginner' | 'Intermediate' | 'Advanced'
-  durationWeeks: number
+  durationDays: number
   status: 'In review' | 'Live' | 'Draft'
   athletesAssigned: number
 }
@@ -596,257 +596,257 @@ export const TRAINER_DASHBOARD_MOCK: TrainerDashboardData = {
 }
 
 export const TRAINER_CLIENT_DETAILS_MOCK: Record<string, TrainerClientDetail> =
-{
-  'client-1': {
-    id: 'client-1',
-    name: 'Noah Patel',
-    focus: 'Power + sprint work',
-    readiness: 'Green',
-    compliance: 92,
-    trend: '+4% week-over-week',
-    plan: 'Block 3 • Week 2',
-    metrics: [
-      { label: 'Average load', value: '8,450 lb', helper: 'Last 7 sessions' },
-      { label: 'Session RPE', value: '7.2', helper: 'Moderate intensity' },
-      { label: 'Sleep avg', value: '7h 45m', helper: 'Trending up' },
-      {
-        label: 'Nutrition compliance',
-        value: '94%',
-        helper: 'Macros on target',
-      },
-    ],
-    readinessBreakdown: [
-      { label: 'Load', current: 78, target: 80 },
-      { label: 'Recovery', current: 84, target: 88 },
-      { label: 'Mindset', current: 76, target: 80 },
-    ],
-    recentWorkouts: [
-      {
-        id: 'nw1',
-        title: 'Acceleration clusters',
-        date: 'Tue · 06:30',
-        focus: 'Track sprint work',
-        load: 'High CNS',
-        readiness: 'Green',
-      },
-      {
-        id: 'nw2',
-        title: 'Strength density',
-        date: 'Sun · 09:00',
-        focus: 'Lower-body',
-        load: 'Moderate',
-        readiness: 'Green',
-      },
-      {
-        id: 'nw3',
-        title: 'Assault bike intervals',
-        date: 'Fri · 07:15',
-        focus: 'Conditioning',
-        load: 'Low',
-        readiness: 'Amber',
-      },
-    ],
-    nutritionLog: [
-      {
-        id: 'nn1',
-        time: '08:00',
-        mealType: 'Breakfast',
-        description: 'Protein oats + berries',
-        calories: 480,
-      },
-      {
-        id: 'nn2',
-        time: '13:00',
-        mealType: 'Midday Snack',
-        description: 'Turkey quinoa bowl',
-        calories: 620,
-      },
-      {
-        id: 'nn3',
-        time: '19:30',
-        mealType: 'Lunch',
-        description: 'Salmon, rice, greens',
-        calories: 710,
-      },
-    ],
-    actionItems: [
-      {
-        id: 'na1',
-        label: 'Upload sprint footage',
-        status: 'In progress',
-        description: 'Share slow-mo clips for technical review.',
-      },
-      {
-        id: 'na2',
-        label: 'Nutrition check-in',
-        status: 'Queued',
-        description: 'Review new macro targets on Thu.',
-      },
-    ],
-  },
-  'client-2': {
-    id: 'client-2',
-    name: 'Amelia Trent',
-    focus: 'Hybrid marathon prep',
-    readiness: 'Amber',
-    compliance: 86,
-    trend: '-2% week-over-week',
-    plan: 'Deload scheduled',
-    metrics: [
-      { label: 'Long-run pace', value: '5:05 /km', helper: 'Goal 4:55 /km' },
-      {
-        label: 'VO₂ max',
-        value: '51 ml/kg/min',
-        helper: 'Hold through deload',
-      },
-      { label: 'HRV avg', value: '68 ms', helper: 'Down 5% this week' },
-      { label: 'Strength touchpoints', value: '2', helper: 'Need 3 minimum' },
-    ],
-    readinessBreakdown: [
-      { label: 'Load', current: 64, target: 75 },
-      { label: 'Recovery', current: 70, target: 80 },
-      { label: 'Mindset', current: 82, target: 85 },
-    ],
-    recentWorkouts: [
-      {
-        id: 'aw1',
-        title: 'Tempo + hills',
-        date: 'Mon · 05:45',
-        focus: 'Run economy',
-        load: 'High',
-        readiness: 'Amber',
-      },
-      {
-        id: 'aw2',
-        title: 'Joint prep circuit',
-        date: 'Sat · 08:15',
-        focus: 'Strength support',
-        load: 'Low',
-        readiness: 'Green',
-      },
-    ],
-    nutritionLog: [
-      {
-        id: 'an1',
-        time: '07:30',
-        mealType: 'Breakfast',
-        description: 'Bagel + egg whites',
-        calories: 520,
-      },
-      {
-        id: 'an2',
-        time: '12:15',
-        mealType: 'Lunch',
-        description: 'Chicken wrap, greens',
-        calories: 610,
-      },
-      {
-        id: 'an3',
-        time: '21:00',
-        mealType: 'Snack',
-        description: 'Casein shake',
-        calories: 230,
-      },
-    ],
-    actionItems: [
-      {
-        id: 'aa1',
-        label: 'Schedule deload call',
-        status: 'Queued',
-        description: 'Align on next block adjustments.',
-      },
-      {
-        id: 'aa2',
-        label: 'Upload HRV screenshots',
-        status: 'Blocked',
-        description: 'Waiting for morning readings.',
-      },
-    ],
-  },
-  'client-3': {
-    id: 'client-3',
-    name: 'Leo Morales',
-    focus: 'Strength / hypertrophy',
-    readiness: 'Green',
-    compliance: 89,
-    trend: '+1% week-over-week',
-    plan: 'Push/pull split',
-    metrics: [
-      { label: 'Volume PRs', value: '3', helper: 'Hit this week' },
-      { label: 'Avg. tonnage', value: '32k lb', helper: 'Up 6%' },
-      { label: 'Sleep avg', value: '7h 10m', helper: 'Stable' },
-      { label: 'Energy check-ins', value: 'Green', helper: 'No red flags' },
-    ],
-    readinessBreakdown: [
-      { label: 'Load', current: 81, target: 82 },
-      { label: 'Recovery', current: 79, target: 83 },
-      { label: 'Mindset', current: 74, target: 78 },
-    ],
-    recentWorkouts: [
-      {
-        id: 'lw1',
-        title: 'Upper push volume',
-        date: 'Tue · 18:00',
-        focus: 'Chest + triceps',
-        load: 'Moderate',
-        readiness: 'Green',
-      },
-      {
-        id: 'lw2',
-        title: 'Lower strength wave',
-        date: 'Sun · 10:00',
-        focus: 'Squat + hinge',
-        load: 'High',
-        readiness: 'Green',
-      },
-      {
-        id: 'lw3',
-        title: 'Conditioning finisher',
-        date: 'Fri · 17:30',
-        focus: 'Bike sprints',
-        load: 'Low',
-        readiness: 'Green',
-      },
-    ],
-    nutritionLog: [
-      {
-        id: 'ln1',
-        time: '09:00',
-        mealType: 'Breakfast',
-        description: 'Egg scramble + rice',
-        calories: 650,
-      },
-      {
-        id: 'ln2',
-        time: '14:00',
-        mealType: 'Lunch',
-        description: 'Steak bowl',
-        calories: 780,
-      },
-      {
-        id: 'ln3',
-        time: '22:00',
-        mealType: 'Snack',
-        description: 'Greek yogurt + honey',
-        calories: 320,
-      },
-    ],
-    actionItems: [
-      {
-        id: 'la1',
-        label: 'Film squat top set',
-        status: 'Queued',
-        description: 'Need angle check before adding load.',
-      },
-      {
-        id: 'la2',
-        label: 'Update macro targets',
-        status: 'In progress',
-        description: 'Adjust carbs on heavy days.',
-      },
-    ],
-  },
-}
+  {
+    'client-1': {
+      id: 'client-1',
+      name: 'Noah Patel',
+      focus: 'Power + sprint work',
+      readiness: 'Green',
+      compliance: 92,
+      trend: '+4% week-over-week',
+      plan: 'Block 3 • Week 2',
+      metrics: [
+        { label: 'Average load', value: '8,450 lb', helper: 'Last 7 sessions' },
+        { label: 'Session RPE', value: '7.2', helper: 'Moderate intensity' },
+        { label: 'Sleep avg', value: '7h 45m', helper: 'Trending up' },
+        {
+          label: 'Nutrition compliance',
+          value: '94%',
+          helper: 'Macros on target',
+        },
+      ],
+      readinessBreakdown: [
+        { label: 'Load', current: 78, target: 80 },
+        { label: 'Recovery', current: 84, target: 88 },
+        { label: 'Mindset', current: 76, target: 80 },
+      ],
+      recentWorkouts: [
+        {
+          id: 'nw1',
+          title: 'Acceleration clusters',
+          date: 'Tue · 06:30',
+          focus: 'Track sprint work',
+          load: 'High CNS',
+          readiness: 'Green',
+        },
+        {
+          id: 'nw2',
+          title: 'Strength density',
+          date: 'Sun · 09:00',
+          focus: 'Lower-body',
+          load: 'Moderate',
+          readiness: 'Green',
+        },
+        {
+          id: 'nw3',
+          title: 'Assault bike intervals',
+          date: 'Fri · 07:15',
+          focus: 'Conditioning',
+          load: 'Low',
+          readiness: 'Amber',
+        },
+      ],
+      nutritionLog: [
+        {
+          id: 'nn1',
+          time: '08:00',
+          mealType: 'Breakfast',
+          description: 'Protein oats + berries',
+          calories: 480,
+        },
+        {
+          id: 'nn2',
+          time: '13:00',
+          mealType: 'Midday Snack',
+          description: 'Turkey quinoa bowl',
+          calories: 620,
+        },
+        {
+          id: 'nn3',
+          time: '19:30',
+          mealType: 'Lunch',
+          description: 'Salmon, rice, greens',
+          calories: 710,
+        },
+      ],
+      actionItems: [
+        {
+          id: 'na1',
+          label: 'Upload sprint footage',
+          status: 'In progress',
+          description: 'Share slow-mo clips for technical review.',
+        },
+        {
+          id: 'na2',
+          label: 'Nutrition check-in',
+          status: 'Queued',
+          description: 'Review new macro targets on Thu.',
+        },
+      ],
+    },
+    'client-2': {
+      id: 'client-2',
+      name: 'Amelia Trent',
+      focus: 'Hybrid marathon prep',
+      readiness: 'Amber',
+      compliance: 86,
+      trend: '-2% week-over-week',
+      plan: 'Deload scheduled',
+      metrics: [
+        { label: 'Long-run pace', value: '5:05 /km', helper: 'Goal 4:55 /km' },
+        {
+          label: 'VO₂ max',
+          value: '51 ml/kg/min',
+          helper: 'Hold through deload',
+        },
+        { label: 'HRV avg', value: '68 ms', helper: 'Down 5% this week' },
+        { label: 'Strength touchpoints', value: '2', helper: 'Need 3 minimum' },
+      ],
+      readinessBreakdown: [
+        { label: 'Load', current: 64, target: 75 },
+        { label: 'Recovery', current: 70, target: 80 },
+        { label: 'Mindset', current: 82, target: 85 },
+      ],
+      recentWorkouts: [
+        {
+          id: 'aw1',
+          title: 'Tempo + hills',
+          date: 'Mon · 05:45',
+          focus: 'Run economy',
+          load: 'High',
+          readiness: 'Amber',
+        },
+        {
+          id: 'aw2',
+          title: 'Joint prep circuit',
+          date: 'Sat · 08:15',
+          focus: 'Strength support',
+          load: 'Low',
+          readiness: 'Green',
+        },
+      ],
+      nutritionLog: [
+        {
+          id: 'an1',
+          time: '07:30',
+          mealType: 'Breakfast',
+          description: 'Bagel + egg whites',
+          calories: 520,
+        },
+        {
+          id: 'an2',
+          time: '12:15',
+          mealType: 'Lunch',
+          description: 'Chicken wrap, greens',
+          calories: 610,
+        },
+        {
+          id: 'an3',
+          time: '21:00',
+          mealType: 'Snack',
+          description: 'Casein shake',
+          calories: 230,
+        },
+      ],
+      actionItems: [
+        {
+          id: 'aa1',
+          label: 'Schedule deload call',
+          status: 'Queued',
+          description: 'Align on next block adjustments.',
+        },
+        {
+          id: 'aa2',
+          label: 'Upload HRV screenshots',
+          status: 'Blocked',
+          description: 'Waiting for morning readings.',
+        },
+      ],
+    },
+    'client-3': {
+      id: 'client-3',
+      name: 'Leo Morales',
+      focus: 'Strength / hypertrophy',
+      readiness: 'Green',
+      compliance: 89,
+      trend: '+1% week-over-week',
+      plan: 'Push/pull split',
+      metrics: [
+        { label: 'Volume PRs', value: '3', helper: 'Hit this week' },
+        { label: 'Avg. tonnage', value: '32k lb', helper: 'Up 6%' },
+        { label: 'Sleep avg', value: '7h 10m', helper: 'Stable' },
+        { label: 'Energy check-ins', value: 'Green', helper: 'No red flags' },
+      ],
+      readinessBreakdown: [
+        { label: 'Load', current: 81, target: 82 },
+        { label: 'Recovery', current: 79, target: 83 },
+        { label: 'Mindset', current: 74, target: 78 },
+      ],
+      recentWorkouts: [
+        {
+          id: 'lw1',
+          title: 'Upper push volume',
+          date: 'Tue · 18:00',
+          focus: 'Chest + triceps',
+          load: 'Moderate',
+          readiness: 'Green',
+        },
+        {
+          id: 'lw2',
+          title: 'Lower strength wave',
+          date: 'Sun · 10:00',
+          focus: 'Squat + hinge',
+          load: 'High',
+          readiness: 'Green',
+        },
+        {
+          id: 'lw3',
+          title: 'Conditioning finisher',
+          date: 'Fri · 17:30',
+          focus: 'Bike sprints',
+          load: 'Low',
+          readiness: 'Green',
+        },
+      ],
+      nutritionLog: [
+        {
+          id: 'ln1',
+          time: '09:00',
+          mealType: 'Breakfast',
+          description: 'Egg scramble + rice',
+          calories: 650,
+        },
+        {
+          id: 'ln2',
+          time: '14:00',
+          mealType: 'Lunch',
+          description: 'Steak bowl',
+          calories: 780,
+        },
+        {
+          id: 'ln3',
+          time: '22:00',
+          mealType: 'Snack',
+          description: 'Greek yogurt + honey',
+          calories: 320,
+        },
+      ],
+      actionItems: [
+        {
+          id: 'la1',
+          label: 'Film squat top set',
+          status: 'Queued',
+          description: 'Need angle check before adding load.',
+        },
+        {
+          id: 'la2',
+          label: 'Update macro targets',
+          status: 'In progress',
+          description: 'Adjust carbs on heavy days.',
+        },
+      ],
+    },
+  }
 
 export const TRAINER_PROGRAMS_MOCK: TrainerProgramSummary[] = [
   {
@@ -854,7 +854,7 @@ export const TRAINER_PROGRAMS_MOCK: TrainerProgramSummary[] = [
     name: 'Acceleration Builder',
     focus: 'Speed + sprint mechanics',
     level: 'Intermediate',
-    durationWeeks: 6,
+    durationDays: 6 * 7,
     status: 'Live',
     athletesAssigned: 8,
   },
@@ -863,7 +863,7 @@ export const TRAINER_PROGRAMS_MOCK: TrainerProgramSummary[] = [
     name: 'Hybrid Marathon Prep',
     focus: 'Endurance + strength support',
     level: 'Advanced',
-    durationWeeks: 10,
+    durationDays: 10 * 7,
     status: 'In review',
     athletesAssigned: 4,
   },
@@ -872,7 +872,7 @@ export const TRAINER_PROGRAMS_MOCK: TrainerProgramSummary[] = [
     name: 'Foundations Reloaded',
     focus: 'General strength + mobility',
     level: 'Beginner',
-    durationWeeks: 4,
+    durationDays: 4 * 7,
     status: 'Draft',
     athletesAssigned: 0,
   },

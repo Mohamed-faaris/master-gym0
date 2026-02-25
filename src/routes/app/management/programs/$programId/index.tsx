@@ -107,7 +107,7 @@ function ProgramDetailRoute() {
                   <div className="flex items-center gap-2">
                     <Calendar className="h-4 w-4" />
                     <span className="font-medium">
-                      {program.durationWeeks} weeks
+                      {program.durationDays} days
                     </span>
                   </div>
                 </div>

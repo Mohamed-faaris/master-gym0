@@ -135,7 +135,7 @@ export const seedDatabase = mutation({
       name: 'Beginner Strength Training',
       description:
         'A comprehensive 8-week strength training program for beginners',
-      durationWeeks: 8,
+      durationDays: 8 * 7,
       isCopy: false,
       isAssigned: false,
       days: [
@@ -357,7 +357,7 @@ export const seedDatabase = mutation({
     const cardioEndurancePlanId = await ctx.db.insert('trainingPlans', {
       name: 'Cardio & Endurance Builder',
       description: '6-week cardio and endurance focused training program',
-      durationWeeks: 6,
+      durationDays: 6 * 7,
       isCopy: false,
       isAssigned: false,
       days: [
@@ -580,7 +580,7 @@ export const seedDatabase = mutation({
       name: 'Weight Loss Meal Plan',
       description: 'Balanced calorie-deficit meal plan for healthy weight loss',
       goal: 'Weight Loss',
-      durationWeeks: 8,
+      durationDays: 8 * 7,
       activeDays: ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'],
       dailyCalorieTarget: 1800,
       hydrationTarget: '3 liters',
@@ -596,7 +596,7 @@ export const seedDatabase = mutation({
       name: 'Muscle Building Meal Plan',
       description: 'High-protein, calorie-surplus plan for muscle growth',
       goal: 'Muscle Gain',
-      durationWeeks: 12,
+      durationDays: 12 * 7,
       activeDays: ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'],
       dailyCalorieTarget: 3000,
       hydrationTarget: '4 liters',

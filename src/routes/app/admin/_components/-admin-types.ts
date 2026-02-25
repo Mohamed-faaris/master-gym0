@@ -33,7 +33,7 @@ export interface AdminUser {
     hip?: number
     arms?: number
     legs?: number
-    timeSpanWeeks?: number
+    timeSpanDays?: number
     updatedAt?: number
   } | null
 }

@@ -94,7 +94,7 @@ export function AdminShell() {
     hip: '',
     arms: '',
     legs: '',
-    timeSpanWeeks: '',
+    timeSpanDays: '',
   })
 
   const [changePinDrawerOpen, setChangePinDrawerOpen] = useState(false)
@@ -149,7 +149,7 @@ export function AdminShell() {
       hip: '',
       arms: '',
       legs: '',
-      timeSpanWeeks: '',
+      timeSpanDays: '',
     })
   }
 
@@ -204,9 +204,9 @@ export function AdminShell() {
         target.measurements?.legs !== undefined
           ? String(target.measurements.legs)
           : '',
-      timeSpanWeeks:
-        target.measurements?.timeSpanWeeks !== undefined
-          ? String(target.measurements.timeSpanWeeks)
+      timeSpanDays:
+        target.measurements?.timeSpanDays !== undefined
+          ? String(target.measurements.timeSpanDays)
           : '',
     })
     setOnboardDrawerOpen(true)
@@ -292,7 +292,7 @@ export function AdminShell() {
           hip: toNumberOrUndefined(measurements.hip),
           arms: toNumberOrUndefined(measurements.arms),
           legs: toNumberOrUndefined(measurements.legs),
-          timeSpanWeeks: toNumberOrUndefined(measurements.timeSpanWeeks),
+          timeSpanDays: toNumberOrUndefined(measurements.timeSpanDays),
         }
 
         const shouldSaveMeasurements = Object.values(measurementUpdates).some(
@@ -374,7 +374,10 @@ export function AdminShell() {
 
         <AdminBottomBar onPlusClick={openCreateDrawer} />
 
-        <Drawer open={changePinDrawerOpen} onOpenChange={setChangePinDrawerOpen}>
+        <Drawer
+          open={changePinDrawerOpen}
+          onOpenChange={setChangePinDrawerOpen}
+        >
           <DrawerContent>
             <DrawerHeader>
               <DrawerTitle>Change User PIN</DrawerTitle>
@@ -431,7 +434,10 @@ export function AdminShell() {
                   }
                 }}
                 disabled={
-                  !newPin || !confirmPin || newPin !== confirmPin || isPinChanging
+                  !newPin ||
+                  !confirmPin ||
+                  newPin !== confirmPin ||
+                  isPinChanging
                 }
               >
                 {isPinChanging ? 'Updating...' : 'Update PIN'}
@@ -500,7 +506,9 @@ export function AdminShell() {
                   <label className="text-sm font-medium">Role</label>
                   <Select
                     value={newClientRole}
-                    onValueChange={(value) => setNewClientRole(value as AdminRole)}
+                    onValueChange={(value) =>
+                      setNewClientRole(value as AdminRole)
+                    }
                   >
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder="Select role" />
@@ -512,8 +520,12 @@ export function AdminShell() {
                       <SelectItem value="selfManagedCustomer">
                         {roleLabelMap.selfManagedCustomer}
                       </SelectItem>
-                      <SelectItem value="trainer">{roleLabelMap.trainer}</SelectItem>
-                      <SelectItem value="admin">{roleLabelMap.admin}</SelectItem>
+                      <SelectItem value="trainer">
+                        {roleLabelMap.trainer}
+                      </SelectItem>
+                      <SelectItem value="admin">
+                        {roleLabelMap.admin}
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -582,7 +594,10 @@ export function AdminShell() {
                       placeholder="Chest (cm)"
                       value={measurements.chest}
                       onChange={(e) =>
-                        setMeasurements({ ...measurements, chest: e.target.value })
+                        setMeasurements({
+                          ...measurements,
+                          chest: e.target.value,
+                        })
                       }
                     />
                     <Input
@@ -601,7 +616,10 @@ export function AdminShell() {
                       placeholder="Hip (cm)"
                       value={measurements.hip}
                       onChange={(e) =>
-                        setMeasurements({ ...measurements, hip: e.target.value })
+                        setMeasurements({
+                          ...measurements,
+                          hip: e.target.value,
+                        })
                       }
                     />
                     <Input
@@ -609,7 +627,10 @@ export function AdminShell() {
                       placeholder="Arms (cm)"
                       value={measurements.arms}
                       onChange={(e) =>
-                        setMeasurements({ ...measurements, arms: e.target.value })
+                        setMeasurements({
+                          ...measurements,
+                          arms: e.target.value,
+                        })
                       }
                     />
                     <Input
@@ -617,17 +638,20 @@ export function AdminShell() {
                       placeholder="Legs (cm)"
                       value={measurements.legs}
                       onChange={(e) =>
-                        setMeasurements({ ...measurements, legs: e.target.value })
+                        setMeasurements({
+                          ...measurements,
+                          legs: e.target.value,
+                        })
                       }
                     />
                     <Input
                       type="number"
-                      placeholder="Time Span (weeks)"
-                      value={measurements.timeSpanWeeks}
+                      placeholder="Time Span (days)"
+                      value={measurements.timeSpanDays}
                       onChange={(e) =>
                         setMeasurements({
                           ...measurements,
-                          timeSpanWeeks: e.target.value,
+                          timeSpanDays: e.target.value,
                         })
                       }
                     />
@@ -640,7 +664,10 @@ export function AdminShell() {
               <Button
                 onClick={handleOnboardClient}
                 disabled={
-                  !newClientName || !newClientPhone || !newClientPin || isSubmitting
+                  !newClientName ||
+                  !newClientPhone ||
+                  !newClientPin ||
+                  isSubmitting
                 }
               >
                 {isSubmitting

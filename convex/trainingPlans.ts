@@ -36,7 +36,7 @@ export const createTrainingPlan = mutation({
     name: v.string(),
     description: v.string(),
     days: v.array(DayPlanValidator),
-    durationWeeks: v.number(),
+    durationDays: v.number(),
     createdBy: v.id('users'),
   },
   handler: async (ctx, args) => {
@@ -48,7 +48,7 @@ export const createTrainingPlan = mutation({
       isCopy: false,
       isAssigned: false,
       days: args.days,
-      durationWeeks: args.durationWeeks,
+      durationDays: args.durationDays,
       createdBy: args.createdBy,
       createdAt: now,
       updatedAt: now,
@@ -116,7 +116,7 @@ export const updateTrainingPlan = mutation({
     name: v.optional(v.string()),
     description: v.optional(v.string()),
     days: v.optional(v.array(DayPlanValidator)),
-    durationWeeks: v.optional(v.number()),
+    durationDays: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
     const { trainingPlanId, ...updates } = args
@@ -183,7 +183,7 @@ export const assignTrainingPlanToUser = mutation({
       isCopy: true,
       isAssigned: true,
       days: sourceTrainingPlan.days,
-      durationWeeks: sourceTrainingPlan.durationWeeks,
+      durationDays: sourceTrainingPlan.durationDays,
       createdBy: sourceTrainingPlan.createdBy,
       createdAt: now,
       updatedAt: now,

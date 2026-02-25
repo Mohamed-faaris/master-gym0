@@ -223,7 +223,7 @@ export function ProgramFormScreen({
     Math.min(Math.max(initialStep, 0), steps.length - 1),
   )
   const [planName, setPlanName] = useState('')
-  const [durationWeeks, setDurationWeeks] = useState('')
+  const [durationDays, setDurationDays] = useState('')
   const [selectedDays, setSelectedDays] = useState<DayKey[]>([])
   const [activeWorkoutDay, setActiveWorkoutDay] = useState<DayKey | null>(null)
   const [workoutsByDay, setWorkoutsByDay] = useState<
@@ -256,7 +256,7 @@ export function ProgramFormScreen({
     if (mode !== 'edit' || !trainingPlan || didHydrateEditData) return
 
     setPlanName(trainingPlan.name)
-    setDurationWeeks(String(trainingPlan.durationWeeks))
+    setDurationDays(String(trainingPlan.durationDays))
 
     const nextSelectedDays = trainingPlan.days.map((day) => day.day as DayKey)
     setSelectedDays(nextSelectedDays)
@@ -432,7 +432,7 @@ export function ProgramFormScreen({
         return false
       }
 
-      const parsedDuration = parseInt(durationWeeks, 10)
+      const parsedDuration = parseInt(durationDays, 10)
       if (!parsedDuration || parsedDuration < 1) {
         toast.error('Duration must be at least 1 day')
         return false
@@ -468,7 +468,10 @@ export function ProgramFormScreen({
           {},
         )
         const message = Object.entries(byDay)
-          .map(([dayKey, indexes]) => `${getDayLabel(dayKey as DayKey)} (ex ${indexes.join(', ')})`)
+          .map(
+            ([dayKey, indexes]) =>
+              `${getDayLabel(dayKey as DayKey)} (ex ${indexes.join(', ')})`,
+          )
           .join(', ')
         toast.error(`Name all exercises before saving: ${message}`)
         return false
@@ -476,11 +479,15 @@ export function ProgramFormScreen({
 
       const emptyDays = selectedDays.filter((dayKey) => {
         const exercises = workoutsByDay[dayKey]
-        return !exercises.some((exercise) => exercise.exerciseName.trim() !== '')
+        return !exercises.some(
+          (exercise) => exercise.exerciseName.trim() !== '',
+        )
       })
 
       if (emptyDays.length > 0) {
-        const missingLabels = emptyDays.map((dayKey) => getDayLabel(dayKey)).join(', ')
+        const missingLabels = emptyDays
+          .map((dayKey) => getDayLabel(dayKey))
+          .join(', ')
         toast.error(`Add at least one exercise for: ${missingLabels}`)
         return false
       }
@@ -522,7 +529,7 @@ export function ProgramFormScreen({
       return
     }
 
-    const parsedDuration = parseInt(durationWeeks, 10)
+    const parsedDuration = parseInt(durationDays, 10)
 
     const invalidSetEntries: Array<{ dayKey: DayKey; exerciseIndex: number }> =
       []
@@ -543,7 +550,10 @@ export function ProgramFormScreen({
             )
 
             if (reps.error || weight.error || restTime.error) {
-              invalidSetEntries.push({ dayKey, exerciseIndex: exerciseIndex + 1 })
+              invalidSetEntries.push({
+                dayKey,
+                exerciseIndex: exerciseIndex + 1,
+              })
             }
 
             return {
@@ -592,7 +602,7 @@ export function ProgramFormScreen({
           name: planName,
           description: planName,
           days: daysPayload as any,
-          durationWeeks: parsedDuration,
+          durationDays: parsedDuration,
         })
         toast.success('Program updated successfully!')
       } else {
@@ -600,7 +610,7 @@ export function ProgramFormScreen({
           name: planName,
           description: planName,
           days: daysPayload as any,
-          durationWeeks: parsedDuration,
+          durationDays: parsedDuration,
           createdBy: user._id,
         })
         toast.success('Program created successfully!')
@@ -764,15 +774,13 @@ export function ProgramFormScreen({
               </div>
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">
-                    Duration (days)
-                  </label>
+                  <label className="text-sm font-medium">Duration (days)</label>
                   <Input
                     type="number"
-                    placeholder='e.g. 28'
+                    placeholder="e.g. 28"
                     min={1}
-                    value={durationWeeks}
-                    onChange={(event) => setDurationWeeks(event.target.value)}
+                    value={durationDays}
+                    onChange={(event) => setDurationDays(event.target.value)}
                   />
                 </div>
               </div>
@@ -1073,8 +1081,7 @@ export function ProgramFormScreen({
               <div className="rounded-2xl border border-border bg-muted/30 p-4 space-y-2">
                 <p className="text-sm font-semibold">Program summary</p>
                 <p className="text-sm text-muted-foreground">
-                  {planName || 'Untitled program'} · {durationWeeks || '--'}{' '}
-                  days
+                  {planName || 'Untitled program'} · {durationDays || '--'} days
                 </p>
               </div>
 
@@ -1142,7 +1149,6 @@ export function ProgramFormScreen({
             </CardContent>
           </Card>
         )}
-
       </div>
 
       <div className="fixed inset-x-0 z-50 bottom-[calc(4rem+env(safe-area-inset-bottom))] border-t border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">

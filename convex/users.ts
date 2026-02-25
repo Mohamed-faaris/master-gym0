@@ -248,7 +248,7 @@ export const saveMeasurements = mutation({
       hip: v.optional(v.number()),
       arms: v.optional(v.number()),
       legs: v.optional(v.number()),
-      timeSpanWeeks: v.optional(v.number()),
+      timeSpanDays: v.optional(v.number()),
     }),
   },
   handler: async (ctx, args) => {

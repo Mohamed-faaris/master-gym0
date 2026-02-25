@@ -38,7 +38,7 @@ export interface ClientDetailViewProps {
       hip?: number
       arms?: number
       legs?: number
-      timeSpanWeeks?: number
+      timeSpanDays?: number
       updatedAt?: number
     } | null
     createdAt: number
@@ -275,11 +275,11 @@ export function ClientDetailView({
                       </p>
                     </div>
                   )}
-                  {client.measurements.timeSpanWeeks && (
+                  {client.measurements.timeSpanDays && (
                     <div>
                       <p className="text-xs text-muted-foreground">Time Span</p>
                       <p className="font-medium">
-                        {client.measurements.timeSpanWeeks} weeks
+                        {client.measurements.timeSpanDays} days
                       </p>
                     </div>
                   )}

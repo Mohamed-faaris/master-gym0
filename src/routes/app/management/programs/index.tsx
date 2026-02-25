@@ -206,7 +206,7 @@ function ProgramsRoute() {
                       <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
                         <div className="flex items-center gap-1.5">
                           <Calendar className="h-4 w-4" />
-                          {program.durationWeeks} weeks
+                          {program.durationDays} days
                         </div>
                         <div className="flex items-center gap-1.5">
                           <ClipboardList className="h-4 w-4" />

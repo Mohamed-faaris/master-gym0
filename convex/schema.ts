@@ -34,7 +34,6 @@ export const CONTENT_STATUSES = ['active', 'draft', 'inactive'] as const
 
 const DAYS_OF_WEEK = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'] as const
 
-
 const EXERCISE_NAMES = [
   // CHEST (8)
   'Barbell Bench Press',
@@ -177,7 +176,7 @@ const userMeasurement = defineTable({
   arms: v.optional(v.number()),
   legs: v.optional(v.number()),
 
-  timeSpanWeeks: v.optional(v.number()),
+  timeSpanDays: v.optional(v.number()),
 
   createdAt: v.number(),
   updatedAt: v.number(),
@@ -233,7 +232,7 @@ const trainingPlans = defineTable({
     }),
   ),
 
-  durationWeeks: v.number(),
+  durationDays: v.number(),
   createdBy: v.id('users'),
   createdAt: v.number(),
   updatedAt: v.number(),
@@ -243,7 +242,7 @@ export const dietPlans = defineTable({
   name: v.string(),
   description: v.string(),
   goal: v.optional(v.string()),
-  durationWeeks: v.optional(v.number()),
+  durationDays: v.optional(v.number()),
 
   // Days that are active in this plan
   activeDays: v.array(DayOfWeekValidator),

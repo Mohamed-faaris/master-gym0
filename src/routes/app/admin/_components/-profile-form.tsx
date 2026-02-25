@@ -127,14 +127,24 @@ export function ProfileForm({ userId, onSignOut }: ProfileFormProps) {
   return (
     <section className="space-y-5">
       <header className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">
-            Admin
-          </p>
-          <h1 className="text-3xl font-semibold text-foreground">Profile</h1>
-          <p className="text-sm text-muted-foreground">
-            Review account information and update only when needed.
-          </p>
+        <div className="flex items-end gap-3">
+          <div>
+            <h1 className="text-3xl font-semibold text-foreground">Profile</h1>
+            <p className="text-sm text-muted-foreground">
+              Review account information and update only when needed.
+            </p>
+          </div>
+
+          <Button
+            variant="outline"
+            onClick={() => {
+              onSignOut()
+              navigate({ to: '/app/sign-in' })
+            }}
+          >
+            <LogOut className="mr-2 h-4 w-4" />
+            Logout
+          </Button>
         </div>
 
         <div className="flex items-center gap-2">
@@ -156,22 +166,8 @@ export function ProfileForm({ userId, onSignOut }: ProfileFormProps) {
               </Button>
             </>
           ) : (
-            <Button variant="outline" onClick={() => setIsEditing(true)}>
-              <PencilLine className="mr-2 h-4 w-4" />
-              Edit
-            </Button>
+            <></>
           )}
-
-          <Button
-            variant="outline"
-            onClick={() => {
-              onSignOut()
-              navigate({ to: '/app/sign-in' })
-            }}
-          >
-            <LogOut className="mr-2 h-4 w-4" />
-            Logout
-          </Button>
         </div>
       </header>
 
@@ -256,9 +252,7 @@ export function ProfileForm({ userId, onSignOut }: ProfileFormProps) {
       <Card>
         <CardHeader>
           <CardTitle className="text-lg">About Us Preview</CardTitle>
-          <CardDescription>
-            Live preview from active content.
-          </CardDescription>
+          <CardDescription>Live preview from active content.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
           <div className="rounded-lg border border-border bg-background px-3 py-3">
@@ -266,13 +260,17 @@ export function ProfileForm({ userId, onSignOut }: ProfileFormProps) {
               {aboutPreview?.title ?? 'No active About Us yet'}
             </p>
             <p className="mt-1 text-xs text-muted-foreground">
-              {aboutPreview?.paragraph ?? 'Publish About Us content to preview here.'}
+              {aboutPreview?.paragraph ??
+                'Publish About Us content to preview here.'}
             </p>
           </div>
           <div className="overflow-x-auto pb-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
             <div className="flex gap-2 pr-1">
               {(transformationPreview ?? []).map((image, index) => (
-                <div key={image._id} className="shrink-0 overflow-hidden rounded-md border">
+                <div
+                  key={image._id}
+                  className="shrink-0 overflow-hidden rounded-md border"
+                >
                   <img
                     src={image.imageUrl}
                     alt={`Preview ${index + 1}`}
