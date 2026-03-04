@@ -28,6 +28,16 @@ import {
 import { toast } from 'sonner'
 import { api } from '@convex/_generated/api'
 import type { Id } from '../../../../../convex/_generated/dataModel'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogPopup,
+  AlertDialogTitle,
+} from '@/components/animate-ui/components/base/alert-dialog'
 
 const privilegedRoles = new Set(['trainer', 'admin'])
 
@@ -101,6 +111,7 @@ function DietPlanDetailRoute() {
   const [activeDay, setActiveDay] = useState<DayKey>(
     () => availableDays[0] ?? dayOrder[0],
   )
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
 
   useEffect(() => {
     if (!availableDays.length) return
@@ -134,8 +145,6 @@ function DietPlanDetailRoute() {
   }, [user, isLoading, navigate])
 
   const handleDelete = async () => {
-    if (!confirm('Are you sure you want to delete this diet plan?')) return
-
     try {
       await deleteDietPlan({ dietPlanId: planId as Id<'dietPlans'> })
       toast.success('Diet plan deleted successfully')
@@ -177,7 +186,7 @@ function DietPlanDetailRoute() {
               variant="destructive"
               size="sm"
               className="gap-2"
-              onClick={handleDelete}
+              onClick={() => setDeleteDialogOpen(true)}
             >
               <Trash2 className="h-4 w-4" />
               Delete
@@ -321,6 +330,27 @@ function DietPlanDetailRoute() {
           </CardContent>
         </Card>
       </div>
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogPopup>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete diet plan?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone and will permanently delete this diet
+              plan.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={handleDelete}
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogPopup>
+      </AlertDialog>
     </div>
   )
 }

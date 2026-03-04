@@ -19,6 +19,13 @@ import { Progress } from '@/components/ui/progress'
 import { cn } from '@/lib/utils'
 import { api } from '@convex/_generated/api'
 import { Link } from '@tanstack/react-router'
+import {
+  Tabs,
+  TabsContent,
+  TabsContents,
+  TabsList,
+  TabsTrigger,
+} from '@/components/animate-ui/components/radix/tabs'
 
 export const Route = createFileRoute('/app/management/diet-plans/new')({
   component: RouteComponent,
@@ -78,8 +85,9 @@ function RouteComponent() {
   const stepIndex = Math.min(Math.max(search.step ?? 0, 0), steps.length - 1)
   const [planName, setPlanName] = useState('')
   const [goal, setGoal] = useState('')
-  const [durationWeeks, setDurationWeeks] = useState('4')
-  const [selectedDays, setSelectedDays] = useState<string[]>([])
+  const [durationDays, setDurationDays] = useState('4')
+  const [selectedDays, setSelectedDays] = useState<DayKey[]>([])
+  const [activeMealDay, setActiveMealDay] = useState<DayKey | null>(null)
   const [calorieTarget, setCalorieTarget] = useState('')
   const [hydrationTarget, setHydrationTarget] = useState('')
   const [coachNote, setCoachNote] = useState('')
@@ -124,12 +132,63 @@ function RouteComponent() {
     [stepIndex],
   )
 
-  const toggleDay = (dayKey: string) => {
+  useEffect(() => {
+    if (selectedDays.length === 0) {
+      setActiveMealDay(null)
+      return
+    }
+    if (!activeMealDay || !selectedDays.includes(activeMealDay)) {
+      setActiveMealDay(selectedDays[0])
+    }
+  }, [selectedDays, activeMealDay])
+
+  const getDayLabel = (dayKey: DayKey) =>
+    weekDays.find((entry) => entry.key === dayKey)?.label || dayKey
+
+  const toggleDay = (dayKey: DayKey) => {
     setSelectedDays((prev) =>
       prev.includes(dayKey)
         ? prev.filter((day) => day !== dayKey)
         : [...prev, dayKey],
     )
+  }
+
+  const validateStep = (currentStep: number) => {
+    if (currentStep === 0) {
+      if (!planName.trim()) {
+        toast.error('Plan name is required')
+        return false
+      }
+      const parsedDuration = parseInt(durationDays, 10)
+      if (!parsedDuration || parsedDuration < 1) {
+        toast.error('Duration must be at least 1 day')
+        return false
+      }
+    }
+
+    if (currentStep === 1) {
+      if (selectedDays.length === 0) {
+        toast.error('Please select at least one active day')
+        return false
+      }
+    }
+
+    if (currentStep === 2) {
+      const missingDays = selectedDays.filter((dayKey) => {
+        const mealsForDay = mealsByDay[dayKey]
+        return !Object.values(mealsForDay).some(
+          (meal) => meal.title.trim() !== '',
+        )
+      })
+
+      if (missingDays.length > 0) {
+        const missingLabels = missingDays.map((day) => getDayLabel(day)).join(', ')
+        toast.error(`Add at least one meal for: ${missingLabels}`)
+        return false
+      }
+    }
+
+    return true
   }
 
   const handleSubmit = async () => {
@@ -138,28 +197,7 @@ function RouteComponent() {
       return
     }
 
-    if (!planName.trim()) {
-      toast.error('Plan name is required')
-      return
-    }
-
-    if (selectedDays.length === 0) {
-      toast.error('Please select at least one active day')
-      return
-    }
-
-    const missingDays = selectedDays.filter((dayKey) => {
-      const mealsForDay = mealsByDay[dayKey as DayKey]
-      return !Object.values(mealsForDay).some(
-        (meal) => meal.title.trim() !== '',
-      )
-    })
-
-    if (missingDays.length > 0) {
-      const missingLabels = missingDays
-        .map((day) => weekDays.find((entry) => entry.key === day)?.label || day)
-        .join(', ')
-      toast.error(`Add at least one meal for: ${missingLabels}`)
+    if (!validateStep(0) || !validateStep(1) || !validateStep(2)) {
       return
     }
 
@@ -184,7 +222,7 @@ function RouteComponent() {
         name: planName,
         description: planName,
         goal: goal || undefined,
-        durationWeeks: parseInt(durationWeeks) || undefined,
+        durationDays: parseInt(durationDays) || undefined,
         activeDays: selectedDays as any,
         dailyCalorieTarget: calorieTarget
           ? parseFloat(calorieTarget)
@@ -219,7 +257,7 @@ function RouteComponent() {
   }
 
   return (
-    <div className="min-h-screen bg-background pb-24">
+    <div className="min-h-screen bg-background pb-32">
       <div className="px-4 pt-6 pb-4 space-y-4">
         <header className="space-y-3">
           <Link
@@ -244,24 +282,44 @@ function RouteComponent() {
           <Progress value={progressValue} />
         </div>
 
-        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+        <div className="grid w-full grid-cols-4 gap-2 text-xs text-muted-foreground">
           {steps.map((step, index) => (
-            <span
+            <button
               key={step.key}
+              type="button"
+              onClick={() => {
+                if (index <= stepIndex) {
+                  navigate({
+                    search: (prev) => ({ ...prev, step: index }),
+                  })
+                  return
+                }
+
+                const canMoveForward = Array.from(
+                  { length: index - stepIndex },
+                  (_, offset) => stepIndex + offset,
+                ).every((stepToValidate) => validateStep(stepToValidate))
+
+                if (canMoveForward) {
+                  navigate({
+                    search: (prev) => ({ ...prev, step: index }),
+                  })
+                }
+              }}
               className={cn(
-                'rounded-full border border-border px-3 py-1',
+                'w-full rounded-full border border-border px-3 py-1 text-center transition-colors',
                 index === stepIndex
                   ? 'bg-primary text-primary-foreground border-primary'
-                  : 'bg-muted/40',
+                  : 'bg-muted/40 hover:bg-muted',
               )}
             >
               {step.label}
-            </span>
+            </button>
           ))}
         </div>
       </div>
 
-      <div className="px-4 pb-10 space-y-4">
+      <div className="px-4 pb-36 space-y-4">
         {stepIndex === 0 && (
           <Card>
             <CardHeader className="space-y-1">
@@ -290,13 +348,13 @@ function RouteComponent() {
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-medium">
-                    Duration (weeks)
+                    Duration (days)
                   </label>
                   <Input
                     type="number"
                     min={1}
-                    value={durationWeeks}
-                    onChange={(event) => setDurationWeeks(event.target.value)}
+                    value={durationDays}
+                    onChange={(event) => setDurationDays(event.target.value)}
                   />
                 </div>
               </div>
@@ -396,110 +454,123 @@ function RouteComponent() {
                   Select active days first to add meals per day.
                 </div>
               ) : (
-                <div className="space-y-6">
-                  {weekDays
-                    .filter((day) => selectedDays.includes(day.key))
-                    .map((day) => (
-                      <div key={day.key} className="space-y-3">
-                        <div className="flex items-center justify-between">
-                          <p className="text-sm font-semibold">{day.label}</p>
-                          <span className="text-xs text-muted-foreground">
-                            Daily template
-                          </span>
-                        </div>
+                <Tabs
+                  value={activeMealDay ?? undefined}
+                  onValueChange={(value) => setActiveMealDay(value as DayKey)}
+                  className="gap-4"
+                >
+                  <TabsList className="w-full flex-wrap">
+                    {weekDays
+                      .filter((day) => selectedDays.includes(day.key))
+                      .map((day) => (
+                        <TabsTrigger key={day.key} value={day.key}>
+                          {day.label}
+                        </TabsTrigger>
+                      ))}
+                  </TabsList>
+                  <TabsContents>
+                    {weekDays
+                      .filter((day) => selectedDays.includes(day.key))
+                      .map((day) => (
+                        <TabsContent key={day.key} value={day.key}>
+                          <div className="space-y-3">
+                            <div className="flex items-center justify-between">
+                              <p className="text-sm font-semibold">{day.label}</p>
+                              <span className="text-xs text-muted-foreground">
+                                Daily template
+                              </span>
+                            </div>
 
-                        <div className="space-y-4">
-                          {(Object.keys(mealsByDay[day.key]) as MealType[]).map(
-                            (mealType) => (
-                              <div
-                                key={`${day.key}-${mealType}`}
-                                className="rounded-2xl border border-border bg-muted/30 p-4 space-y-3"
-                              >
-                                <div className="flex items-center justify-between">
-                                  <span className="text-sm font-semibold">
-                                    {mealTypeLabels[mealType]}
-                                  </span>
-                                  <span className="text-xs text-muted-foreground">
-                                    Template entry
-                                  </span>
-                                </div>
-                                <div className="space-y-2">
-                                  <label className="text-xs font-medium uppercase text-muted-foreground">
-                                    Meal title
-                                  </label>
-                                  <Input
-                                    placeholder="e.g. Protein oats"
-                                    value={mealsByDay[day.key][mealType].title}
-                                    onChange={(event) =>
-                                      setMealsByDay((prev) => ({
-                                        ...prev,
-                                        [day.key]: {
-                                          ...prev[day.key],
-                                          [mealType]: {
-                                            ...prev[day.key][mealType],
-                                            title: event.target.value,
-                                          },
-                                        },
-                                      }))
-                                    }
-                                  />
-                                </div>
-                                <div className="space-y-2">
-                                  <label className="text-xs font-medium uppercase text-muted-foreground">
-                                    Description
-                                  </label>
-                                  <textarea
-                                    className="w-full min-h-[80px] rounded-lg border border-border bg-background px-3 py-2 text-sm"
-                                    placeholder="Ingredients, timing, or portion notes."
-                                    value={
-                                      mealsByDay[day.key][mealType].description
-                                    }
-                                    onChange={(event) =>
-                                      setMealsByDay((prev) => ({
-                                        ...prev,
-                                        [day.key]: {
-                                          ...prev[day.key],
-                                          [mealType]: {
-                                            ...prev[day.key][mealType],
-                                            description: event.target.value,
-                                          },
-                                        },
-                                      }))
-                                    }
-                                  />
-                                </div>
-                                <div className="space-y-2">
-                                  <label className="text-xs font-medium uppercase text-muted-foreground">
-                                    Calories
-                                  </label>
-                                  <Input
-                                    type="number"
-                                    min={0}
-                                    placeholder="0"
-                                    value={
-                                      mealsByDay[day.key][mealType].calories
-                                    }
-                                    onChange={(event) =>
-                                      setMealsByDay((prev) => ({
-                                        ...prev,
-                                        [day.key]: {
-                                          ...prev[day.key],
-                                          [mealType]: {
-                                            ...prev[day.key][mealType],
-                                            calories: event.target.value,
-                                          },
-                                        },
-                                      }))
-                                    }
-                                  />
-                                </div>
-                              </div>
-                            ),
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                </div>
+                            <div className="space-y-4">
+                              {(Object.keys(mealsByDay[day.key]) as MealType[]).map(
+                                (mealType) => (
+                                  <div
+                                    key={`${day.key}-${mealType}`}
+                                    className="rounded-2xl border border-border bg-muted/30 p-4 space-y-3"
+                                  >
+                                    <div className="flex items-center justify-between">
+                                      <span className="text-sm font-semibold">
+                                        {mealTypeLabels[mealType]}
+                                      </span>
+                                      <span className="text-xs text-muted-foreground">
+                                        Template entry
+                                      </span>
+                                    </div>
+                                    <div className="space-y-2">
+                                      <label className="text-xs font-medium uppercase text-muted-foreground">
+                                        Meal title
+                                      </label>
+                                      <Input
+                                        placeholder="e.g. Protein oats"
+                                        value={mealsByDay[day.key][mealType].title}
+                                        onChange={(event) =>
+                                          setMealsByDay((prev) => ({
+                                            ...prev,
+                                            [day.key]: {
+                                              ...prev[day.key],
+                                              [mealType]: {
+                                                ...prev[day.key][mealType],
+                                                title: event.target.value,
+                                              },
+                                            },
+                                          }))
+                                        }
+                                      />
+                                    </div>
+                                    <div className="space-y-2">
+                                      <label className="text-xs font-medium uppercase text-muted-foreground">
+                                        Description
+                                      </label>
+                                      <textarea
+                                        className="w-full min-h-[80px] rounded-lg border border-border bg-background px-3 py-2 text-sm"
+                                        placeholder="Ingredients, timing, or portion notes."
+                                        value={mealsByDay[day.key][mealType].description}
+                                        onChange={(event) =>
+                                          setMealsByDay((prev) => ({
+                                            ...prev,
+                                            [day.key]: {
+                                              ...prev[day.key],
+                                              [mealType]: {
+                                                ...prev[day.key][mealType],
+                                                description: event.target.value,
+                                              },
+                                            },
+                                          }))
+                                        }
+                                      />
+                                    </div>
+                                    <div className="space-y-2">
+                                      <label className="text-xs font-medium uppercase text-muted-foreground">
+                                        Calories
+                                      </label>
+                                      <Input
+                                        type="number"
+                                        min={0}
+                                        placeholder="0"
+                                        value={mealsByDay[day.key][mealType].calories}
+                                        onChange={(event) =>
+                                          setMealsByDay((prev) => ({
+                                            ...prev,
+                                            [day.key]: {
+                                              ...prev[day.key],
+                                              [mealType]: {
+                                                ...prev[day.key][mealType],
+                                                calories: event.target.value,
+                                              },
+                                            },
+                                          }))
+                                        }
+                                      />
+                                    </div>
+                                  </div>
+                                ),
+                              )}
+                            </div>
+                          </div>
+                        </TabsContent>
+                      ))}
+                  </TabsContents>
+                </Tabs>
               )}
             </CardContent>
           </Card>
@@ -517,7 +588,7 @@ function RouteComponent() {
               <div className="rounded-2xl border border-border bg-muted/30 p-4 space-y-2">
                 <p className="text-sm font-semibold">Plan summary</p>
                 <p className="text-sm text-muted-foreground">
-                  {planName || 'Untitled plan'} · {durationWeeks || '--'} weeks
+                  {planName || 'Untitled plan'} · {durationDays || '--'} days
                 </p>
                 <p className="text-sm text-muted-foreground">
                   {goal || 'No primary goal yet'}
@@ -588,46 +659,51 @@ function RouteComponent() {
           </Card>
         )}
 
-        <div className="flex items-center justify-between gap-3">
-          <Button
-            variant="outline"
-            className="flex-1"
-            onClick={() =>
-              navigate({
-                search: (prev) => ({
-                  ...prev,
-                  step: Math.max(stepIndex - 1, 0),
-                }),
-              })
-            }
-            disabled={isFirstStep || isSubmitting}
-          >
-            <ChevronLeft className="mr-2 h-4 w-4" />
-            Back
-          </Button>
-          <Button
-            className="flex-1"
-            onClick={() => {
-              if (isLastStep) {
-                handleSubmit()
-              } else {
+      </div>
+
+      <div className="fixed inset-x-0 z-50 bottom-[calc(4rem+env(safe-area-inset-bottom))] border-t border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
+        <div className="mx-auto w-full max-w-screen-sm px-4 py-3">
+          <div className="flex items-center justify-between gap-3">
+            <Button
+              variant="outline"
+              className="flex-1"
+              onClick={() =>
                 navigate({
                   search: (prev) => ({
                     ...prev,
-                    step: Math.min(stepIndex + 1, steps.length - 1),
+                    step: Math.max(stepIndex - 1, 0),
                   }),
                 })
               }
-            }}
-            disabled={isSubmitting}
-          >
-            {isLastStep
-              ? isSubmitting
-                ? 'Saving...'
-                : 'Save Plan'
-              : 'Continue'}
-            <ChevronRight className="ml-2 h-4 w-4" />
-          </Button>
+              disabled={isFirstStep || isSubmitting}
+            >
+              <ChevronLeft className="mr-2 h-4 w-4" />
+              Back
+            </Button>
+            <Button
+              className="flex-1"
+              onClick={() => {
+                if (isLastStep) {
+                  handleSubmit()
+                } else if (validateStep(stepIndex)) {
+                  navigate({
+                    search: (prev) => ({
+                      ...prev,
+                      step: Math.min(stepIndex + 1, steps.length - 1),
+                    }),
+                  })
+                }
+              }}
+              disabled={isSubmitting}
+            >
+              {isLastStep
+                ? isSubmitting
+                  ? 'Saving...'
+                  : 'Save Plan'
+                : 'Continue'}
+              <ChevronRight className="ml-2 h-4 w-4" />
+            </Button>
+          </div>
         </div>
       </div>
     </div>

@@ -1,4 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
+import { useState } from 'react'
 import { useMutation, useQuery } from 'convex/react'
 import { toast } from 'sonner'
 
@@ -6,6 +7,16 @@ import { api } from '@convex/_generated/api'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useAuth } from '@/components/auth/useAuth'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogPopup,
+  AlertDialogTitle,
+} from '@/components/animate-ui/components/base/alert-dialog'
 
 export const Route = createFileRoute('/app/management/test-integration')({
   component: TestIntegrationPage,
@@ -22,6 +33,7 @@ function TestIntegrationPage() {
     api.dietPlans.getDietPlansByUser,
     user ? { userId: user._id } : 'skip',
   )
+  const [clearDialogOpen, setClearDialogOpen] = useState(false)
 
   const handleSeed = async () => {
     try {
@@ -35,14 +47,6 @@ function TestIntegrationPage() {
   }
 
   const handleClear = async () => {
-    if (
-      !confirm(
-        'Are you sure you want to clear ALL data? This cannot be undone!',
-      )
-    ) {
-      return
-    }
-
     try {
       const result = await clearDatabase()
       toast.success('Database cleared successfully!')
@@ -72,7 +76,7 @@ function TestIntegrationPage() {
               Seed Database
             </Button>
             <Button
-              onClick={handleClear}
+              onClick={() => setClearDialogOpen(true)}
               variant="destructive"
               className="flex-1"
             >
@@ -140,6 +144,26 @@ function TestIntegrationPage() {
           </CardContent>
         </Card>
       )}
+
+      <AlertDialog open={clearDialogOpen} onOpenChange={setClearDialogOpen}>
+        <AlertDialogPopup>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Clear all data?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone and will delete all seeded data.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={handleClear}
+            >
+              Clear Database
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogPopup>
+      </AlertDialog>
     </div>
   )
 }
