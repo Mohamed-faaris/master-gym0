@@ -164,7 +164,7 @@ export const backfillDietPlanMealDays = mutation({
       if (!hasMissingDay) continue
 
       const activeDays =
-        plan.activeDays && plan.activeDays.length > 0
+       plan.activeDays.length > 0
           ? plan.activeDays
           : dayOrder
 

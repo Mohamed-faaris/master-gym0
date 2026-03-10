@@ -70,66 +70,6 @@ const weekDays = [
 
 type DayKey = (typeof weekDays)[number]['key']
 
-const EXERCISE_NAMES = [
-  // CHEST (8)
-  'Barbell Bench Press',
-  'Incline Dumbbell Press',
-  'Decline Bench Press',
-  'Dumbbell Fly',
-  'Cable Chest Fly',
-  'Push-Ups',
-  'Dumbbell Pullover',
-  'Smith Machine Bench Press',
-  // BACK (8)
-  'Lat Pulldown',
-  'Pull-Ups / Assisted Pull-Ups',
-  'Seated Cable Row',
-  'Bent-Over Barbell Row',
-  'One-Arm Dumbbell Row',
-  'T-Bar Row',
-  'Deadlift',
-  'Straight-Arm Pulldown',
-  // SHOULDERS (7)
-  'Barbell Overhead Press',
-  'Dumbbell Lateral Raise',
-  'Front Raise',
-  'Rear Delt Fly',
-  'Arnold Press',
-  'Upright Row',
-  'Face Pull',
-  // BICEPS (6)
-  'Barbell Curl',
-  'Dumbbell Curl',
-  'Hammer Curl',
-  'Preacher Curl',
-  'Concentration Curl',
-  'Cable Biceps Curl',
-  // TRICEPS (6)
-  'Cable Triceps Pushdown',
-  'Skull Crushers',
-  'Overhead Dumbbell Triceps Extension',
-  'Bench Dips',
-  'Close-Grip Bench Press',
-  'Triceps Kickbacks',
-  // LEGS (10)
-  'Barbell Squat',
-  'Leg Press',
-  'Walking Lunges',
-  'Leg Extension',
-  'Leg Curl',
-  'Romanian Deadlift',
-  'Standing Calf Raises',
-  'Seated Calf Raises',
-  'Bulgarian Split Squat',
-  'Hack Squat',
-  // CORE / ABS (5)
-  'Hanging Leg Raises',
-  'Cable Crunch',
-  'Ab Wheel Rollout',
-  'Plank',
-  'Russian Twist',
-] as const
-
 const steps = [
   { key: 'details', label: 'Program details' },
   { key: 'schedule', label: 'Schedule' },
@@ -218,6 +158,7 @@ export function ProgramFormScreen({
     api.trainingPlans.getTrainingPlanById,
     mode === 'edit' && programId ? { trainingPlanId: programId } : 'skip',
   )
+  const exerciseNames = useQuery(api.exercises.getNames) ?? []
 
   const [stepIndex, setStepIndex] = useState(() =>
     Math.min(Math.max(initialStep, 0), steps.length - 1),
@@ -921,7 +862,7 @@ export function ProgramFormScreen({
                                         </label>
                                         <ExerciseNameField
                                           value={exercise.exerciseName}
-                                          options={EXERCISE_NAMES}
+                                          options={exerciseNames}
                                           onValueChange={(value) =>
                                             updateExerciseName(
                                               day.key,

@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import { Plus, Trash2 } from 'lucide-react'
+import { api } from '@convex/_generated/api'
+import { useQuery } from 'convex/react'
 import { Button } from '@/components/ui/button'
 import type { ProgramFormData, DayOfWeek } from '../new'
 
@@ -18,34 +20,11 @@ const DAYS_OF_WEEK: { value: DayOfWeek; label: string }[] = [
   { value: 'sun', label: 'Sunday' },
 ]
 
-const EXERCISE_NAMES = [
-  'Barbell Bench Press',
-  'Incline Dumbbell Press',
-  'Decline Bench Press',
-  'Dumbbell Fly',
-  'Cable Chest Fly',
-  'Push-Ups',
-  'Lat Pulldown',
-  'Pull-Ups / Assisted Pull-Ups',
-  'Seated Cable Row',
-  'Bent-Over Barbell Row',
-  'Deadlift',
-  'Barbell Squat',
-  'Leg Press',
-  'Walking Lunges',
-  'Romanian Deadlift',
-  'Barbell Curl',
-  'Dumbbell Curl',
-  'Cable Triceps Pushdown',
-  'Overhead Dumbbell Triceps Extension',
-  'Plank',
-  'Russian Twist',
-]
-
 export function StepAddExercises({
   programForm,
   setProgramForm,
 }: StepAddExercisesProps) {
+  const exerciseNames = useQuery(api.exercises.getNames) ?? []
   const [selectedDay, setSelectedDay] = useState<DayOfWeek | null>(
     programForm.days[0]?.day || null,
   )
@@ -60,7 +39,7 @@ export function StepAddExercises({
               exercises: [
                 ...d.exercises,
                 {
-                  exerciseName: EXERCISE_NAMES[0],
+                  exerciseName: exerciseNames[0] ?? '',
                   noOfSets: 3,
                   sets: [
                     { reps: 10, weight: 0 },
@@ -261,7 +240,7 @@ export function StepAddExercises({
                           )
                         }
                       >
-                        {EXERCISE_NAMES.map((name) => (
+                        {exerciseNames.map((name) => (
                           <option key={name} value={name}>
                             {name}
                           </option>

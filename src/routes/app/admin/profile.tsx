@@ -1,5 +1,10 @@
 import { Link, createFileRoute } from '@tanstack/react-router'
-import { BookOpenText, FileText, Image as ImageIcon } from 'lucide-react'
+import {
+  BookOpenText,
+  Dumbbell,
+  FileText,
+  Image as ImageIcon,
+} from 'lucide-react'
 
 import type { Id } from '@convex/_generated/dataModel'
 import { useAdminConsole } from './_components/-admin-shell'
@@ -39,6 +44,12 @@ function ProfilePage() {
             <Link to="/app/admin/profile-stories">
               <FileText className="mr-2 h-4 w-4" />
               Stories
+            </Link>
+          </Button>
+          <Button asChild variant="outline">
+            <Link to="/app/admin/profile-exercises">
+              <Dumbbell className="mr-2 h-4 w-4" />
+              Manage Exercises
             </Link>
           </Button>
         </CardContent>

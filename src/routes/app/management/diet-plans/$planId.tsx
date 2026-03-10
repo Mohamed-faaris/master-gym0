@@ -201,10 +201,10 @@ function DietPlanDetailRoute() {
               {dietPlan.goal}
             </div>
           )}
-          {dietPlan.durationWeeks && (
+          {dietPlan.durationDays && (
             <div className="flex items-center gap-1.5">
               <Calendar className="h-4 w-4" />
-              {dietPlan.durationWeeks} weeks
+              {dietPlan.durationDays} days
             </div>
           )}
           {dietPlan.dailyCalorieTarget && (

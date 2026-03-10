@@ -1241,6 +1241,66 @@ export const seedDatabase = mutation({
       })
     }
 
+    const EXERCISE_NAMES = [
+      'Barbell Bench Press',
+      'Incline Dumbbell Press',
+      'Decline Bench Press',
+      'Dumbbell Fly',
+      'Cable Chest Fly',
+      'Push-Ups',
+      'Dumbbell Pullover',
+      'Smith Machine Bench Press',
+      'Lat Pulldown',
+      'Pull-Ups / Assisted Pull-Ups',
+      'Seated Cable Row',
+      'Bent-Over Barbell Row',
+      'One-Arm Dumbbell Row',
+      'T-Bar Row',
+      'Deadlift',
+      'Straight-Arm Pulldown',
+      'Barbell Overhead Press',
+      'Dumbbell Lateral Raise',
+      'Front Raise',
+      'Rear Delt Fly',
+      'Arnold Press',
+      'Upright Row',
+      'Face Pull',
+      'Barbell Curl',
+      'Dumbbell Curl',
+      'Hammer Curl',
+      'Preacher Curl',
+      'Concentration Curl',
+      'Cable Biceps Curl',
+      'Cable Triceps Pushdown',
+      'Skull Crushers',
+      'Overhead Dumbbell Triceps Extension',
+      'Bench Dips',
+      'Close-Grip Bench Press',
+      'Triceps Kickbacks',
+      'Barbell Squat',
+      'Leg Press',
+      'Walking Lunges',
+      'Leg Extension',
+      'Leg Curl',
+      'Romanian Deadlift',
+      'Standing Calf Raises',
+      'Seated Calf Raises',
+      'Bulgarian Split Squat',
+      'Hack Squat',
+      'Hanging Leg Raises',
+      'Cable Crunch',
+      'Ab Wheel Rollout',
+      'Plank',
+      'Russian Twist',
+    ]
+
+    for (const name of EXERCISE_NAMES) {
+      await ctx.db.insert('exercises', {
+        name,
+        createdAt: now,
+      })
+    }
+
     return {
       success: true,
       message: 'Database seeded successfully',
@@ -1254,6 +1314,7 @@ export const seedDatabase = mutation({
         aboutContent: 1,
         successStories: 3,
         transformationImages: 6,
+        exercises: EXERCISE_NAMES.length,
       },
     }
   },
@@ -1373,6 +1434,7 @@ export const clearDatabase = mutation({
       'aboutContent',
       'successStories',
       'transformationImages',
+      'exercises',
     ] as const
 
     let totalDeleted = 0

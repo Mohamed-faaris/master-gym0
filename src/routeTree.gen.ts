@@ -22,6 +22,7 @@ import { Route as AppManagementTestIntegrationRouteImport } from './routes/app/m
 import { Route as AppManagementProfileRouteImport } from './routes/app/management/profile'
 import { Route as AppAdminProfileStoriesRouteImport } from './routes/app/admin/profile-stories'
 import { Route as AppAdminProfileImagesRouteImport } from './routes/app/admin/profile-images'
+import { Route as AppAdminProfileExercisesRouteImport } from './routes/app/admin/profile-exercises'
 import { Route as AppAdminProfileAboutRouteImport } from './routes/app/admin/profile-about'
 import { Route as AppAdminProfileRouteImport } from './routes/app/admin/profile'
 import { Route as AppUserWorkoutsRouteImport } from './routes/app/_user/workouts'
@@ -130,6 +131,12 @@ const AppAdminProfileImagesRoute = AppAdminProfileImagesRouteImport.update({
   path: '/profile-images',
   getParentRoute: () => AppAdminRouteRoute,
 } as any)
+const AppAdminProfileExercisesRoute =
+  AppAdminProfileExercisesRouteImport.update({
+    id: '/profile-exercises',
+    path: '/profile-exercises',
+    getParentRoute: () => AppAdminRouteRoute,
+  } as any)
 const AppAdminProfileAboutRoute = AppAdminProfileAboutRouteImport.update({
   id: '/profile-about',
   path: '/profile-about',
@@ -379,6 +386,7 @@ export interface FileRoutesByFullPath {
   '/app/workouts': typeof AppUserWorkoutsRoute
   '/app/admin/profile': typeof AppAdminProfileRoute
   '/app/admin/profile-about': typeof AppAdminProfileAboutRoute
+  '/app/admin/profile-exercises': typeof AppAdminProfileExercisesRoute
   '/app/admin/profile-images': typeof AppAdminProfileImagesRoute
   '/app/admin/profile-stories': typeof AppAdminProfileStoriesRoute
   '/app/management/profile': typeof AppManagementProfileRoute
@@ -432,6 +440,7 @@ export interface FileRoutesByTo {
   '/app/workouts': typeof AppUserWorkoutsRoute
   '/app/admin/profile': typeof AppAdminProfileRoute
   '/app/admin/profile-about': typeof AppAdminProfileAboutRoute
+  '/app/admin/profile-exercises': typeof AppAdminProfileExercisesRoute
   '/app/admin/profile-images': typeof AppAdminProfileImagesRoute
   '/app/admin/profile-stories': typeof AppAdminProfileStoriesRoute
   '/app/management/profile': typeof AppManagementProfileRoute
@@ -489,6 +498,7 @@ export interface FileRoutesById {
   '/app/_user/workouts': typeof AppUserWorkoutsRoute
   '/app/admin/profile': typeof AppAdminProfileRoute
   '/app/admin/profile-about': typeof AppAdminProfileAboutRoute
+  '/app/admin/profile-exercises': typeof AppAdminProfileExercisesRoute
   '/app/admin/profile-images': typeof AppAdminProfileImagesRoute
   '/app/admin/profile-stories': typeof AppAdminProfileStoriesRoute
   '/app/management/profile': typeof AppManagementProfileRoute
@@ -547,6 +557,7 @@ export interface FileRouteTypes {
     | '/app/workouts'
     | '/app/admin/profile'
     | '/app/admin/profile-about'
+    | '/app/admin/profile-exercises'
     | '/app/admin/profile-images'
     | '/app/admin/profile-stories'
     | '/app/management/profile'
@@ -600,6 +611,7 @@ export interface FileRouteTypes {
     | '/app/workouts'
     | '/app/admin/profile'
     | '/app/admin/profile-about'
+    | '/app/admin/profile-exercises'
     | '/app/admin/profile-images'
     | '/app/admin/profile-stories'
     | '/app/management/profile'
@@ -656,6 +668,7 @@ export interface FileRouteTypes {
     | '/app/_user/workouts'
     | '/app/admin/profile'
     | '/app/admin/profile-about'
+    | '/app/admin/profile-exercises'
     | '/app/admin/profile-images'
     | '/app/admin/profile-stories'
     | '/app/management/profile'
@@ -792,6 +805,13 @@ declare module '@tanstack/react-router' {
       path: '/profile-images'
       fullPath: '/app/admin/profile-images'
       preLoaderRoute: typeof AppAdminProfileImagesRouteImport
+      parentRoute: typeof AppAdminRouteRoute
+    }
+    '/app/admin/profile-exercises': {
+      id: '/app/admin/profile-exercises'
+      path: '/profile-exercises'
+      fullPath: '/app/admin/profile-exercises'
+      preLoaderRoute: typeof AppAdminProfileExercisesRouteImport
       parentRoute: typeof AppAdminRouteRoute
     }
     '/app/admin/profile-about': {
@@ -1087,6 +1107,7 @@ declare module '@tanstack/react-router' {
 interface AppAdminRouteRouteChildren {
   AppAdminProfileRoute: typeof AppAdminProfileRoute
   AppAdminProfileAboutRoute: typeof AppAdminProfileAboutRoute
+  AppAdminProfileExercisesRoute: typeof AppAdminProfileExercisesRoute
   AppAdminProfileImagesRoute: typeof AppAdminProfileImagesRoute
   AppAdminProfileStoriesRoute: typeof AppAdminProfileStoriesRoute
   AppAdminIndexRoute: typeof AppAdminIndexRoute
@@ -1106,6 +1127,7 @@ interface AppAdminRouteRouteChildren {
 const AppAdminRouteRouteChildren: AppAdminRouteRouteChildren = {
   AppAdminProfileRoute: AppAdminProfileRoute,
   AppAdminProfileAboutRoute: AppAdminProfileAboutRoute,
+  AppAdminProfileExercisesRoute: AppAdminProfileExercisesRoute,
   AppAdminProfileImagesRoute: AppAdminProfileImagesRoute,
   AppAdminProfileStoriesRoute: AppAdminProfileStoriesRoute,
   AppAdminIndexRoute: AppAdminIndexRoute,

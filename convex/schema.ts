@@ -34,66 +34,6 @@ export const CONTENT_STATUSES = ['active', 'draft', 'inactive'] as const
 
 const DAYS_OF_WEEK = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'] as const
 
-const EXERCISE_NAMES = [
-  // CHEST (8)
-  'Barbell Bench Press',
-  'Incline Dumbbell Press',
-  'Decline Bench Press',
-  'Dumbbell Fly',
-  'Cable Chest Fly',
-  'Push-Ups',
-  'Dumbbell Pullover',
-  'Smith Machine Bench Press',
-  // BACK (8)
-  'Lat Pulldown',
-  'Pull-Ups / Assisted Pull-Ups',
-  'Seated Cable Row',
-  'Bent-Over Barbell Row',
-  'One-Arm Dumbbell Row',
-  'T-Bar Row',
-  'Deadlift',
-  'Straight-Arm Pulldown',
-  // SHOULDERS (7)
-  'Barbell Overhead Press',
-  'Dumbbell Lateral Raise',
-  'Front Raise',
-  'Rear Delt Fly',
-  'Arnold Press',
-  'Upright Row',
-  'Face Pull',
-  // BICEPS (6)
-  'Barbell Curl',
-  'Dumbbell Curl',
-  'Hammer Curl',
-  'Preacher Curl',
-  'Concentration Curl',
-  'Cable Biceps Curl',
-  // TRICEPS (6)
-  'Cable Triceps Pushdown',
-  'Skull Crushers',
-  'Overhead Dumbbell Triceps Extension',
-  'Bench Dips',
-  'Close-Grip Bench Press',
-  'Triceps Kickbacks',
-  // LEGS (10)
-  'Barbell Squat',
-  'Leg Press',
-  'Walking Lunges',
-  'Leg Extension',
-  'Leg Curl',
-  'Romanian Deadlift',
-  'Standing Calf Raises',
-  'Seated Calf Raises',
-  'Bulgarian Split Squat',
-  'Hack Squat',
-  // CORE / ABS (5)
-  'Hanging Leg Raises',
-  'Cable Crunch',
-  'Ab Wheel Rollout',
-  'Plank',
-  'Russian Twist',
-] as const
-
 /* ======================================================
    ENUM → VALIDATOR HELPER
 ====================================================== */
@@ -113,7 +53,6 @@ const GalleryStatusValidator = enumToValidator(GALLERY_STATUSES)
 const GalleryAccessValidator = enumToValidator(GALLERY_ACCESS)
 const ContentStatusValidator = enumToValidator(CONTENT_STATUSES)
 const DayOfWeekValidator = enumToValidator(DAYS_OF_WEEK)
-const ExerciseNameValidator = enumToValidator(EXERCISE_NAMES)
 
 /* ======================================================
    TABLES
@@ -371,6 +310,13 @@ const transformationImages = defineTable({
   .index('by_status', ['status'])
   .index('by_status_order', ['status', 'order'])
 
+/* -------------------- EXERCISES -------------------- */
+
+const exercises = defineTable({
+  name: v.string(),
+  createdAt: v.number(),
+}).index('by_name', ['name'])
+
 /* ======================================================= */
 
 export default defineSchema({
@@ -386,4 +332,5 @@ export default defineSchema({
   aboutContent,
   successStories,
   transformationImages,
+  exercises,
 })

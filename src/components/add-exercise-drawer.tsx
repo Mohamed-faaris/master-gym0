@@ -1,5 +1,7 @@
 import * as React from 'react'
 import { Plus, Trash2, X } from 'lucide-react'
+import { api } from '@convex/_generated/api'
+import { useQuery } from 'convex/react'
 import { Button } from '@/components/ui/button'
 import { ExerciseNameField } from '@/components/exercise-name-field'
 import {
@@ -11,59 +13,6 @@ import {
   DrawerTitle,
 } from '@/components/ui/drawer'
 import { Input } from '@/components/ui/input'
-
-const EXERCISE_NAMES = [
-  'Barbell Bench Press',
-  'Incline Dumbbell Press',
-  'Decline Bench Press',
-  'Dumbbell Fly',
-  'Cable Chest Fly',
-  'Push-Ups',
-  'Dumbbell Pullover',
-  'Smith Machine Bench Press',
-  'Lat Pulldown',
-  'Pull-Ups / Assisted Pull-Ups',
-  'Seated Cable Row',
-  'Bent-Over Barbell Row',
-  'One-Arm Dumbbell Row',
-  'T-Bar Row',
-  'Deadlift',
-  'Straight-Arm Pulldown',
-  'Barbell Overhead Press',
-  'Dumbbell Lateral Raise',
-  'Front Raise',
-  'Rear Delt Fly',
-  'Arnold Press',
-  'Upright Row',
-  'Face Pull',
-  'Barbell Curl',
-  'Dumbbell Curl',
-  'Hammer Curl',
-  'Preacher Curl',
-  'Concentration Curl',
-  'Cable Biceps Curl',
-  'Cable Triceps Pushdown',
-  'Skull Crushers',
-  'Overhead Dumbbell Triceps Extension',
-  'Bench Dips',
-  'Close-Grip Bench Press',
-  'Triceps Kickbacks',
-  'Barbell Squat',
-  'Leg Press',
-  'Walking Lunges',
-  'Leg Extension',
-  'Leg Curl',
-  'Romanian Deadlift',
-  'Standing Calf Raises',
-  'Seated Calf Raises',
-  'Bulgarian Split Squat',
-  'Hack Squat',
-  'Hanging Leg Raises',
-  'Cable Crunch',
-  'Ab Wheel Rollout',
-  'Plank',
-  'Russian Twist',
-] as const
 
 export interface ExerciseSet {
   reps: number
@@ -86,6 +35,7 @@ export function AddExerciseDrawer({
   onOpenChange,
   onSave,
 }: AddExerciseDrawerProps) {
+  const exerciseNames = useQuery(api.exercises.getNames) ?? []
   const [exerciseName, setExerciseName] = React.useState('')
   const [setReps, setSetReps] = React.useState([''])
   const [setWeights, setSetWeights] = React.useState([''])
@@ -183,7 +133,7 @@ export function AddExerciseDrawer({
             <label className="text-sm font-medium">Exercise</label>
             <ExerciseNameField
               value={exerciseName}
-              options={EXERCISE_NAMES}
+              options={exerciseNames}
               onValueChange={setExerciseName}
               placeholder="Type exercise name"
             />
