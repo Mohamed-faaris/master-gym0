@@ -1241,6 +1241,11 @@ export const seedDatabase = mutation({
       })
     }
 
+    const existingExercises = await ctx.db.query('exercises').collect()
+    for (const ex of existingExercises) {
+      await ctx.db.delete(ex._id)
+    }
+
     const EXERCISE_NAMES = [
       'Barbell Bench Press',
       'Incline Dumbbell Press',
