@@ -4,6 +4,7 @@ import { useMutation, useQuery } from 'convex/react'
 import * as React from 'react'
 import { CheckCircle2, Clock, Pause, Play, Plus } from 'lucide-react'
 import { toast } from 'sonner'
+import type {ExerciseData} from '@/components/add-exercise-drawer';
 import { useAuth } from '@/components/auth/useAuth'
 import {
   Checkbox,
@@ -11,10 +12,8 @@ import {
 } from '@/components/animate-ui/primitives/radix/checkbox'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import {
-  AddExerciseDrawer,
-  type ExerciseData,
-} from '@/components/add-exercise-drawer'
+import { Id } from '@convex/_generated/dataModel'
+import { AddExerciseDrawer } from '@/components/add-exercise-drawer'
 
 export const Route = createFileRoute('/app/_user/workout-session')({
   component: WorkoutSessionRouteComponent,
@@ -33,17 +32,12 @@ export function WorkoutSessionRouteComponent() {
     api.workoutSessions.addSelfManagedExerciseToToday,
   )
 
-  const userWithMeta = useQuery(
-    api.users.getUserWithMeta,
-    user ? { userId: user._id } : 'skip',
+  // Fetch the active routine (for now using the primary authored one)
+  const routines = useQuery(
+    api.routines.getRoutinesByAuthor,
+    user ? { authorId: user._id } : 'skip',
   )
-
-  const trainingPlan = useQuery(
-    api.trainingPlans.getTrainingPlanById,
-    userWithMeta?.trainingPlanId
-      ? { trainingPlanId: userWithMeta.trainingPlanId }
-      : 'skip',
-  )
+  const todaysWorkout = routines?.[0]
 
   // Workout session state - track individual sets
   const [isPaused, setIsPaused] = React.useState(false)
@@ -80,12 +74,7 @@ export function WorkoutSessionRouteComponent() {
       : 'skip',
   )
 
-  const todaysWorkout = useQuery(
-    api.trainingPlans.getWorkoutForDay,
-    userWithMeta?.trainingPlanId
-      ? { trainingPlanId: userWithMeta.trainingPlanId, day: dayOfWeek }
-      : 'skip',
-  )
+
 
   const activeExercises = existingSession?.exercises.length
     ? existingSession.exercises
@@ -136,13 +125,13 @@ export function WorkoutSessionRouteComponent() {
       const exerciseSetCount = getSetCount(ex)
       const sets =
         ex.sets && ex.sets.length > 0
-          ? ex.sets.map((set, setIdx) => ({
+          ? ex.sets.map((set: any, setIdx: number) => ({
               reps: set.reps,
               weight: set.weight,
               restTime: set.restTime,
               completed: updatedSets.has(`${idx}-${setIdx}`),
             }))
-          : Array.from({ length: exerciseSetCount }).map((_, setIdx) => ({
+          : Array.from({ length: exerciseSetCount }).map((_, setIdx: number) => ({
               completed: updatedSets.has(`${idx}-${setIdx}`),
             }))
 
@@ -169,7 +158,7 @@ export function WorkoutSessionRouteComponent() {
     try {
       const estimatedCalories = (workoutTime / 60) * 5
       await updateSession({
-        sessionId,
+        sessionId: sessionId as Id<'workoutSessions'>,
         exercises: buildExercisesData(updatedSets, activeExercises),
         totalTime: workoutTime,
         totalCaloriesBurned: Math.round(estimatedCalories),
@@ -186,12 +175,12 @@ export function WorkoutSessionRouteComponent() {
   }
 
   const handleStartSession = async () => {
-    if (!user || !trainingPlan) return
+    if (!user || !todaysWorkout) return
 
     try {
       const session = await startSession({
         userId: user._id,
-        trainingPlanId: trainingPlan._id,
+        routineId: todaysWorkout._id as Id<'routines'>,
         dayOfWeek,
         dayStart: dayStart.getTime(),
         dayEnd: dayEnd.getTime(),
@@ -209,7 +198,7 @@ export function WorkoutSessionRouteComponent() {
 
     try {
       await completeSession({
-        sessionId,
+        sessionId: sessionId as Id<'workoutSessions'>,
         totalTime: workoutTime,
         totalCaloriesBurned: Math.round((workoutTime / 60) * 5),
       })
@@ -303,7 +292,7 @@ export function WorkoutSessionRouteComponent() {
           </Card>
         )}
 
-        {activeExercises.map((exercise, exerciseIndex) => (
+        {activeExercises.map((exercise: any, exerciseIndex: number) => (
           <Card key={exercise.exerciseName}>
             <CardContent className="pt-6 space-y-4">
               <div className="space-y-1">
@@ -400,7 +389,7 @@ export function WorkoutSessionRouteComponent() {
           </div>
 
           <div className="flex items-center gap-2">
-            {!sessionId && trainingPlan ? (
+            {!sessionId && todaysWorkout ? (
               <Button onClick={handleStartSession} className="gap-2">
                 <Play className="w-4 h-4" />
                 Start Session

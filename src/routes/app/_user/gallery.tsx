@@ -1,10 +1,11 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { useEffect, useRef, useState, type ChangeEvent } from 'react'
+import {  useEffect, useRef, useState } from 'react'
 import { useMutation, useQuery } from 'convex/react'
 import { Upload, X } from 'lucide-react'
 import { toast } from 'sonner'
 
 import { api } from '@convex/_generated/api'
+import type {ChangeEvent} from 'react';
 import { useAuth } from '@/components/auth/useAuth'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'

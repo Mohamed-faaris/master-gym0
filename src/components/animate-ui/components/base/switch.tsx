@@ -1,10 +1,11 @@
 import * as React from 'react'
 
+import type {SwitchProps as SwitchPrimitiveProps} from '@/components/animate-ui/primitives/base/switch';
 import {
-  Switch as SwitchPrimitive,
-  SwitchThumb as SwitchThumbPrimitive,
   SwitchIcon as SwitchIconPrimitive,
-  type SwitchProps as SwitchPrimitiveProps,
+  Switch as SwitchPrimitive,
+  
+  SwitchThumb as SwitchThumbPrimitive
 } from '@/components/animate-ui/primitives/base/switch'
 import { cn } from '@/lib/utils'
 

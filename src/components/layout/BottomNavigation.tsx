@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { Link, useRouterState } from '@tanstack/react-router'
-import { Home, Dumbbell, User, Scale, Utensils } from 'lucide-react'
+import { Dumbbell, Home, Scale, User, Utensils } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 interface NavItem {
@@ -9,7 +9,7 @@ interface NavItem {
   label: string
 }
 
-const navItems: NavItem[] = [
+const navItems: Array<NavItem> = [
   { to: '/app/', icon: Home, label: 'Dashboard' },
   { to: '/app/diet-plan', icon: Utensils, label: 'Diets' },
   { to: '/app/workouts', icon: Dumbbell, label: 'Workout' },

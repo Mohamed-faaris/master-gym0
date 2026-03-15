@@ -1,10 +1,11 @@
 import { Link, createFileRoute } from '@tanstack/react-router'
 import { useMutation, useQuery } from 'convex/react'
-import { useMemo, useRef, useState, type ChangeEvent } from 'react'
+import {  useMemo, useRef, useState } from 'react'
 import { ChevronDown, ChevronUp, Plus, X } from 'lucide-react'
 import { toast } from 'sonner'
 
 import { api } from '@convex/_generated/api'
+import type {ChangeEvent} from 'react';
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
@@ -43,7 +44,7 @@ type ImageRecord = {
 
 function ProfileImagesPage() {
   const rawImages = useQuery(api.transformationImages.listAllTransformationImages) as
-    | ImageRecord[]
+    | Array<ImageRecord>
     | undefined
 
   const sortedImages = useMemo(
@@ -127,7 +128,7 @@ function ProfileImagesPage() {
   const openEditDrawer = (image: ImageRecord) => {
     setEditingImageId(image._id)
     setImageTitle(image.title ?? '')
-    setImageStatus(image.status as ContentStatus)
+    setImageStatus(image.status)
     setTransformationStorageId(null)
     setImagePreview(image.imageUrl)
     setImageDrawerOpen(true)

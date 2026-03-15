@@ -1,7 +1,8 @@
 'use client'
 
 import * as React from 'react'
-import { motion, isMotionComponent, type HTMLMotionProps } from 'motion/react'
+import {  isMotionComponent, motion } from 'motion/react'
+import type {HTMLMotionProps} from 'motion/react';
 import { cn } from '@/lib/utils'
 
 type AnyProps = Record<string, unknown>
@@ -16,12 +17,12 @@ type WithAsChild<Base extends object> =
   | (Base & { asChild?: false | undefined })
 
 type SlotProps<T extends HTMLElement = HTMLElement> = {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   children?: any
 } & DOMMotionProps<T>
 
 function mergeRefs<T>(
-  ...refs: (React.Ref<T> | undefined)[]
+  ...refs: Array<React.Ref<T> | undefined>
 ): React.RefCallback<T> {
   return (node) => {
     refs.forEach((ref) => {
@@ -29,7 +30,7 @@ function mergeRefs<T>(
       if (typeof ref === 'function') {
         ref(node)
       } else {
-        ;(ref as React.RefObject<T | null>).current = node
+        ;(ref).current = node
       }
     })
   }

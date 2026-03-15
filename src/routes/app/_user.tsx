@@ -1,8 +1,8 @@
 import { Outlet, createFileRoute, useNavigate } from '@tanstack/react-router'
-import { BottomNavigation } from '@/components/layout/BottomNavigation'
-import { useAuth } from '@/components/auth/useAuth'
 import { useEffect } from 'react'
 import { Loader2 } from 'lucide-react'
+import { BottomNavigation } from '@/components/layout/BottomNavigation'
+import { useAuth } from '@/components/auth/useAuth'
 
 export const Route = createFileRoute('/app/_user')({
   component: RouteComponent,

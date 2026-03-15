@@ -19,7 +19,7 @@ export const signInQuery = query({
       .withIndex('by_phone_pin', (q) =>
         q.eq('phoneNumber', args.phoneNumber).eq('pin', args.pin),
       )
-      .unique()
+      .first()
     return user
   },
 })
@@ -129,7 +129,6 @@ export const updateUser = mutation({
     role: v.optional(RoleValidator),
     goal: v.optional(GoalValidator),
     trainerId: v.optional(v.id('users')),
-    trainingPlanId: v.optional(v.id('trainingPlans')),
     dietPlanId: v.optional(v.id('dietPlans')),
   },
   handler: async (ctx, args) => {

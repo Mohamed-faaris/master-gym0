@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
-import { Scale, Utensils, Plus, Trash2, TrendingDown } from 'lucide-react'
-import { useQuery, useMutation } from 'convex/react'
+import { Plus, Scale, Trash2, TrendingDown, Utensils } from 'lucide-react'
+import { useMutation, useQuery } from 'convex/react'
 import { toast } from 'sonner'
 import {
   Area,
@@ -13,6 +13,8 @@ import {
   YAxis,
 } from 'recharts'
 
+import { api } from '@convex/_generated/api'
+import type {ChartConfig} from '@/components/ui/chart';
 import {
   Card,
   CardContent,
@@ -30,12 +32,11 @@ import {
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useAuth } from '@/components/auth/useAuth'
-import { api } from '@convex/_generated/api'
 import {
+  
   ChartContainer,
   ChartTooltip,
-  ChartTooltipContent,
-  type ChartConfig,
+  ChartTooltipContent
 } from '@/components/ui/chart'
 
 export const Route = createFileRoute('/app/_user/logs')({

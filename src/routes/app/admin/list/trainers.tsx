@@ -1,5 +1,9 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useState } from 'react'
+
+import { TrainerDetailView } from '../-detail-views'
+import { useAdminConsole } from '../_components/-admin-shell'
+import { PeopleList } from '../_components/-people-list'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -10,10 +14,6 @@ import {
   AlertDialogPopup,
   AlertDialogTitle,
 } from '@/components/animate-ui/components/base/alert-dialog'
-
-import { TrainerDetailView } from '../-detail-views'
-import { useAdminConsole } from '../_components/-admin-shell'
-import { PeopleList } from '../_components/-people-list'
 
 export const Route = createFileRoute('/app/admin/list/trainers')({
   component: TrainersListPage,

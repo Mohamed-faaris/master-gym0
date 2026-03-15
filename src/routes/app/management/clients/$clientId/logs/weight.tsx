@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
+import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
 import {
   ArrowLeft,
   BarChart3,
@@ -9,6 +9,17 @@ import {
 } from 'lucide-react'
 import { useQuery } from 'convex/react'
 
+import {
+  CartesianGrid,
+  Line,
+  LineChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from 'recharts'
+import { api } from '@convex/_generated/api'
+import type {ChartConfig} from '@/components/ui/chart';
 import { useAuth } from '@/components/auth/useAuth'
 import {
   Card,
@@ -18,21 +29,11 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import {
-  LineChart,
-  Line,
-  CartesianGrid,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ResponsiveContainer,
-} from 'recharts'
-import {
+  
   ChartContainer,
   ChartTooltip,
-  ChartTooltipContent,
-  type ChartConfig,
+  ChartTooltipContent
 } from '@/components/ui/chart'
-import { api } from '@convex/_generated/api'
 
 const privilegedRoles = new Set(['trainer', 'admin'])
 

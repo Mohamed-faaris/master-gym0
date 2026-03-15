@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from '@tanstack/react-router'
+import { Link, createFileRoute } from '@tanstack/react-router'
 import { ArrowLeft, BarChart3, TrendingDown, TrendingUp } from 'lucide-react'
 import { useQuery } from 'convex/react'
 import {
@@ -12,10 +12,11 @@ import {
 } from 'recharts'
 
 import { api } from '@convex/_generated/api'
+import type {ChartConfig} from '@/components/ui/chart';
 import {
+  
   ChartContainer,
-  ChartTooltipContent,
-  type ChartConfig,
+  ChartTooltipContent
 } from '@/components/ui/chart'
 import {
   Card,

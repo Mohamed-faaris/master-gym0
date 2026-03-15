@@ -17,15 +17,16 @@ const DayOfWeekValidator = v.union(
 export const startSession = mutation({
   args: {
     userId: v.id('users'),
-    trainingPlanId: v.optional(v.id('trainingPlans')),
+    routineId: v.optional(v.id('routines')),
+    instructorId: v.optional(v.id('users')), // If a trainer is starting it
     dayStart: v.number(),
     dayEnd: v.number(),
     dayOfWeek: DayOfWeekValidator,
     exercises: v.optional(
       v.array(
         v.object({
+          exerciseId: v.optional(v.id('exercises')),
           exerciseName: v.string(),
-          noOfSets: v.number(),
           sets: v.array(
             v.object({
               reps: v.optional(v.number()),
@@ -59,16 +60,12 @@ export const startSession = mutation({
 
     let exercises = args.exercises
 
-    if (args.trainingPlanId) {
-      const trainingPlan = await ctx.db.get(args.trainingPlanId)
-      const dayPlan = trainingPlan?.days.find(
-        (day) => day.day === args.dayOfWeek,
-      )
-
-      if (dayPlan) {
-        exercises = dayPlan.exercises.map((exercise) => ({
+    if (args.routineId) {
+      const routine = await ctx.db.get(args.routineId)
+      if (routine) {
+        exercises = routine.exercises.map((exercise) => ({
+          exerciseId: exercise.exerciseId,
           exerciseName: exercise.exerciseName,
-          noOfSets: exercise.noOfSets,
           sets: exercise.sets.map((set) => ({
             reps: set.reps,
             weight: set.weight,
@@ -80,14 +77,13 @@ export const startSession = mutation({
     }
 
     if (!exercises) {
-      throw new Error(
-        'Workout session requires exercises or a valid training plan day',
-      )
+      throw new Error('Workout session requires exercises or a valid routine')
     }
 
     const sessionId = await ctx.db.insert('workoutSessions', {
       userId: args.userId,
-      trainingPlanId: args.trainingPlanId,
+      routineId: args.routineId,
+      instructorId: args.instructorId,
       dayOfWeek: args.dayOfWeek,
       status: 'ongoing',
       startTime: Date.now(),
@@ -137,7 +133,6 @@ export const addSelfManagedExerciseToToday = mutation({
     const now = Date.now()
     const exerciseToAppend = {
       exerciseName: args.exerciseName,
-      noOfSets: args.sets.length,
       sets: args.sets.map((set) => ({
         reps: set.reps,
         weight: set.weight,
@@ -158,7 +153,7 @@ export const addSelfManagedExerciseToToday = mutation({
 
     const sessionId = await ctx.db.insert('workoutSessions', {
       userId: args.userId,
-      trainingPlanId: undefined,
+      routineId: undefined,
       dayOfWeek: args.dayOfWeek,
       status: 'ongoing',
       startTime: now,
@@ -181,8 +176,8 @@ export const updateSessionProgress = mutation({
     sessionId: v.id('workoutSessions'),
     exercises: v.array(
       v.object({
+        exerciseId: v.optional(v.id('exercises')),
         exerciseName: v.string(),
-        noOfSets: v.number(),
         sets: v.array(
           v.object({
             reps: v.optional(v.number()),

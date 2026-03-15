@@ -2,7 +2,8 @@
 
 import * as React from 'react'
 import { AlertDialog as AlertDialogPrimitive } from '@base-ui-components/react/alert-dialog'
-import { AnimatePresence, motion, type HTMLMotionProps } from 'motion/react'
+import { AnimatePresence,  motion } from 'motion/react'
+import type {HTMLMotionProps} from 'motion/react';
 
 import { useControlledState } from '@/hooks/use-controlled-state'
 import { getStrictContext } from '@/lib/get-strict-context'

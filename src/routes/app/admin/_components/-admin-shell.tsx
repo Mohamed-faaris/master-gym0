@@ -1,11 +1,13 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react'
-import { Outlet, Link, useNavigate } from '@tanstack/react-router'
+import { Link, Outlet, useNavigate } from '@tanstack/react-router'
 import { useMutation, useQuery } from 'convex/react'
 import { Dumbbell, Lock, Phone, User } from 'lucide-react'
 import { toast } from 'sonner'
 
 import { api } from '@convex/_generated/api'
+import { AdminBottomBar } from './-admin-bottom-bar'
 import type { Id } from '@convex/_generated/dataModel'
+import type { AdminRole, AdminUser } from './-admin-types'
 import { useAuth } from '@/components/auth/useAuth'
 import { Button } from '@/components/ui/button'
 import {
@@ -25,14 +27,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { AdminBottomBar } from './-admin-bottom-bar'
-import type { AdminRole, AdminUser } from './-admin-types'
 
 interface AdminConsoleContextValue {
   user: AdminUser
-  allUsers: AdminUser[]
-  clients: AdminUser[]
-  trainers: AdminUser[]
+  allUsers: Array<AdminUser>
+  clients: Array<AdminUser>
+  trainers: Array<AdminUser>
   isUsersLoading: boolean
   openCreateDrawer: () => void
   openEditDrawer: (userId: string) => void
@@ -116,7 +116,7 @@ export function AdminShell() {
     }
   }, [user, isLoading, navigate])
 
-  const allUsers = (allUsersQuery ?? []) as AdminUser[]
+  const allUsers = (allUsersQuery ?? []) as Array<AdminUser>
 
   const clients = useMemo(
     () =>

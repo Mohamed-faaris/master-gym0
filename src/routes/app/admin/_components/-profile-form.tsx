@@ -16,6 +16,7 @@ import {
 import { toast } from 'sonner'
 
 import { api } from '@convex/_generated/api'
+import type { Id } from '@convex/_generated/dataModel'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -25,7 +26,6 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
-import type { Id } from '@convex/_generated/dataModel'
 
 interface ProfileFormProps {
   userId: Id<'users'>

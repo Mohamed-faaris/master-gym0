@@ -14,7 +14,7 @@ interface PeopleListProps {
   heading: string
   subheading: string
   emptyLabel: string
-  people: AdminUser[]
+  people: Array<AdminUser>
   isLoading: boolean
   onSelect?: (id: string) => void
   getTo?: (id: string) => string

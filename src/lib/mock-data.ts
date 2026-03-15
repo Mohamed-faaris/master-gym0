@@ -11,7 +11,7 @@ export interface Exercise {
 export interface WorkoutDay {
   day: 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun'
   name: string
-  exercises: Exercise[]
+  exercises: Array<Exercise>
   duration: number // in minutes
   caloriesBurned: number
 }
@@ -20,7 +20,7 @@ export interface TrainingPlan {
   id: string
   name: string
   description: string
-  weeks: WorkoutDay[]
+  weeks: Array<WorkoutDay>
 }
 
 export const TRAINING_PLAN: TrainingPlan = {
@@ -181,7 +181,7 @@ export interface WeightLog {
 }
 
 // Mock workout logs
-export const MOCK_WORKOUT_LOGS: WorkoutLog[] = [
+export const MOCK_WORKOUT_LOGS: Array<WorkoutLog> = [
   {
     id: '1',
     startTime: new Date(2026, 0, 27, 9, 0),
@@ -230,7 +230,7 @@ export const MOCK_WORKOUT_LOGS: WorkoutLog[] = [
 ]
 
 // Mock diet logs
-export const MOCK_DIET_LOGS: DietLog[] = [
+export const MOCK_DIET_LOGS: Array<DietLog> = [
   {
     id: '1',
     createdAt: new Date(2026, 0, 28, 8, 0),
@@ -276,7 +276,7 @@ export const MOCK_DIET_LOGS: DietLog[] = [
 ]
 
 // Mock weight logs
-export const MOCK_WEIGHT_LOGS: WeightLog[] = [
+export const MOCK_WEIGHT_LOGS: Array<WeightLog> = [
   { id: '1', createdAt: new Date(2026, 0, 28), weight: 180.5 },
   { id: '2', createdAt: new Date(2026, 0, 21), weight: 181.2 },
   { id: '3', createdAt: new Date(2026, 0, 14), weight: 182.0 },
@@ -377,11 +377,11 @@ export interface TrainerClientDetail {
   compliance: number
   trend: string
   plan: string
-  metrics: TrainerClientPerformanceMetric[]
-  readinessBreakdown: TrainerReadinessBreakdown[]
-  recentWorkouts: TrainerClientRecentWorkout[]
-  nutritionLog: TrainerClientNutritionEntry[]
-  actionItems: TrainerClientActionItem[]
+  metrics: Array<TrainerClientPerformanceMetric>
+  readinessBreakdown: Array<TrainerReadinessBreakdown>
+  recentWorkouts: Array<TrainerClientRecentWorkout>
+  nutritionLog: Array<TrainerClientNutritionEntry>
+  actionItems: Array<TrainerClientActionItem>
 }
 
 export interface TrainerProgramSummary {
@@ -398,7 +398,7 @@ export interface TrainerProgramBlock {
   week: number
   title: string
   focus: string
-  keySessions: string[]
+  keySessions: Array<string>
   readinessCue: string
 }
 
@@ -415,7 +415,7 @@ export interface TrainerProgramDailyWorkout {
   focus: string
   durationMinutes: number
   intensity: 'Low' | 'Medium' | 'High'
-  keyWork: string[]
+  keyWork: Array<string>
   readinessCue: string
   nutritionCue: string
 }
@@ -429,7 +429,7 @@ export interface TrainerProgramDietMeal {
 export interface TrainerProgramDietDay {
   dayLabel: string
   emphasis: string
-  meals: TrainerProgramDietMeal[]
+  meals: Array<TrainerProgramDietMeal>
   hydration: string
   notes?: string
 }
@@ -440,10 +440,10 @@ export interface TrainerProgramDetail {
   overview: string
   goal: string
   progressionNotes: string
-  blocks: TrainerProgramBlock[]
-  resources: TrainerProgramResource[]
-  dailyWorkouts: TrainerProgramDailyWorkout[]
-  dietPlan: TrainerProgramDietDay[]
+  blocks: Array<TrainerProgramBlock>
+  resources: Array<TrainerProgramResource>
+  dailyWorkouts: Array<TrainerProgramDailyWorkout>
+  dietPlan: Array<TrainerProgramDietDay>
 }
 
 export interface TrainerDashboardData {
@@ -455,10 +455,10 @@ export interface TrainerDashboardData {
     checkInsDue: number
   }
   metrics: Array<{ label: string; value: string; helper: string }>
-  clients: Record<'active' | 'flagged', TrainerClientCard[]>
-  quickActions: TrainerQuickAction[]
-  sessions: TrainerSessionSlot[]
-  opsBoard: TrainerOperationsNote[]
+  clients: Record<'active' | 'flagged', Array<TrainerClientCard>>
+  quickActions: Array<TrainerQuickAction>
+  sessions: Array<TrainerSessionSlot>
+  opsBoard: Array<TrainerOperationsNote>
 }
 
 export const TRAINER_DASHBOARD_MOCK: TrainerDashboardData = {
@@ -848,7 +848,7 @@ export const TRAINER_CLIENT_DETAILS_MOCK: Record<string, TrainerClientDetail> =
     },
   }
 
-export const TRAINER_PROGRAMS_MOCK: TrainerProgramSummary[] = [
+export const TRAINER_PROGRAMS_MOCK: Array<TrainerProgramSummary> = [
   {
     id: 'program-accel',
     name: 'Acceleration Builder',

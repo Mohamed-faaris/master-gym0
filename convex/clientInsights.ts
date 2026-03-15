@@ -1,5 +1,5 @@
-import { query } from './_generated/server'
 import { v } from 'convex/values'
+import { query } from './_generated/server'
 
 export const getClientRangeData = query({
   args: {
@@ -47,11 +47,11 @@ export const getClientRangeData = query({
     ])
 
     const splitByRange = <T extends { createdAt?: number; startTime?: number }>(
-      items: T[],
+      items: Array<T>,
       timestampKey: 'createdAt' | 'startTime',
     ) => {
-      const current: T[] = []
-      const previous: T[] = []
+      const current: Array<T> = []
+      const previous: Array<T> = []
 
       for (const item of items) {
         const ts = item[timestampKey] ?? 0

@@ -2,17 +2,19 @@
 
 import * as React from 'react'
 import {
-  useSpring,
-  useTransform,
+  
+  
+  
   motion,
   useMotionValue,
-  type MotionValue,
-  type SpringOptions,
-  type HTMLMotionProps,
+  useSpring,
+  useTransform
 } from 'motion/react'
 import useMeasure from 'react-use-measure'
+import type {HTMLMotionProps, MotionValue, SpringOptions} from 'motion/react';
 
-import { useIsInView, type UseIsInViewOptions } from '@/hooks/use-is-in-view'
+import type {UseIsInViewOptions} from '@/hooks/use-is-in-view';
+import {  useIsInView } from '@/hooks/use-is-in-view'
 
 type SlidingNumberRollerProps = {
   prevValue: number

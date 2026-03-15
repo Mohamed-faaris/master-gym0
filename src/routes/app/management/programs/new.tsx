@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
+import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useEffect, useMemo, useState } from 'react'
 import {
   ArrowLeft,
@@ -12,6 +12,8 @@ import {
 } from 'lucide-react'
 import { useMutation as useConvexMutation, useQuery } from 'convex/react'
 import { toast } from 'sonner'
+import { api } from '@convex/_generated/api'
+import type { Id } from '@convex/_generated/dataModel'
 import { useAuth } from '@/components/auth/useAuth'
 import { ExerciseNameField } from '@/components/exercise-name-field'
 import { Button } from '@/components/ui/button'
@@ -19,8 +21,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Progress } from '@/components/ui/progress'
 import { cn } from '@/lib/utils'
-import { api } from '@convex/_generated/api'
-import type { Id } from '@convex/_generated/dataModel'
 import {
   Tabs,
   TabsContent,
@@ -44,7 +44,7 @@ type SetEntry = {
 
 type ExerciseEntry = {
   exerciseName: string
-  sets: SetEntry[]
+  sets: Array<SetEntry>
 }
 
 type DayMeta = {
@@ -110,13 +110,13 @@ const isSchemaValidationError = (message: string) =>
     message,
   )
 
-const createEmptyWorkoutsByDay = (): Record<DayKey, ExerciseEntry[]> =>
+const createEmptyWorkoutsByDay = (): Record<DayKey, Array<ExerciseEntry>> =>
   weekDays.reduce(
     (acc, day) => {
       acc[day.key] = []
       return acc
     },
-    {} as Record<DayKey, ExerciseEntry[]>,
+    {} as Record<DayKey, Array<ExerciseEntry>>,
   )
 
 const createEmptyDayMetaByDay = (): Record<DayKey, DayMeta> =>
@@ -132,7 +132,7 @@ type ProgramFormMode = 'create' | 'edit'
 
 interface ProgramFormScreenProps {
   mode: ProgramFormMode
-  programId?: Id<'trainingPlans'>
+  programId?: Id<'routines'>
   initialStep?: number
 }
 
@@ -148,15 +148,15 @@ export function ProgramFormScreen({
 }: ProgramFormScreenProps) {
   const navigate = useNavigate()
   const { user, isLoading } = useAuth()
-  const createTrainingPlan = useConvexMutation(
-    api.trainingPlans.createTrainingPlan,
+  const createRoutine = useConvexMutation(
+    api.routines.createRoutine,
   )
-  const updateTrainingPlan = useConvexMutation(
-    api.trainingPlans.updateTrainingPlan,
+  const updateRoutine = useConvexMutation(
+    api.routines.updateRoutine,
   )
   const trainingPlan = useQuery(
-    api.trainingPlans.getTrainingPlanById,
-    mode === 'edit' && programId ? { trainingPlanId: programId } : 'skip',
+    api.routines.getRoutineById,
+    mode === 'edit' && programId ? { routineId: programId } : 'skip',
   )
   const exerciseNames = useQuery(api.exercises.getNames) ?? []
 
@@ -165,10 +165,10 @@ export function ProgramFormScreen({
   )
   const [planName, setPlanName] = useState('')
   const [durationDays, setDurationDays] = useState('')
-  const [selectedDays, setSelectedDays] = useState<DayKey[]>([])
+  const [selectedDays, setSelectedDays] = useState<Array<DayKey>>([])
   const [activeWorkoutDay, setActiveWorkoutDay] = useState<DayKey | null>(null)
   const [workoutsByDay, setWorkoutsByDay] = useState<
-    Record<DayKey, ExerciseEntry[]>
+    Record<DayKey, Array<ExerciseEntry>>
   >(() => createEmptyWorkoutsByDay())
   const [dayMetaByDay, setDayMetaByDay] = useState<Record<DayKey, DayMeta>>(
     () => createEmptyDayMetaByDay(),
@@ -197,45 +197,25 @@ export function ProgramFormScreen({
     if (mode !== 'edit' || !trainingPlan || didHydrateEditData) return
 
     setPlanName(trainingPlan.name)
-    setDurationDays(String(trainingPlan.durationDays))
+    // we don't have durationDays anymore for routines, omitting it.
 
-    const nextSelectedDays = trainingPlan.days.map((day) => day.day as DayKey)
+    const nextSelectedDays: Array<DayKey> = ['mon']
     setSelectedDays(nextSelectedDays)
 
-    const nextWorkoutsByDay = createEmptyWorkoutsByDay()
     const nextDayMetaByDay = createEmptyDayMetaByDay()
+    const nextWorkoutsByDay = createEmptyWorkoutsByDay()
 
-    trainingPlan.days.forEach((day) => {
-      const key = day.day as DayKey
-      nextDayMetaByDay[key] = {
-        title: day.dayTitle ?? '',
-        description: day.dayDescription ?? '',
-      }
-      nextWorkoutsByDay[key] =
-        day.exercises.length > 0
-          ? day.exercises.map((exercise) => ({
-              exerciseName: exercise.exerciseName,
-              sets:
-                exercise.sets.length > 0
-                  ? exercise.sets.map((setEntry) => ({
-                      reps:
-                        typeof setEntry.reps === 'number'
-                          ? String(setEntry.reps)
-                          : '',
-                      weight:
-                        typeof setEntry.weight === 'number'
-                          ? String(setEntry.weight)
-                          : '',
-                      restTime:
-                        typeof setEntry.restTime === 'number'
-                          ? String(setEntry.restTime)
-                          : '',
-                    }))
-                  : [createEmptySet()],
-            }))
-          : []
-    })
+    nextWorkoutsByDay['mon'] = trainingPlan.exercises.map((exercise: any) => ({
+      exerciseId: exercise.exerciseId,
+      exerciseName: exercise.exerciseName,
+      sets: exercise.sets.map((setEntry: any) => ({
+        reps: setEntry.reps ? String(setEntry.reps) : '',
+        weight: setEntry.weight ? String(setEntry.weight) : '',
+        restTime: setEntry.restTime ? String(setEntry.restTime) : '',
+      })),
+    }))
 
+    setSelectedDays(['mon'])
     setWorkoutsByDay(nextWorkoutsByDay)
     setDayMetaByDay(nextDayMetaByDay)
     setDidHydrateEditData(true)
@@ -470,16 +450,15 @@ export function ProgramFormScreen({
       return
     }
 
-    const parsedDuration = parseInt(durationDays, 10)
-
+    // parsedDuration is not used for routines but we parse it if needed.
     const invalidSetEntries: Array<{ dayKey: DayKey; exerciseIndex: number }> =
       []
-    const daysPayload = selectedDays.map((dayKey) => {
-      const dayMeta = dayMetaByDay[dayKey]
-      const exercises = workoutsByDay[dayKey]
+    // Flatten the day-based exercises into the single array required by routines schema.
+    const allExercises = selectedDays.flatMap((dayKey) => {
+      return workoutsByDay[dayKey]
         .filter((exercise) => exercise.exerciseName.trim() !== '')
         .map((exercise, exerciseIndex) => {
-          const parsedSets: ParsedSetEntry[] = exercise.sets.map((setEntry) => {
+          const parsedSets: Array<ParsedSetEntry> = exercise.sets.map((setEntry) => {
             const reps = parseOptionalNumber(setEntry.reps, (value) =>
               parseInt(value, 10),
             )
@@ -506,16 +485,9 @@ export function ProgramFormScreen({
 
           return {
             exerciseName: exercise.exerciseName,
-            noOfSets: exercise.sets.length,
             sets: parsedSets,
           }
         })
-      return {
-        day: dayKey,
-        dayTitle: dayMeta.title.trim() || undefined,
-        dayDescription: dayMeta.description.trim() || undefined,
-        exercises,
-      }
     })
 
     if (invalidSetEntries.length > 0) {
@@ -535,26 +507,24 @@ export function ProgramFormScreen({
     try {
       if (mode === 'edit') {
         if (!programId) {
-          toast.error('Program id is missing')
+          toast.error('Routine id is missing')
           return
         }
-        await updateTrainingPlan({
-          trainingPlanId: programId,
+        await updateRoutine({
+          routineId: programId,
           name: planName,
-          description: planName,
-          days: daysPayload as any,
-          durationDays: parsedDuration,
+          exercises: allExercises as any,
         })
-        toast.success('Program updated successfully!')
+        toast.success('Routine updated successfully!')
       } else {
-        await createTrainingPlan({
+        await createRoutine({
           name: planName,
-          description: planName,
-          days: daysPayload as any,
-          durationDays: parsedDuration,
-          createdBy: user._id,
+          userId: undefined, // global routine for trainer
+          authorId: user._id,
+          type: 'trainer',
+          exercises: allExercises as any,
         })
-        toast.success('Program created successfully!')
+        toast.success('Routine created successfully!')
       }
       navigate({ to: '/app/management/programs' })
     } catch (error) {

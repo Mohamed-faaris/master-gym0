@@ -1,14 +1,15 @@
 import { useEffect, useState } from 'react'
-import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
+import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
 import {
   ArrowLeft,
-  Activity,
+  BarChart3,
   Dumbbell,
   UtensilsCrossed,
-  BarChart3,
 } from 'lucide-react'
 import { useQuery } from 'convex/react'
 
+import { api } from '@convex/_generated/api'
+import type {DateScope} from '@/components/date-context-selector';
 import { useAuth } from '@/components/auth/useAuth'
 import { Button } from '@/components/ui/button'
 import {
@@ -19,18 +20,17 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import {
-  DateContextSelector,
-  type DateScope,
+  DateContextSelector
+  
 } from '@/components/date-context-selector'
 import { ActivityWeekCard } from '@/components/activity-week-card'
 import {
   filterByDateScope,
-  getDaysOfWeek,
-  getDateRange,
   formatDateShort,
   getComparisonLabel,
+  getDateRange,
+  getDaysOfWeek,
 } from '@/lib/date-helpers'
-import { api } from '@convex/_generated/api'
 
 const privilegedRoles = new Set(['trainer', 'admin'])
 
@@ -68,13 +68,7 @@ function ClientDetailRoute() {
     clientId ? { userId: clientId as any } : 'skip',
   )
 
-  const trainingPlan = useQuery(
-    api.trainingPlans.getTrainingPlanById,
-    client?.trainingPlanId ? { trainingPlanId: client.trainingPlanId } : 'skip',
-  )
 
-  // Fetch training plans and diet plans (kept for potential future use)
-  useQuery(api.trainingPlans.getAllTrainingPlans)
   useQuery(
     api.dietPlans.getDietPlansByUser,
     user ? { userId: user._id } : 'skip',
@@ -126,19 +120,13 @@ function ClientDetailRoute() {
     return log.createdAt >= scopeStart.getTime() && log.createdAt <= scopeEnd.getTime()
   })
 
-  const dayKeys = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'] as const
-
-  const plannedWorkoutDays = scopeDays.filter((day) => {
-    const dayKey = dayKeys[day.getDay()]
-    const plannedDay = trainingPlan?.days.find((d) => d.day === dayKey)
-    return (plannedDay?.exercises?.length || 0) > 0
-  })
-
   const completedWorkoutsCount = workoutsInScope.filter(
     (session) => session.status === 'completed',
   ).length
 
-  const plannedWorkoutsCount = plannedWorkoutDays.length
+  // In the routines-based Hevy-style model, workouts aren't strictly planned to
+  // particular days. We default to a 4-workout-per-week goal for progress display.
+  const plannedWorkoutsCount = 4
   const workoutProgressPercent =
     plannedWorkoutsCount > 0
       ? Math.min(

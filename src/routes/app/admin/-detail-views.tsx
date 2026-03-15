@@ -199,25 +199,25 @@ export function ClientDetailView({
         </CardHeader>
         <CardContent className="space-y-3">
           <Button asChild variant="outline" className="h-11 w-full">
-            <Link to={`/app/admin/list/view-work/${client._id}`}>
+            <Link to="/app/admin/list/view-work/$clientId" params={{ clientId: client._id }}>
               <Dumbbell className="w-4 h-4 mr-2" />
               View Workout Sessions
             </Link>
           </Button>
           <Button asChild variant="outline" className="h-11 w-full">
-            <Link to={`/app/admin/list/logs/diet/${client._id}`}>
+            <Link to="/app/admin/list/logs/diet/$clientId" params={{ clientId: client._id }}>
               <UtensilsCrossed className="w-4 h-4 mr-2" />
               View Diet Entry
             </Link>
           </Button>
           <Button asChild variant="outline" className="h-11 w-full">
-            <Link to={`/app/admin/list/logs/weight/${client._id}`}>
+            <Link to="/app/admin/list/logs/weight/$clientId" params={{ clientId: client._id }}>
               <BarChart3 className="w-4 h-4 mr-2" />
               View Weight
             </Link>
           </Button>
           <Button asChild variant="outline" className="h-11 w-full">
-            <Link to={`/app/admin/list/pattern/${client._id}`}>
+            <Link to="/app/admin/list/pattern/$clientId" params={{ clientId: client._id }}>
               <ClipboardList className="w-4 h-4 mr-2" />
               Manage Pattern
             </Link>
@@ -318,7 +318,6 @@ export interface TrainerDetailViewProps {
     role: string
     createdAt: number
   }
-  clientCount: number
   clients: Array<{
     _id: string
     name: string
@@ -333,7 +332,6 @@ export interface TrainerDetailViewProps {
 
 export function TrainerDetailView({
   trainer,
-  clientCount,
   clients,
   onBack,
   onChangePin,

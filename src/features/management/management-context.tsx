@@ -1,24 +1,26 @@
 import {
+  
   createContext,
   useContext,
   useMemo,
-  useState,
-  type ReactNode,
+  useState
 } from 'react'
+import type {ReactNode} from 'react';
 
+import type {TrainerClientActionItem, TrainerClientCard, TrainerClientDetail, TrainerClientNutritionEntry, TrainerClientRecentWorkout, TrainerDashboardData, TrainerProgramDetail, TrainerProgramSummary} from '@/lib/mock-data';
 import {
   TRAINER_CLIENT_DETAILS_MOCK,
   TRAINER_DASHBOARD_MOCK,
   TRAINER_PROGRAMS_MOCK,
-  TRAINER_PROGRAM_DETAILS_MOCK,
-  type TrainerClientActionItem,
-  type TrainerClientCard,
-  type TrainerClientDetail,
-  type TrainerClientNutritionEntry,
-  type TrainerClientRecentWorkout,
-  type TrainerDashboardData,
-  type TrainerProgramDetail,
-  type TrainerProgramSummary,
+  TRAINER_PROGRAM_DETAILS_MOCK
+  
+  
+  
+  
+  
+  
+  
+  
 } from '@/lib/mock-data'
 
 const privilegedClients = TRAINER_DASHBOARD_MOCK.clients
@@ -65,14 +67,14 @@ type AssignedWorkoutPattern = {
   name: string
   focus: string
   sourceProgramId?: string
-  schedule: WorkoutScheduleEntry[]
+  schedule: Array<WorkoutScheduleEntry>
 }
 
 type DietAssignment = {
   id: string
   title: string
   summary: string
-  photoRefs: string[]
+  photoRefs: Array<string>
   dailyPlan: Array<{
     day: string
     guidance: string
@@ -103,21 +105,21 @@ interface ClientPatternState {
   workout?: AssignedWorkoutPattern
   diet?: DietAssignment
   finalizedAt?: string | null
-  tasks: WorkoutTask[]
-  weightLog: WeightLogEntry[]
+  tasks: Array<WorkoutTask>
+  weightLog: Array<WeightLogEntry>
 }
 
 type AssignWorkoutPatternInput = {
   name: string
   focus: string
   programId?: string
-  schedule: WorkoutScheduleEntry[]
+  schedule: Array<WorkoutScheduleEntry>
 }
 
 type AssignDietPlanInput = {
   title: string
   summary: string
-  photoRefs: string[]
+  photoRefs: Array<string>
   dailyPlan: Array<{
     day: string
     guidance: string
@@ -132,7 +134,7 @@ interface TrainerManagementContextValue {
   opsBoard: TrainerDashboardData['opsBoard']
   clients: ClientsState
   clientDetails: Record<string, TrainerClientDetail>
-  programs: TrainerProgramSummary[]
+  programs: Array<TrainerProgramSummary>
   programDetails: Record<string, TrainerProgramDetail>
   createClient: (payload: CreateClientInput) => TrainerClientCard
   updateClient: (id: string, updates: UpdateClientInput) => void
@@ -225,7 +227,7 @@ export function TrainerManagementProvider({
   const [clientDetails, setClientDetails] = useState<
     Record<string, TrainerClientDetail>
   >(TRAINER_CLIENT_DETAILS_MOCK)
-  const [programs, setPrograms] = useState<TrainerProgramSummary[]>(
+  const [programs, setPrograms] = useState<Array<TrainerProgramSummary>>(
     TRAINER_PROGRAMS_MOCK,
   )
   const [programDetails, setProgramDetails] = useState<
@@ -294,7 +296,7 @@ export function TrainerManagementProvider({
     clientId: string,
     payload: AssignWorkoutPatternInput,
   ) => {
-    const baseTasks: WorkoutTask[] = payload.schedule.map((entry) => ({
+    const baseTasks: Array<WorkoutTask> = payload.schedule.map((entry) => ({
       id: createId('task'),
       label: `${entry.day} · ${entry.focus}`,
       detail: entry.detail,
@@ -395,7 +397,7 @@ export function TrainerManagementProvider({
     )
     const thisWeek = sorted.slice(0, 7)
     const lastWeek = sorted.slice(7, 14)
-    const avg = (entries: WeightLogEntry[]) =>
+    const avg = (entries: Array<WeightLogEntry>) =>
       entries.length
         ? Number(
             (
@@ -436,7 +438,7 @@ export function TrainerManagementProvider({
 
   const updateClient = (id: string, updates: UpdateClientInput) => {
     setClients((prev) => {
-      const mapList = (list: TrainerClientCard[]) =>
+      const mapList = (list: Array<TrainerClientCard>) =>
         list.map((client) =>
           client.id === id ? { ...client, ...updates } : client,
         )

@@ -1,9 +1,10 @@
 import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useMutation, useQuery } from 'convex/react'
-import { useEffect, useState, type ChangeEvent } from 'react'
+import {  useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
 import { api } from '@convex/_generated/api'
+import type {ChangeEvent} from 'react';
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'

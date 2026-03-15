@@ -1,15 +1,20 @@
 import { createFileRoute } from '@tanstack/react-router'
 import {
   Activity,
-  Clock,
-  TrendingUp,
-  Flame,
-  Scale,
-  UtensilsCrossed,
   Camera,
-  X,
+  Clock,
+  Flame,
   Loader2,
+  Scale,
+  TrendingUp,
+  UtensilsCrossed,
+  X,
 } from 'lucide-react'
+import {  useEffect, useRef, useState } from 'react'
+import { toast } from 'sonner'
+import { useMutation, useQuery } from 'convex/react'
+import { api } from 'convex/_generated/api'
+import type {ChangeEvent} from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -19,18 +24,14 @@ import { ActivityTimeCard } from '@/components/activity-time-card'
 import {
   Drawer,
   DrawerContent,
-  DrawerHeader,
-  DrawerTitle,
   DrawerDescription,
   DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
 } from '@/components/ui/drawer'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { useEffect, useRef, useState, type ChangeEvent } from 'react'
-import { toast } from 'sonner'
 import { MEAL_TYPES } from '@/lib/constants'
 import { useAuth } from '@/components/auth/useAuth'
-import { useQuery, useMutation } from 'convex/react'
-import { api } from 'convex/_generated/api'
 
 export const Route = createFileRoute('/app/_user/')({
   component: RouteComponent,

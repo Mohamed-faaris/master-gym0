@@ -1,24 +1,23 @@
-import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { Link, createFileRoute, useNavigate  } from '@tanstack/react-router'
 import { useEffect, useMemo, useState } from 'react'
 import {
+  ArrowLeft,
   CalendarDays,
   ChevronLeft,
   ChevronRight,
   ClipboardList,
   Droplets,
   UtensilsCrossed,
-  ArrowLeft,
 } from 'lucide-react'
 import { useMutation as useConvexMutation } from 'convex/react'
-import { useAuth } from '@/components/auth/useAuth'
 import { toast } from 'sonner'
+import { api } from '@convex/_generated/api'
+import { useAuth } from '@/components/auth/useAuth'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Progress } from '@/components/ui/progress'
 import { cn } from '@/lib/utils'
-import { api } from '@convex/_generated/api'
-import { Link } from '@tanstack/react-router'
 import {
   Tabs,
   TabsContent,
@@ -86,7 +85,7 @@ function RouteComponent() {
   const [planName, setPlanName] = useState('')
   const [goal, setGoal] = useState('')
   const [durationDays, setDurationDays] = useState('4')
-  const [selectedDays, setSelectedDays] = useState<DayKey[]>([])
+  const [selectedDays, setSelectedDays] = useState<Array<DayKey>>([])
   const [activeMealDay, setActiveMealDay] = useState<DayKey | null>(null)
   const [calorieTarget, setCalorieTarget] = useState('')
   const [hydrationTarget, setHydrationTarget] = useState('')
@@ -203,7 +202,7 @@ function RouteComponent() {
 
     // Convert meals to array format for backend
     const mealTemplate = selectedDays.flatMap((dayKey) => {
-      const mealsForDay = mealsByDay[dayKey as DayKey]
+      const mealsForDay = mealsByDay[dayKey]
       return Object.entries(mealsForDay)
         .filter(([_, meal]) => meal.title.trim() !== '')
         .map(([mealType, meal]) => ({
@@ -482,7 +481,7 @@ function RouteComponent() {
                             </div>
 
                             <div className="space-y-4">
-                              {(Object.keys(mealsByDay[day.key]) as MealType[]).map(
+                              {(Object.keys(mealsByDay[day.key]) as Array<MealType>).map(
                                 (mealType) => (
                                   <div
                                     key={`${day.key}-${mealType}`}
@@ -633,7 +632,7 @@ function RouteComponent() {
                           </p>
                           <div className="grid gap-2">
                             {(
-                              Object.keys(mealsByDay[day.key]) as MealType[]
+                              Object.keys(mealsByDay[day.key]) as Array<MealType>
                             ).map((mealType) => (
                               <div key={`${day.key}-${mealType}`}>
                                 <p className="text-xs font-semibold uppercase text-muted-foreground">

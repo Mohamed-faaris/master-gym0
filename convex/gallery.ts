@@ -1,5 +1,5 @@
-import { mutation, query } from './_generated/server'
 import { v } from 'convex/values'
+import { mutation, query } from './_generated/server'
 import { GALLERY_ACCESS, GALLERY_STATUSES } from './schema'
 
 const GalleryStatusValidator = v.union(...GALLERY_STATUSES.map(v.literal))

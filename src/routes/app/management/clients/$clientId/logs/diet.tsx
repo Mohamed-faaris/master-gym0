@@ -1,15 +1,16 @@
 import { useEffect, useState } from 'react'
-import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
+import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
 import {
   ArrowLeft,
-  UtensilsCrossed,
   Calendar,
-  Flame,
   Camera,
+  Flame,
+  UtensilsCrossed,
 } from 'lucide-react'
 import { useMutation, useQuery } from 'convex/react'
 import { toast } from 'sonner'
 
+import { api } from '@convex/_generated/api'
 import { useAuth } from '@/components/auth/useAuth'
 import {
   Card,
@@ -20,7 +21,6 @@ import {
 } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { api } from '@convex/_generated/api'
 
 const privilegedRoles = new Set(['trainer', 'admin'])
 

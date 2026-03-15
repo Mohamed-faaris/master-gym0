@@ -1,5 +1,5 @@
-import { mutation, query } from './_generated/server'
 import { v } from 'convex/values'
+import { mutation, query } from './_generated/server'
 import { MEAL_TYPES } from './schema'
 
 const MealTypeValidator = v.union(...MEAL_TYPES.map(v.literal))
@@ -38,7 +38,7 @@ export const getDietLogsByUser = query({
     limit: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
-    let query = ctx.db
+    const query = ctx.db
       .query('dietLogs')
       .withIndex('by_user', (q) => q.eq('userId', args.userId))
       .order('desc')

@@ -1,8 +1,9 @@
 import { useEffect } from 'react'
-import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
-import { ClipboardList, Plus, ArrowLeft, Calendar, Pencil } from 'lucide-react'
+import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
+import { ArrowLeft, ClipboardList, Pencil, Plus } from 'lucide-react'
 import { useQuery } from 'convex/react'
 
+import { api } from '@convex/_generated/api'
 import { useAuth } from '@/components/auth/useAuth'
 import { Button } from '@/components/ui/button'
 import {
@@ -12,7 +13,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-import { api } from '@convex/_generated/api'
 
 const privilegedRoles = new Set(['trainer', 'admin'])
 
@@ -24,9 +24,11 @@ function ProgramsRoute() {
   const { user, isLoading } = useAuth()
   const navigate = useNavigate()
 
-  // Fetch training plans
-  const trainingPlans = useQuery(api.trainingPlans.getAllTrainingPlans)
-  const visibleTrainingPlans = trainingPlans?.filter((plan) => !plan.isCopy)
+  // Fetch routines
+  const routines = useQuery(api.routines.getRoutinesByAuthor, {
+    authorId: user?._id as NonNullable<typeof user>['_id'],
+  })
+  const visibleRoutines = routines?.filter((routine) => routine.type === 'trainer')
 
   /* -------------------------------------------------------------------------- */
   /*                                 Auth Guard                                 */
@@ -99,7 +101,7 @@ function ProgramsRoute() {
           <div>
             <h1 className="text-2xl font-semibold">Programs</h1>
             <p className="text-muted-foreground">
-              {visibleTrainingPlans?.length || 0} training programs
+              {visibleRoutines?.length || 0} training programs
             </p>
           </div>
           <div className="flex gap-2">
@@ -129,13 +131,13 @@ function ProgramsRoute() {
         </CardHeader>
 
         <CardContent className="space-y-4">
-          {!trainingPlans && (
+          {!routines && (
             <div className="text-center py-8 text-muted-foreground">
               Loading programs...
             </div>
           )}
 
-          {trainingPlans && visibleTrainingPlans?.length === 0 && (
+          {routines && visibleRoutines?.length === 0 && (
             <div className="text-center py-12 space-y-4">
               <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
                 <ClipboardList className="h-8 w-8 text-primary" />
@@ -160,11 +162,11 @@ function ProgramsRoute() {
             </div>
           )}
 
-          {trainingPlans &&
-            visibleTrainingPlans &&
-            visibleTrainingPlans.length > 0 && (
+          {routines &&
+            visibleRoutines &&
+            visibleRoutines.length > 0 && (
               <div className="space-y-3">
-                {visibleTrainingPlans.map((program) => (
+                {visibleRoutines.map((program) => (
                   <Card
                     key={program._id}
                     className="hover:border-primary transition-colors cursor-pointer"
@@ -182,7 +184,7 @@ function ProgramsRoute() {
                             {program.name}
                           </CardTitle>
                           <CardDescription className="mt-1">
-                            {program.description}
+                            {program.exercises.length} exercises configured
                           </CardDescription>
                         </div>
                         <Button
@@ -205,12 +207,8 @@ function ProgramsRoute() {
                     <CardContent>
                       <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
                         <div className="flex items-center gap-1.5">
-                          <Calendar className="h-4 w-4" />
-                          {program.durationDays} days
-                        </div>
-                        <div className="flex items-center gap-1.5">
                           <ClipboardList className="h-4 w-4" />
-                          {program.days.length} workout days
+                          {program.exercises.length} exercises
                         </div>
                       </div>
                     </CardContent>

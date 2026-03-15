@@ -1,11 +1,13 @@
 'use client'
 
 import * as React from 'react'
-import { cva, type VariantProps } from 'class-variance-authority'
+import {  cva } from 'class-variance-authority'
+import type {VariantProps} from 'class-variance-authority';
 
+import type {ButtonProps as ButtonPrimitiveProps} from '@/components/animate-ui/primitives/buttons/button';
 import {
-  Button as ButtonPrimitive,
-  type ButtonProps as ButtonPrimitiveProps,
+  Button as ButtonPrimitive
+  
 } from '@/components/animate-ui/primitives/buttons/button'
 import { cn } from '@/lib/utils'
 

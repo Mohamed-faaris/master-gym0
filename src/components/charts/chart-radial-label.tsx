@@ -3,6 +3,7 @@
 import { TrendingUp } from 'lucide-react'
 import { LabelList, RadialBar, RadialBarChart } from 'recharts'
 
+import type {ChartConfig} from '@/components/ui/chart';
 import {
   Card,
   CardContent,
@@ -12,10 +13,10 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import {
+  
   ChartContainer,
   ChartTooltip,
-  ChartTooltipContent,
-  type ChartConfig,
+  ChartTooltipContent
 } from '@/components/ui/chart'
 
 export const description = 'A radial chart with a label'

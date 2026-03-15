@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, createFileRoute } from '@tanstack/react-router'
-import { Check, Dumbbell, Trash2, UtensilsCrossed, ArrowLeft } from 'lucide-react'
+import { ArrowLeft, Check, Dumbbell, Trash2, UtensilsCrossed } from 'lucide-react'
 import { useMutation, useQuery } from 'convex/react'
 import { toast } from 'sonner'
 

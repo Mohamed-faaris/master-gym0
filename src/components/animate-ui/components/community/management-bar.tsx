@@ -2,15 +2,16 @@
 
 import * as React from 'react'
 import {
+  Ban,
   ChevronLeft,
   ChevronRight,
-  Ban,
-  X,
   Command,
   IdCard,
+  X,
 } from 'lucide-react'
+import {   motion } from 'motion/react'
+import type {Transition, Variants} from 'motion/react';
 import { SlidingNumber } from '@/components/animate-ui/primitives/texts/sliding-number'
-import { motion, type Variants, type Transition } from 'motion/react'
 
 const TOTAL_PAGES = 10
 

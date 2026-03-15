@@ -13,6 +13,7 @@ const ROLES = [
 ] as const
 
 const WORKOUT_STATUSES = ['ongoing', 'completed', 'cancelled'] as const
+const ROUTINE_TYPES = ['custom', 'trainer'] as const
 
 export const MEAL_TYPES = [
   'breakfast',
@@ -48,6 +49,7 @@ function enumToValidator<T extends ReadonlyArray<string>>(values: T) {
 
 const RoleValidator = enumToValidator(ROLES)
 const WorkoutStatusValidator = enumToValidator(WORKOUT_STATUSES)
+const RoutineTypeValidator = enumToValidator(ROUTINE_TYPES)
 const MealTypeValidator = enumToValidator(MEAL_TYPES)
 const GalleryStatusValidator = enumToValidator(GALLERY_STATUSES)
 const GalleryAccessValidator = enumToValidator(GALLERY_ACCESS)
@@ -71,7 +73,6 @@ const users = defineTable({
   goal: v.optional(v.string()),
 
   trainerId: v.optional(v.id('users')),
-  trainingPlanId: v.optional(v.id('trainingPlans')),
   dietPlanId: v.optional(v.id('dietPlans')),
 
   createdAt: v.number(),
@@ -80,7 +81,6 @@ const users = defineTable({
   .index('by_phone', ['phoneNumber'])
   .index('by_phone_pin', ['phoneNumber', 'pin'])
   .index('by_trainer', ['trainerId'])
-  .index('by_training_plan', ['trainingPlanId'])
 
 /* -------------------- USER META -------------------- */
 
@@ -142,40 +142,34 @@ const weightLogs = defineTable({
   weight: v.number(),
 }).index('by_user', ['userId'])
 
-/* -------------------- TRAINING PLANS -------------------- */
+/* -------------------- ROUTINES -------------------- */
 
-const trainingPlans = defineTable({
+const routines = defineTable({
   name: v.string(),
-  description: v.string(),
-  isCopy: v.boolean(),
-  isAssigned: v.boolean(),
+  userId: v.optional(v.id('users')), // null if global/app routine
+  authorId: v.id('users'), // Who created it
+  type: RoutineTypeValidator, // 'custom' | 'trainer'
 
-  days: v.array(
+  exercises: v.array(
     v.object({
-      day: DayOfWeekValidator,
-      dayTitle: v.optional(v.string()),
-      dayDescription: v.optional(v.string()),
-      exercises: v.array(
+      exerciseId: v.optional(v.id('exercises')),
+      exerciseName: v.string(),
+      sets: v.array(
         v.object({
-          exerciseName: v.string(),
-          noOfSets: v.number(),
-          sets: v.array(
-            v.object({
-              reps: v.optional(v.number()),
-              weight: v.optional(v.number()),
-              restTime: v.optional(v.number()),
-            }),
-          ),
+          reps: v.optional(v.number()),
+          weight: v.optional(v.number()),
+          restTime: v.optional(v.number()), // in seconds
         }),
       ),
     }),
   ),
 
-  durationDays: v.optional(v.number()),
-  createdBy: v.id('users'),
   createdAt: v.number(),
   updatedAt: v.number(),
-}).index('by_creator', ['createdBy'])
+})
+  .index('by_user', ['userId'])
+  .index('by_author', ['authorId'])
+  .index('by_type', ['type'])
 
 export const dietPlans = defineTable({
   name: v.string(),
@@ -213,7 +207,8 @@ export const dietPlans = defineTable({
 
 const workoutSessions = defineTable({
   userId: v.id('users'),
-  trainingPlanId: v.optional(v.id('trainingPlans')),
+  routineId: v.optional(v.id('routines')),
+  instructorId: v.optional(v.id('users')), // If a trainer started it
 
   startTime: v.number(),
   endTime: v.optional(v.number()),
@@ -223,8 +218,8 @@ const workoutSessions = defineTable({
 
   exercises: v.array(
     v.object({
+      exerciseId: v.optional(v.id('exercises')),
       exerciseName: v.string(),
-      noOfSets: v.number(),
       sets: v.array(
         v.object({
           reps: v.optional(v.number()),
@@ -325,7 +320,7 @@ export default defineSchema({
   userMeasurement,
   dietLogs,
   weightLogs,
-  trainingPlans,
+  routines,
   dietPlans,
   workoutSessions,
   gallery,

@@ -1,13 +1,15 @@
-import { useState, useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import {
-  BarChart,
   Bar,
+  BarChart,
+  CartesianGrid,
+  ResponsiveContainer,
+  Tooltip,
   XAxis,
   YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
 } from 'recharts'
+import { useQuery } from 'convex/react'
+import { api } from 'convex/_generated/api'
 import {
   Select,
   SelectContent,
@@ -15,8 +17,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { useQuery } from 'convex/react'
-import { api } from 'convex/_generated/api'
 import { useAuth } from '@/components/auth/useAuth'
 
 type TabType = 'duration' | 'calories'

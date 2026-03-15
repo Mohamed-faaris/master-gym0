@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
-import type { Id } from '@convex/_generated/dataModel'
 import { ProgramFormScreen } from '../new'
+import type { Id } from '@convex/_generated/dataModel'
 
 export const Route = createFileRoute(
   '/app/management/programs/$programId/edit',
@@ -14,7 +14,7 @@ function ProgramEditRoute() {
   return (
     <ProgramFormScreen
       mode="edit"
-      programId={programId as Id<'trainingPlans'>}
+      programId={programId as Id<'routines'>}
     />
   )
 }

@@ -6,6 +6,7 @@ import { Scale, TrendingDown, X } from 'lucide-react'
 import { toast } from 'sonner'
 
 import { api } from '@convex/_generated/api'
+import type {ChartConfig} from '@/components/ui/chart';
 import { useAuth } from '@/components/auth/useAuth'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -25,10 +26,10 @@ import {
   DrawerTitle,
 } from '@/components/ui/drawer'
 import {
+  
   ChartContainer,
   ChartTooltip,
-  ChartTooltipContent,
-  type ChartConfig,
+  ChartTooltipContent
 } from '@/components/ui/chart'
 
 export const Route = createFileRoute('/app/_user/weight')({

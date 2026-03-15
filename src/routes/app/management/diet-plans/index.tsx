@@ -1,15 +1,16 @@
 import { useEffect, useMemo } from 'react'
-import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
+import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useQuery } from 'convex/react'
 import {
-  UtensilsCrossed,
-  Plus,
-  Target,
+  ArrowLeft,
   Calendar,
   ChevronRight,
-  ArrowLeft,
+  Plus,
+  Target,
+  UtensilsCrossed,
 } from 'lucide-react'
 
+import { api } from '@convex/_generated/api'
 import { useAuth } from '@/components/auth/useAuth'
 import { Button } from '@/components/ui/button'
 import {
@@ -19,7 +20,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-import { api } from '@convex/_generated/api'
 
 const privilegedRoles = new Set(['trainer', 'admin'])
 

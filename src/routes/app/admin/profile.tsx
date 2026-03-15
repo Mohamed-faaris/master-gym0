@@ -6,9 +6,9 @@ import {
   Image as ImageIcon,
 } from 'lucide-react'
 
-import type { Id } from '@convex/_generated/dataModel'
 import { useAdminConsole } from './_components/-admin-shell'
 import { ProfileForm } from './_components/-profile-form'
+import type { Id } from '@convex/_generated/dataModel'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 

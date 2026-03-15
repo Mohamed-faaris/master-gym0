@@ -1,20 +1,20 @@
-import { createFileRoute, useNavigate, Link } from '@tanstack/react-router'
+import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
 import * as React from 'react'
 import {
-  Play,
-  Pause,
-  CheckCircle2,
-  X,
-  Clock,
   ArrowLeft,
+  Clock,
   Dumbbell,
+  Pause,
+  Play,
+  X,
 } from 'lucide-react'
-import { Card, CardContent } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 import { useMutation, useQuery } from 'convex/react'
 import { api } from '@convex/_generated/api'
-import { useAuth } from '@/components/auth/useAuth'
 import { toast } from 'sonner'
+import type { Id } from '@convex/_generated/dataModel'
+import { useAuth } from '@/components/auth/useAuth'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
 import {
   Checkbox,
   CheckboxIndicator,
@@ -40,13 +40,21 @@ function TrainerWorkoutSessionRoute() {
   // Fetch client
   const client = useQuery(
     api.users.getUserById,
-    clientId ? { userId: clientId } : 'skip',
+    clientId ? { userId: clientId as Id<'users'> } : 'skip',
   )
 
-  const trainingPlan = useQuery(
-    api.trainingPlans.getTrainingPlanById,
-    client?.trainingPlanId ? { trainingPlanId: client.trainingPlanId } : 'skip',
-  )
+  // Actually we need to fetch routines the trainer defined for this client.
+  // For now, let's grab all routines by this trainer and just let them select one.
+  // In a robust flow, the trainer would select from a dropdown which routine to start for the client.
+  // Since we don't have a UI for that here yet, we'll try to find any routine
+  // that was explicitly assigned to this user, or any of the trainer's routines.
+  const routines = useQuery(api.routines.getRoutinesByAuthor, {
+    authorId: user?._id as string, // Trainer's routines or any they authored
+  })
+
+  // To keep the flow simple, just pick the first 'trainer' type routine 
+  // until a proper selector is built or we use a designated active routine field on the user.
+  const todaysWorkout = routines?.find((r: any) => r.type === 'trainer')
 
   // Workout session state - track individual sets
   const [isPaused, setIsPaused] = React.useState(false)
@@ -55,8 +63,8 @@ function TrainerWorkoutSessionRoute() {
   )
   const [workoutTime, setWorkoutTime] = React.useState(0)
   const [sessionId, setSessionId] = React.useState<string | null>(null)
-  const [workoutTitle, setWorkoutTitle] = React.useState('Chest Day')
-  const [workoutFocus, setWorkoutFocus] = React.useState('Chest & Shoulders')
+  const [workoutTitle, setWorkoutTitle] = React.useState('Trainer Routine')
+  const [workoutFocus, setWorkoutFocus] = React.useState('Full Body')
   const [isSessionStarted, setIsSessionStarted] = React.useState(false)
 
   const currentExerciseRef = React.useRef<HTMLDivElement>(null)
@@ -71,8 +79,6 @@ function TrainerWorkoutSessionRoute() {
   const dayEnd = new Date()
   dayEnd.setHours(23, 59, 59, 999)
 
-  const todaysWorkout = trainingPlan?.days.find((day) => day.day === dayOfWeek)
-
   const getSetCount = (exercise: {
     noOfSets: number
     sets: Array<{
@@ -86,7 +92,7 @@ function TrainerWorkoutSessionRoute() {
     api.workoutSessions.getLatestSessionForDay,
     clientId
       ? {
-          userId: clientId,
+          userId: clientId as Id<'users'>,
           dayOfWeek,
           dayStart: dayStart.getTime(),
           dayEnd: dayEnd.getTime(),
@@ -123,7 +129,7 @@ function TrainerWorkoutSessionRoute() {
 
   // Calculate total sets
   const totalSets = activeExercises.reduce(
-    (sum, ex) => sum + getSetCount(ex),
+    (sum: number, ex: any) => sum + getSetCount(ex),
     0,
   )
 
@@ -134,15 +140,16 @@ function TrainerWorkoutSessionRoute() {
   // Initialize session
   const startWorkout = async () => {
     if (!user || !clientId) return
-    if (!client?.trainingPlanId || !todaysWorkout) {
-      toast.error('No training plan assigned for today')
+    if (!todaysWorkout) {
+      toast.error('No suitable routine found to start the workout')
       return
     }
 
     try {
       const id = await startSession({
-        userId: clientId,
-        trainingPlanId: client.trainingPlanId,
+        userId: clientId as Id<'users'>,
+        instructorId: user._id, // the trainer is starting it
+        routineId: todaysWorkout._id as Id<'routines'>,
         dayOfWeek,
         dayStart: dayStart.getTime(),
         dayEnd: dayEnd.getTime(),
@@ -172,11 +179,11 @@ function TrainerWorkoutSessionRoute() {
 
     const updateInterval = setInterval(async () => {
       try {
-        const exercisesData = activeExercises.map((ex, idx) => {
+        const exercisesData = activeExercises.map((ex: any, idx: number) => {
           const setCount = getSetCount(ex)
           const sets =
             ex.sets.length > 0
-              ? ex.sets.map((set, setIdx) => ({
+              ? ex.sets.map((set: any, setIdx: number) => ({
                   reps: set.reps,
                   weight: set.weight,
                   restTime: set.restTime,
@@ -196,7 +203,7 @@ function TrainerWorkoutSessionRoute() {
         const estimatedCalories = (workoutTime / 60) * 5
 
         await updateSession({
-          sessionId,
+          sessionId: sessionId as Id<'workoutSessions'>,
           exercises: exercisesData,
           totalTime: workoutTime,
           totalCaloriesBurned: Math.round(estimatedCalories),
@@ -247,12 +254,12 @@ function TrainerWorkoutSessionRoute() {
 
     try {
       await updateSession({
-        sessionId,
-        exercises: activeExercises.map((ex, idx) => {
+        sessionId: sessionId as Id<'workoutSessions'>,
+        exercises: activeExercises.map((ex: any, idx: number) => {
           const setTotal = getSetCount(ex)
           const sets =
             ex.sets.length > 0
-              ? ex.sets.map((set, setIdx) => ({
+              ? ex.sets.map((set: any, setIdx: number) => ({
                   reps: set.reps,
                   weight: set.weight,
                   restTime: set.restTime,
@@ -287,7 +294,7 @@ function TrainerWorkoutSessionRoute() {
       try {
         const estimatedCalories = (workoutTime / 60) * 5
         await completeSession({
-          sessionId,
+          sessionId: sessionId as Id<'workoutSessions'>,
           totalTime: workoutTime,
           totalCaloriesBurned: Math.round(estimatedCalories),
         })
@@ -303,7 +310,7 @@ function TrainerWorkoutSessionRoute() {
   const cancelWorkout = async () => {
     if (sessionId) {
       try {
-        await cancelSession({ sessionId })
+        await cancelSession({ sessionId: sessionId as Id<'workoutSessions'> })
       } catch (error) {
         console.error(error)
       }
@@ -328,7 +335,7 @@ function TrainerWorkoutSessionRoute() {
     return { totalSetsCount, currentSetIndex }
   }
 
-  const { totalSetsCount, currentSetIndex } = calculateSetInfo()
+  const { currentSetIndex } = calculateSetInfo()
 
   if (isLoading) {
     return <div className="p-4">Loading...</div>
@@ -344,7 +351,7 @@ function TrainerWorkoutSessionRoute() {
         {/* Header */}
         <header className="space-y-3">
           <Link
-            to={`/app/management/clients/${clientId}`}
+            to="/app/management"
             className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
           >
             <ArrowLeft className="h-4 w-4" />
@@ -392,7 +399,7 @@ function TrainerWorkoutSessionRoute() {
         <Card>
           <CardContent className="pt-6 space-y-3">
             <h3 className="font-semibold">Exercises</h3>
-            {activeExercises.map((ex, idx) => (
+            {activeExercises.map((ex: any, idx: number) => (
               <div key={idx} className="p-3 bg-muted rounded-lg">
                 <p className="font-medium">{ex.exerciseName}</p>
                 <p className="text-sm text-muted-foreground">
@@ -432,7 +439,7 @@ function TrainerWorkoutSessionRoute() {
               {completedSets.size} / {totalSets} sets completed
             </div>
           </div>
-          <Button variant="outline" size="sm" onClick={cancelWorkout}>
+          <Button variant="outline" size="sm" onClick={endWorkout}>
             <X className="w-4 h-4 mr-2" />
             End
           </Button>
@@ -443,7 +450,7 @@ function TrainerWorkoutSessionRoute() {
       <div className="p-4 space-y-6">
         <div className="h-[50vh]" />
 
-        {activeExercises.map((exercise, exerciseIndex) => {
+        {activeExercises.map((exercise: any, exerciseIndex: number) => {
           const exerciseCompletedSets = Array.from(completedSets).filter(
             (key) => key.startsWith(`${exerciseIndex}-`),
           ).length

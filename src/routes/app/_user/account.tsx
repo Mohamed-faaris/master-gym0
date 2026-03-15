@@ -14,6 +14,7 @@ import {
   User,
   X,
 } from 'lucide-react'
+import { toast } from 'sonner'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -26,7 +27,6 @@ import {
   DrawerTitle,
 } from '@/components/ui/drawer'
 import { useAuth } from '@/components/auth/useAuth'
-import { toast } from 'sonner'
 
 export const Route = createFileRoute('/app/_user/account')({
   component: RouteComponent,

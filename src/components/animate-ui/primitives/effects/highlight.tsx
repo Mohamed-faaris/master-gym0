@@ -1,7 +1,8 @@
 'use client'
 
 import * as React from 'react'
-import { AnimatePresence, motion, type Transition } from 'motion/react'
+import { AnimatePresence,  motion } from 'motion/react'
+import type {Transition} from 'motion/react';
 
 import { cn } from '@/lib/utils'
 
@@ -43,7 +44,7 @@ type HighlightContextType<T extends string> = {
 }
 
 const HighlightContext = React.createContext<
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   HighlightContextType<any> | undefined
 >(undefined)
 
@@ -99,7 +100,7 @@ type UncontrolledParentModeHighlightProps<T extends React.ElementType = 'div'> =
       mode: 'parent'
       controlledItems?: false
       itemsClassName?: string
-      children: React.ReactElement | React.ReactElement[]
+      children: React.ReactElement | Array<React.ReactElement>
     }
 
 type UncontrolledChildrenModeHighlightProps<
@@ -108,7 +109,7 @@ type UncontrolledChildrenModeHighlightProps<
   mode?: 'children'
   controlledItems?: false
   itemsClassName?: string
-  children: React.ReactElement | React.ReactElement[]
+  children: React.ReactElement | Array<React.ReactElement>
 }
 
 type HighlightProps<T extends React.ElementType = 'div'> =

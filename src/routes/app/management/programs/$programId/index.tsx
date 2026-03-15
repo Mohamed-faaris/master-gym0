@@ -1,8 +1,10 @@
 import { useEffect } from 'react'
-import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
-import { ArrowLeft, Calendar, Dumbbell, Pencil } from 'lucide-react'
+import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
+import { ArrowLeft, Dumbbell, Pencil } from 'lucide-react'
 import { useQuery } from 'convex/react'
 
+import { api } from '@convex/_generated/api'
+import type { Id } from '../../../../../../convex/_generated/dataModel'
 import { useAuth } from '@/components/auth/useAuth'
 import { Button } from '@/components/ui/button'
 import {
@@ -12,8 +14,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-import { api } from '@convex/_generated/api'
-import type { Id } from '../../../../../../convex/_generated/dataModel'
 
 const privilegedRoles = new Set(['trainer', 'admin'])
 
@@ -26,9 +26,9 @@ function ProgramDetailRoute() {
   const { user, isLoading } = useAuth()
   const navigate = useNavigate()
 
-  // Fetch program details
-  const program = useQuery(api.trainingPlans.getTrainingPlanById, {
-    trainingPlanId: programId as Id<'trainingPlans'>,
+  // Fetch routine details
+  const program = useQuery(api.routines.getRoutineById, {
+    routineId: programId as Id<'routines'>,
   })
 
   /* -------------------------------------------------------------------------- */
@@ -98,27 +98,15 @@ function ProgramDetailRoute() {
           <Card>
             <CardHeader>
               <CardTitle>{program.name}</CardTitle>
-              <CardDescription>{program.description}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1">
-                  <div className="text-sm text-muted-foreground">Duration</div>
-                  <div className="flex items-center gap-2">
-                    <Calendar className="h-4 w-4" />
-                    <span className="font-medium">
-                      {program.durationDays} days
-                    </span>
-                  </div>
-                </div>
-                <div className="space-y-1">
-                  <div className="text-sm text-muted-foreground">
-                    Workout Days
-                  </div>
+                  <div className="text-sm text-muted-foreground">Exercises</div>
                   <div className="flex items-center gap-2">
                     <Dumbbell className="h-4 w-4" />
                     <span className="font-medium">
-                      {program.days.length} days/week
+                      {program.exercises.length} total
                     </span>
                   </div>
                 </div>
@@ -126,42 +114,35 @@ function ProgramDetailRoute() {
             </CardContent>
           </Card>
 
-          {program.days.map((day, index) => (
-            <Card key={index}>
-              <CardHeader>
-                <CardTitle className="text-lg capitalize">
-                  {day.dayTitle || day.day}
-                </CardTitle>
-                <CardDescription>
-                  {day.dayDescription
-                    ? day.dayDescription
-                    : `${day.exercises.length} exercises`}
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {day.exercises.map((exercise, exIndex) => (
-                  <div
-                    key={exIndex}
-                    className="border rounded-lg p-4 space-y-2"
-                  >
-                    <h4 className="font-medium">{exercise.exerciseName}</h4>
-                    <div className="text-sm text-muted-foreground">
-                      {exercise.noOfSets} sets
-                    </div>
-                    <div className="grid grid-cols-3 gap-2 text-sm">
-                      {exercise.sets.map((set, setIndex) => (
-                        <div key={setIndex} className="bg-muted p-2 rounded">
-                          Set {setIndex + 1}: {set.reps} reps
-                          {set.weight && ` @ ${set.weight}kg`}
-                          {set.restTime && ` · ${set.restTime}s rest`}
-                        </div>
-                      ))}
-                    </div>
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Routine Exercises</CardTitle>
+              <CardDescription>
+                {program.exercises.length} exercises
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {program.exercises.map((exercise: any, exIndex: number) => (
+                <div key={exIndex} className="border rounded-lg p-4 space-y-2">
+                  <h4 className="font-medium">
+                    {exercise.exerciseName}
+                  </h4>
+                  <div className="text-sm text-muted-foreground">
+                    {exercise.sets.length} sets
                   </div>
-                ))}
-              </CardContent>
-            </Card>
-          ))}
+                  <div className="grid grid-cols-3 gap-2 text-sm">
+                    {exercise.sets.map((set: any, setIndex: number) => (
+                      <div key={setIndex} className="bg-muted p-2 rounded">
+                        Set {setIndex + 1}: {set.reps} reps
+                        {set.weight && ` @ ${set.weight}kg`}
+                        {set.restTime && ` · ${set.restTime}s rest`}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
         </>
       )}
     </div>

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
-import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
-import { useQuery, useMutation } from 'convex/react'
+import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
+import { useMutation, useQuery } from 'convex/react'
 import {
   ArrowLeft,
   Calendar,
@@ -10,6 +10,9 @@ import {
   UtensilsCrossed,
 } from 'lucide-react'
 
+import { toast } from 'sonner'
+import { api } from '@convex/_generated/api'
+import type { Id } from '../../../../../convex/_generated/dataModel'
 import { useAuth } from '@/components/auth/useAuth'
 import { Button } from '@/components/ui/button'
 import {
@@ -25,9 +28,6 @@ import {
   TabsList,
   TabsTrigger,
 } from '@/components/animate-ui/components/radix/tabs'
-import { toast } from 'sonner'
-import { api } from '@convex/_generated/api'
-import type { Id } from '../../../../../convex/_generated/dataModel'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -85,15 +85,15 @@ function DietPlanDetailRoute() {
 
   const deleteDietPlan = useMutation(api.dietPlans.deleteDietPlan)
 
-  const mealTemplate: MealTemplateEntry[] = dietPlan?.mealTemplate ?? []
+  const mealTemplate: Array<MealTemplateEntry> = dietPlan?.mealTemplate ?? []
 
   const mealsByDay = useMemo(() => {
-    const base = dayOrder.reduce<Record<DayKey, MealTemplateEntry[]>>(
+    const base = dayOrder.reduce<Record<DayKey, Array<MealTemplateEntry>>>(
       (acc, day) => {
         acc[day] = []
         return acc
       },
-      {} as Record<DayKey, MealTemplateEntry[]>,
+      {} as Record<DayKey, Array<MealTemplateEntry>>,
     )
 
     mealTemplate.forEach((meal) => {
@@ -103,7 +103,7 @@ function DietPlanDetailRoute() {
     return base
   }, [mealTemplate])
 
-  const availableDays = useMemo<DayKey[]>(
+  const availableDays = useMemo<Array<DayKey>>(
     () => dayOrder.filter((day) => mealsByDay[day]?.length),
     [mealsByDay],
   )

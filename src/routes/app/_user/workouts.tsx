@@ -1,5 +1,5 @@
 import { Link, createFileRoute } from '@tanstack/react-router'
-import { useEffect, useMemo, useState } from 'react'
+import { useState } from 'react'
 import {
   Calendar,
   CheckCircle2,
@@ -13,6 +13,7 @@ import { useMutation, useQuery } from 'convex/react'
 import { toast } from 'sonner'
 import { api } from '@convex/_generated/api'
 
+import type {ExerciseData} from '@/components/add-exercise-drawer';
 import {
   Card,
   CardContent,
@@ -22,16 +23,10 @@ import {
 } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { useAuth } from '@/components/auth/useAuth'
+
 import {
-  Tabs,
-  TabsContent,
-  TabsContents,
-  TabsList,
-  TabsTrigger,
-} from '@/components/animate-ui/components/radix/tabs'
-import {
-  AddExerciseDrawer,
-  type ExerciseData,
+  AddExerciseDrawer
+  
 } from '@/components/add-exercise-drawer'
 
 export const Route = createFileRoute('/app/_user/workouts')({
@@ -47,18 +42,15 @@ function RouteComponent() {
     api.workoutSessions.addSelfManagedExerciseToToday,
   )
 
-  // Fetch user's assigned training plan
-  const userWithMeta = useQuery(
-    api.users.getUserWithMeta,
-    user ? { userId: user._id } : 'skip',
+  // In a full Hevy-style implementation, users have multiple routines they can choose from.
+  // We'll fetch routines they authored or copied, and display the primary one for now,
+  // or simply the first one in the list.
+  const routines = useQuery(
+    api.routines.getRoutinesByAuthor,
+    user ? { authorId: user._id } : 'skip',
   )
 
-  const trainingPlan = useQuery(
-    api.trainingPlans.getTrainingPlanById,
-    userWithMeta?.trainingPlanId
-      ? { trainingPlanId: userWithMeta.trainingPlanId }
-      : 'skip',
-  )
+  const activeRoutine = routines?.[0]
 
   const dayOfWeek = (
     ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'] as const
@@ -110,44 +102,9 @@ function RouteComponent() {
 
   const todayStats = getTodayStats()
 
-  const dayOrder = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'] as const
-  const dayLabels: Record<(typeof dayOrder)[number], string> = {
-    mon: 'Mon',
-    tue: 'Tue',
-    wed: 'Wed',
-    thu: 'Thu',
-    fri: 'Fri',
-    sat: 'Sat',
-    sun: 'Sun',
-  }
-
-  const todayKey = (['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'] as const)[
-    today.getDay()
-  ]
-
-  const sortedDays = useMemo(() => {
-    if (!trainingPlan) return []
-    const orderIndex = new Map(dayOrder.map((day, index) => [day, index]))
-    return [...trainingPlan.days].sort((a, b) => {
-      return (orderIndex.get(a.day) ?? 0) - (orderIndex.get(b.day) ?? 0)
-    })
-  }, [trainingPlan, dayOrder])
-
-  const availableDays = useMemo(
-    () => sortedDays.map((day) => day.day),
-    [sortedDays],
-  )
-  const availableDaySet = useMemo(() => new Set(availableDays), [availableDays])
-  const [activeDay, setActiveDay] = useState<string | undefined>(todayKey)
-
-  useEffect(() => {
-    if (!availableDays.length) return
-    setActiveDay((prev) => {
-      if (prev && availableDaySet.has(prev)) return prev
-      if (availableDaySet.has(todayKey)) return todayKey
-      return availableDays[0]
-    })
-  }, [availableDays, availableDaySet, todayKey])
+  // Since routines don't have strict scheduling days by default in the new schema,
+  // we'll just show the routine exercises directly.
+  // The 'add self-managed exercise' still works on a per-day basis as a diary.
 
   const handleAddExercise = async (data: ExerciseData) => {
     if (!user || !isSelfManaged) return
@@ -189,7 +146,7 @@ function RouteComponent() {
               </span>
             </div>
           </div>
-          {isSelfManaged && !trainingPlan && (
+          {isSelfManaged && !activeRoutine && (
             <Button
               variant="outline"
               size="icon"
@@ -256,7 +213,7 @@ function RouteComponent() {
           </>
         )}
 
-        {user && !trainingPlan && !isSelfManaged && (
+        {user && !activeRoutine && !isSelfManaged && (
           <Card>
             <CardHeader>
               <CardTitle>No Training Program Assigned</CardTitle>
@@ -281,7 +238,7 @@ function RouteComponent() {
           </Card>
         )}
 
-        {user && !trainingPlan && isSelfManaged && (
+        {user && !activeRoutine && isSelfManaged && (
           <Card>
             <CardHeader>
               <CardTitle>Today's Session</CardTitle>
@@ -298,7 +255,7 @@ function RouteComponent() {
                   >
                     <h4 className="font-medium">{exercise.exerciseName}</h4>
                     <div className="text-sm text-muted-foreground">
-                      {exercise.noOfSets} sets
+                      {exercise.sets?.length || 0} sets
                     </div>
                     <div className="space-y-1">
                       {exercise.sets.map((set, setIndex) => (
@@ -336,96 +293,58 @@ function RouteComponent() {
           </Card>
         )}
 
-        {trainingPlan && (
-          <>
-            <Card>
-              <CardHeader>
-                <CardTitle>{trainingPlan.name}</CardTitle>
-                <CardDescription>{trainingPlan.description}</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center gap-4 text-sm">
-                  <div className="flex items-center gap-2">
-                    <Calendar className="h-4 w-4" />
-                    <span>{trainingPlan.durationWeeks} weeks</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Dumbbell className="h-4 w-4" />
-                    <span>{trainingPlan.days.length} workout days</span>
-                  </div>
+        {activeRoutine && (
+          <Card>
+            <CardHeader>
+              <CardTitle>{activeRoutine.name}</CardTitle>
+              <CardDescription>Your current active routine</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center gap-4 text-sm mb-6">
+                <div className="flex items-center gap-2">
+                  <Dumbbell className="h-4 w-4" />
+                  <span>{activeRoutine.exercises.length} Exercises total</span>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
 
-            <Tabs value={activeDay} onValueChange={setActiveDay}>
-              <TabsList className="grid w-full grid-cols-7">
-                {dayOrder.map((dayKey) => {
-                  const isAvailable = availableDaySet.has(dayKey)
-                  return (
-                    <TabsTrigger
-                      key={dayKey}
-                      value={dayKey}
-                      disabled={!isAvailable}
-                      className="text-xs uppercase"
-                    >
-                      {dayLabels[dayKey]}
-                    </TabsTrigger>
-                  )
-                })}
-              </TabsList>
-
-              <TabsContents className="space-y-4">
-                {sortedDays.map((day) => (
-                  <TabsContent key={day.day} value={day.day}>
-                    <Card>
-                      <CardHeader>
-                        <CardTitle className="text-lg capitalize">
-                          {day.day}
-                        </CardTitle>
-                        <CardDescription>
-                          {day.exercises.length} exercises
-                        </CardDescription>
-                      </CardHeader>
-                      <CardContent className="space-y-3">
-                        {day.exercises.map((exercise, exIndex) => (
-                          <div
-                            key={exIndex}
-                            className="border rounded-lg p-4 space-y-2"
-                          >
-                            <h4 className="font-medium">
-                              {exercise.exerciseName}
-                            </h4>
-                            <div className="text-sm text-muted-foreground">
-                              {exercise.noOfSets} sets
-                            </div>
-                            <div className="space-y-1">
-                              {exercise.sets.map((set, setIndex) => (
-                                <div
-                                  key={setIndex}
-                                  className="text-sm flex items-center gap-2"
-                                >
-                                  <span className="text-muted-foreground">
-                                    Set {setIndex + 1}:
-                                  </span>
-                                  <span>{set.reps} reps</span>
-                                  {set.weight && <span>@ {set.weight}kg</span>}
-                                  {set.restTime && (
-                                    <span className="text-muted-foreground">
-                                      ({set.restTime}s rest)
-                                    </span>
-                                  )}
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        ))}
-                      </CardContent>
-                    </Card>
-                  </TabsContent>
+              <div className="space-y-4">
+                {activeRoutine.exercises.map((exercise: any, exIndex: number) => (
+                  <div
+                    key={exIndex}
+                    className="border rounded-lg p-4 space-y-2"
+                  >
+                    <h4 className="font-medium">
+                      {exercise.exerciseName}
+                    </h4>
+                    <div className="text-sm text-muted-foreground mb-2">
+                      {exercise.sets.length} sets
+                    </div>
+                    <div className="space-y-1">
+                      {exercise.sets.map((set: any, setIndex: number) => (
+                        <div
+                          key={setIndex}
+                          className="text-sm flex items-center gap-2"
+                        >
+                          <span className="text-muted-foreground w-12">
+                            Set {setIndex + 1}:
+                          </span>
+                          <span>{set.reps} reps</span>
+                          {set.weight !== undefined && (
+                            <span>@ {set.weight}kg</span>
+                          )}
+                          {set.restTime !== undefined && (
+                            <span className="text-muted-foreground">
+                              ({set.restTime}s rest)
+                            </span>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 ))}
-              </TabsContents>
-            </Tabs>
-          </>
+              </div>
+            </CardContent>
+          </Card>
         )}
       </div>
 

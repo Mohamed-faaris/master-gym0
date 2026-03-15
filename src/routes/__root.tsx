@@ -1,8 +1,8 @@
 import {
   HeadContent,
+  Link,
   Scripts,
   createRootRouteWithContext,
-  Link,
   useRouter,
 } from '@tanstack/react-router'
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
@@ -12,6 +12,7 @@ import { Capacitor } from '@capacitor/core'
 import { App } from '@capacitor/app'
 import { StatusBar, Style } from '@capacitor/status-bar'
 
+import { PostHogProvider } from '@posthog/react'
 import ConvexProvider from '../integrations/convex/provider'
 
 import TanStackQueryDevtools from '../integrations/tanstack-query/devtools'
@@ -20,7 +21,6 @@ import appCss from '../styles.css?url'
 
 import type { QueryClient } from '@tanstack/react-query'
 import { AuthProvider } from '@/components/auth/AuthProvider'
-import { PostHogProvider } from '@posthog/react'
 import { Toaster } from '@/components/ui/sonner'
 
 interface MyRouterContext {

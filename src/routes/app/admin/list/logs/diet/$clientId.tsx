@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from '@tanstack/react-router'
+import { Link, createFileRoute } from '@tanstack/react-router'
 import { ArrowLeft, Calendar, Camera, Flame, UtensilsCrossed } from 'lucide-react'
 import { useMutation, useQuery } from 'convex/react'
 import { useState } from 'react'

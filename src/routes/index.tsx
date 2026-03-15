@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { useAuth } from '@/components/auth/useAuth'
 import { useEffect } from 'react'
 import { Loader2 } from 'lucide-react'
+import { useAuth } from '@/components/auth/useAuth'
 
 export const Route = createFileRoute('/')({ component: App })
 

@@ -3,12 +3,13 @@
 import * as React from 'react'
 import { Switch as SwitchPrimitives } from '@base-ui-components/react/switch'
 import {
-  motion,
-  type TargetAndTransition,
-  type VariantLabels,
-  type HTMLMotionProps,
-  type LegacyAnimationControls,
+  
+  
+  
+  
+  motion
 } from 'motion/react'
+import type {HTMLMotionProps, LegacyAnimationControls, TargetAndTransition, VariantLabels} from 'motion/react';
 
 import { getStrictContext } from '@/lib/get-strict-context'
 import { useControlledState } from '@/hooks/use-controlled-state'

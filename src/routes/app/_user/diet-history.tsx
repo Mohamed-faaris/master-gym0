@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from '@tanstack/react-router'
+import { Link, createFileRoute } from '@tanstack/react-router'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useQuery } from 'convex/react'
 import { Camera, UtensilsCrossed } from 'lucide-react'
@@ -41,7 +41,7 @@ function RouteComponent() {
   const [cursor, setCursor] = useState<number | null>(null)
   const [nextCursor, setNextCursor] = useState<number | null>(null)
   const [isLoadingMore, setIsLoadingMore] = useState(false)
-  const [entries, setEntries] = useState<HistoryLog[]>([])
+  const [entries, setEntries] = useState<Array<HistoryLog>>([])
   const [selectedImageUrl, setSelectedImageUrl] = useState<string | null>(null)
   const sentinelRef = useRef<HTMLDivElement | null>(null)
 

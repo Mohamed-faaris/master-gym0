@@ -1,16 +1,17 @@
 'use client'
 
 import { PolarAngleAxis, RadialBar, RadialBarChart } from 'recharts'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import {
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-  type ChartConfig,
-} from '@/components/ui/chart'
-import { useAuth } from '@/components/auth/useAuth'
 import { useQuery } from 'convex/react'
 import { api } from 'convex/_generated/api'
+import type {ChartConfig} from '@/components/ui/chart';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent
+} from '@/components/ui/chart'
+import { useAuth } from '@/components/auth/useAuth'
 
 const chartConfig = {
   calories: {
