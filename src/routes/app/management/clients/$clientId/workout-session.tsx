@@ -1,24 +1,21 @@
-import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
-import * as React from 'react'
-import {
-  ArrowLeft,
-  Clock,
-  Dumbbell,
-  Pause,
-  Play,
-  X,
-} from 'lucide-react'
-import { useMutation, useQuery } from 'convex/react'
+import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { api } from '@convex/_generated/api'
+import { useMutation, useQuery } from 'convex/react'
+import * as React from 'react'
+import { CheckCircle2, Clock, Pause, Play, Plus, ArrowLeft } from 'lucide-react'
 import { toast } from 'sonner'
-import type { Id } from '@convex/_generated/dataModel'
+import type {ExerciseData} from '@/components/add-exercise-drawer';
 import { useAuth } from '@/components/auth/useAuth'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
 import {
   Checkbox,
   CheckboxIndicator,
 } from '@/components/animate-ui/primitives/radix/checkbox'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Id } from '@convex/_generated/dataModel'
+import { AddExerciseDrawer } from '@/components/add-exercise-drawer'
+import { RestTimer } from '@/components/rest-timer'
 
 export const Route = createFileRoute(
   '/app/management/clients/$clientId/workout-session',
@@ -28,65 +25,39 @@ export const Route = createFileRoute(
 
 function TrainerWorkoutSessionRoute() {
   const navigate = useNavigate()
+  const search = Route.useSearch() as { routineId?: string }
   const { clientId } = Route.useParams()
   const { user, isLoading } = useAuth()
 
-  // Convex mutations
+  const privilegedRoles = new Set(['trainer', 'admin'])
+
   const startSession = useMutation(api.workoutSessions.startSession)
   const updateSession = useMutation(api.workoutSessions.updateSessionProgress)
   const completeSession = useMutation(api.workoutSessions.completeSession)
-  const cancelSession = useMutation(api.workoutSessions.cancelSession)
 
-  // Fetch client
-  const client = useQuery(
-    api.users.getUserById,
-    clientId ? { userId: clientId as Id<'users'> } : 'skip',
+  const routineQuery = useQuery(
+    api.routines.getRoutineById,
+    search.routineId ? { routineId: search.routineId as Id<'routines'> } : 'skip'
   )
+  const todaysWorkout = routineQuery
 
-  // Actually we need to fetch routines the trainer defined for this client.
-  // For now, let's grab all routines by this trainer and just let them select one.
-  // In a robust flow, the trainer would select from a dropdown which routine to start for the client.
-  // Since we don't have a UI for that here yet, we'll try to find any routine
-  // that was explicitly assigned to this user, or any of the trainer's routines.
-  const routines = useQuery(api.routines.getRoutinesByAuthor, {
-    authorId: user?._id as string, // Trainer's routines or any they authored
-  })
-
-  // To keep the flow simple, just pick the first 'trainer' type routine 
-  // until a proper selector is built or we use a designated active routine field on the user.
-  const todaysWorkout = routines?.find((r: any) => r.type === 'trainer')
-
-  // Workout session state - track individual sets
   const [isPaused, setIsPaused] = React.useState(false)
-  const [completedSets, setCompletedSets] = React.useState<Set<string>>(
-    new Set(),
-  )
   const [workoutTime, setWorkoutTime] = React.useState(0)
   const [sessionId, setSessionId] = React.useState<string | null>(null)
-  const [workoutTitle, setWorkoutTitle] = React.useState('Trainer Routine')
-  const [workoutFocus, setWorkoutFocus] = React.useState('Full Body')
-  const [isSessionStarted, setIsSessionStarted] = React.useState(false)
+  const [isAddExerciseDrawerOpen, setIsAddExerciseDrawerOpen] = React.useState(false)
 
-  const currentExerciseRef = React.useRef<HTMLDivElement>(null)
+  // New Rest Timer state
+  const [isRestTimerOpen, setIsRestTimerOpen] = React.useState(false)
+  const [restTimerSeconds, setRestTimerSeconds] = React.useState(90)
 
-  const privilegedRoles = new Set(['trainer', 'admin'])
-
+  const today = new Date()
   const dayOfWeek = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'][
-    new Date().getDay()
+    today.getDay()
   ] as 'sun' | 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat'
-  const dayStart = new Date()
+  const dayStart = new Date(today)
   dayStart.setHours(0, 0, 0, 0)
-  const dayEnd = new Date()
+  const dayEnd = new Date(today)
   dayEnd.setHours(23, 59, 59, 999)
-
-  const getSetCount = (exercise: {
-    noOfSets: number
-    sets: Array<{
-      reps?: number
-      weight?: number
-      notes?: string
-    }>
-  }) => (exercise.sets.length > 0 ? exercise.sets.length : exercise.noOfSets)
 
   const existingSession = useQuery(
     api.workoutSessions.getLatestSessionForDay,
@@ -100,24 +71,7 @@ function TrainerWorkoutSessionRoute() {
       : 'skip',
   )
 
-  const activeExercises =
-    existingSession?.exercises ?? todaysWorkout?.exercises ?? []
-
-  const hydrateFromSession = React.useCallback(() => {
-    if (!existingSession) return
-    const completed = new Set<string>()
-    existingSession.exercises.forEach((exercise, exIndex) => {
-      exercise.sets.forEach((set, setIndex) => {
-        if (set.completed) {
-          completed.add(`${exIndex}-${setIndex}`)
-        }
-      })
-    })
-    setCompletedSets(completed)
-    setSessionId(existingSession._id)
-    setWorkoutTime(existingSession.totalTime || 0)
-    setIsSessionStarted(true)
-  }, [existingSession])
+  const [localExercises, setLocalExercises] = React.useState<any[]>([])
 
   // Auth check
   React.useEffect(() => {
@@ -127,215 +81,135 @@ function TrainerWorkoutSessionRoute() {
     }
   }, [user, isLoading, navigate])
 
-  // Calculate total sets
-  const totalSets = activeExercises.reduce(
-    (sum: number, ex: any) => sum + getSetCount(ex),
-    0,
-  )
+  React.useEffect(() => {
+    if (existingSession) {
+      setSessionId(existingSession._id)
+      setWorkoutTime(existingSession.totalTime || 0)
+      if (existingSession.status === 'completed') {
+        setIsPaused(true)
+      }
+      setLocalExercises(existingSession.exercises)
+    } else if (todaysWorkout && localExercises.length === 0) {
+      // initialize from routine
+      const initial = todaysWorkout.exercises.map((ex: any) => ({
+        exerciseName: ex.exerciseName,
+        sets: ex.sets.map((s: any) => ({ ...s, completed: false }))
+      }))
+      setLocalExercises(initial)
+    }
+  }, [existingSession, todaysWorkout])
 
   React.useEffect(() => {
-    hydrateFromSession()
-  }, [hydrateFromSession])
-
-  // Initialize session
-  const startWorkout = async () => {
-    if (!user || !clientId) return
-    if (!todaysWorkout) {
-      toast.error('No suitable routine found to start the workout')
-      return
+    let timer: NodeJS.Timeout | undefined
+    if (sessionId && !isPaused) {
+      timer = setInterval(() => {
+        setWorkoutTime((prev) => prev + 1)
+      }, 1000)
     }
+    return () => {
+      if (timer) clearInterval(timer)
+    }
+  }, [sessionId, isPaused])
 
+  const syncToDb = async (newExercises: any[]) => {
+    if (!sessionId) return
     try {
-      const id = await startSession({
-        userId: clientId as Id<'users'>,
-        instructorId: user._id, // the trainer is starting it
-        routineId: todaysWorkout._id as Id<'routines'>,
-        dayOfWeek,
-        dayStart: dayStart.getTime(),
-        dayEnd: dayEnd.getTime(),
+      const estimatedCalories = (workoutTime / 60) * 5
+      await updateSession({
+        sessionId: sessionId as Id<'workoutSessions'>,
+        exercises: newExercises,
+        totalTime: workoutTime,
+        totalCaloriesBurned: Math.round(estimatedCalories),
       })
-      setSessionId(id)
-      setIsSessionStarted(true)
-      toast.success('Workout session started')
     } catch (error) {
-      toast.error('Failed to start workout session')
       console.error(error)
     }
   }
 
-  // Timer effect
-  React.useEffect(() => {
-    if (!isPaused && isSessionStarted) {
-      const interval = setInterval(() => {
-        setWorkoutTime((prev) => prev + 1)
-      }, 1000)
-      return () => clearInterval(interval)
+  const updateSet = (exIndex: number, setIndex: number, field: string, value: any) => {
+    const updated = [...localExercises]
+    updated[exIndex].sets[setIndex][field] = value
+    setLocalExercises(updated)
+    syncToDb(updated)
+  }
+
+  const toggleSet = (exIndex: number, setIndex: number) => {
+    const currentStatus = localExercises[exIndex].sets[setIndex].completed
+    const newStatus = !currentStatus
+    updateSet(exIndex, setIndex, 'completed', newStatus)
+
+    if (newStatus && !isPaused) { // Trigger rest timer only if just checked
+      const restTime = localExercises[exIndex].sets[setIndex].restTime || 90
+      setRestTimerSeconds(restTime)
+      setIsRestTimerOpen(true)
     }
-  }, [isPaused, isSessionStarted])
+  }
 
-  // Update session progress every 10 seconds
-  React.useEffect(() => {
-    if (!sessionId || !isSessionStarted || activeExercises.length === 0) return
+  const addSet = (exIndex: number) => {
+    const updated = [...localExercises]
+    const lastSet = updated[exIndex].sets.slice(-1)[0] || { reps: 8, weight: 0, restTime: 90, completed: false }
+    updated[exIndex].sets.push({ ...lastSet, completed: false })
+    setLocalExercises(updated)
+    syncToDb(updated)
+  }
 
-    const updateInterval = setInterval(async () => {
-      try {
-        const exercisesData = activeExercises.map((ex: any, idx: number) => {
-          const setCount = getSetCount(ex)
-          const sets =
-            ex.sets.length > 0
-              ? ex.sets.map((set: any, setIdx: number) => ({
-                  reps: set.reps,
-                  weight: set.weight,
-                  restTime: set.restTime,
-                  completed: completedSets.has(`${idx}-${setIdx}`),
-                }))
-              : Array.from({ length: setCount }).map((_, setIdx) => ({
-                  completed: completedSets.has(`${idx}-${setIdx}`),
-                }))
-
-          return {
-            exerciseName: ex.exerciseName,
-            noOfSets: ex.noOfSets,
-            sets,
-          }
-        })
-
-        const estimatedCalories = (workoutTime / 60) * 5
-
-        await updateSession({
-          sessionId: sessionId as Id<'workoutSessions'>,
-          exercises: exercisesData,
-          totalTime: workoutTime,
-          totalCaloriesBurned: Math.round(estimatedCalories),
-        })
-      } catch (error) {
-        console.error('Failed to update session:', error)
-      }
-    }, 10000)
-
-    return () => clearInterval(updateInterval)
-  }, [
-    sessionId,
-    completedSets,
-    workoutTime,
-    activeExercises,
-    isSessionStarted,
-    updateSession,
-  ])
-
-  // Auto-scroll to current set
-  React.useEffect(() => {
-    if (
-      currentExerciseRef.current &&
-      document.body.contains(currentExerciseRef.current)
-    ) {
-      try {
-        currentExerciseRef.current.scrollIntoView({
-          behavior: 'smooth',
-          block: 'center',
-        })
-      } catch (error) {
-        console.debug('Scroll error:', error)
-      }
-    }
-  }, [completedSets])
-
-  const toggleSet = async (exerciseIndex: number, setIndex: number) => {
-    const setKey = `${exerciseIndex}-${setIndex}`
-    const newCompleted = new Set(completedSets)
-    if (newCompleted.has(setKey)) {
-      newCompleted.delete(setKey)
-    } else {
-      newCompleted.add(setKey)
-    }
-    setCompletedSets(newCompleted)
-
-    if (!sessionId) return
-
+  const handleStartSession = async () => {
+    if (!user || !clientId) return
     try {
-      await updateSession({
-        sessionId: sessionId as Id<'workoutSessions'>,
-        exercises: activeExercises.map((ex: any, idx: number) => {
-          const setTotal = getSetCount(ex)
-          const sets =
-            ex.sets.length > 0
-              ? ex.sets.map((set: any, setIdx: number) => ({
-                  reps: set.reps,
-                  weight: set.weight,
-                  restTime: set.restTime,
-                  completed: newCompleted.has(`${idx}-${setIdx}`),
-                }))
-              : Array.from({ length: setTotal }).map((_, setIdx) => ({
-                  completed: newCompleted.has(`${idx}-${setIdx}`),
-                }))
+      const activeRoutineId = todaysWorkout?._id
+      const session = await startSession({
+        userId: clientId as Id<'users'>,
+        instructorId: user._id, // the trainer is starting it
+        routineId: activeRoutineId as Id<'routines'> | undefined,
+        dayOfWeek,
+        dayStart: dayStart.getTime(),
+        dayEnd: dayEnd.getTime(),
+      })
+      setSessionId(session)
+      toast.success('Client workout session started')
+    } catch (error) {
+      console.error(error)
+      toast.error('Failed to start session')
+    }
+  }
 
-          return {
-            exerciseName: ex.exerciseName,
-            noOfSets: ex.noOfSets,
-            sets,
-          }
-        }),
+  const handleCompleteSession = async () => {
+    if (!sessionId) return
+    try {
+      await completeSession({
+        sessionId: sessionId as Id<'workoutSessions'>,
         totalTime: workoutTime,
         totalCaloriesBurned: Math.round((workoutTime / 60) * 5),
       })
+      toast.success('Workout completed!')
+      navigate({ to: `/app/management/clients/${clientId}/logs/workout` })
     } catch (error) {
-      console.error('Failed to update session:', error)
+      console.error(error)
+      toast.error('Failed to complete workout')
     }
+  }
+
+  const handleAddExercise = async (data: ExerciseData) => {
+    if (!sessionId) {
+      toast.error('Please start the session first')
+      return;
+    }
+    
+    const updated = [...localExercises, {
+      exerciseName: data.exerciseName,
+      sets: data.sets?.length ? data.sets.map(s => ({...s, completed: false})) : [{ reps: 8, weight: 0, restTime: 90, completed: false }]
+    }]
+    setLocalExercises(updated)
+    await syncToDb(updated)
+    toast.success('Exercise added')
+    setIsAddExerciseDrawerOpen(false)
   }
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60)
     const secs = seconds % 60
-    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
+    return `${mins}:${secs.toString().padStart(2, '0')}`
   }
-
-  const endWorkout = async () => {
-    if (sessionId) {
-      try {
-        const estimatedCalories = (workoutTime / 60) * 5
-        await completeSession({
-          sessionId: sessionId as Id<'workoutSessions'>,
-          totalTime: workoutTime,
-          totalCaloriesBurned: Math.round(estimatedCalories),
-        })
-        toast.success('Workout logged successfully!')
-      } catch (error) {
-        toast.error('Failed to save workout')
-        console.error(error)
-      }
-    }
-    navigate({ to: `/app/management/clients/${clientId}` })
-  }
-
-  const cancelWorkout = async () => {
-    if (sessionId) {
-      try {
-        await cancelSession({ sessionId: sessionId as Id<'workoutSessions'> })
-      } catch (error) {
-        console.error(error)
-      }
-    }
-    navigate({ to: `/app/management/clients/${clientId}` })
-  }
-
-  const calculateSetInfo = () => {
-    let totalSetsCount = 0
-    let currentSetIndex = 0
-    for (let i = 0; i < activeExercises.length; i++) {
-      const setCount = getSetCount(activeExercises[i])
-      for (let j = 0; j < setCount; j++) {
-        const setKey = `${i}-${j}`
-        if (!completedSets.has(setKey)) {
-          currentSetIndex = totalSetsCount
-          return { totalSetsCount, currentSetIndex }
-        }
-        totalSetsCount++
-      }
-    }
-    return { totalSetsCount, currentSetIndex }
-  }
-
-  const { currentSetIndex } = calculateSetInfo()
 
   if (isLoading) {
     return <div className="p-4">Loading...</div>
@@ -345,250 +219,170 @@ function TrainerWorkoutSessionRoute() {
     return null
   }
 
-  if (!isSessionStarted) {
-    return (
-      <div className="space-y-6 p-4 pb-20 max-w-4xl mx-auto">
-        {/* Header */}
-        <header className="space-y-3">
-          <Link
-            to="/app/management"
-            className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back to client
-          </Link>
-          <div>
-            <h1 className="text-3xl font-semibold">Log Workout Session</h1>
-            <p className="text-muted-foreground">
-              Record a new workout for {client?.name || 'Client'}
-            </p>
-          </div>
-        </header>
-
-        {/* Workout Details */}
-        <Card>
-          <CardContent className="pt-6 space-y-4">
-            <div>
-              <label className="text-sm font-medium">Workout Title</label>
-              <input
-                type="text"
-                className="mt-2 w-full rounded-lg border border-border bg-background px-4 py-2 text-base"
-                placeholder="e.g., Chest Day"
-                value={workoutTitle}
-                onChange={(e) => setWorkoutTitle(e.target.value)}
-              />
-            </div>
-            <div>
-              <label className="text-sm font-medium">Focus Area</label>
-              <select
-                className="mt-2 w-full rounded-lg border border-border bg-background px-4 py-2 text-base"
-                value={workoutFocus}
-                onChange={(e) => setWorkoutFocus(e.target.value)}
-              >
-                <option>Chest & Shoulders</option>
-                <option>Back & Biceps</option>
-                <option>Legs</option>
-                <option>Full Body</option>
-                <option>Cardio</option>
-              </select>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Exercises */}
-        <Card>
-          <CardContent className="pt-6 space-y-3">
-            <h3 className="font-semibold">Exercises</h3>
-            {activeExercises.map((ex: any, idx: number) => (
-              <div key={idx} className="p-3 bg-muted rounded-lg">
-                <p className="font-medium">{ex.exerciseName}</p>
-                <p className="text-sm text-muted-foreground">
-                  {getSetCount(ex)} sets
-                </p>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
-
-        {/* Start Button */}
-        <div className="flex gap-2">
-          <Button onClick={startWorkout} className="w-full h-10">
-            <Dumbbell className="w-4 h-4 mr-2" />
-            Start Workout Session
-          </Button>
-          <Button
-            onClick={cancelWorkout}
-            variant="outline"
-            className="w-full h-10"
-          >
-            Cancel
-          </Button>
-        </div>
-      </div>
-    )
-  }
-
   return (
-    <div className="min-h-screen bg-background pb-48">
-      {/* Sticky Header */}
-      <div className="sticky top-0 z-10 bg-background border-b p-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-xl font-bold">{workoutTitle}</h2>
-            <div className="text-sm text-muted-foreground">
-              {completedSets.size} / {totalSets} sets completed
-            </div>
+    <div className="p-4 pb-32 space-y-6 max-w-4xl mx-auto">
+      <header className="flex flex-col gap-3">
+        <Button 
+          variant="ghost" 
+          className="w-fit p-0 hover:bg-transparent text-muted-foreground"
+          onClick={() => navigate({ to: `/app/management/clients/${clientId}/logs/workout` })}
+        >
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          Back to Client Logs
+        </Button>
+        <div className="flex items-start justify-between gap-3">
+          <div className="space-y-2">
+            <h1 className="text-2xl font-semibold">
+              {todaysWorkout?.name ?? 'Client Workout Session'}
+            </h1>
           </div>
-          <Button variant="outline" size="sm" onClick={endWorkout}>
-            <X className="w-4 h-4 mr-2" />
-            End
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => setIsAddExerciseDrawerOpen(true)}
+            aria-label="Add workout exercise"
+          >
+            <Plus className="h-4 w-4" />
           </Button>
         </div>
-      </div>
+      </header>
 
-      {/* Exercise List */}
-      <div className="p-4 space-y-6">
-        <div className="h-[50vh]" />
+      <div className="space-y-4">
+        {localExercises.length === 0 && (
+          <Card>
+            <CardContent className="pt-6 text-center">
+              <p className="text-muted-foreground">
+                No exercises scheduled today. Add an exercise to begin!
+              </p>
+            </CardContent>
+          </Card>
+        )}
 
-        {activeExercises.map((exercise: any, exerciseIndex: number) => {
-          const exerciseCompletedSets = Array.from(completedSets).filter(
-            (key) => key.startsWith(`${exerciseIndex}-`),
-          ).length
-          const setCount = getSetCount(exercise)
-
-          return (
-            <div key={exerciseIndex} className="space-y-2">
-              {/* Exercise Header */}
-              <div className="px-2 py-1">
-                <h3 className="font-bold text-lg">{exercise.exerciseName}</h3>
-                <div className="text-xs text-muted-foreground">
-                  {exerciseCompletedSets} / {setCount} sets
-                </div>
-              </div>
-
-              {/* Individual Sets */}
-              <div className="space-y-2">
-                {Array.from({ length: setCount }).map((_, setIndex) => {
-                  const setKey = `${exerciseIndex}-${setIndex}`
-                  const isCompleted = completedSets.has(setKey)
-                  const isCurrent =
-                    completedSets.size === currentSetIndex && !isCompleted
-                  const setData =
-                    exercise.sets && exercise.sets.length > 0
-                      ? exercise.sets[setIndex]
-                      : null
-                  const repsLabel = setData?.reps
-                    ? `${setData.reps} reps`
-                    : 'Reps TBD'
-                  const weightLabel = setData?.weight
-                    ? `${setData.weight} lbs`
-                    : 'Weight TBD'
-                  const restTimeLabel = setData?.restTime
-                    ? `${setData.restTime}s rest`
-                    : ''
-
-                  return (
-                    <Card
-                      key={setKey}
-                      ref={isCurrent ? currentExerciseRef : null}
-                      className={`transition-all ${
-                        isCurrent
-                          ? 'border-primary shadow-lg scale-[1.01]'
-                          : isCompleted
-                            ? 'border-green-500 bg-green-500/5'
-                            : 'border-border'
-                      } cursor-pointer`}
-                      onClick={() => toggleSet(exerciseIndex, setIndex)}
-                    >
-                      <CardContent className="p-3">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-3 flex-1">
-                            <div className="flex items-center justify-center flex-shrink-0">
-                              <Checkbox
-                                checked={isCompleted}
-                                onCheckedChange={() =>
-                                  toggleSet(exerciseIndex, setIndex)
-                                }
-                                aria-label={`Mark set ${setIndex + 1}`}
-                                onClick={(event) => event.stopPropagation()}
-                                className="size-5 flex justify-center items-center border [&[data-state=checked],&[data-state=indeterminate]]:bg-primary [&[data-state=checked],&[data-state=indeterminate]]:text-primary-foreground transition-colors duration-500"
-                              >
-                                <CheckboxIndicator className="size-3.5" />
-                              </Checkbox>
-                            </div>
-                            <div className="flex-1">
-                              <div
-                                className={`font-semibold ${
-                                  isCompleted
-                                    ? 'line-through text-muted-foreground'
-                                    : ''
-                                }`}
-                              >
-                                Set {setIndex + 1}
-                              </div>
-                              <div
-                                className={`text-sm text-muted-foreground ${
-                                  isCompleted ? 'line-through' : ''
-                                }`}
-                              >
-                                {repsLabel} · {weightLabel}
-                              </div>
-                              <div
-                                className={`text-xs text-muted-foreground mt-1 ${
-                                  isCompleted ? 'line-through' : ''
-                                }`}
-                              >
-                                {restTimeLabel}
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  )
-                })}
-              </div>
+        {localExercises.map((exercise, exerciseIndex) => (
+          <Card key={exerciseIndex}>
+            <div className="p-4 font-semibold text-lg border-b bg-muted/20">
+              {exercise.exerciseName}
             </div>
-          )
-        })}
+            <CardContent className="p-0">
+              <table className="w-full text-sm">
+                <thead className="text-muted-foreground text-xs font-medium border-b">
+                  <tr>
+                    <th className="py-2 pl-4 text-left w-12">Set</th>
+                    <th className="py-2 text-center">kg</th>
+                    <th className="py-2 text-center">Reps</th>
+                    <th className="py-2 pr-4 text-center w-16">Done</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {exercise.sets.map((set: any, setIndex: number) => {
+                    const isCompleted = set.completed
+                    return (
+                      <tr key={setIndex} className={`border-b border-muted transition-colors ${isCompleted ? 'bg-green-500/10' : ''}`}>
+                        <td className="py-2 pl-4 text-muted-foreground font-medium">
+                          {setIndex + 1}
+                        </td>
+                        <td className="py-2 px-1 text-center">
+                          <Input
+                            type="number"
+                            className={`h-8 w-16 mx-auto text-center font-medium ${isCompleted ? 'bg-transparent border-transparent text-muted-foreground' : ''}`}
+                            value={set.weight ?? ''}
+                            onChange={(e) => updateSet(exerciseIndex, setIndex, 'weight', e.target.value === '' ? undefined : Number(e.target.value))}
+                            disabled={isCompleted}
+                          />
+                        </td>
+                        <td className="py-2 px-1 text-center">
+                          <Input
+                            type="number"
+                            className={`h-8 w-16 mx-auto text-center font-medium ${isCompleted ? 'bg-transparent border-transparent text-muted-foreground' : ''}`}
+                            value={set.reps ?? ''}
+                            onChange={(e) => updateSet(exerciseIndex, setIndex, 'reps', e.target.value === '' ? undefined : Number(e.target.value))}
+                            disabled={isCompleted}
+                          />
+                        </td>
+                        <td className="py-2 pr-4 text-center align-middle">
+                          <Checkbox
+                            checked={isCompleted}
+                            onCheckedChange={() => toggleSet(exerciseIndex, setIndex)}
+                            className={`size-6 mx-auto flex justify-center items-center border rounded-md transition-colors ${
+                              isCompleted ? 'bg-green-500 border-green-500 text-white' : 'border-input bg-transparent'
+                            }`}
+                          >
+                            <CheckboxIndicator className="size-4" />
+                          </Checkbox>
+                        </td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+              <div className="p-3 text-center">
+                <Button variant="ghost" size="sm" className="w-full text-primary" onClick={() => addSet(exerciseIndex)}>
+                  <Plus className="w-4 h-4 mr-2" /> Add Set
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+        
+        {localExercises.length > 0 && (
+          <Button variant="outline" className="w-full h-12 border-dashed border-2" onClick={() => setIsAddExerciseDrawerOpen(true)}>
+            <Plus className="w-4 h-4 mr-2" />
+            Add Exercise
+          </Button>
+        )}
       </div>
 
-      {/* Fixed Bottom Timer Bar */}
       <div
-        className="fixed left-0 right-0 bg-background border-t shadow-lg z-20"
+        className="fixed inset-x-0 border-t bg-background/95 backdrop-blur shadow-[0_-10px_40px_rgba(0,0,0,0.1)] supports-[backdrop-filter]:bg-background/90 z-40"
         style={{ bottom: 'calc(4rem + var(--safe-bottom))' }}
       >
-        <div className="p-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Clock className="w-5 h-5 text-primary" />
-              <div>
-                <div className="text-2xl font-bold tabular-nums">
-                  {formatTime(workoutTime)}
-                </div>
-                <div className="text-xs text-muted-foreground">Total Time</div>
-              </div>
-            </div>
-            <Button
-              className="h-10 px-5 rounded-full"
-              variant={isPaused ? 'default' : 'secondary'}
-              onClick={() => setIsPaused(!isPaused)}
-            >
-              {isPaused ? (
-                <>
-                  <Play className="w-4 h-4 mr-2" />
-                  Resume
-                </>
-              ) : (
-                <>
-                  <Pause className="w-4 h-4 mr-2" />
-                  Pause
-                </>
-              )}
-            </Button>
+        <div className="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground font-medium tabular-nums">
+            <Clock className="w-4 h-4" />
+            {formatTime(workoutTime)}
+          </div>
+
+          <div className="flex items-center gap-2">
+            {!sessionId ? (
+              <Button onClick={handleStartSession} className="gap-2 px-8 rounded-full">
+                <Play className="w-4 h-4" />
+                Start Session
+              </Button>
+            ) : (
+              <>
+                <Button
+                  onClick={() => setIsPaused((prev) => !prev)}
+                  variant="outline"
+                  className="gap-2 rounded-full"
+                >
+                  {isPaused ? <Play className="w-4 h-4" /> : <Pause className="w-4 h-4" />}
+                </Button>
+                <Button
+                  onClick={handleCompleteSession}
+                  className="gap-2 rounded-full bg-green-600 hover:bg-green-700 text-white"
+                >
+                  <CheckCircle2 className="w-4 h-4" />
+                  Finish
+                </Button>
+              </>
+            )}
           </div>
         </div>
       </div>
+
+      <AddExerciseDrawer
+        open={isAddExerciseDrawerOpen}
+        onOpenChange={setIsAddExerciseDrawerOpen}
+        onSave={handleAddExercise}
+      />
+
+      {isRestTimerOpen && (
+        <RestTimer
+          initialSeconds={restTimerSeconds}
+          onComplete={() => setIsRestTimerOpen(false)}
+          onSkip={() => setIsRestTimerOpen(false)}
+        />
+      )}
     </div>
   )
 }

@@ -27,6 +27,7 @@ function ManagementRoutinesIndexComponent() {
       const routineId = await createRoutine({
         name: 'New Template ' + new Date().toLocaleDateString(),
         type: 'trainer',
+        authorId: user._id,
         exercises: [],
       })
       navigate({ to: `/app/management/routines/${routineId}` })

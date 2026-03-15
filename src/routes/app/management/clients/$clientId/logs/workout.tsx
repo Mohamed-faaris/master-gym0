@@ -1,8 +1,8 @@
 import { useEffect } from 'react'
 import { Id } from '@convex/_generated/dataModel';
 import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
-import { ArrowLeft, Calendar, Clock, Dumbbell } from 'lucide-react'
-import { useQuery } from 'convex/react'
+import { ArrowLeft, Calendar, Clock, Dumbbell, Play, Edit, Plus } from 'lucide-react'
+import { useQuery, useMutation } from 'convex/react'
 
 import { api } from '@convex/_generated/api'
 import { useAuth } from '@/components/auth/useAuth'
@@ -13,6 +13,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
 
 const privilegedRoles = new Set(['trainer', 'admin'])
 
@@ -32,6 +33,30 @@ function WorkoutLogsRoute() {
     api.workoutSessions.getSessionHistory,
     clientId ? { userId: clientId as Id<'users'>, limit: 100 } : 'skip',
   )
+
+  // Fetch routines assigned to this client
+  const routines = useQuery(
+    api.routines.getRoutinesByUser,
+    clientId ? { userId: clientId as Id<'users'> } : 'skip',
+  )
+
+  const createRoutine = useMutation(api.routines.createRoutine)
+
+  const handleCreateRoutine = async () => {
+    if (!user || !clientId) return
+    try {
+      const routineId = await createRoutine({
+        name: 'New Client Routine ' + new Date().toLocaleDateString(),
+        type: 'custom',
+        authorId: user._id,
+        userId: clientId as Id<'users'>,
+        exercises: [],
+      })
+      navigate({ to: `/app/management/clients/${clientId}/routines/${routineId}` })
+    } catch (error) {
+      console.error('Failed to create routine', error)
+    }
+  }
 
   useEffect(() => {
     if (isLoading) return
@@ -69,7 +94,87 @@ function WorkoutLogsRoute() {
         </div>
       </header>
 
+      {/* Client Routines Section */}
+      <h2 className="text-xl font-bold mb-4">Client's Routines & Workouts</h2>
+
+      <div className="space-y-4 mb-8">
+        {/* Quick Start Blank Workout */}
+        <Card className="bg-primary/5 border-primary/20">
+          <CardHeader>
+            <CardTitle>Quick Start</CardTitle>
+            <CardDescription>Start an empty workout session right now</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Link to="/app/management/clients/$clientId/workout-session" params={{ clientId }} className="block">
+              <Button className="w-full gap-2 font-semibold h-12">
+                <Dumbbell className="w-5 h-5" /> Start Blank Session
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
+
+        <div className="flex items-center justify-between pt-2">
+          <h3 className="text-lg font-semibold">Saved Routines</h3>
+          <Button onClick={handleCreateRoutine} size="sm" variant="outline" className="gap-2">
+            <Plus className="w-4 h-4" /> Create Routine
+          </Button>
+        </div>
+        
+        {routines && routines.length > 0 ? (
+          <div className="space-y-4">
+            {routines.map((routine) => (
+              <Card key={routine._id}>
+                <CardHeader>
+                  <CardTitle>{routine.name}</CardTitle>
+                  {(routine.focus || routine.dayOfWeek) && (
+                    <CardDescription className="flex items-center gap-2">
+                      {routine.dayOfWeek && (
+                        <span className="font-medium text-primary">
+                          {{ mon: 'Monday', tue: 'Tuesday', wed: 'Wednesday', thu: 'Thursday', fri: 'Friday', sat: 'Saturday', sun: 'Sunday' }[routine.dayOfWeek as string]}
+                        </span>
+                      )}
+                      {routine.dayOfWeek && routine.focus && <span>•</span>}
+                      {routine.focus && <span>{routine.focus}</span>}
+                    </CardDescription>
+                  )}
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center gap-4 text-sm mb-4">
+                    <div className="flex items-center gap-2 text-muted-foreground">
+                      <Dumbbell className="h-4 w-4" />
+                      <span>{routine.exercises.length} Exercises total</span>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center gap-2 mt-4">
+                    <Link to="/app/management/clients/$clientId/workout-session" params={{ clientId }} search={{ routineId: routine._id }} className="flex-1">
+                      <Button className="w-full gap-2">
+                        <Play className="w-4 h-4" /> Start Workout
+                      </Button>
+                    </Link>
+                    <Link to="/app/management/clients/$clientId/routines/$routineId" params={{ clientId, routineId: routine._id }} className="flex-1">
+                      <Button variant="outline" className="w-full gap-2">
+                        <Edit className="w-4 h-4" /> Edit Routine
+                      </Button>
+                    </Link>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        ) : (
+          <Card>
+            <CardContent className="pt-6 text-center text-muted-foreground">
+              This client does not have any assigned routines.
+            </CardContent>
+          </Card>
+        )}
+      </div>
+
+      <div className="border-t pt-6" />
+
       {/* Logs List */}
+      <h2 className="text-xl font-bold mb-4">Past Sessions</h2>
       <div className="space-y-3">
         {!workoutSessions ? (
           <Card>

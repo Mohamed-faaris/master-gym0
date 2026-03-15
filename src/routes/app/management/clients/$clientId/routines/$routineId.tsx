@@ -6,6 +6,7 @@ import { Trash2, Plus, ArrowUp, ArrowDown, Save, ChevronLeft, X } from 'lucide-r
 import { toast } from 'sonner'
 import { Id } from '@convex/_generated/dataModel'
 
+import { useAuth } from '@/components/auth/useAuth'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent } from '@/components/ui/card'
@@ -21,13 +22,14 @@ const DAYS_OF_WEEK = [
   { value: 'sun', label: 'Sunday' },
 ] as const;
 
-export const Route = createFileRoute('/app/management/routines/$routineId')({
-  component: ManagementRoutineEditorComponent,
+export const Route = createFileRoute('/app/management/clients/$clientId/routines/$routineId')({
+  component: ClientRoutineEditorComponent,
 })
 
-function ManagementRoutineEditorComponent() {
-  const { routineId } = Route.useParams()
+function ClientRoutineEditorComponent() {
+  const { clientId, routineId } = Route.useParams()
   const navigate = useNavigate()
+  const { user } = useAuth()
 
   const routine = useQuery(api.routines.getRoutineById, { routineId: routineId as Id<'routines'> })
   const updateRoutine = useMutation(api.routines.updateRoutine)
@@ -54,7 +56,7 @@ function ManagementRoutineEditorComponent() {
   }
 
   if (routine === null) {
-    return <div className="p-8 text-center text-muted-foreground">Routine template not found</div>
+    return <div className="p-8 text-center text-muted-foreground">Routine not found</div>
   }
 
   const handleSave = async () => {
@@ -72,22 +74,22 @@ function ManagementRoutineEditorComponent() {
         dayOfWeek: dayOfWeek as any,
         exercises,
       })
-      toast.success('Template saved!')
-      navigate({ to: '/app/management/routines' })
+      toast.success('Routine saved!')
+      navigate({ to: `/app/management/clients/${clientId}/logs/workout` })
     } catch (error) {
       console.error(error)
-      toast.error('Failed to save template')
+      toast.error('Failed to save routine')
     } finally {
       setIsSaving(false)
     }
   }
 
   const handleDelete = async () => {
-    if (confirm('Are you sure you want to delete this template?')) {
+    if (confirm('Are you sure you want to delete this routine?')) {
       try {
         await deleteRoutine({ routineId: routineId as Id<'routines'> })
-        toast.success('Template deleted')
-        navigate({ to: '/app/management/routines' })
+        toast.success('Routine deleted')
+        navigate({ to: `/app/management/clients/${clientId}/logs/workout` })
       } catch (error) {
         toast.error('Failed to delete')
       }
@@ -143,10 +145,10 @@ function ManagementRoutineEditorComponent() {
     <div className="space-y-4 pb-32">
       <div className="sticky top-0 z-10 bg-background/95 backdrop-blur p-4 border-b flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon" onClick={() => navigate({ to: '/app/management/routines' })}>
+          <Button variant="ghost" size="icon" onClick={() => navigate({ to: `/app/management/clients/${clientId}/logs/workout` })}>
             <ChevronLeft className="w-5 h-5" />
           </Button>
-          <h1 className="text-xl font-bold">Edit Template</h1>
+          <h1 className="text-xl font-bold">Edit Client Routine</h1>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="ghost" size="icon" className="text-destructive" onClick={handleDelete}>
@@ -163,11 +165,11 @@ function ManagementRoutineEditorComponent() {
         <Card>
           <CardContent className="pt-6 space-y-4">
             <div className="space-y-2">
-              <label className="text-sm font-medium">Template Name</label>
+              <label className="text-sm font-medium">Routine Name</label>
               <Input 
                 value={name} 
                 onChange={(e) => setName(e.target.value)} 
-                placeholder="e.g. Push Day, Full Body Starter" 
+                placeholder="e.g. Push Day, Upper Body" 
               />
             </div>
             <div className="space-y-2">

@@ -290,7 +290,7 @@ function ClientDetailRoute() {
             <Button
               onClick={() =>
                 navigate({
-                  to: `/app/management/clients/${clientId}/workout-session`,
+                  to: `/app/management/clients/${clientId}/logs/workout`,
                 })
               }
               className="w-full h-12"
@@ -302,14 +302,14 @@ function ClientDetailRoute() {
             <Button
               onClick={() =>
                 navigate({
-                  to: `/app/management/clients/${clientId}/view-work`,
+                  to: `/app/management/clients/${clientId}/logs/workout`,
                 })
               }
               variant="outline"
               className="h-12 w-full"
             >
               <Dumbbell className="w-4 h-4 mr-2" />
-              View Workout Sessions
+              View Routines & Workouts
             </Button>
 
             <Button

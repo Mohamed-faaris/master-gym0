@@ -59,6 +59,7 @@ import { Route as AppManagementClientsClientIdCheckRouteImport } from './routes/
 import { Route as AppAdminProfileStoryStoryIdEditRouteImport } from './routes/app/admin/profile-story/$storyId.edit'
 import { Route as AppAdminListViewWorkClientIdRouteImport } from './routes/app/admin/list/view-work/$clientId'
 import { Route as AppAdminListPatternClientIdRouteImport } from './routes/app/admin/list/pattern/$clientId'
+import { Route as AppManagementClientsClientIdRoutinesRoutineIdRouteImport } from './routes/app/management/clients/$clientId/routines/$routineId'
 import { Route as AppManagementClientsClientIdLogsWorkoutRouteImport } from './routes/app/management/clients/$clientId/logs/workout'
 import { Route as AppManagementClientsClientIdLogsWeightRouteImport } from './routes/app/management/clients/$clientId/logs/weight'
 import { Route as AppManagementClientsClientIdLogsDietRouteImport } from './routes/app/management/clients/$clientId/logs/diet'
@@ -333,6 +334,12 @@ const AppAdminListPatternClientIdRoute =
     path: '/list/pattern/$clientId',
     getParentRoute: () => AppAdminRouteRoute,
   } as any)
+const AppManagementClientsClientIdRoutinesRoutineIdRoute =
+  AppManagementClientsClientIdRoutinesRoutineIdRouteImport.update({
+    id: '/clients/$clientId/routines/$routineId',
+    path: '/clients/$clientId/routines/$routineId',
+    getParentRoute: () => AppManagementRouteRoute,
+  } as any)
 const AppManagementClientsClientIdLogsWorkoutRoute =
   AppManagementClientsClientIdLogsWorkoutRouteImport.update({
     id: '/clients/$clientId/logs/workout',
@@ -420,6 +427,7 @@ export interface FileRoutesByFullPath {
   '/app/management/clients/$clientId/logs/diet': typeof AppManagementClientsClientIdLogsDietRoute
   '/app/management/clients/$clientId/logs/weight': typeof AppManagementClientsClientIdLogsWeightRoute
   '/app/management/clients/$clientId/logs/workout': typeof AppManagementClientsClientIdLogsWorkoutRoute
+  '/app/management/clients/$clientId/routines/$routineId': typeof AppManagementClientsClientIdRoutinesRoutineIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -474,6 +482,7 @@ export interface FileRoutesByTo {
   '/app/management/clients/$clientId/logs/diet': typeof AppManagementClientsClientIdLogsDietRoute
   '/app/management/clients/$clientId/logs/weight': typeof AppManagementClientsClientIdLogsWeightRoute
   '/app/management/clients/$clientId/logs/workout': typeof AppManagementClientsClientIdLogsWorkoutRoute
+  '/app/management/clients/$clientId/routines/$routineId': typeof AppManagementClientsClientIdRoutinesRoutineIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -532,6 +541,7 @@ export interface FileRoutesById {
   '/app/management/clients/$clientId/logs/diet': typeof AppManagementClientsClientIdLogsDietRoute
   '/app/management/clients/$clientId/logs/weight': typeof AppManagementClientsClientIdLogsWeightRoute
   '/app/management/clients/$clientId/logs/workout': typeof AppManagementClientsClientIdLogsWorkoutRoute
+  '/app/management/clients/$clientId/routines/$routineId': typeof AppManagementClientsClientIdRoutinesRoutineIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -591,6 +601,7 @@ export interface FileRouteTypes {
     | '/app/management/clients/$clientId/logs/diet'
     | '/app/management/clients/$clientId/logs/weight'
     | '/app/management/clients/$clientId/logs/workout'
+    | '/app/management/clients/$clientId/routines/$routineId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -645,6 +656,7 @@ export interface FileRouteTypes {
     | '/app/management/clients/$clientId/logs/diet'
     | '/app/management/clients/$clientId/logs/weight'
     | '/app/management/clients/$clientId/logs/workout'
+    | '/app/management/clients/$clientId/routines/$routineId'
   id:
     | '__root__'
     | '/'
@@ -702,6 +714,7 @@ export interface FileRouteTypes {
     | '/app/management/clients/$clientId/logs/diet'
     | '/app/management/clients/$clientId/logs/weight'
     | '/app/management/clients/$clientId/logs/workout'
+    | '/app/management/clients/$clientId/routines/$routineId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -1065,6 +1078,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAdminListPatternClientIdRouteImport
       parentRoute: typeof AppAdminRouteRoute
     }
+    '/app/management/clients/$clientId/routines/$routineId': {
+      id: '/app/management/clients/$clientId/routines/$routineId'
+      path: '/clients/$clientId/routines/$routineId'
+      fullPath: '/app/management/clients/$clientId/routines/$routineId'
+      preLoaderRoute: typeof AppManagementClientsClientIdRoutinesRoutineIdRouteImport
+      parentRoute: typeof AppManagementRouteRoute
+    }
     '/app/management/clients/$clientId/logs/workout': {
       id: '/app/management/clients/$clientId/logs/workout'
       path: '/clients/$clientId/logs/workout'
@@ -1165,6 +1185,7 @@ interface AppManagementRouteRouteChildren {
   AppManagementClientsClientIdLogsDietRoute: typeof AppManagementClientsClientIdLogsDietRoute
   AppManagementClientsClientIdLogsWeightRoute: typeof AppManagementClientsClientIdLogsWeightRoute
   AppManagementClientsClientIdLogsWorkoutRoute: typeof AppManagementClientsClientIdLogsWorkoutRoute
+  AppManagementClientsClientIdRoutinesRoutineIdRoute: typeof AppManagementClientsClientIdRoutinesRoutineIdRoute
 }
 
 const AppManagementRouteRouteChildren: AppManagementRouteRouteChildren = {
@@ -1193,6 +1214,8 @@ const AppManagementRouteRouteChildren: AppManagementRouteRouteChildren = {
     AppManagementClientsClientIdLogsWeightRoute,
   AppManagementClientsClientIdLogsWorkoutRoute:
     AppManagementClientsClientIdLogsWorkoutRoute,
+  AppManagementClientsClientIdRoutinesRoutineIdRoute:
+    AppManagementClientsClientIdRoutinesRoutineIdRoute,
 }
 
 const AppManagementRouteRouteWithChildren =
