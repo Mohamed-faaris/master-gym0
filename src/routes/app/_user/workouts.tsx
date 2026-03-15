@@ -42,10 +42,10 @@ function RouteComponent() {
     api.workoutSessions.addSelfManagedExerciseToToday,
   )
 
-  // We'll fetch all routines they authored or copied, and display them for selection.
+  // We'll fetch all routines assigned to the user, and display them for selection.
   const routines = useQuery(
-    api.routines.getRoutinesByAuthor,
-    user ? { authorId: user._id } : 'skip',
+    api.routines.getRoutinesByUser,
+    user ? { userId: user._id } : 'skip',
   )
 
   const dayOfWeek = (

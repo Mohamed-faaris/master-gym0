@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { api } from '@convex/_generated/api'
 import { useQuery, useMutation } from 'convex/react'
-import { Dumbbell, Plus, Copy, CheckCircle } from 'lucide-react'
+import { Dumbbell, Plus, Copy } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
 
