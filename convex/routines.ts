@@ -22,6 +22,11 @@ export const createRoutine = mutation({
     userId: v.optional(v.id('users')), // null for global/trainer's generic routines
     authorId: v.id('users'),
     type: RoutineTypeValidator,
+    dayOfWeek: v.optional(v.union(
+      v.literal('mon'), v.literal('tue'), v.literal('wed'),
+      v.literal('thu'), v.literal('fri'), v.literal('sat'), v.literal('sun')
+    )),
+    focus: v.optional(v.string()),
     exercises: v.array(RoutineExerciseValidator),
   },
   handler: async (ctx, args) => {
@@ -30,6 +35,8 @@ export const createRoutine = mutation({
       userId: args.userId,
       authorId: args.authorId,
       type: args.type,
+      dayOfWeek: args.dayOfWeek,
+      focus: args.focus,
       exercises: args.exercises,
       createdAt: Date.now(),
       updatedAt: Date.now(),
@@ -71,6 +78,11 @@ export const updateRoutine = mutation({
   args: {
     routineId: v.id('routines'),
     name: v.optional(v.string()),
+    dayOfWeek: v.optional(v.union(
+      v.literal('mon'), v.literal('tue'), v.literal('wed'),
+      v.literal('thu'), v.literal('fri'), v.literal('sat'), v.literal('sun')
+    )),
+    focus: v.optional(v.string()),
     exercises: v.optional(v.array(RoutineExerciseValidator)),
   },
   handler: async (ctx, args) => {
@@ -103,6 +115,8 @@ export const copyRoutineFromTrainer = mutation({
       userId: args.userId,
       authorId: routine.authorId,
       type: 'custom',
+      dayOfWeek: routine.dayOfWeek,
+      focus: routine.focus,
       exercises: routine.exercises,
       createdAt: Date.now(),
       updatedAt: Date.now(),

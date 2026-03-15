@@ -42,15 +42,11 @@ function RouteComponent() {
     api.workoutSessions.addSelfManagedExerciseToToday,
   )
 
-  // In a full Hevy-style implementation, users have multiple routines they can choose from.
-  // We'll fetch routines they authored or copied, and display the primary one for now,
-  // or simply the first one in the list.
+  // We'll fetch all routines they authored or copied, and display them for selection.
   const routines = useQuery(
     api.routines.getRoutinesByAuthor,
     user ? { authorId: user._id } : 'skip',
   )
-
-  const activeRoutine = routines?.[0]
 
   const dayOfWeek = (
     ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'] as const
@@ -146,7 +142,7 @@ function RouteComponent() {
               </span>
             </div>
           </div>
-          {isSelfManaged && !activeRoutine && (
+          {isSelfManaged && routines?.length === 0 && (
             <Button
               variant="outline"
               size="icon"
@@ -157,6 +153,15 @@ function RouteComponent() {
             </Button>
           )}
         </div>
+      </div>
+
+      <div className="px-4 pt-4">
+        <Link to="/app/routines" className="block">
+          <Button variant="outline" className="w-full h-12 shadow-sm border-primary/20 bg-primary/5 text-primary hover:bg-primary/10">
+            <ClipboardList className="w-5 h-5 mr-3" />
+            My Routines
+          </Button>
+        </Link>
       </div>
 
       {/* Main Content */}
@@ -213,7 +218,7 @@ function RouteComponent() {
           </>
         )}
 
-        {user && !activeRoutine && !isSelfManaged && (
+        {user && routines?.length === 0 && !isSelfManaged && (
           <Card>
             <CardHeader>
               <CardTitle>No Training Program Assigned</CardTitle>
@@ -238,7 +243,7 @@ function RouteComponent() {
           </Card>
         )}
 
-        {user && !activeRoutine && isSelfManaged && (
+        {user && routines?.length === 0 && isSelfManaged && (
           <Card>
             <CardHeader>
               <CardTitle>Today's Session</CardTitle>
@@ -293,72 +298,66 @@ function RouteComponent() {
           </Card>
         )}
 
-        {activeRoutine && (
-          <Card>
-            <CardHeader>
-              <CardTitle>{activeRoutine.name}</CardTitle>
-              <CardDescription>Your current active routine</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center gap-4 text-sm mb-6">
-                <div className="flex items-center gap-2">
-                  <Dumbbell className="h-4 w-4" />
-                  <span>{activeRoutine.exercises.length} Exercises total</span>
-                </div>
-              </div>
-
-              <div className="space-y-4">
-                {activeRoutine.exercises.map((exercise: any, exIndex: number) => (
-                  <div
-                    key={exIndex}
-                    className="border rounded-lg p-4 space-y-2"
-                  >
-                    <h4 className="font-medium">
-                      {exercise.exerciseName}
-                    </h4>
-                    <div className="text-sm text-muted-foreground mb-2">
-                      {exercise.sets.length} sets
-                    </div>
-                    <div className="space-y-1">
-                      {exercise.sets.map((set: any, setIndex: number) => (
-                        <div
-                          key={setIndex}
-                          className="text-sm flex items-center gap-2"
-                        >
-                          <span className="text-muted-foreground w-12">
-                            Set {setIndex + 1}:
-                          </span>
-                          <span>{set.reps} reps</span>
-                          {set.weight !== undefined && (
-                            <span>@ {set.weight}kg</span>
-                          )}
-                          {set.restTime !== undefined && (
-                            <span className="text-muted-foreground">
-                              ({set.restTime}s rest)
-                            </span>
-                          )}
-                        </div>
-                      ))}
+        {user && routines && routines.length > 0 && (
+          <div className="space-y-4">
+            <h2 className="text-xl font-bold mt-8 mb-4">Your Routines</h2>
+            {routines.map(routine => (
+              <Card key={routine._id}>
+                <CardHeader>
+                  <CardTitle>{routine.name}</CardTitle>
+                  {(routine.focus || routine.dayOfWeek) && (
+                    <CardDescription className="flex items-center gap-2">
+                      {routine.dayOfWeek && (
+                        <span className="font-medium text-primary">
+                          {{ mon: 'Monday', tue: 'Tuesday', wed: 'Wednesday', thu: 'Thursday', fri: 'Friday', sat: 'Saturday', sun: 'Sunday' }[routine.dayOfWeek as string]}
+                        </span>
+                      )}
+                      {routine.dayOfWeek && routine.focus && <span>•</span>}
+                      {routine.focus && <span>{routine.focus}</span>}
+                    </CardDescription>
+                  )}
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center gap-4 text-sm mb-6">
+                    <div className="flex items-center gap-2">
+                      <Dumbbell className="h-4 w-4" />
+                      <span>{routine.exercises.length} Exercises total</span>
                     </div>
                   </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+
+                  <div className="space-y-4">
+                    <div className="text-sm font-medium">
+                      {routine.exercises.slice(0, 3).map((ex: any) => ex.exerciseName).join(', ')}
+                      {routine.exercises.length > 3 && '...'}
+                    </div>
+                    
+                    <Link to="/app/workout-session" search={{ routineId: routine._id }} className="block pt-2">
+                      <Button className="w-full" variant="secondary">
+                        Start Routine
+                      </Button>
+                    </Link>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
         )}
       </div>
 
       {user && (
-        <Link
-          to="/app/workout-session"
-          className="fixed left-1/2 -translate-x-1/2 z-30 w-[calc(100%-2rem)] max-w-screen-sm"
-          style={{ bottom: 'calc(5rem + var(--safe-bottom))' }}
+        <div 
+          className="fixed left-0 right-0 z-30 bg-background/95 backdrop-blur border-t p-4"
+          style={{ bottom: 'calc(4rem + var(--safe-bottom))', paddingBottom: 'calc(1rem + var(--safe-bottom))' }}
         >
-          <Button className="h-14 w-full rounded-full shadow-lg">
-            <Dumbbell className="w-5 h-5 mr-2" />
-            Start Workout
-          </Button>
-        </Link>
+          <div className="max-w-screen-sm mx-auto">
+            <Link to="/app/workout-session">
+              <Button className="h-14 w-full rounded-full shadow-lg text-lg font-semibold">
+                <Plus className="w-5 h-5 mr-2" />
+                Start Blank Workout
+              </Button>
+            </Link>
+          </div>
+        </div>
       )}
 
       <AddExerciseDrawer

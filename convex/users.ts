@@ -1,5 +1,5 @@
 import { v } from 'convex/values'
-import { mutation, query } from './_generated/server'
+import { mutation, query, internalMutation } from './_generated/server'
 
 const RoleValidator = v.union(
   v.literal('trainer'),
@@ -293,5 +293,17 @@ export const searchUsers = query({
     )
 
     return filtered
+  },
+})
+
+// Migration to remove trainingPlanId from all users
+export const removeTrainingPlanId = internalMutation({
+  handler: async (ctx) => {
+    const allUsers = await ctx.db.query('users').collect()
+    for (const user of allUsers) {
+      if ((user as any).trainingPlanId !== undefined) {
+        await ctx.db.patch(user._id, { trainingPlanId: undefined } as any)
+      }
+    }
   },
 })

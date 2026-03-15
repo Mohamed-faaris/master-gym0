@@ -37,11 +37,12 @@ import { Route as AppUserDietLogsRouteImport } from './routes/app/_user/diet-log
 import { Route as AppUserDietHistoryRouteImport } from './routes/app/_user/diet-history'
 import { Route as AppUserDashboardRouteImport } from './routes/app/_user/dashboard'
 import { Route as AppUserAccountRouteImport } from './routes/app/_user/account'
-import { Route as AppManagementProgramsIndexRouteImport } from './routes/app/management/programs/index'
+import { Route as AppManagementRoutinesIndexRouteImport } from './routes/app/management/routines/index'
 import { Route as AppManagementDietPlansIndexRouteImport } from './routes/app/management/diet-plans/index'
 import { Route as AppManagementClientsIndexRouteImport } from './routes/app/management/clients/index'
 import { Route as AppAdminListIndexRouteImport } from './routes/app/admin/list/index'
-import { Route as AppManagementProgramsNewRouteImport } from './routes/app/management/programs/new'
+import { Route as AppUserRoutinesIndexRouteImport } from './routes/app/_user/routines/index'
+import { Route as AppManagementRoutinesRoutineIdRouteImport } from './routes/app/management/routines/$routineId'
 import { Route as AppManagementDietPlansNewRouteImport } from './routes/app/management/diet-plans/new'
 import { Route as AppManagementDietPlansPlanIdRouteImport } from './routes/app/management/diet-plans/$planId'
 import { Route as AppAdminProfileStoryNewRouteImport } from './routes/app/admin/profile-story/new'
@@ -49,9 +50,8 @@ import { Route as AppAdminListTrainersRouteImport } from './routes/app/admin/lis
 import { Route as AppAdminListTrainerManagedRouteImport } from './routes/app/admin/list/trainer-managed'
 import { Route as AppAdminListSelfManagedRouteImport } from './routes/app/admin/list/self-managed'
 import { Route as AppAdminListClientIdRouteImport } from './routes/app/admin/list/$clientId'
-import { Route as AppManagementProgramsProgramIdIndexRouteImport } from './routes/app/management/programs/$programId/index'
+import { Route as AppUserRoutinesRoutineIdRouteImport } from './routes/app/_user/routines/$routineId'
 import { Route as AppManagementClientsClientIdIndexRouteImport } from './routes/app/management/clients/$clientId/index'
-import { Route as AppManagementProgramsProgramIdEditRouteImport } from './routes/app/management/programs/$programId/edit'
 import { Route as AppManagementClientsClientIdWorkoutSessionRouteImport } from './routes/app/management/clients/$clientId/workout-session'
 import { Route as AppManagementClientsClientIdViewWorkRouteImport } from './routes/app/management/clients/$clientId/view-work'
 import { Route as AppManagementClientsClientIdPatternRouteImport } from './routes/app/management/clients/$clientId/pattern'
@@ -207,10 +207,10 @@ const AppUserAccountRoute = AppUserAccountRouteImport.update({
   path: '/account',
   getParentRoute: () => AppUserRoute,
 } as any)
-const AppManagementProgramsIndexRoute =
-  AppManagementProgramsIndexRouteImport.update({
-    id: '/programs/',
-    path: '/programs/',
+const AppManagementRoutinesIndexRoute =
+  AppManagementRoutinesIndexRouteImport.update({
+    id: '/routines/',
+    path: '/routines/',
     getParentRoute: () => AppManagementRouteRoute,
   } as any)
 const AppManagementDietPlansIndexRoute =
@@ -230,10 +230,15 @@ const AppAdminListIndexRoute = AppAdminListIndexRouteImport.update({
   path: '/list/',
   getParentRoute: () => AppAdminRouteRoute,
 } as any)
-const AppManagementProgramsNewRoute =
-  AppManagementProgramsNewRouteImport.update({
-    id: '/programs/new',
-    path: '/programs/new',
+const AppUserRoutinesIndexRoute = AppUserRoutinesIndexRouteImport.update({
+  id: '/routines/',
+  path: '/routines/',
+  getParentRoute: () => AppUserRoute,
+} as any)
+const AppManagementRoutinesRoutineIdRoute =
+  AppManagementRoutinesRoutineIdRouteImport.update({
+    id: '/routines/$routineId',
+    path: '/routines/$routineId',
     getParentRoute: () => AppManagementRouteRoute,
   } as any)
 const AppManagementDietPlansNewRoute =
@@ -274,22 +279,16 @@ const AppAdminListClientIdRoute = AppAdminListClientIdRouteImport.update({
   path: '/list/$clientId',
   getParentRoute: () => AppAdminRouteRoute,
 } as any)
-const AppManagementProgramsProgramIdIndexRoute =
-  AppManagementProgramsProgramIdIndexRouteImport.update({
-    id: '/programs/$programId/',
-    path: '/programs/$programId/',
-    getParentRoute: () => AppManagementRouteRoute,
+const AppUserRoutinesRoutineIdRoute =
+  AppUserRoutinesRoutineIdRouteImport.update({
+    id: '/routines/$routineId',
+    path: '/routines/$routineId',
+    getParentRoute: () => AppUserRoute,
   } as any)
 const AppManagementClientsClientIdIndexRoute =
   AppManagementClientsClientIdIndexRouteImport.update({
     id: '/clients/$clientId/',
     path: '/clients/$clientId/',
-    getParentRoute: () => AppManagementRouteRoute,
-  } as any)
-const AppManagementProgramsProgramIdEditRoute =
-  AppManagementProgramsProgramIdEditRouteImport.update({
-    id: '/programs/$programId/edit',
-    path: '/programs/$programId/edit',
     getParentRoute: () => AppManagementRouteRoute,
   } as any)
 const AppManagementClientsClientIdWorkoutSessionRoute =
@@ -394,6 +393,7 @@ export interface FileRoutesByFullPath {
   '/app/': typeof AppUserIndexRoute
   '/app/admin/': typeof AppAdminIndexRoute
   '/app/management/': typeof AppManagementIndexRoute
+  '/app/routines/$routineId': typeof AppUserRoutinesRoutineIdRoute
   '/app/admin/list/$clientId': typeof AppAdminListClientIdRoute
   '/app/admin/list/self-managed': typeof AppAdminListSelfManagedRoute
   '/app/admin/list/trainer-managed': typeof AppAdminListTrainerManagedRoute
@@ -401,11 +401,12 @@ export interface FileRoutesByFullPath {
   '/app/admin/profile-story/new': typeof AppAdminProfileStoryNewRoute
   '/app/management/diet-plans/$planId': typeof AppManagementDietPlansPlanIdRoute
   '/app/management/diet-plans/new': typeof AppManagementDietPlansNewRoute
-  '/app/management/programs/new': typeof AppManagementProgramsNewRoute
+  '/app/management/routines/$routineId': typeof AppManagementRoutinesRoutineIdRoute
+  '/app/routines/': typeof AppUserRoutinesIndexRoute
   '/app/admin/list/': typeof AppAdminListIndexRoute
   '/app/management/clients/': typeof AppManagementClientsIndexRoute
   '/app/management/diet-plans/': typeof AppManagementDietPlansIndexRoute
-  '/app/management/programs/': typeof AppManagementProgramsIndexRoute
+  '/app/management/routines/': typeof AppManagementRoutinesIndexRoute
   '/app/admin/list/pattern/$clientId': typeof AppAdminListPatternClientIdRoute
   '/app/admin/list/view-work/$clientId': typeof AppAdminListViewWorkClientIdRoute
   '/app/admin/profile-story/$storyId/edit': typeof AppAdminProfileStoryStoryIdEditRoute
@@ -413,9 +414,7 @@ export interface FileRoutesByFullPath {
   '/app/management/clients/$clientId/pattern': typeof AppManagementClientsClientIdPatternRoute
   '/app/management/clients/$clientId/view-work': typeof AppManagementClientsClientIdViewWorkRoute
   '/app/management/clients/$clientId/workout-session': typeof AppManagementClientsClientIdWorkoutSessionRoute
-  '/app/management/programs/$programId/edit': typeof AppManagementProgramsProgramIdEditRoute
   '/app/management/clients/$clientId/': typeof AppManagementClientsClientIdIndexRoute
-  '/app/management/programs/$programId/': typeof AppManagementProgramsProgramIdIndexRoute
   '/app/admin/list/logs/diet/$clientId': typeof AppAdminListLogsDietClientIdRoute
   '/app/admin/list/logs/weight/$clientId': typeof AppAdminListLogsWeightClientIdRoute
   '/app/management/clients/$clientId/logs/diet': typeof AppManagementClientsClientIdLogsDietRoute
@@ -448,6 +447,7 @@ export interface FileRoutesByTo {
   '/app': typeof AppUserIndexRoute
   '/app/admin': typeof AppAdminIndexRoute
   '/app/management': typeof AppManagementIndexRoute
+  '/app/routines/$routineId': typeof AppUserRoutinesRoutineIdRoute
   '/app/admin/list/$clientId': typeof AppAdminListClientIdRoute
   '/app/admin/list/self-managed': typeof AppAdminListSelfManagedRoute
   '/app/admin/list/trainer-managed': typeof AppAdminListTrainerManagedRoute
@@ -455,11 +455,12 @@ export interface FileRoutesByTo {
   '/app/admin/profile-story/new': typeof AppAdminProfileStoryNewRoute
   '/app/management/diet-plans/$planId': typeof AppManagementDietPlansPlanIdRoute
   '/app/management/diet-plans/new': typeof AppManagementDietPlansNewRoute
-  '/app/management/programs/new': typeof AppManagementProgramsNewRoute
+  '/app/management/routines/$routineId': typeof AppManagementRoutinesRoutineIdRoute
+  '/app/routines': typeof AppUserRoutinesIndexRoute
   '/app/admin/list': typeof AppAdminListIndexRoute
   '/app/management/clients': typeof AppManagementClientsIndexRoute
   '/app/management/diet-plans': typeof AppManagementDietPlansIndexRoute
-  '/app/management/programs': typeof AppManagementProgramsIndexRoute
+  '/app/management/routines': typeof AppManagementRoutinesIndexRoute
   '/app/admin/list/pattern/$clientId': typeof AppAdminListPatternClientIdRoute
   '/app/admin/list/view-work/$clientId': typeof AppAdminListViewWorkClientIdRoute
   '/app/admin/profile-story/$storyId/edit': typeof AppAdminProfileStoryStoryIdEditRoute
@@ -467,9 +468,7 @@ export interface FileRoutesByTo {
   '/app/management/clients/$clientId/pattern': typeof AppManagementClientsClientIdPatternRoute
   '/app/management/clients/$clientId/view-work': typeof AppManagementClientsClientIdViewWorkRoute
   '/app/management/clients/$clientId/workout-session': typeof AppManagementClientsClientIdWorkoutSessionRoute
-  '/app/management/programs/$programId/edit': typeof AppManagementProgramsProgramIdEditRoute
   '/app/management/clients/$clientId': typeof AppManagementClientsClientIdIndexRoute
-  '/app/management/programs/$programId': typeof AppManagementProgramsProgramIdIndexRoute
   '/app/admin/list/logs/diet/$clientId': typeof AppAdminListLogsDietClientIdRoute
   '/app/admin/list/logs/weight/$clientId': typeof AppAdminListLogsWeightClientIdRoute
   '/app/management/clients/$clientId/logs/diet': typeof AppManagementClientsClientIdLogsDietRoute
@@ -506,6 +505,7 @@ export interface FileRoutesById {
   '/app/_user/': typeof AppUserIndexRoute
   '/app/admin/': typeof AppAdminIndexRoute
   '/app/management/': typeof AppManagementIndexRoute
+  '/app/_user/routines/$routineId': typeof AppUserRoutinesRoutineIdRoute
   '/app/admin/list/$clientId': typeof AppAdminListClientIdRoute
   '/app/admin/list/self-managed': typeof AppAdminListSelfManagedRoute
   '/app/admin/list/trainer-managed': typeof AppAdminListTrainerManagedRoute
@@ -513,11 +513,12 @@ export interface FileRoutesById {
   '/app/admin/profile-story/new': typeof AppAdminProfileStoryNewRoute
   '/app/management/diet-plans/$planId': typeof AppManagementDietPlansPlanIdRoute
   '/app/management/diet-plans/new': typeof AppManagementDietPlansNewRoute
-  '/app/management/programs/new': typeof AppManagementProgramsNewRoute
+  '/app/management/routines/$routineId': typeof AppManagementRoutinesRoutineIdRoute
+  '/app/_user/routines/': typeof AppUserRoutinesIndexRoute
   '/app/admin/list/': typeof AppAdminListIndexRoute
   '/app/management/clients/': typeof AppManagementClientsIndexRoute
   '/app/management/diet-plans/': typeof AppManagementDietPlansIndexRoute
-  '/app/management/programs/': typeof AppManagementProgramsIndexRoute
+  '/app/management/routines/': typeof AppManagementRoutinesIndexRoute
   '/app/admin/list/pattern/$clientId': typeof AppAdminListPatternClientIdRoute
   '/app/admin/list/view-work/$clientId': typeof AppAdminListViewWorkClientIdRoute
   '/app/admin/profile-story/$storyId/edit': typeof AppAdminProfileStoryStoryIdEditRoute
@@ -525,9 +526,7 @@ export interface FileRoutesById {
   '/app/management/clients/$clientId/pattern': typeof AppManagementClientsClientIdPatternRoute
   '/app/management/clients/$clientId/view-work': typeof AppManagementClientsClientIdViewWorkRoute
   '/app/management/clients/$clientId/workout-session': typeof AppManagementClientsClientIdWorkoutSessionRoute
-  '/app/management/programs/$programId/edit': typeof AppManagementProgramsProgramIdEditRoute
   '/app/management/clients/$clientId/': typeof AppManagementClientsClientIdIndexRoute
-  '/app/management/programs/$programId/': typeof AppManagementProgramsProgramIdIndexRoute
   '/app/admin/list/logs/diet/$clientId': typeof AppAdminListLogsDietClientIdRoute
   '/app/admin/list/logs/weight/$clientId': typeof AppAdminListLogsWeightClientIdRoute
   '/app/management/clients/$clientId/logs/diet': typeof AppManagementClientsClientIdLogsDietRoute
@@ -565,6 +564,7 @@ export interface FileRouteTypes {
     | '/app/'
     | '/app/admin/'
     | '/app/management/'
+    | '/app/routines/$routineId'
     | '/app/admin/list/$clientId'
     | '/app/admin/list/self-managed'
     | '/app/admin/list/trainer-managed'
@@ -572,11 +572,12 @@ export interface FileRouteTypes {
     | '/app/admin/profile-story/new'
     | '/app/management/diet-plans/$planId'
     | '/app/management/diet-plans/new'
-    | '/app/management/programs/new'
+    | '/app/management/routines/$routineId'
+    | '/app/routines/'
     | '/app/admin/list/'
     | '/app/management/clients/'
     | '/app/management/diet-plans/'
-    | '/app/management/programs/'
+    | '/app/management/routines/'
     | '/app/admin/list/pattern/$clientId'
     | '/app/admin/list/view-work/$clientId'
     | '/app/admin/profile-story/$storyId/edit'
@@ -584,9 +585,7 @@ export interface FileRouteTypes {
     | '/app/management/clients/$clientId/pattern'
     | '/app/management/clients/$clientId/view-work'
     | '/app/management/clients/$clientId/workout-session'
-    | '/app/management/programs/$programId/edit'
     | '/app/management/clients/$clientId/'
-    | '/app/management/programs/$programId/'
     | '/app/admin/list/logs/diet/$clientId'
     | '/app/admin/list/logs/weight/$clientId'
     | '/app/management/clients/$clientId/logs/diet'
@@ -619,6 +618,7 @@ export interface FileRouteTypes {
     | '/app'
     | '/app/admin'
     | '/app/management'
+    | '/app/routines/$routineId'
     | '/app/admin/list/$clientId'
     | '/app/admin/list/self-managed'
     | '/app/admin/list/trainer-managed'
@@ -626,11 +626,12 @@ export interface FileRouteTypes {
     | '/app/admin/profile-story/new'
     | '/app/management/diet-plans/$planId'
     | '/app/management/diet-plans/new'
-    | '/app/management/programs/new'
+    | '/app/management/routines/$routineId'
+    | '/app/routines'
     | '/app/admin/list'
     | '/app/management/clients'
     | '/app/management/diet-plans'
-    | '/app/management/programs'
+    | '/app/management/routines'
     | '/app/admin/list/pattern/$clientId'
     | '/app/admin/list/view-work/$clientId'
     | '/app/admin/profile-story/$storyId/edit'
@@ -638,9 +639,7 @@ export interface FileRouteTypes {
     | '/app/management/clients/$clientId/pattern'
     | '/app/management/clients/$clientId/view-work'
     | '/app/management/clients/$clientId/workout-session'
-    | '/app/management/programs/$programId/edit'
     | '/app/management/clients/$clientId'
-    | '/app/management/programs/$programId'
     | '/app/admin/list/logs/diet/$clientId'
     | '/app/admin/list/logs/weight/$clientId'
     | '/app/management/clients/$clientId/logs/diet'
@@ -676,6 +675,7 @@ export interface FileRouteTypes {
     | '/app/_user/'
     | '/app/admin/'
     | '/app/management/'
+    | '/app/_user/routines/$routineId'
     | '/app/admin/list/$clientId'
     | '/app/admin/list/self-managed'
     | '/app/admin/list/trainer-managed'
@@ -683,11 +683,12 @@ export interface FileRouteTypes {
     | '/app/admin/profile-story/new'
     | '/app/management/diet-plans/$planId'
     | '/app/management/diet-plans/new'
-    | '/app/management/programs/new'
+    | '/app/management/routines/$routineId'
+    | '/app/_user/routines/'
     | '/app/admin/list/'
     | '/app/management/clients/'
     | '/app/management/diet-plans/'
-    | '/app/management/programs/'
+    | '/app/management/routines/'
     | '/app/admin/list/pattern/$clientId'
     | '/app/admin/list/view-work/$clientId'
     | '/app/admin/profile-story/$storyId/edit'
@@ -695,9 +696,7 @@ export interface FileRouteTypes {
     | '/app/management/clients/$clientId/pattern'
     | '/app/management/clients/$clientId/view-work'
     | '/app/management/clients/$clientId/workout-session'
-    | '/app/management/programs/$programId/edit'
     | '/app/management/clients/$clientId/'
-    | '/app/management/programs/$programId/'
     | '/app/admin/list/logs/diet/$clientId'
     | '/app/admin/list/logs/weight/$clientId'
     | '/app/management/clients/$clientId/logs/diet'
@@ -912,11 +911,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppUserAccountRouteImport
       parentRoute: typeof AppUserRoute
     }
-    '/app/management/programs/': {
-      id: '/app/management/programs/'
-      path: '/programs'
-      fullPath: '/app/management/programs/'
-      preLoaderRoute: typeof AppManagementProgramsIndexRouteImport
+    '/app/management/routines/': {
+      id: '/app/management/routines/'
+      path: '/routines'
+      fullPath: '/app/management/routines/'
+      preLoaderRoute: typeof AppManagementRoutinesIndexRouteImport
       parentRoute: typeof AppManagementRouteRoute
     }
     '/app/management/diet-plans/': {
@@ -940,11 +939,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAdminListIndexRouteImport
       parentRoute: typeof AppAdminRouteRoute
     }
-    '/app/management/programs/new': {
-      id: '/app/management/programs/new'
-      path: '/programs/new'
-      fullPath: '/app/management/programs/new'
-      preLoaderRoute: typeof AppManagementProgramsNewRouteImport
+    '/app/_user/routines/': {
+      id: '/app/_user/routines/'
+      path: '/routines'
+      fullPath: '/app/routines/'
+      preLoaderRoute: typeof AppUserRoutinesIndexRouteImport
+      parentRoute: typeof AppUserRoute
+    }
+    '/app/management/routines/$routineId': {
+      id: '/app/management/routines/$routineId'
+      path: '/routines/$routineId'
+      fullPath: '/app/management/routines/$routineId'
+      preLoaderRoute: typeof AppManagementRoutinesRoutineIdRouteImport
       parentRoute: typeof AppManagementRouteRoute
     }
     '/app/management/diet-plans/new': {
@@ -996,25 +1002,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAdminListClientIdRouteImport
       parentRoute: typeof AppAdminRouteRoute
     }
-    '/app/management/programs/$programId/': {
-      id: '/app/management/programs/$programId/'
-      path: '/programs/$programId'
-      fullPath: '/app/management/programs/$programId/'
-      preLoaderRoute: typeof AppManagementProgramsProgramIdIndexRouteImport
-      parentRoute: typeof AppManagementRouteRoute
+    '/app/_user/routines/$routineId': {
+      id: '/app/_user/routines/$routineId'
+      path: '/routines/$routineId'
+      fullPath: '/app/routines/$routineId'
+      preLoaderRoute: typeof AppUserRoutinesRoutineIdRouteImport
+      parentRoute: typeof AppUserRoute
     }
     '/app/management/clients/$clientId/': {
       id: '/app/management/clients/$clientId/'
       path: '/clients/$clientId'
       fullPath: '/app/management/clients/$clientId/'
       preLoaderRoute: typeof AppManagementClientsClientIdIndexRouteImport
-      parentRoute: typeof AppManagementRouteRoute
-    }
-    '/app/management/programs/$programId/edit': {
-      id: '/app/management/programs/$programId/edit'
-      path: '/programs/$programId/edit'
-      fullPath: '/app/management/programs/$programId/edit'
-      preLoaderRoute: typeof AppManagementProgramsProgramIdEditRouteImport
       parentRoute: typeof AppManagementRouteRoute
     }
     '/app/management/clients/$clientId/workout-session': {
@@ -1154,17 +1153,15 @@ interface AppManagementRouteRouteChildren {
   AppManagementIndexRoute: typeof AppManagementIndexRoute
   AppManagementDietPlansPlanIdRoute: typeof AppManagementDietPlansPlanIdRoute
   AppManagementDietPlansNewRoute: typeof AppManagementDietPlansNewRoute
-  AppManagementProgramsNewRoute: typeof AppManagementProgramsNewRoute
+  AppManagementRoutinesRoutineIdRoute: typeof AppManagementRoutinesRoutineIdRoute
   AppManagementClientsIndexRoute: typeof AppManagementClientsIndexRoute
   AppManagementDietPlansIndexRoute: typeof AppManagementDietPlansIndexRoute
-  AppManagementProgramsIndexRoute: typeof AppManagementProgramsIndexRoute
+  AppManagementRoutinesIndexRoute: typeof AppManagementRoutinesIndexRoute
   AppManagementClientsClientIdCheckRoute: typeof AppManagementClientsClientIdCheckRoute
   AppManagementClientsClientIdPatternRoute: typeof AppManagementClientsClientIdPatternRoute
   AppManagementClientsClientIdViewWorkRoute: typeof AppManagementClientsClientIdViewWorkRoute
   AppManagementClientsClientIdWorkoutSessionRoute: typeof AppManagementClientsClientIdWorkoutSessionRoute
-  AppManagementProgramsProgramIdEditRoute: typeof AppManagementProgramsProgramIdEditRoute
   AppManagementClientsClientIdIndexRoute: typeof AppManagementClientsClientIdIndexRoute
-  AppManagementProgramsProgramIdIndexRoute: typeof AppManagementProgramsProgramIdIndexRoute
   AppManagementClientsClientIdLogsDietRoute: typeof AppManagementClientsClientIdLogsDietRoute
   AppManagementClientsClientIdLogsWeightRoute: typeof AppManagementClientsClientIdLogsWeightRoute
   AppManagementClientsClientIdLogsWorkoutRoute: typeof AppManagementClientsClientIdLogsWorkoutRoute
@@ -1176,10 +1173,10 @@ const AppManagementRouteRouteChildren: AppManagementRouteRouteChildren = {
   AppManagementIndexRoute: AppManagementIndexRoute,
   AppManagementDietPlansPlanIdRoute: AppManagementDietPlansPlanIdRoute,
   AppManagementDietPlansNewRoute: AppManagementDietPlansNewRoute,
-  AppManagementProgramsNewRoute: AppManagementProgramsNewRoute,
+  AppManagementRoutinesRoutineIdRoute: AppManagementRoutinesRoutineIdRoute,
   AppManagementClientsIndexRoute: AppManagementClientsIndexRoute,
   AppManagementDietPlansIndexRoute: AppManagementDietPlansIndexRoute,
-  AppManagementProgramsIndexRoute: AppManagementProgramsIndexRoute,
+  AppManagementRoutinesIndexRoute: AppManagementRoutinesIndexRoute,
   AppManagementClientsClientIdCheckRoute:
     AppManagementClientsClientIdCheckRoute,
   AppManagementClientsClientIdPatternRoute:
@@ -1188,12 +1185,8 @@ const AppManagementRouteRouteChildren: AppManagementRouteRouteChildren = {
     AppManagementClientsClientIdViewWorkRoute,
   AppManagementClientsClientIdWorkoutSessionRoute:
     AppManagementClientsClientIdWorkoutSessionRoute,
-  AppManagementProgramsProgramIdEditRoute:
-    AppManagementProgramsProgramIdEditRoute,
   AppManagementClientsClientIdIndexRoute:
     AppManagementClientsClientIdIndexRoute,
-  AppManagementProgramsProgramIdIndexRoute:
-    AppManagementProgramsProgramIdIndexRoute,
   AppManagementClientsClientIdLogsDietRoute:
     AppManagementClientsClientIdLogsDietRoute,
   AppManagementClientsClientIdLogsWeightRoute:
@@ -1219,6 +1212,8 @@ interface AppUserRouteChildren {
   AppUserWorkoutSessionRoute: typeof AppUserWorkoutSessionRoute
   AppUserWorkoutsRoute: typeof AppUserWorkoutsRoute
   AppUserIndexRoute: typeof AppUserIndexRoute
+  AppUserRoutinesRoutineIdRoute: typeof AppUserRoutinesRoutineIdRoute
+  AppUserRoutinesIndexRoute: typeof AppUserRoutinesIndexRoute
 }
 
 const AppUserRouteChildren: AppUserRouteChildren = {
@@ -1235,6 +1230,8 @@ const AppUserRouteChildren: AppUserRouteChildren = {
   AppUserWorkoutSessionRoute: AppUserWorkoutSessionRoute,
   AppUserWorkoutsRoute: AppUserWorkoutsRoute,
   AppUserIndexRoute: AppUserIndexRoute,
+  AppUserRoutinesRoutineIdRoute: AppUserRoutinesRoutineIdRoute,
+  AppUserRoutinesIndexRoute: AppUserRoutinesIndexRoute,
 }
 
 const AppUserRouteWithChildren =

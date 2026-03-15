@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { Calendar, Mail, MapPin, Phone, User } from 'lucide-react'
+import { Calendar, Mail, Phone, User } from 'lucide-react'
 
 import { useAuth } from '@/components/auth/useAuth'
 import {
@@ -106,16 +106,10 @@ function RouteComponent() {
               <Phone className="w-5 h-5 text-muted-foreground" />
               <div>
                 <p className="text-sm text-muted-foreground">Phone</p>
-                <p className="font-medium">{user.phone || 'Not provided'}</p>
+                <p className="font-medium">{user.phoneNumber || 'Not provided'}</p>
               </div>
             </div>
-            <div className="flex items-center gap-3">
-              <MapPin className="w-5 h-5 text-muted-foreground" />
-              <div>
-                <p className="text-sm text-muted-foreground">Location</p>
-                <p className="font-medium">{user.location || 'Not provided'}</p>
-              </div>
-            </div>
+
           </CardContent>
         </Card>
 

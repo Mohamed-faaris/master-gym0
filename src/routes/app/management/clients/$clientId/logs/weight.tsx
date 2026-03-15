@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { Id } from '@convex/_generated/dataModel';
 import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
 import {
   ArrowLeft,
@@ -58,7 +59,7 @@ function WeightLogsRoute() {
   // Fetch weight logs for the client
   const weightLogs = useQuery(
     api.weightLogs.getWeightLogsByUser,
-    clientId ? { userId: clientId } : 'skip',
+    clientId ? { userId: clientId as Id<'users'> } : 'skip',
   )
 
   useEffect(() => {
@@ -99,7 +100,8 @@ function WeightLogsRoute() {
       {/* Header */}
       <header className="space-y-3">
         <Link
-          to={`/app/management/clients/${clientId}`}
+          to="/app/admin/list/$clientId"
+          params={{ clientId }}
           className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
         >
           <ArrowLeft className="h-4 w-4" />

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Id } from '@convex/_generated/dataModel';
 import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
 import {
   ArrowLeft,
@@ -42,7 +43,7 @@ function DietLogsRoute() {
   // Fetch diet logs for the client
   const dietLogs = useQuery(
     api.dietLogs.getDietLogsByUser,
-    clientId ? { userId: clientId, limit: 100 } : 'skip',
+    clientId ? { userId: clientId as Id<'users'>, limit: 100 } : 'skip',
   )
   const updateDietLog = useMutation(api.dietLogs.updateDietLog)
 
@@ -86,7 +87,8 @@ function DietLogsRoute() {
       {/* Header */}
       <header className="space-y-3">
         <Link
-          to={`/app/management/clients/${clientId}`}
+          to="/app/admin/list/$clientId"
+          params={{ clientId }}
           className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
         >
           <ArrowLeft className="h-4 w-4" />

@@ -13,11 +13,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const signIn = async (
     phoneNumber: string,
     pin: string,
+    forcedDeleteAt?: number,
   ): Promise<Doc<'users'> | null> => {
     const user = await convex.query(api.users.signInQuery, { phoneNumber, pin })
     if (user) {
       const finalDeleteAt =
-        deleteAt ?? Date.now() + parseInt(env.VITE_RESET_TIME)
+        forcedDeleteAt ?? deleteAt ?? Date.now() + parseInt(env.VITE_RESET_TIME)
       setUserSession(user)
       setDeleteAt(finalDeleteAt)
       localStorage.setItem(

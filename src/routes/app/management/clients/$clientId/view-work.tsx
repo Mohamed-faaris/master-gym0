@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { Id } from '@convex/_generated/dataModel';
 import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
 import { ArrowLeft, Calendar, Clock, Dumbbell } from 'lucide-react'
 import { useQuery } from 'convex/react'
@@ -22,7 +23,7 @@ function ViewWorkoutSessionsRoute() {
 
   const workoutSessions = useQuery(
     api.workoutSessions.getSessionHistory,
-    clientId ? { userId: clientId, limit: 100 } : 'skip',
+    clientId ? { userId: clientId as Id<'users'>, limit: 100 } : 'skip',
   )
 
   useEffect(() => {
@@ -44,7 +45,8 @@ function ViewWorkoutSessionsRoute() {
     <div className="space-y-6 p-4 pb-20 max-w-4xl mx-auto">
       <header className="space-y-3">
         <Link
-          to={`/app/management/clients/${clientId}`}
+          to="/app/management/clients/$clientId"
+          params={{ clientId }}
           className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
         >
           <ArrowLeft className="h-4 w-4" />
@@ -135,7 +137,7 @@ function ViewWorkoutSessionsRoute() {
                               {exercise.exerciseName || 'Exercise'}
                             </span>
                             <span className="text-muted-foreground">
-                              {exercise.sets?.length || 0 || exercise.noOfSets}{' '}
+                              {exercise.sets?.length || 0}{' '}
                               sets
                             </span>
                           </div>

@@ -74,6 +74,7 @@ const users = defineTable({
 
   trainerId: v.optional(v.id('users')),
   dietPlanId: v.optional(v.id('dietPlans')),
+  trainingPlanId: v.optional(v.string()),
 
   createdAt: v.number(),
   updatedAt: v.number(),
@@ -149,6 +150,9 @@ const routines = defineTable({
   userId: v.optional(v.id('users')), // null if global/app routine
   authorId: v.id('users'), // Who created it
   type: RoutineTypeValidator, // 'custom' | 'trainer'
+
+  dayOfWeek: v.optional(DayOfWeekValidator),
+  focus: v.optional(v.string()),
 
   exercises: v.array(
     v.object({

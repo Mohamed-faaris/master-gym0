@@ -102,7 +102,7 @@ function AdminViewWorkoutSessionsRoute() {
                               {exercise.exerciseName || 'Exercise'}
                             </span>
                             <span className="text-muted-foreground">
-                              {exercise.sets?.length || 0 || exercise.noOfSets} sets
+                              {exercise.sets?.length || 0} sets
                             </span>
                           </div>
                         ))}

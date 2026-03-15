@@ -122,7 +122,7 @@ export function BottomBarAdmin({
             </DrawerDescription>
           </DrawerHeader>
           <div className="flex flex-col gap-3 p-6">
-            <Link to="/app/management/programs">
+            <Link to="/app/management/routines">
               <Button
                 variant="outline"
                 className="w-full h-16 justify-start gap-4"
@@ -132,9 +132,9 @@ export function BottomBarAdmin({
                   <ClipboardList className="w-5 h-5 text-chart-2" />
                 </div>
                 <div className="text-left">
-                  <p className="font-semibold">Create training program</p>
+                  <p className="font-semibold">Create routine template</p>
                   <p className="text-sm text-muted-foreground">
-                    Design a new workout program.
+                    Design a new reusable workout routine.
                   </p>
                 </div>
               </Button>

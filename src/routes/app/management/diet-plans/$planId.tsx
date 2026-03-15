@@ -140,7 +140,7 @@ function DietPlanDetailRoute() {
       return
     }
     if (!privilegedRoles.has(user.role)) {
-      navigate({ to: '/app/_user' })
+      navigate({ to: '/app' })
     }
   }, [user, isLoading, navigate])
 

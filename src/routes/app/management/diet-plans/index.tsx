@@ -48,7 +48,7 @@ function DietPlansRoute() {
       return
     }
     if (!privilegedRoles.has(user.role)) {
-      navigate({ to: '/app/_user' })
+      navigate({ to: '/app' })
     }
   }, [user, isLoading, navigate])
 
@@ -218,8 +218,8 @@ function DietPlansRoute() {
 
                 {/* Meta row */}
                 <div className="flex flex-wrap items-center gap-5 text-sm text-muted-foreground">
-                  {plan.durationWeeks && (
-                    <span>{plan.durationWeeks}-week plan</span>
+                  {plan.durationDays && (
+                    <span>{Math.round(plan.durationDays / 7)}-week plan</span>
                   )}
                   {plan.goal && (
                     <span className="flex items-center gap-1.5">
