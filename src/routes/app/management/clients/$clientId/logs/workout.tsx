@@ -1,8 +1,9 @@
 import { useEffect } from 'react'
 import { Id } from '@convex/_generated/dataModel';
 import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
-import { ArrowLeft, Calendar, Clock, Dumbbell, Play, Edit, Plus } from 'lucide-react'
+import { ArrowLeft, Calendar, Clock, Dumbbell, Play, Edit, Plus, Copy, CheckCircle } from 'lucide-react'
 import { useQuery, useMutation } from 'convex/react'
+import { useState } from 'react'
 
 import { api } from '@convex/_generated/api'
 import { useAuth } from '@/components/auth/useAuth'
@@ -14,6 +15,15 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+} from '@/components/ui/drawer'
 
 const privilegedRoles = new Set(['trainer', 'admin'])
 
@@ -27,6 +37,9 @@ function WorkoutLogsRoute() {
   const navigate = useNavigate()
   const { clientId } = Route.useParams()
   const { user, isLoading } = useAuth()
+  
+  const [isTemplateDrawerOpen, setIsTemplateDrawerOpen] = useState(false)
+  const [isCopying, setIsCopying] = useState(false)
 
   // Fetch workout sessions for the client
   const workoutSessions = useQuery(
@@ -40,7 +53,15 @@ function WorkoutLogsRoute() {
     clientId ? { userId: clientId as Id<'users'> } : 'skip',
   )
 
+  // Fetch templates created by the trainer
+  const templates = useQuery(
+    api.routines.getRoutinesByAuthor,
+    user ? { authorId: user._id } : 'skip'
+  )
+  const availableTemplates = templates?.filter(t => t.type === 'trainer') || []
+
   const createRoutine = useMutation(api.routines.createRoutine)
+  const copyRoutine = useMutation(api.routines.copyRoutineFromTrainer)
 
   const handleCreateRoutine = async () => {
     if (!user || !clientId) return
@@ -55,6 +76,22 @@ function WorkoutLogsRoute() {
       navigate({ to: `/app/management/clients/${clientId}/routines/${routineId}` })
     } catch (error) {
       console.error('Failed to create routine', error)
+    }
+  }
+
+  const handleCopyTemplate = async (templateId: Id<'routines'>) => {
+    if (!clientId) return
+    setIsCopying(true)
+    try {
+      await copyRoutine({
+        routineId: templateId,
+        userId: clientId as Id<'users'>,
+      })
+      setIsTemplateDrawerOpen(false)
+    } catch (error) {
+      console.error('Failed to copy template', error)
+    } finally {
+      setIsCopying(false)
     }
   }
 
@@ -115,9 +152,14 @@ function WorkoutLogsRoute() {
 
         <div className="flex items-center justify-between pt-2">
           <h3 className="text-lg font-semibold">Saved Routines</h3>
-          <Button onClick={handleCreateRoutine} size="sm" variant="outline" className="gap-2">
-            <Plus className="w-4 h-4" /> Create Routine
-          </Button>
+          <div className="flex gap-2">
+            <Button onClick={() => setIsTemplateDrawerOpen(true)} size="sm" variant="outline" className="gap-2">
+              <Copy className="w-4 h-4" /> From Template
+            </Button>
+            <Button onClick={handleCreateRoutine} size="sm" variant="outline" className="gap-2">
+              <Plus className="w-4 h-4" /> New Routine
+            </Button>
+          </div>
         </div>
         
         {routines && routines.length > 0 ? (
@@ -266,6 +308,49 @@ function WorkoutLogsRoute() {
           ))
         )}
       </div>
+
+      <Drawer open={isTemplateDrawerOpen} onOpenChange={setIsTemplateDrawerOpen}>
+        <DrawerContent>
+          <div className="mx-auto w-full max-w-sm">
+            <DrawerHeader>
+              <DrawerTitle>Assign Routine Template</DrawerTitle>
+              <DrawerDescription>
+                Copy a global template to {clientId}'s profile.
+              </DrawerDescription>
+            </DrawerHeader>
+            <div className="p-4 pb-0 space-y-3 max-h-[50vh] overflow-y-auto">
+              {availableTemplates.length > 0 ? (
+                availableTemplates.map((template) => (
+                  <Card key={template._id} className="cursor-pointer hover:border-primary transition-colors" onClick={() => handleCopyTemplate(template._id)}>
+                    <CardHeader className="p-4">
+                      <CardTitle className="text-base flex items-center justify-between">
+                        {template.name}
+                        {isCopying ? (
+                          <span className="text-xs text-muted-foreground animate-pulse">Copying...</span>
+                        ) : (
+                          <CheckCircle className="w-4 h-4 text-primary opacity-0 group-hover:opacity-100 transition-opacity" />
+                        )}
+                      </CardTitle>
+                      <CardDescription>
+                        {template.exercises.length} Exercises
+                      </CardDescription>
+                    </CardHeader>
+                  </Card>
+                ))
+              ) : (
+                <div className="text-center text-muted-foreground p-4">
+                  No trainer templates found.
+                </div>
+              )}
+            </div>
+            <DrawerFooter>
+              <DrawerClose asChild>
+                <Button variant="outline" disabled={isCopying}>Cancel</Button>
+              </DrawerClose>
+            </DrawerFooter>
+          </div>
+        </DrawerContent>
+      </Drawer>
     </div>
   )
 }

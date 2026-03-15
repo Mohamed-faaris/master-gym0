@@ -1,7 +1,8 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { api } from '@convex/_generated/api'
 import { useQuery, useMutation } from 'convex/react'
-import { Dumbbell, Plus } from 'lucide-react'
+import { Dumbbell, Plus, Copy, CheckCircle } from 'lucide-react'
+import { useState } from 'react'
 import { toast } from 'sonner'
 
 import { useAuth } from '@/components/auth/useAuth'
@@ -27,7 +28,18 @@ function RoutinesRouteComponent() {
     user ? { userId: user._id } : 'skip',
   )
   
+  // Fetch trainer's templates if the user has a trainer
+  const trainerTemplatesQuery = useQuery(
+    api.routines.getRoutinesByAuthor,
+    user?.trainerId ? { authorId: user.trainerId } : 'skip'
+  )
+  
+  const trainerTemplates = trainerTemplatesQuery?.filter(t => t.type === 'trainer') || []
+
   const createRoutine = useMutation(api.routines.createRoutine)
+  const copyRoutine = useMutation(api.routines.copyRoutineFromTrainer)
+
+  const [isCopyingId, setIsCopyingId] = useState<string | null>(null)
 
   const handleCreateNewRoutine = async () => {
     if (!user) return
@@ -43,6 +55,24 @@ function RoutinesRouteComponent() {
     } catch (error) {
       toast.error('Failed to create a new routine.')
       console.error(error)
+    }
+  }
+
+  const handleCopyTemplate = async (templateId: any) => {
+    if (!user) return
+    setIsCopyingId(templateId)
+    try {
+      const newRoutineId = await copyRoutine({
+        routineId: templateId,
+        userId: user._id,
+      })
+      toast.success('Template copied to your routines!')
+      navigate({ to: `/app/routines/${newRoutineId}` })
+    } catch (error) {
+      console.error('Failed to copy template', error)
+      toast.error('Failed to copy template')
+    } finally {
+      setIsCopyingId(null)
     }
   }
 
@@ -111,6 +141,50 @@ function RoutinesRouteComponent() {
             </CardContent>
           </Card>
         ))}
+
+        {user?.trainerId && trainerTemplates.length > 0 && (
+          <div className="pt-8">
+            <hr className="border-border/60 mb-8" />
+            <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+              <Dumbbell className="w-5 h-5 text-primary" /> 
+              Trainer Templates
+            </h2>
+            <div className="space-y-4">
+              {trainerTemplates.map((template) => (
+                <Card key={template._id} className="border-primary/20 bg-primary/5">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="flex items-start justify-between">
+                      {template.name}
+                      <Button 
+                        size="sm" 
+                        variant="default"
+                        disabled={isCopyingId === template._id}
+                        onClick={() => handleCopyTemplate(template._id)}
+                        className="gap-2"
+                      >
+                        {isCopyingId === template._id ? (
+                          <span className="animate-pulse">Copying...</span>
+                        ) : (
+                          <>
+                            <Copy className="w-3 h-3" />
+                            Copy
+                          </>
+                        )}
+                      </Button>
+                    </CardTitle>
+                    <CardDescription>{template.exercises.length} Exercises</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-sm font-medium text-muted-foreground">
+                      {template.exercises.slice(0, 3).map(ex => ex.exerciseName).join(', ')}
+                      {template.exercises.length > 3 && '...'}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )
