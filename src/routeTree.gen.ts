@@ -18,7 +18,6 @@ import { Route as AppAdminRouteRouteImport } from './routes/app/admin/route'
 import { Route as AppManagementIndexRouteImport } from './routes/app/management/index'
 import { Route as AppAdminIndexRouteImport } from './routes/app/admin/index'
 import { Route as AppUserIndexRouteImport } from './routes/app/_user/index'
-import { Route as AppManagementTestIntegrationRouteImport } from './routes/app/management/test-integration'
 import { Route as AppManagementProfileRouteImport } from './routes/app/management/profile'
 import { Route as AppAdminProfileStoriesRouteImport } from './routes/app/admin/profile-stories'
 import { Route as AppAdminProfileImagesRouteImport } from './routes/app/admin/profile-images'
@@ -111,12 +110,6 @@ const AppUserIndexRoute = AppUserIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AppUserRoute,
 } as any)
-const AppManagementTestIntegrationRoute =
-  AppManagementTestIntegrationRouteImport.update({
-    id: '/test-integration',
-    path: '/test-integration',
-    getParentRoute: () => AppManagementRouteRoute,
-  } as any)
 const AppManagementProfileRoute = AppManagementProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
@@ -396,7 +389,6 @@ export interface FileRoutesByFullPath {
   '/app/admin/profile-images': typeof AppAdminProfileImagesRoute
   '/app/admin/profile-stories': typeof AppAdminProfileStoriesRoute
   '/app/management/profile': typeof AppManagementProfileRoute
-  '/app/management/test-integration': typeof AppManagementTestIntegrationRoute
   '/app/': typeof AppUserIndexRoute
   '/app/admin/': typeof AppAdminIndexRoute
   '/app/management/': typeof AppManagementIndexRoute
@@ -451,7 +443,6 @@ export interface FileRoutesByTo {
   '/app/admin/profile-images': typeof AppAdminProfileImagesRoute
   '/app/admin/profile-stories': typeof AppAdminProfileStoriesRoute
   '/app/management/profile': typeof AppManagementProfileRoute
-  '/app/management/test-integration': typeof AppManagementTestIntegrationRoute
   '/app': typeof AppUserIndexRoute
   '/app/admin': typeof AppAdminIndexRoute
   '/app/management': typeof AppManagementIndexRoute
@@ -510,7 +501,6 @@ export interface FileRoutesById {
   '/app/admin/profile-images': typeof AppAdminProfileImagesRoute
   '/app/admin/profile-stories': typeof AppAdminProfileStoriesRoute
   '/app/management/profile': typeof AppManagementProfileRoute
-  '/app/management/test-integration': typeof AppManagementTestIntegrationRoute
   '/app/_user/': typeof AppUserIndexRoute
   '/app/admin/': typeof AppAdminIndexRoute
   '/app/management/': typeof AppManagementIndexRoute
@@ -570,7 +560,6 @@ export interface FileRouteTypes {
     | '/app/admin/profile-images'
     | '/app/admin/profile-stories'
     | '/app/management/profile'
-    | '/app/management/test-integration'
     | '/app/'
     | '/app/admin/'
     | '/app/management/'
@@ -625,7 +614,6 @@ export interface FileRouteTypes {
     | '/app/admin/profile-images'
     | '/app/admin/profile-stories'
     | '/app/management/profile'
-    | '/app/management/test-integration'
     | '/app'
     | '/app/admin'
     | '/app/management'
@@ -683,7 +671,6 @@ export interface FileRouteTypes {
     | '/app/admin/profile-images'
     | '/app/admin/profile-stories'
     | '/app/management/profile'
-    | '/app/management/test-integration'
     | '/app/_user/'
     | '/app/admin/'
     | '/app/management/'
@@ -790,13 +777,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/app/'
       preLoaderRoute: typeof AppUserIndexRouteImport
       parentRoute: typeof AppUserRoute
-    }
-    '/app/management/test-integration': {
-      id: '/app/management/test-integration'
-      path: '/test-integration'
-      fullPath: '/app/management/test-integration'
-      preLoaderRoute: typeof AppManagementTestIntegrationRouteImport
-      parentRoute: typeof AppManagementRouteRoute
     }
     '/app/management/profile': {
       id: '/app/management/profile'
@@ -1169,7 +1149,6 @@ const AppAdminRouteRouteWithChildren = AppAdminRouteRoute._addFileChildren(
 
 interface AppManagementRouteRouteChildren {
   AppManagementProfileRoute: typeof AppManagementProfileRoute
-  AppManagementTestIntegrationRoute: typeof AppManagementTestIntegrationRoute
   AppManagementIndexRoute: typeof AppManagementIndexRoute
   AppManagementDietPlansPlanIdRoute: typeof AppManagementDietPlansPlanIdRoute
   AppManagementDietPlansNewRoute: typeof AppManagementDietPlansNewRoute
@@ -1190,7 +1169,6 @@ interface AppManagementRouteRouteChildren {
 
 const AppManagementRouteRouteChildren: AppManagementRouteRouteChildren = {
   AppManagementProfileRoute: AppManagementProfileRoute,
-  AppManagementTestIntegrationRoute: AppManagementTestIntegrationRoute,
   AppManagementIndexRoute: AppManagementIndexRoute,
   AppManagementDietPlansPlanIdRoute: AppManagementDietPlansPlanIdRoute,
   AppManagementDietPlansNewRoute: AppManagementDietPlansNewRoute,
