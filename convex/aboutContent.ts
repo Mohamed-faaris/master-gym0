@@ -31,7 +31,6 @@ export const upsertAbout = mutation({
     founderName: v.optional(v.string()),
     founderRole: v.optional(v.string()),
     founderBio: v.optional(v.string()),
-    status: ContentStatusValidator,
   },
   handler: async (ctx, args) => {
     const now = Date.now()
@@ -40,6 +39,7 @@ export const upsertAbout = mutation({
     if (aboutId) {
       await ctx.db.patch(aboutId, {
         ...payload,
+        status: 'active',
         updatedAt: now,
       })
       return aboutId
@@ -47,26 +47,12 @@ export const upsertAbout = mutation({
 
     const createdId = await ctx.db.insert('aboutContent', {
       ...payload,
+      status: 'active',
       createdAt: now,
       updatedAt: now,
     })
 
     return createdId
-  },
-})
-
-export const setAboutStatus = mutation({
-  args: {
-    aboutId: v.id('aboutContent'),
-    status: ContentStatusValidator,
-  },
-  handler: async (ctx, args) => {
-    await ctx.db.patch(args.aboutId, {
-      status: args.status,
-      updatedAt: Date.now(),
-    })
-
-    return args.aboutId
   },
 })
 

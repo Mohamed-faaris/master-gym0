@@ -18,21 +18,10 @@ import {
   DrawerTitle,
 } from '@/components/ui/drawer'
 import { Input } from '@/components/ui/input'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
 
 export const Route = createFileRoute('/app/admin/profile-stories')({
   component: ProfileStoriesPage,
 })
-
-const STATUSES = ['active', 'draft', 'inactive'] as const
-
-type ContentStatus = (typeof STATUSES)[number]
 
 function toLines(value: string) {
   return value
@@ -56,7 +45,6 @@ function ProfileStoriesPage() {
   const generateUploadUrl = useMutation(api.files.generateUploadUrl)
   const createStory = useMutation(api.successStories.createStory)
   const updateStory = useMutation(api.successStories.updateStory)
-  const setStoryStatus = useMutation(api.successStories.setStoryStatus)
   const deleteStory = useMutation(api.successStories.deleteStory)
 
   const [storyDrawerOpen, setStoryDrawerOpen] = useState(false)
@@ -64,7 +52,6 @@ function ProfileStoriesPage() {
   const [storyTitle, setStoryTitle] = useState('')
   const [storyParagraph, setStoryParagraph] = useState('')
   const [storyPoints, setStoryPoints] = useState('')
-  const [storyStatus, setStoryStatusValue] = useState<ContentStatus>('draft')
   const [storyImageStorageId, setStoryImageStorageId] =
     useState<string | null>(null)
   const [storyPreview, setStoryPreview] = useState<string | null>(null)
@@ -74,7 +61,6 @@ function ProfileStoriesPage() {
     setStoryTitle('')
     setStoryParagraph('')
     setStoryPoints('')
-    setStoryStatusValue('draft')
     setStoryImageStorageId(null)
     setStoryPreview(null)
   }
@@ -89,7 +75,6 @@ function ProfileStoriesPage() {
     setStoryTitle(story.title)
     setStoryParagraph(story.paragraph)
     setStoryPoints(story.points.join('\n'))
-    setStoryStatusValue(story.status as ContentStatus)
     setStoryImageStorageId(null)
     setStoryPreview(story.imageUrl ?? null)
     setStoryDrawerOpen(true)
@@ -145,7 +130,6 @@ function ProfileStoriesPage() {
             <div key={story._id} className="rounded-lg border p-3">
               <div className="font-medium">{story.title}</div>
               <div className="text-xs text-muted-foreground">slug: {story.slug}</div>
-              <div className="text-xs text-muted-foreground">status: {story.status}</div>
               <div className="mt-2 flex min-w-0 items-center gap-2">
                 <Button
                   size="sm"
@@ -155,33 +139,6 @@ function ProfileStoriesPage() {
                 >
                   Edit Story
                 </Button>
-                <div className="min-w-0 flex-1">
-                  <Select
-                    value={story.status}
-                    onValueChange={async (value) => {
-                      try {
-                        await setStoryStatus({
-                          storyId: story._id as any,
-                          status: value as ContentStatus,
-                        })
-                        toast.success('Story status changed')
-                      } catch {
-                        toast.error('Failed to change story status')
-                      }
-                    }}
-                  >
-                    <SelectTrigger className="h-8 w-full min-w-0">
-                      <SelectValue placeholder="Status" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {STATUSES.map((status) => (
-                        <SelectItem key={status} value={status}>
-                          {status}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
                 <Button
                   size="sm"
                   variant="destructive"
@@ -212,7 +169,7 @@ function ProfileStoriesPage() {
           <DrawerHeader>
             <DrawerTitle>{editingStoryId ? 'Edit Story' : 'Add Story'}</DrawerTitle>
             <DrawerDescription>
-              Story details with auto slug and auto append order.
+              Story details with auto slug and auto append order. Stories stay active.
             </DrawerDescription>
             <Button
               variant="ghost"
@@ -242,21 +199,6 @@ function ProfileStoriesPage() {
               placeholder="Points (one per line)"
               className="min-h-20 w-full rounded-md border bg-background px-3 py-2 text-sm"
             />
-            <Select
-              value={storyStatus}
-              onValueChange={(value) => setStoryStatusValue(value as ContentStatus)}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Status" />
-              </SelectTrigger>
-              <SelectContent>
-                {STATUSES.map((status) => (
-                  <SelectItem key={status} value={status}>
-                    {status}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
 
             <Input type="file" accept="image/*" onChange={handleImageChange} />
 
@@ -289,10 +231,6 @@ function ProfileStoriesPage() {
                       points: toLines(storyPoints),
                       imageStorageId: storyImageStorageId as any,
                     })
-                    await setStoryStatus({
-                      storyId: editingStoryId as any,
-                      status: storyStatus,
-                    })
                     toast.success('Story updated')
                   } else {
                     const nextOrder =
@@ -305,7 +243,6 @@ function ProfileStoriesPage() {
                       title: storyTitle,
                       paragraph: storyParagraph,
                       points: toLines(storyPoints),
-                      status: storyStatus,
                       order: nextOrder,
                       imageStorageId: storyImageStorageId as any,
                     })

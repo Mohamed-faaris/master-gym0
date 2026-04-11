@@ -1,8 +1,5 @@
 import { v } from 'convex/values'
 import { mutation, query } from './_generated/server'
-import { CONTENT_STATUSES } from './schema'
-
-const ContentStatusValidator = v.union(...CONTENT_STATUSES.map(v.literal))
 
 export const listActiveTransformationImages = query({
   handler: async (ctx) => {
@@ -26,7 +23,6 @@ export const createTransformationImage = mutation({
     imageStorageId: v.optional(v.id('_storage')),
     imageUrl: v.optional(v.string()),
     order: v.number(),
-    status: ContentStatusValidator,
   },
   handler: async (ctx, args) => {
     const now = Date.now()
@@ -49,7 +45,7 @@ export const createTransformationImage = mutation({
       imageStorageId: args.imageStorageId,
       imageUrl: resolvedImageUrl,
       order: args.order,
-      status: args.status,
+      status: 'active',
       createdAt: now,
       updatedAt: now,
     })
@@ -99,21 +95,6 @@ export const updateTransformationImage = mutation({
     await ctx.db.patch(imageId, patch)
 
     return imageId
-  },
-})
-
-export const setTransformationImageStatus = mutation({
-  args: {
-    imageId: v.id('transformationImages'),
-    status: ContentStatusValidator,
-  },
-  handler: async (ctx, args) => {
-    await ctx.db.patch(args.imageId, {
-      status: args.status,
-      updatedAt: Date.now(),
-    })
-
-    return args.imageId
   },
 })
 

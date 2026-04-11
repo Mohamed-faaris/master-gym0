@@ -1,28 +1,17 @@
 import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useMutation, useQuery } from 'convex/react'
-import {  useState } from 'react'
+import { useState } from 'react'
 import { toast } from 'sonner'
 
 import { api } from '@convex/_generated/api'
-import type {ChangeEvent} from 'react';
+import type { ChangeEvent } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
 
 export const Route = createFileRoute('/app/admin/profile-story/new')({
   component: NewStoryPage,
 })
-
-const STATUSES = ['active', 'draft', 'inactive'] as const
-
-type ContentStatus = (typeof STATUSES)[number]
 
 function toLines(value: string) {
   return value
@@ -49,7 +38,6 @@ function NewStoryPage() {
   const [storyTitle, setStoryTitle] = useState('')
   const [storyParagraph, setStoryParagraph] = useState('')
   const [storyPoints, setStoryPoints] = useState('')
-  const [storyStatus, setStoryStatus] = useState<ContentStatus>('draft')
   const [storyImageStorageId, setStoryImageStorageId] =
     useState<string | null>(null)
   const [storyPreview, setStoryPreview] = useState<string | null>(null)
@@ -115,21 +103,6 @@ function NewStoryPage() {
             placeholder="Points (one per line)"
             className="min-h-20 w-full rounded-md border bg-background px-3 py-2 text-sm"
           />
-          <Select
-            value={storyStatus}
-            onValueChange={(value) => setStoryStatus(value as ContentStatus)}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Status" />
-            </SelectTrigger>
-            <SelectContent>
-              {STATUSES.map((status) => (
-                <SelectItem key={status} value={status}>
-                  {status}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
 
           <Input type="file" accept="image/*" onChange={handleImageChange} />
 
@@ -163,7 +136,6 @@ function NewStoryPage() {
                     title: storyTitle,
                     paragraph: storyParagraph,
                     points: toLines(storyPoints),
-                    status: storyStatus,
                     order: nextOrder,
                     imageStorageId: storyImageStorageId as any,
                   })

@@ -1,28 +1,17 @@
 import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useMutation, useQuery } from 'convex/react'
-import {  useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
 import { api } from '@convex/_generated/api'
-import type {ChangeEvent} from 'react';
+import type { ChangeEvent } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
 
 export const Route = createFileRoute('/app/admin/profile-story/$storyId/edit')({
   component: EditStoryPage,
 })
-
-const STATUSES = ['active', 'draft', 'inactive'] as const
-
-type ContentStatus = (typeof STATUSES)[number]
 
 function toLines(value: string) {
   return value
@@ -49,13 +38,11 @@ function EditStoryPage() {
 
   const generateUploadUrl = useMutation(api.files.generateUploadUrl)
   const updateStory = useMutation(api.successStories.updateStory)
-  const setStoryStatus = useMutation(api.successStories.setStoryStatus)
   const deleteStory = useMutation(api.successStories.deleteStory)
 
   const [storyTitle, setStoryTitle] = useState('')
   const [storyParagraph, setStoryParagraph] = useState('')
   const [storyPoints, setStoryPoints] = useState('')
-  const [storyStatus, setStoryStatusValue] = useState<ContentStatus>('draft')
   const [storyImageStorageId, setStoryImageStorageId] =
     useState<string | null>(null)
   const [storyPreview, setStoryPreview] = useState<string | null>(null)
@@ -65,7 +52,6 @@ function EditStoryPage() {
     setStoryTitle(story.title)
     setStoryParagraph(story.paragraph)
     setStoryPoints(story.points.join('\n'))
-    setStoryStatusValue(story.status as ContentStatus)
     setStoryPreview(story.imageUrl ?? null)
   }, [story?._id])
 
@@ -138,21 +124,6 @@ function EditStoryPage() {
             placeholder="Points (one per line)"
             className="min-h-20 w-full rounded-md border bg-background px-3 py-2 text-sm"
           />
-          <Select
-            value={storyStatus}
-            onValueChange={(value) => setStoryStatusValue(value as ContentStatus)}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Status" />
-            </SelectTrigger>
-            <SelectContent>
-              {STATUSES.map((status) => (
-                <SelectItem key={status} value={status}>
-                  {status}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
 
           <Input type="file" accept="image/*" onChange={handleImageChange} />
 
@@ -182,10 +153,6 @@ function EditStoryPage() {
                     paragraph: storyParagraph,
                     points: toLines(storyPoints),
                     imageStorageId: storyImageStorageId as any,
-                  })
-                  await setStoryStatus({
-                    storyId: story._id as any,
-                    status: storyStatus,
                   })
                   toast.success('Story updated')
                   navigate({ to: '/app/admin/profile-stories' })

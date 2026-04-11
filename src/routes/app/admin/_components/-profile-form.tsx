@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useMutation, useQuery } from 'convex/react'
-import { useNavigate } from '@tanstack/react-router'
+import { Link, useNavigate } from '@tanstack/react-router'
 import {
   Calendar,
+  Image as ImageIcon,
   LogOut,
   Mail,
   MapPin,
@@ -246,9 +247,17 @@ export function ProfileForm({ userId, onSignOut }: ProfileFormProps) {
       </Card> */}
 
       <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">About Us Preview</CardTitle>
-          <CardDescription>Live preview from active content.</CardDescription>
+        <CardHeader className="flex flex-row items-start justify-between gap-3">
+          <div>
+            <CardTitle className="text-lg">About Us Preview</CardTitle>
+            <CardDescription>Live preview from active content.</CardDescription>
+          </div>
+          <Button asChild size="sm" className="shrink-0">
+            <Link to="/app/admin/profile-images" search={{ open: 'create' }}>
+              <ImageIcon className="mr-2 h-4 w-4" />
+              Add Image
+            </Link>
+          </Button>
         </CardHeader>
         <CardContent className="space-y-3">
           <div className="rounded-lg border border-border bg-background px-3 py-3">

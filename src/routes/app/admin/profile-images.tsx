@@ -1,11 +1,11 @@
-import { Link, createFileRoute } from '@tanstack/react-router'
+import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useMutation, useQuery } from 'convex/react'
-import {  useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { ChevronDown, ChevronUp, Plus, X } from 'lucide-react'
 import { toast } from 'sonner'
 
 import { api } from '@convex/_generated/api'
-import type {ChangeEvent} from 'react';
+import type { ChangeEvent } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
@@ -18,31 +18,24 @@ import {
   DrawerTitle,
 } from '@/components/ui/drawer'
 import { Input } from '@/components/ui/input'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
 
 export const Route = createFileRoute('/app/admin/profile-images')({
+  validateSearch: (search: Record<string, unknown>) => ({
+    open: search.open === 'create' ? 'create' : undefined,
+  }),
   component: ProfileImagesPage,
 })
-
-const STATUSES = ['active', 'draft', 'inactive'] as const
-
-type ContentStatus = (typeof STATUSES)[number]
 
 type ImageRecord = {
   _id: string
   title?: string
   imageUrl: string
   order: number
-  status: ContentStatus
 }
 
 function ProfileImagesPage() {
+  const navigate = useNavigate()
+  const search = Route.useSearch()
   const rawImages = useQuery(api.transformationImages.listAllTransformationImages) as
     | Array<ImageRecord>
     | undefined
@@ -59,16 +52,12 @@ function ProfileImagesPage() {
   const updateTransformationImage = useMutation(
     api.transformationImages.updateTransformationImage,
   )
-  const setTransformationImageStatus = useMutation(
-    api.transformationImages.setTransformationImageStatus,
-  )
   const deleteTransformationImage = useMutation(
     api.transformationImages.deleteTransformationImage,
   )
 
   const [editingImageId, setEditingImageId] = useState<string | null>(null)
   const [imageTitle, setImageTitle] = useState('')
-  const [imageStatus, setImageStatus] = useState<ContentStatus>('draft')
   const [transformationStorageId, setTransformationStorageId] =
     useState<string | null>(null)
   const [imagePreview, setImagePreview] = useState<string | null>(null)
@@ -112,7 +101,6 @@ function ProfileImagesPage() {
   const resetImageForm = () => {
     setEditingImageId(null)
     setImageTitle('')
-    setImageStatus('draft')
     setTransformationStorageId(null)
     setImagePreview(null)
     if (transformationImageInputRef.current) {
@@ -125,10 +113,20 @@ function ProfileImagesPage() {
     setImageDrawerOpen(true)
   }
 
+  useEffect(() => {
+    if (search.open === 'create') {
+      openCreateDrawer()
+      navigate({
+        to: '/app/admin/profile-images',
+        search: {},
+        replace: true,
+      })
+    }
+  }, [navigate, search.open])
+
   const openEditDrawer = (image: ImageRecord) => {
     setEditingImageId(image._id)
     setImageTitle(image.title ?? '')
-    setImageStatus(image.status)
     setTransformationStorageId(null)
     setImagePreview(image.imageUrl)
     setImageDrawerOpen(true)
@@ -169,15 +167,14 @@ function ProfileImagesPage() {
       </header>
 
       <Card>
-        <CardHeader>
+        <CardHeader className="flex flex-row items-center justify-between gap-3">
           <CardTitle>Transformation Images</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <Button onClick={openCreateDrawer}>
+          <Button onClick={openCreateDrawer} size="sm">
             <Plus className="mr-2 h-4 w-4" />
             Add Image
           </Button>
-
+        </CardHeader>
+        <CardContent className="space-y-4">
           <div className="space-y-2">
             {sortedImages.map((image, index) => (
               <div key={image._id} className="rounded-lg border p-3">
@@ -200,7 +197,6 @@ function ProfileImagesPage() {
                   </button>
                 </div>
                 <div className="mt-2 font-medium">{image.title ?? 'Untitled image'}</div>
-                <div className="text-xs text-muted-foreground">status: {image.status}</div>
                 <div className="text-xs text-muted-foreground">order: {image.order}</div>
                 <div className="mt-2 flex flex-wrap gap-2">
                   <Button
@@ -228,31 +224,6 @@ function ProfileImagesPage() {
                   >
                     Edit
                   </Button>
-                  <Select
-                    value={image.status}
-                    onValueChange={async (value) => {
-                      try {
-                        await setTransformationImageStatus({
-                          imageId: image._id as any,
-                          status: value as ContentStatus,
-                        })
-                        toast.success('Image status changed')
-                      } catch {
-                        toast.error('Failed to change image status')
-                      }
-                    }}
-                  >
-                    <SelectTrigger className="h-8 w-36">
-                      <SelectValue placeholder="Status" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {STATUSES.map((status) => (
-                        <SelectItem key={status} value={status}>
-                          {status}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
                   <Button
                     size="sm"
                     variant="destructive"
@@ -284,12 +255,20 @@ function ProfileImagesPage() {
         </CardContent>
       </Card>
 
-      <Drawer open={imageDrawerOpen} onOpenChange={setImageDrawerOpen}>
+      <Drawer
+        open={imageDrawerOpen}
+        onOpenChange={(open) => {
+          setImageDrawerOpen(open)
+          if (!open) {
+            resetImageForm()
+          }
+        }}
+      >
         <DrawerContent>
           <DrawerHeader>
             <DrawerTitle>{editingImageId ? 'Edit Image' : 'Add Image'}</DrawerTitle>
             <DrawerDescription>
-              Upload with preview and set status.
+              Upload with preview.
             </DrawerDescription>
             <Button
               variant="ghost"
@@ -307,21 +286,6 @@ function ProfileImagesPage() {
               onChange={(e) => setImageTitle(e.target.value)}
               placeholder="Image title"
             />
-            <Select
-              value={imageStatus}
-              onValueChange={(value) => setImageStatus(value as ContentStatus)}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Status" />
-              </SelectTrigger>
-              <SelectContent>
-                {STATUSES.map((status) => (
-                  <SelectItem key={status} value={status}>
-                    {status}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
 
             <Input
               ref={transformationImageInputRef}
@@ -359,10 +323,6 @@ function ProfileImagesPage() {
                     }
 
                     await updateTransformationImage(updatePayload)
-                    await setTransformationImageStatus({
-                      imageId: editingImageId as any,
-                      status: imageStatus,
-                    })
                     toast.success('Image updated')
                   } else {
                     if (!transformationStorageId) {
@@ -378,7 +338,6 @@ function ProfileImagesPage() {
                     await createTransformationImage({
                       title: imageTitle || undefined,
                       order: nextOrder,
-                      status: imageStatus,
                       imageStorageId: transformationStorageId as any,
                     })
                     toast.success('Image created')

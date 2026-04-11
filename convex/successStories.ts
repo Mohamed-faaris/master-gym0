@@ -1,8 +1,5 @@
 import { v } from 'convex/values'
 import { mutation, query } from './_generated/server'
-import { CONTENT_STATUSES } from './schema'
-
-const ContentStatusValidator = v.union(...CONTENT_STATUSES.map(v.literal))
 
 export const listActiveStories = query({
   handler: async (ctx) => {
@@ -40,7 +37,6 @@ export const createStory = mutation({
     imageUrl: v.optional(v.string()),
     paragraph: v.string(),
     points: v.array(v.string()),
-    status: ContentStatusValidator,
     order: v.number(),
   },
   handler: async (ctx, args) => {
@@ -57,6 +53,7 @@ export const createStory = mutation({
 
     return await ctx.db.insert('successStories', {
       ...args,
+      status: 'active',
       imageUrl: resolvedImageUrl,
       createdAt: now,
       updatedAt: now,
@@ -95,21 +92,6 @@ export const updateStory = mutation({
     })
 
     return storyId
-  },
-})
-
-export const setStoryStatus = mutation({
-  args: {
-    storyId: v.id('successStories'),
-    status: ContentStatusValidator,
-  },
-  handler: async (ctx, args) => {
-    await ctx.db.patch(args.storyId, {
-      status: args.status,
-      updatedAt: Date.now(),
-    })
-
-    return args.storyId
   },
 })
 

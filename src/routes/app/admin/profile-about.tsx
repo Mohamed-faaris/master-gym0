@@ -1,6 +1,7 @@
 import { Link, createFileRoute } from '@tanstack/react-router'
 import { useMutation, useQuery } from 'convex/react'
-import { useEffect, useState } from 'react'
+import { type Dispatch, type SetStateAction, useEffect, useState } from 'react'
+import { Plus, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 
 import { api } from '@convex/_generated/api'
@@ -22,24 +23,20 @@ export const Route = createFileRoute('/app/admin/profile-about')({
   component: ProfileAboutPage,
 })
 
-function toLines(value: string) {
-  return value
-    .split('\n')
-    .map((line) => line.trim())
-    .filter(Boolean)
+function sanitizeItems(items: string[]) {
+  return items.map((item) => item.trim()).filter(Boolean)
 }
 
 function ProfileAboutPage() {
-  const aboutRows = useQuery(api.aboutContent.getAllAbout)
-  const about = aboutRows?.[0]
+  const about = useQuery(api.aboutContent.getActiveAbout)
 
   const upsertAbout = useMutation(api.aboutContent.upsertAbout)
 
   const [aboutTitle, setAboutTitle] = useState('About Us')
   const [aboutSubtitle, setAboutSubtitle] = useState('Master Fitness')
   const [aboutParagraph, setAboutParagraph] = useState('')
-  const [aboutBranches, setAboutBranches] = useState('')
-  const [aboutAchievements, setAboutAchievements] = useState('')
+  const [aboutBranches, setAboutBranches] = useState<string[]>([''])
+  const [aboutAchievements, setAboutAchievements] = useState<string[]>([''])
   const [aboutFounderName, setAboutFounderName] = useState('')
   const [aboutFounderRole, setAboutFounderRole] = useState('')
   const [aboutFounderBio, setAboutFounderBio] = useState('')
@@ -51,8 +48,8 @@ function ProfileAboutPage() {
     setAboutTitle(about.title)
     setAboutSubtitle(about.subtitle ?? '')
     setAboutParagraph(about.paragraph)
-    setAboutBranches(about.branchNames.join('\n'))
-    setAboutAchievements(about.achievements.join('\n'))
+    setAboutBranches(about.branchNames.length ? about.branchNames : [''])
+    setAboutAchievements(about.achievements.length ? about.achievements : [''])
     setAboutFounderName(about.founderName ?? '')
     setAboutFounderRole(about.founderRole ?? '')
     setAboutFounderBio(about.founderBio ?? '')
@@ -66,12 +63,11 @@ function ProfileAboutPage() {
         title: aboutTitle,
         subtitle: aboutSubtitle || undefined,
         paragraph: aboutParagraph,
-        branchNames: toLines(aboutBranches),
-        achievements: toLines(aboutAchievements),
+        branchNames: sanitizeItems(aboutBranches),
+        achievements: sanitizeItems(aboutAchievements),
         founderName: aboutFounderName || undefined,
         founderRole: aboutFounderRole || undefined,
         founderBio: aboutFounderBio || undefined,
-        status: 'active',
       })
       toast.success('About saved')
       setSaveDialogOpen(false)
@@ -80,6 +76,30 @@ function ProfileAboutPage() {
     } finally {
       setIsSaving(false)
     }
+  }
+
+  const updateListItem = (
+    setter: Dispatch<SetStateAction<string[]>>,
+    index: number,
+    value: string,
+  ) => {
+    setter((current) =>
+      current.map((item, itemIndex) => (itemIndex === index ? value : item)),
+    )
+  }
+
+  const addListItem = (setter: Dispatch<SetStateAction<string[]>>) => {
+    setter((current) => [...current, ''])
+  }
+
+  const removeListItem = (
+    setter: Dispatch<SetStateAction<string[]>>,
+    index: number,
+  ) => {
+    setter((current) => {
+      if (current.length === 1) return ['']
+      return current.filter((_, itemIndex) => itemIndex !== index)
+    })
   }
 
   return (
@@ -99,8 +119,76 @@ function ProfileAboutPage() {
           <Input value={aboutTitle} onChange={(e) => setAboutTitle(e.target.value)} placeholder="Title" />
           <Input value={aboutSubtitle} onChange={(e) => setAboutSubtitle(e.target.value)} placeholder="Subtitle" />
           <textarea value={aboutParagraph} onChange={(e) => setAboutParagraph(e.target.value)} placeholder="Paragraph" className="min-h-24 w-full rounded-md border bg-background px-3 py-2 text-sm" />
-          <textarea value={aboutBranches} onChange={(e) => setAboutBranches(e.target.value)} placeholder="Branch names (one per line)" className="min-h-20 w-full rounded-md border bg-background px-3 py-2 text-sm" />
-          <textarea value={aboutAchievements} onChange={(e) => setAboutAchievements(e.target.value)} placeholder="Achievements (one per line)" className="min-h-24 w-full rounded-md border bg-background px-3 py-2 text-sm" />
+          <div className="space-y-3 rounded-lg border p-3">
+            <div className="flex items-center justify-between gap-2">
+              <div>
+                <p className="text-sm font-medium">Branches</p>
+                <p className="text-xs text-muted-foreground">
+                  Add or remove branch names from the UI.
+                </p>
+              </div>
+              <Button type="button" variant="outline" size="sm" onClick={() => addListItem(setAboutBranches)}>
+                <Plus className="mr-2 h-4 w-4" />
+                Add Branch
+              </Button>
+            </div>
+            <div className="space-y-2">
+              {aboutBranches.map((branch, index) => (
+                <div key={`branch-${index}`} className="flex items-center gap-2">
+                  <Input
+                    value={branch}
+                    onChange={(e) => updateListItem(setAboutBranches, index, e.target.value)}
+                    placeholder={`Branch ${index + 1}`}
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => removeListItem(setAboutBranches, index)}
+                    aria-label={`Remove branch ${index + 1}`}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="space-y-3 rounded-lg border p-3">
+            <div className="flex items-center justify-between gap-2">
+              <div>
+                <p className="text-sm font-medium">Achievements</p>
+                <p className="text-xs text-muted-foreground">
+                  Add or remove achievements without editing raw text blocks.
+                </p>
+              </div>
+              <Button type="button" variant="outline" size="sm" onClick={() => addListItem(setAboutAchievements)}>
+                <Plus className="mr-2 h-4 w-4" />
+                Add Achievement
+              </Button>
+            </div>
+            <div className="space-y-2">
+              {aboutAchievements.map((achievement, index) => (
+                <div key={`achievement-${index}`} className="flex items-start gap-2">
+                  <Input
+                    value={achievement}
+                    onChange={(e) =>
+                      updateListItem(setAboutAchievements, index, e.target.value)
+                    }
+                    placeholder={`Achievement ${index + 1}`}
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => removeListItem(setAboutAchievements, index)}
+                    aria-label={`Remove achievement ${index + 1}`}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              ))}
+            </div>
+          </div>
           <Input value={aboutFounderName} onChange={(e) => setAboutFounderName(e.target.value)} placeholder="Founder name" />
           <Input value={aboutFounderRole} onChange={(e) => setAboutFounderRole(e.target.value)} placeholder="Founder role" />
           <textarea value={aboutFounderBio} onChange={(e) => setAboutFounderBio(e.target.value)} placeholder="Founder bio" className="min-h-20 w-full rounded-md border bg-background px-3 py-2 text-sm" />
@@ -119,7 +207,7 @@ function ProfileAboutPage() {
               <AlertDialogHeader>
                 <AlertDialogTitle>Save About Us changes?</AlertDialogTitle>
                 <AlertDialogDescription>
-                  This will publish the updated About Us content as active.
+                  This will save the updated About Us content as active.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
