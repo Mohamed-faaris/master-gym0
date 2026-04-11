@@ -2,7 +2,6 @@ import { Link } from '@tanstack/react-router'
 import {
   BarChart3,
   ChevronRight,
-  ClipboardList,
   Dumbbell,
   Edit2,
   Lock,
@@ -214,12 +213,6 @@ export function ClientDetailView({
             <Link to="/app/admin/list/logs/weight/$clientId" params={{ clientId: client._id }}>
               <BarChart3 className="w-4 h-4 mr-2" />
               View Weight
-            </Link>
-          </Button>
-          <Button asChild variant="outline" className="h-11 w-full">
-            <Link to="/app/admin/list/pattern/$clientId" params={{ clientId: client._id }}>
-              <ClipboardList className="w-4 h-4 mr-2" />
-              Manage Pattern
             </Link>
           </Button>
         </CardContent>

@@ -5,6 +5,7 @@ import {
   ArrowLeft,
   Calendar,
   Camera,
+  ClipboardList,
   Flame,
   UtensilsCrossed,
 } from 'lucide-react'
@@ -87,19 +88,30 @@ function DietLogsRoute() {
       {/* Header */}
       <header className="space-y-3">
         <Link
-          to="/app/admin/list/$clientId"
+          to="/app/management/clients/$clientId"
           params={{ clientId }}
           className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
         >
           <ArrowLeft className="h-4 w-4" />
           Back to client
         </Link>
-        <div>
-          <h1 className="text-2xl font-semibold">Diet Logs</h1>
-          <p className="text-muted-foreground">
-            {dietLogs?.length || 0} log
-            {(dietLogs?.length || 0) !== 1 ? 's' : ''} recorded
-          </p>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+          <div>
+            <h1 className="text-2xl font-semibold">Diet Logs</h1>
+            <p className="text-muted-foreground">
+              {dietLogs?.length || 0} log
+              {(dietLogs?.length || 0) !== 1 ? 's' : ''} recorded
+            </p>
+          </div>
+          <Button asChild variant="outline" className="shrink-0 self-start">
+            <Link
+              to="/app/management/clients/$clientId/pattern"
+              params={{ clientId }}
+            >
+              <ClipboardList className="w-4 h-4 mr-2" />
+              Diet Plan
+            </Link>
+          </Button>
         </div>
       </header>
 

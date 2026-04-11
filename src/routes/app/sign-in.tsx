@@ -23,14 +23,22 @@ function SignInPage() {
   const [isLoading, setIsLoading] = useState(false)
   const { signIn } = useAuth()
   const navigate = useNavigate()
+  const normalizedPhoneNumber = phoneNumber.trim()
+  const isPhoneNumberValid = normalizedPhoneNumber.length === 10
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
+
+    if (!isPhoneNumberValid) {
+      setError('Phone number must be exactly 10 digits')
+      return
+    }
+
     setIsLoading(true)
 
     try {
-      const user = await signIn(phoneNumber, pin)
+      const user = await signIn(normalizedPhoneNumber, pin)
       if (!user) {
         setError('Invalid phone number or PIN')
         return
@@ -78,9 +86,13 @@ function SignInPage() {
               <Input
                 id="phoneNumber"
                 type="tel"
-                placeholder="+1234567890"
+                inputMode="numeric"
+                maxLength={10}
+                placeholder="Enter 10-digit phone number"
                 value={phoneNumber}
-                onChange={(e) => setPhoneNumber(e.target.value)}
+                onChange={(e) =>
+                  setPhoneNumber(e.target.value.replace(/\D/g, '').slice(0, 10))
+                }
                 required
                 disabled={isLoading}
               />
@@ -113,7 +125,11 @@ function SignInPage() {
             )}
           </CardContent>
           <CardFooter>
-            <Button type="submit" className="w-full" disabled={isLoading}>
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={isLoading || !isPhoneNumberValid}
+            >
               {isLoading ? 'Signing in...' : 'Sign In'}
             </Button>
           </CardFooter>

@@ -1,5 +1,12 @@
 import { Link, createFileRoute } from '@tanstack/react-router'
-import { ArrowLeft, Calendar, Camera, Flame, UtensilsCrossed } from 'lucide-react'
+import {
+  ArrowLeft,
+  Calendar,
+  Camera,
+  ClipboardList,
+  Flame,
+  UtensilsCrossed,
+} from 'lucide-react'
 import { useMutation, useQuery } from 'convex/react'
 import { useState } from 'react'
 import { toast } from 'sonner'
@@ -58,12 +65,23 @@ function AdminDietLogsRoute() {
           <ArrowLeft className="h-4 w-4" />
           Back to client
         </Link>
-        <div>
-          <h1 className="text-2xl font-semibold">Diet Logs</h1>
-          <p className="text-muted-foreground">
-            {dietLogs?.length || 0} log
-            {(dietLogs?.length || 0) !== 1 ? 's' : ''} recorded
-          </p>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+          <div>
+            <h1 className="text-2xl font-semibold">Diet Logs</h1>
+            <p className="text-muted-foreground">
+              {dietLogs?.length || 0} log
+              {(dietLogs?.length || 0) !== 1 ? 's' : ''} recorded
+            </p>
+          </div>
+          <Button asChild variant="outline" className="shrink-0 self-start">
+            <Link
+              to="/app/admin/list/pattern/$clientId"
+              params={{ clientId }}
+            >
+              <ClipboardList className="w-4 h-4 mr-2" />
+              Diet Plan
+            </Link>
+          </Button>
         </div>
       </header>
 

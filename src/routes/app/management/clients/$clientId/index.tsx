@@ -232,17 +232,6 @@ function ClientDetailRoute() {
           <h1 className="min-w-0 text-3xl font-semibold break-words">
             {client.name}
           </h1>
-          <Button
-            onClick={() =>
-              navigate({
-                to: `/app/management/clients/${clientId}/pattern`,
-              })
-            }
-            variant="outline"
-            className="w-full shrink-0 sm:w-auto"
-          >
-            Pattern
-          </Button>
         </div>
       </header>
 

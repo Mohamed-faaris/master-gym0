@@ -62,6 +62,9 @@ const roleLabelMap: Record<AdminRole, string> = {
   admin: 'Admin',
 }
 
+const sanitizePhoneNumber = (value: string) =>
+  value.replace(/\D/g, '').slice(0, 10)
+
 export function AdminShell() {
   const { user, isLoading, signOut } = useAuth()
   const navigate = useNavigate()
@@ -102,6 +105,7 @@ export function AdminShell() {
   const [newPin, setNewPin] = useState('')
   const [confirmPin, setConfirmPin] = useState('')
   const [isPinChanging, setIsPinChanging] = useState(false)
+  const isNewClientPhoneValid = newClientPhone.trim().length === 10
 
   useEffect(() => {
     if (isLoading) return
@@ -232,6 +236,12 @@ export function AdminShell() {
 
   const handleOnboardClient = async () => {
     if (!newClientName || !newClientPhone || !newClientPin) return
+    if (!isNewClientPhoneValid) {
+      toast.error('Phone number must be exactly 10 digits', {
+        position: 'top-center',
+      })
+      return
+    }
 
     setIsSubmitting(true)
     try {
@@ -482,9 +492,14 @@ export function AdminShell() {
                     Phone Number
                   </label>
                   <Input
-                    placeholder="+1234567890"
+                    type="tel"
+                    inputMode="numeric"
+                    maxLength={10}
+                    placeholder="Enter 10-digit phone number"
                     value={newClientPhone}
-                    onChange={(e) => setNewClientPhone(e.target.value)}
+                    onChange={(e) =>
+                      setNewClientPhone(sanitizePhoneNumber(e.target.value))
+                    }
                   />
                 </div>
 
@@ -666,6 +681,7 @@ export function AdminShell() {
                 disabled={
                   !newClientName ||
                   !newClientPhone ||
+                  !isNewClientPhoneValid ||
                   !newClientPin ||
                   isSubmitting
                 }
