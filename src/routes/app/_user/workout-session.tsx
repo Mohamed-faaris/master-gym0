@@ -2,9 +2,21 @@ import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { api } from '@convex/_generated/api'
 import { useMutation, useQuery } from 'convex/react'
 import * as React from 'react'
-import { CheckCircle2, Clock, Pause, Play, Plus } from 'lucide-react'
+import {
+  ArrowDown,
+  ArrowUp,
+  CheckCircle2,
+  Clock,
+  Link2,
+  Pause,
+  Play,
+  Plus,
+  RefreshCcw,
+  Unlink2,
+} from 'lucide-react'
 import { toast } from 'sonner'
-import type {ExerciseData} from '@/components/add-exercise-drawer';
+import type { Id } from '@convex/_generated/dataModel'
+import type { ExerciseData } from '@/components/add-exercise-drawer'
 import { useAuth } from '@/components/auth/useAuth'
 import {
   Checkbox,
@@ -13,17 +25,50 @@ import {
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
-import { Id } from '@convex/_generated/dataModel'
 import { AddExerciseDrawer } from '@/components/add-exercise-drawer'
 import { RestTimer } from '@/components/rest-timer'
+
+const daysOfWeek = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'] as const
 
 export const Route = createFileRoute('/app/_user/workout-session')({
   component: WorkoutSessionRouteComponent,
 })
 
+type WorkoutSet = {
+  reps?: number
+  weight?: number
+  restTime?: number
+  completed: boolean
+}
+
+type WorkoutExercise = {
+  exerciseId?: Id<'exercises'>
+  exerciseName: string
+  supersetGroupId?: string
+  sets: Array<WorkoutSet>
+}
+
+const cloneExercises = (exercises: Array<WorkoutExercise>) =>
+  exercises.map((exercise) => ({
+    ...exercise,
+    sets: exercise.sets.map((set) => ({ ...set })),
+  }))
+
+const clearSupersetGroup = (
+  exercises: Array<WorkoutExercise>,
+  groupId?: string,
+) => {
+  if (!groupId) return exercises
+  return exercises.map((exercise) =>
+    exercise.supersetGroupId === groupId
+      ? { ...exercise, supersetGroupId: undefined }
+      : exercise,
+  )
+}
+
 export function WorkoutSessionRouteComponent() {
   const navigate = useNavigate()
-  const search = Route.useSearch() as { routineId?: string }
+  const search = Route.useSearch()
   const { user } = useAuth()
 
   const startSession = useMutation(api.workoutSessions.startSession)
@@ -32,7 +77,7 @@ export function WorkoutSessionRouteComponent() {
 
   const routineQuery = useQuery(
     api.routines.getRoutineById,
-    search.routineId ? { routineId: search.routineId as Id<'routines'> } : 'skip'
+    search.routineId ? { routineId: search.routineId } : 'skip'
   )
   const todaysWorkout = routineQuery
 
@@ -46,9 +91,7 @@ export function WorkoutSessionRouteComponent() {
   const [restTimerSeconds, setRestTimerSeconds] = React.useState(90)
 
   const today = new Date()
-  const dayOfWeek = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'][
-    today.getDay()
-  ] as 'sun' | 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat'
+  const dayOfWeek = daysOfWeek[today.getDay()]
   const dayStart = new Date(today)
   dayStart.setHours(0, 0, 0, 0)
   const dayEnd = new Date(today)
@@ -66,7 +109,8 @@ export function WorkoutSessionRouteComponent() {
       : 'skip',
   )
 
-  const [localExercises, setLocalExercises] = React.useState<any[]>([])
+  const [localExercises, setLocalExercises] = React.useState<Array<WorkoutExercise>>([])
+  const [replaceExerciseIndex, setReplaceExerciseIndex] = React.useState<number | null>(null)
 
   React.useEffect(() => {
     if (existingSession) {
@@ -79,7 +123,9 @@ export function WorkoutSessionRouteComponent() {
     } else if (todaysWorkout && localExercises.length === 0) {
       // initialize from routine
       const initial = todaysWorkout.exercises.map((ex: any) => ({
+        exerciseId: ex.exerciseId,
         exerciseName: ex.exerciseName,
+        supersetGroupId: undefined,
         sets: ex.sets.map((s: any) => ({ ...s, completed: false }))
       }))
       setLocalExercises(initial)
@@ -98,7 +144,7 @@ export function WorkoutSessionRouteComponent() {
     }
   }, [sessionId, isPaused])
 
-  const syncToDb = async (newExercises: any[]) => {
+  const syncToDb = async (newExercises: Array<WorkoutExercise>) => {
     if (!sessionId) return
     try {
       const estimatedCalories = (workoutTime / 60) * 5
@@ -114,7 +160,7 @@ export function WorkoutSessionRouteComponent() {
   }
 
   const updateSet = (exIndex: number, setIndex: number, field: string, value: any) => {
-    const updated = [...localExercises]
+    const updated = cloneExercises(localExercises)
     updated[exIndex].sets[setIndex][field] = value
     setLocalExercises(updated)
     syncToDb(updated)
@@ -133,11 +179,59 @@ export function WorkoutSessionRouteComponent() {
   }
 
   const addSet = (exIndex: number) => {
-    const updated = [...localExercises]
+    const updated = cloneExercises(localExercises)
     const lastSet = updated[exIndex].sets.slice(-1)[0] || { reps: 8, weight: 0, restTime: 90, completed: false }
     updated[exIndex].sets.push({ ...lastSet, completed: false })
     setLocalExercises(updated)
     syncToDb(updated)
+  }
+
+  const moveExercise = (exerciseIndex: number, direction: 'up' | 'down') => {
+    const targetIndex = direction === 'up' ? exerciseIndex - 1 : exerciseIndex + 1
+    if (targetIndex < 0 || targetIndex >= localExercises.length) return
+
+    const updated = cloneExercises(localExercises)
+    const [movedExercise] = updated.splice(exerciseIndex, 1)
+    updated.splice(targetIndex, 0, movedExercise)
+    setLocalExercises(updated)
+    syncToDb(updated)
+  }
+
+  const toggleSuperset = (exerciseIndex: number) => {
+    if (exerciseIndex >= localExercises.length - 1) {
+      toast.error('Move this exercise higher to superset it with the next exercise')
+      return
+    }
+
+    const currentExercise = localExercises[exerciseIndex]
+    const nextExercise = localExercises[exerciseIndex + 1]
+    let updated = cloneExercises(localExercises)
+
+    if (
+      currentExercise.supersetGroupId &&
+      currentExercise.supersetGroupId === nextExercise.supersetGroupId
+    ) {
+      updated = clearSupersetGroup(updated, currentExercise.supersetGroupId)
+      setLocalExercises(updated)
+      syncToDb(updated)
+      toast.success('Superset removed')
+      return
+    }
+
+    updated = clearSupersetGroup(updated, currentExercise.supersetGroupId)
+    updated = clearSupersetGroup(updated, nextExercise.supersetGroupId)
+    const groupId = crypto.randomUUID()
+    updated[exerciseIndex] = {
+      ...updated[exerciseIndex],
+      supersetGroupId: groupId,
+    }
+    updated[exerciseIndex + 1] = {
+      ...updated[exerciseIndex + 1],
+      supersetGroupId: groupId,
+    }
+    setLocalExercises(updated)
+    syncToDb(updated)
+    toast.success('Superset saved')
   }
 
   const handleStartSession = async () => {
@@ -180,14 +274,40 @@ export function WorkoutSessionRouteComponent() {
       toast.error('Please start the session first')
       return;
     }
-    
-    const updated = [...localExercises, {
+
+    const nextExercise: WorkoutExercise = {
       exerciseName: data.exerciseName,
-      sets: data.sets?.length ? data.sets.map(s => ({...s, completed: false})) : [{ reps: 8, weight: 0, restTime: 90, completed: false }]
-    }]
+      supersetGroupId: undefined,
+      sets: data.sets.length
+        ? data.sets.map((set) => ({
+            ...set,
+            restTime: 90,
+            completed: false,
+          }))
+        : [{ reps: 8, weight: 0, restTime: 90, completed: false }]
+    }
+
+    const updated = cloneExercises(localExercises)
+
+    if (replaceExerciseIndex === null) {
+      updated.push(nextExercise)
+    } else {
+      const currentExercise = localExercises[replaceExerciseIndex]
+      updated[replaceExerciseIndex] = {
+        ...nextExercise,
+        exerciseId: currentExercise.exerciseId,
+        supersetGroupId: currentExercise.supersetGroupId,
+        sets: nextExercise.sets.map((set, setIndex) => ({
+          ...set,
+          restTime: currentExercise.sets[setIndex]?.restTime ?? set.restTime ?? 90,
+        })),
+      }
+    }
+
     setLocalExercises(updated)
     await syncToDb(updated)
-    toast.success('Exercise added')
+    toast.success(replaceExerciseIndex === null ? 'Exercise added' : 'Exercise replaced')
+    setReplaceExerciseIndex(null)
     setIsAddExerciseDrawerOpen(false)
   }
 
@@ -227,9 +347,77 @@ export function WorkoutSessionRouteComponent() {
         )}
 
         {localExercises.map((exercise, exerciseIndex) => (
-          <Card key={exerciseIndex}>
-            <div className="p-4 font-semibold text-lg border-b bg-muted/20">
-              {exercise.exerciseName}
+          <Card
+            key={exerciseIndex}
+            className={exercise.supersetGroupId ? 'border-primary/50' : undefined}
+          >
+            <div className="border-b bg-muted/20 p-4">
+              <div className="flex items-start justify-between gap-3">
+                <div className="space-y-1">
+                  <div className="font-semibold text-lg">{exercise.exerciseName}</div>
+                  {exercise.supersetGroupId && (
+                    <div className="text-xs font-medium text-primary">
+                      Superset
+                    </div>
+                  )}
+                </div>
+                <div className="flex items-center gap-1">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8"
+                    onClick={() => moveExercise(exerciseIndex, 'up')}
+                    disabled={exerciseIndex === 0}
+                    aria-label="Move exercise up"
+                  >
+                    <ArrowUp className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8"
+                    onClick={() => moveExercise(exerciseIndex, 'down')}
+                    disabled={exerciseIndex === localExercises.length - 1}
+                    aria-label="Move exercise down"
+                  >
+                    <ArrowDown className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8"
+                    onClick={() => {
+                      setReplaceExerciseIndex(exerciseIndex)
+                      setIsAddExerciseDrawerOpen(true)
+                    }}
+                    aria-label="Replace exercise"
+                  >
+                    <RefreshCcw className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8"
+                    onClick={() => toggleSuperset(exerciseIndex)}
+                    disabled={exerciseIndex === localExercises.length - 1}
+                    aria-label={
+                      exercise.supersetGroupId &&
+                      exercise.supersetGroupId ===
+                        localExercises[exerciseIndex + 1]?.supersetGroupId
+                        ? 'Remove superset'
+                        : 'Create superset with next exercise'
+                    }
+                  >
+                    {exercise.supersetGroupId &&
+                    exercise.supersetGroupId ===
+                      localExercises[exerciseIndex + 1]?.supersetGroupId ? (
+                      <Unlink2 className="h-4 w-4" />
+                    ) : (
+                      <Link2 className="h-4 w-4" />
+                    )}
+                  </Button>
+                </div>
+              </div>
             </div>
             <CardContent className="p-0">
               <table className="w-full text-sm">
@@ -340,8 +528,32 @@ export function WorkoutSessionRouteComponent() {
 
       <AddExerciseDrawer
         open={isAddExerciseDrawerOpen}
-        onOpenChange={setIsAddExerciseDrawerOpen}
+        onOpenChange={(open) => {
+          setIsAddExerciseDrawerOpen(open)
+          if (!open) {
+            setReplaceExerciseIndex(null)
+          }
+        }}
         onSave={handleAddExercise}
+        initialData={
+          replaceExerciseIndex === null
+            ? null
+            : {
+                exerciseName: localExercises[replaceExerciseIndex]?.exerciseName ?? '',
+                sets:
+                  localExercises[replaceExerciseIndex]?.sets.map((set) => ({
+                    reps: set.reps,
+                    weight: set.weight,
+                  })) ?? [],
+              }
+        }
+        title={replaceExerciseIndex === null ? 'Add Exercise for Today' : 'Replace Exercise'}
+        description={
+          replaceExerciseIndex === null
+            ? 'Add sets and reps to your current day session'
+            : 'Update the exercise and set targets for this position'
+        }
+        saveLabel={replaceExerciseIndex === null ? 'Save Exercise' : 'Replace Exercise'}
       />
 
       {isRestTimerOpen && (

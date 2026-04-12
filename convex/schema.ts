@@ -158,6 +158,7 @@ const routines = defineTable({
     v.object({
       exerciseId: v.optional(v.id('exercises')),
       exerciseName: v.string(),
+      supersetGroupId: v.optional(v.string()),
       sets: v.array(
         v.object({
           reps: v.optional(v.number()),
@@ -224,6 +225,7 @@ const workoutSessions = defineTable({
     v.object({
       exerciseId: v.optional(v.id('exercises')),
       exerciseName: v.string(),
+      supersetGroupId: v.optional(v.string()),
       sets: v.array(
         v.object({
           reps: v.optional(v.number()),

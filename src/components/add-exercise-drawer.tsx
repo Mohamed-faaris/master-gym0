@@ -1,9 +1,8 @@
 import * as React from 'react'
-import { Plus, Trash2, X } from 'lucide-react'
+import { X } from 'lucide-react'
 import { api } from '@convex/_generated/api'
 import { useQuery } from 'convex/react'
 import { Button } from '@/components/ui/button'
-import { ExerciseNameField } from '@/components/exercise-name-field'
 import {
   Drawer,
   DrawerContent,
@@ -24,69 +23,107 @@ export interface ExerciseData {
   sets: Array<ExerciseSet>
 }
 
+interface ExerciseFormDefaults {
+  exerciseName: string
+  sets: Array<{
+    reps?: number
+    weight?: number
+  }>
+}
+
 interface AddExerciseDrawerProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   onSave: (data: ExerciseData) => Promise<void> | void
+  initialData?: ExerciseFormDefaults | null
+  title?: string
+  description?: string
+  saveLabel?: string
+}
+
+const scoreExerciseMatch = (exerciseName: string, query: string) => {
+  const normalizedName = exerciseName.toLowerCase()
+  const normalizedQuery = query.toLowerCase().trim()
+  if (!normalizedQuery) return Number.POSITIVE_INFINITY
+
+  if (normalizedName === normalizedQuery) return 0
+  if (normalizedName.startsWith(normalizedQuery)) return 1
+
+  const wordIndex = normalizedName.indexOf(` ${normalizedQuery}`)
+  if (wordIndex !== -1) return 2 + wordIndex / 100
+
+  const includesIndex = normalizedName.indexOf(normalizedQuery)
+  if (includesIndex !== -1) return 3 + includesIndex / 100
+
+  const queryTokens = normalizedQuery.split(/\s+/)
+  const tokenMatches = queryTokens.filter((token) =>
+    normalizedName.includes(token),
+  ).length
+  if (tokenMatches > 0) return 10 - tokenMatches
+
+  return Number.POSITIVE_INFINITY
+}
+
+const getExerciseSuggestions = (
+  query: string,
+  options: ReadonlyArray<string>,
+  limit = 6,
+) => {
+  if (!query.trim()) {
+    return [...options].slice(0, limit)
+  }
+
+  return options
+    .map((exerciseName) => ({
+      exerciseName,
+      score: scoreExerciseMatch(exerciseName, query),
+    }))
+    .filter((entry) => Number.isFinite(entry.score))
+    .sort((a, b) => a.score - b.score)
+    .slice(0, limit)
+    .map((entry) => entry.exerciseName)
 }
 
 export function AddExerciseDrawer({
   open,
   onOpenChange,
   onSave,
+  initialData = null,
+  title = 'Add Exercise for Today',
+  description = 'Add sets and reps to your current day session',
+  saveLabel = 'Save Exercise',
 }: AddExerciseDrawerProps) {
   const exerciseNames = useQuery(api.exercises.getNames) ?? []
   const [exerciseName, setExerciseName] = React.useState('')
-  const [setReps, setSetReps] = React.useState([''])
-  const [setWeights, setSetWeights] = React.useState([''])
   const [isSaving, setIsSaving] = React.useState(false)
+  const exerciseInputRef = React.useRef<HTMLInputElement>(null)
+  const suggestions = React.useMemo(
+    () => getExerciseSuggestions(exerciseName, exerciseNames),
+    [exerciseName, exerciseNames],
+  )
 
   const resetForm = React.useCallback(() => {
+    if (initialData) {
+      setExerciseName(initialData.exerciseName)
+      return
+    }
+
     setExerciseName('')
-    setSetReps([''])
-    setSetWeights([''])
-  }, [])
-
-  const handleAddSet = () => {
-    setSetReps((prev) => [...prev, ''])
-    setSetWeights((prev) => [...prev, ''])
-  }
-
-  const handleRemoveSet = (index: number) => {
-    if (setReps.length <= 1) return
-    setSetReps((prev) => prev.filter((_, i) => i !== index))
-    setSetWeights((prev) => prev.filter((_, i) => i !== index))
-  }
+  }, [initialData])
 
   const handleSave = async () => {
     if (!exerciseName.trim()) {
       throw new Error('Exercise name is required')
     }
 
-    const repsValues = setReps.map((reps, index) => {
-      const parsedReps = Number.parseInt(reps, 10)
-      if (Number.isNaN(parsedReps) || parsedReps <= 0) {
-        throw new Error(`Set ${index + 1} reps must be a positive number`)
-      }
-      return parsedReps
-    })
-
-    const weightValues = setWeights.map((weight) => {
-      const trimmedWeight = weight.trim()
-      if (!trimmedWeight) return undefined
-      const parsedWeight = Number.parseFloat(trimmedWeight)
-      if (Number.isNaN(parsedWeight) || parsedWeight < 0) {
-        throw new Error('Weight must be a non-negative number')
-      }
-      return parsedWeight
-    })
-
     const data: ExerciseData = {
       exerciseName,
-      sets: repsValues.map((reps, index) => ({
-        reps,
-        weight: weightValues[index],
-      })),
+      sets: initialData?.sets.length
+        ? initialData.sets.map((set) => ({
+            reps: set.reps ?? 8,
+            weight: set.weight,
+          }))
+        : [{ reps: 8 }],
     }
 
     setIsSaving(true)
@@ -105,10 +142,16 @@ export function AddExerciseDrawer({
   }
 
   React.useEffect(() => {
-    if (!open) {
-      resetForm()
+    if (open) {
+      requestAnimationFrame(() => {
+        exerciseInputRef.current?.focus()
+        exerciseInputRef.current?.select()
+      })
+      return
     }
-  }, [open, resetForm])
+
+    resetForm()
+  }, [initialData, open, resetForm])
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
@@ -122,95 +165,49 @@ export function AddExerciseDrawer({
           >
             <X className="h-4 w-4" />
           </Button>
-          <DrawerTitle>Add Exercise for Today</DrawerTitle>
-          <DrawerDescription>
-            Add sets and reps to your current day session
-          </DrawerDescription>
+          <DrawerTitle>{title}</DrawerTitle>
+          <DrawerDescription>{description}</DrawerDescription>
         </DrawerHeader>
 
         <div className="flex-1 overflow-y-auto px-4 pb-4 space-y-4">
           <div className="space-y-2">
             <label className="text-sm font-medium">Exercise</label>
-            <ExerciseNameField
+            <Input
+              ref={exerciseInputRef}
               value={exerciseName}
-              options={exerciseNames}
-              onValueChange={setExerciseName}
-              placeholder="Type exercise name"
+              onChange={(event) => setExerciseName(event.target.value)}
+              placeholder="Search or type exercise name"
             />
+            <div className="max-h-48 overflow-y-auto rounded-lg border">
+              {suggestions.length > 0 ? (
+                suggestions.map((name) => (
+                  <button
+                    key={name}
+                    type="button"
+                    className="flex w-full items-center justify-between px-3 py-3 text-left text-sm transition-colors hover:bg-accent"
+                    onClick={() => setExerciseName(name)}
+                  >
+                    <span>{name}</span>
+                    {name.toLowerCase() === exerciseName.trim().toLowerCase() && (
+                      <span className="text-xs text-muted-foreground">
+                        Selected
+                      </span>
+                    )}
+                  </button>
+                ))
+              ) : (
+                <p className="px-3 py-4 text-sm text-muted-foreground">
+                  No matches found.
+                </p>
+              )}
+            </div>
           </div>
 
-          <div className="space-y-2">
-            <p className="text-sm font-medium">Set Details</p>
-            {setReps.map((reps, index) => (
-              <div key={index} className="space-y-2 rounded-lg border p-3">
-                <div className="flex items-center justify-between">
-                  <p className="text-xs text-muted-foreground font-medium">
-                    Set {index + 1}
-                  </p>
-                  {setReps.length > 1 && (
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-6 w-6"
-                      onClick={() => handleRemoveSet(index)}
-                    >
-                      <Trash2 className="h-3 w-3 text-destructive" />
-                    </Button>
-                  )}
-                </div>
-                <div className="grid grid-cols-2 gap-2">
-                  <div className="space-y-1">
-                    <label className="text-xs text-muted-foreground">
-                      Reps
-                    </label>
-                    <Input
-                      type="number"
-                      min={1}
-                      placeholder="e.g. 10"
-                      value={reps}
-                      onChange={(event) => {
-                        const updatedReps = [...setReps]
-                        updatedReps[index] = event.target.value
-                        setSetReps(updatedReps)
-                      }}
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-xs text-muted-foreground">
-                      Weight (kg)
-                    </label>
-                    <Input
-                      type="number"
-                      min={0}
-                      step="0.5"
-                      placeholder="Optional"
-                      value={setWeights[index] ?? ''}
-                      onChange={(event) => {
-                        const updatedWeights = [...setWeights]
-                        updatedWeights[index] = event.target.value
-                        setSetWeights(updatedWeights)
-                      }}
-                    />
-                  </div>
-                </div>
-              </div>
-            ))}
-
-            <Button
-              variant="outline"
-              size="sm"
-              className="w-full"
-              onClick={handleAddSet}
-            >
-              <Plus className="h-4 w-4 mr-1" />
-              Add Set
-            </Button>
-          </div>
         </div>
 
         <DrawerFooter className="shrink-0 border-t bg-background">
           <Button onClick={handleSave} disabled={isSaving}>
-            {isSaving ? 'Saving...' : 'Save Exercise'}
+            {isSaving ? 'Saving...' : saveLabel}
           </Button>
           <Button variant="outline" onClick={handleCancel}>
             Cancel

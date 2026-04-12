@@ -27,6 +27,7 @@ export const startSession = mutation({
         v.object({
           exerciseId: v.optional(v.id('exercises')),
           exerciseName: v.string(),
+          supersetGroupId: v.optional(v.string()),
           sets: v.array(
             v.object({
               reps: v.optional(v.number()),
@@ -66,6 +67,7 @@ export const startSession = mutation({
         exercises = routine.exercises.map((exercise) => ({
           exerciseId: exercise.exerciseId,
           exerciseName: exercise.exerciseName,
+          supersetGroupId: undefined,
           sets: exercise.sets.map((set) => ({
             reps: set.reps,
             weight: set.weight,
@@ -133,6 +135,7 @@ export const addSelfManagedExerciseToToday = mutation({
     const now = Date.now()
     const exerciseToAppend = {
       exerciseName: args.exerciseName,
+      supersetGroupId: undefined,
       sets: args.sets.map((set) => ({
         reps: set.reps,
         weight: set.weight,
@@ -178,6 +181,7 @@ export const updateSessionProgress = mutation({
       v.object({
         exerciseId: v.optional(v.id('exercises')),
         exerciseName: v.string(),
+        supersetGroupId: v.optional(v.string()),
         sets: v.array(
           v.object({
             reps: v.optional(v.number()),

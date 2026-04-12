@@ -1,15 +1,27 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { api } from '@convex/_generated/api'
-import { useQuery, useMutation } from 'convex/react'
-import { useState, useEffect } from 'react'
-import { Trash2, Plus, ArrowUp, ArrowDown, Save, ChevronLeft, X } from 'lucide-react'
+import { useMutation, useQuery } from 'convex/react'
+import { useEffect, useState } from 'react'
+import {
+  ArrowDown,
+  ArrowUp,
+  ChevronLeft,
+  Link2,
+  Plus,
+  RefreshCcw,
+  Save,
+  Trash2,
+  Unlink2,
+  X,
+} from 'lucide-react'
 import { toast } from 'sonner'
-import { Id } from '@convex/_generated/dataModel'
+import type { Id } from '@convex/_generated/dataModel'
 
+import type { ExerciseData } from '@/components/add-exercise-drawer'
+import { AddExerciseDrawer } from '@/components/add-exercise-drawer'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import { Card, CardContent } from '@/components/ui/card'
-import { AddExerciseDrawer, type ExerciseData } from '@/components/add-exercise-drawer'
+import { Input } from '@/components/ui/input'
 
 const DAYS_OF_WEEK = [
   { value: 'mon', label: 'Monday' },
@@ -20,6 +32,37 @@ const DAYS_OF_WEEK = [
   { value: 'sat', label: 'Saturday' },
   { value: 'sun', label: 'Sunday' },
 ] as const;
+
+type RoutineSet = {
+  reps?: number
+  weight?: number
+  restTime?: number
+}
+
+type RoutineExercise = {
+  exerciseId?: Id<'exercises'>
+  exerciseName: string
+  supersetGroupId?: string
+  sets: Array<RoutineSet>
+}
+
+const cloneExercises = (exercises: Array<RoutineExercise>) =>
+  exercises.map((exercise) => ({
+    ...exercise,
+    sets: exercise.sets.map((set) => ({ ...set })),
+  }))
+
+const clearSupersetGroup = (
+  exercises: Array<RoutineExercise>,
+  groupId?: string,
+) => {
+  if (!groupId) return exercises
+  return exercises.map((exercise) =>
+    exercise.supersetGroupId === groupId
+      ? { ...exercise, supersetGroupId: undefined }
+      : exercise,
+  )
+}
 
 export const Route = createFileRoute('/app/management/routines/$routineId')({
   component: ManagementRoutineEditorComponent,
@@ -36,16 +79,17 @@ function ManagementRoutineEditorComponent() {
   const [name, setName] = useState('')
   const [focus, setFocus] = useState('')
   const [dayOfWeek, setDayOfWeek] = useState<string | undefined>()
-  const [exercises, setExercises] = useState<any[]>([])
+  const [exercises, setExercises] = useState<Array<RoutineExercise>>([])
   const [isAddDrawerOpen, setIsAddDrawerOpen] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
+  const [replaceExerciseIndex, setReplaceExerciseIndex] = useState<number | null>(null)
 
   useEffect(() => {
     if (routine) {
       setName(routine.name)
       setFocus(routine.focus || '')
       setDayOfWeek(routine.dayOfWeek)
-      setExercises(routine.exercises || [])
+      setExercises(routine.exercises)
     }
   }, [routine])
 
@@ -95,7 +139,7 @@ function ManagementRoutineEditorComponent() {
   }
 
   const moveExercise = (index: number, direction: 'up' | 'down') => {
-    const newExercises = [...exercises]
+    const newExercises = cloneExercises(exercises)
     if (direction === 'up' && index > 0) {
       ;[newExercises[index - 1], newExercises[index]] = [newExercises[index], newExercises[index - 1]]
     } else if (direction === 'down' && index < newExercises.length - 1) {
@@ -105,37 +149,79 @@ function ManagementRoutineEditorComponent() {
   }
   
   const removeExercise = (index: number) => {
-    const newExercises = [...exercises]
+    const removedGroupId = exercises[index].supersetGroupId
+    const newExercises = cloneExercises(exercises)
     newExercises.splice(index, 1)
-    setExercises(newExercises)
+    setExercises(clearSupersetGroup(newExercises, removedGroupId))
   }
 
   const addSet = (exerciseIndex: number) => {
-    const newExercises = [...exercises]
-    const lastSet = newExercises[exerciseIndex].sets?.slice(-1)[0] || { reps: 8, weight: 0, restTime: 90 }
-    if (!newExercises[exerciseIndex].sets) newExercises[exerciseIndex].sets = []
+    const newExercises = cloneExercises(exercises)
+    const lastSet = newExercises[exerciseIndex].sets.slice(-1)[0] || { reps: 8, weight: 0, restTime: 90 }
     newExercises[exerciseIndex].sets.push({ ...lastSet })
     setExercises(newExercises)
   }
 
   const removeSet = (exerciseIndex: number, setIndex: number) => {
-    const newExercises = [...exercises]
+    const newExercises = cloneExercises(exercises)
     newExercises[exerciseIndex].sets.splice(setIndex, 1)
     setExercises(newExercises)
   }
 
   const updateSet = (exerciseIndex: number, setIndex: number, field: string, value: string) => {
     const numValue = value === '' ? undefined : Number(value)
-    const newExercises = [...exercises]
+    const newExercises = cloneExercises(exercises)
     newExercises[exerciseIndex].sets[setIndex][field] = numValue
     setExercises(newExercises)
   }
 
-  const onAddExercise = async (data: ExerciseData) => {
-    setExercises([...exercises, {
+  const toggleSuperset = (exerciseIndex: number) => {
+    if (exerciseIndex >= exercises.length - 1) {
+      toast.error('Move this exercise higher to superset it with the next exercise')
+      return
+    }
+
+    const currentExercise = exercises[exerciseIndex]
+    const nextExercise = exercises[exerciseIndex + 1]
+    let updated = cloneExercises(exercises)
+
+    if (
+      currentExercise.supersetGroupId &&
+      currentExercise.supersetGroupId === nextExercise.supersetGroupId
+    ) {
+      setExercises(clearSupersetGroup(updated, currentExercise.supersetGroupId))
+      return
+    }
+
+    updated = clearSupersetGroup(updated, currentExercise.supersetGroupId)
+    updated = clearSupersetGroup(updated, nextExercise.supersetGroupId)
+    const groupId = crypto.randomUUID()
+    updated[exerciseIndex].supersetGroupId = groupId
+    updated[exerciseIndex + 1].supersetGroupId = groupId
+    setExercises(updated)
+  }
+
+  const onAddExercise = (data: ExerciseData) => {
+    const nextExercise: RoutineExercise = {
       exerciseName: data.exerciseName,
-      sets: data.sets?.length ? data.sets : [{ reps: 8, weight: 0, restTime: 90 }]
-    }])
+      supersetGroupId: undefined,
+      sets: data.sets.length ? data.sets : [{ reps: 8, weight: 0, restTime: 90 }],
+    }
+
+    const updated = cloneExercises(exercises)
+
+    if (replaceExerciseIndex === null) {
+      updated.push(nextExercise)
+    } else {
+      updated[replaceExerciseIndex] = {
+        ...nextExercise,
+        exerciseId: exercises[replaceExerciseIndex].exerciseId,
+        supersetGroupId: exercises[replaceExerciseIndex].supersetGroupId,
+      }
+    }
+
+    setExercises(updated)
+    setReplaceExerciseIndex(null)
     setIsAddDrawerOpen(false)
   }
 
@@ -205,15 +291,48 @@ function ManagementRoutineEditorComponent() {
           </div>
 
           {exercises.map((exercise, exIndex) => (
-            <Card key={exIndex} className="overflow-hidden">
+            <Card
+              key={exIndex}
+              className={`overflow-hidden ${exercise.supersetGroupId ? 'border-primary/50' : ''}`}
+            >
               <div className="bg-muted/50 p-3 border-b flex items-center justify-between">
-                <span className="font-semibold">{exercise.exerciseName}</span>
+                <div className="space-y-1">
+                  <span className="font-semibold">{exercise.exerciseName}</span>
+                  {exercise.supersetGroupId && (
+                    <div className="text-xs font-medium text-primary">Superset</div>
+                  )}
+                </div>
                 <div className="flex items-center gap-1">
                   <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => moveExercise(exIndex, 'up')} disabled={exIndex === 0}>
                     <ArrowUp className="w-4 h-4" />
                   </Button>
                   <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => moveExercise(exIndex, 'down')} disabled={exIndex === exercises.length - 1}>
                     <ArrowDown className="w-4 h-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8"
+                    onClick={() => {
+                      setReplaceExerciseIndex(exIndex)
+                      setIsAddDrawerOpen(true)
+                    }}
+                  >
+                    <RefreshCcw className="w-4 h-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8"
+                    onClick={() => toggleSuperset(exIndex)}
+                    disabled={exIndex === exercises.length - 1}
+                  >
+                    {exercise.supersetGroupId &&
+                    exercise.supersetGroupId === exercises[exIndex + 1]?.supersetGroupId ? (
+                      <Unlink2 className="w-4 h-4" />
+                    ) : (
+                      <Link2 className="w-4 h-4" />
+                    )}
                   </Button>
                   <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => removeExercise(exIndex)}>
                     <Trash2 className="w-4 h-4" />
@@ -232,7 +351,7 @@ function ManagementRoutineEditorComponent() {
                     </tr>
                   </thead>
                   <tbody>
-                    {exercise.sets?.map((set: any, setIndex: number) => (
+                    {exercise.sets.map((set: any, setIndex: number) => (
                       <tr key={setIndex} className="border-t">
                         <td className="py-2 px-3 pl-4 font-medium">{setIndex + 1}</td>
                         <td className="py-2 px-3">
@@ -287,8 +406,26 @@ function ManagementRoutineEditorComponent() {
 
       <AddExerciseDrawer
         open={isAddDrawerOpen}
-        onOpenChange={setIsAddDrawerOpen}
+        onOpenChange={(open) => {
+          setIsAddDrawerOpen(open)
+          if (!open) setReplaceExerciseIndex(null)
+        }}
         onSave={onAddExercise}
+        initialData={
+          replaceExerciseIndex === null
+            ? null
+            : {
+                exerciseName: exercises[replaceExerciseIndex].exerciseName,
+                sets: exercises[replaceExerciseIndex].sets,
+              }
+        }
+        title={replaceExerciseIndex === null ? 'Add Exercise' : 'Replace Exercise'}
+        description={
+          replaceExerciseIndex === null
+            ? 'Add sets and reps to this routine'
+            : 'Replace the exercise in this routine slot'
+        }
+        saveLabel={replaceExerciseIndex === null ? 'Save Exercise' : 'Replace Exercise'}
       />
     </div>
   )

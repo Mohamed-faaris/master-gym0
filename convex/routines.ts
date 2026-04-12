@@ -12,6 +12,7 @@ const ExerciseSetValidator = v.object({
 const RoutineExerciseValidator = v.object({
   exerciseId: v.optional(v.id('exercises')),
   exerciseName: v.string(),
+  supersetGroupId: v.optional(v.string()),
   sets: v.array(ExerciseSetValidator),
 })
 

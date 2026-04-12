@@ -15,6 +15,7 @@ interface ExerciseNameFieldProps {
   onValueChange: (value: string) => void
   options: ReadonlyArray<string>
   placeholder?: string
+  autoOpen?: boolean
 }
 
 const scoreExerciseMatch = (exerciseName: string, query: string) => {
@@ -65,6 +66,7 @@ export function ExerciseNameField({
   onValueChange,
   options,
   placeholder = 'Type exercise name',
+  autoOpen = false,
 }: ExerciseNameFieldProps) {
   const [open, setOpen] = React.useState(false)
   const inputRef = React.useRef<HTMLInputElement>(null)
@@ -97,6 +99,11 @@ export function ExerciseNameField({
       inputRef.current?.select()
     })
   }, [open])
+
+  React.useEffect(() => {
+    if (!autoOpen) return
+    setOpen(true)
+  }, [autoOpen])
 
   return (
     <Drawer open={open} onOpenChange={setOpen}>

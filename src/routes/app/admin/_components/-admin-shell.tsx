@@ -62,6 +62,12 @@ const roleLabelMap: Record<AdminRole, string> = {
   admin: 'Admin',
 }
 
+const creatableRoleOptions: AdminRole[] = [
+  'trainerManagedCustomer',
+  'selfManagedCustomer',
+  'trainer',
+]
+
 const sanitizePhoneNumber = (value: string) =>
   value.replace(/\D/g, '').slice(0, 10)
 
@@ -529,30 +535,30 @@ export function AdminShell() {
                       <SelectValue placeholder="Select role" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="trainerManagedCustomer">
-                        {roleLabelMap.trainerManagedCustomer}
-                      </SelectItem>
-                      <SelectItem value="selfManagedCustomer">
-                        {roleLabelMap.selfManagedCustomer}
-                      </SelectItem>
-                      <SelectItem value="trainer">
-                        {roleLabelMap.trainer}
-                      </SelectItem>
-                      <SelectItem value="admin">
-                        {roleLabelMap.admin}
-                      </SelectItem>
+                      {creatableRoleOptions.map((role) => (
+                        <SelectItem key={role} value={role}>
+                          {roleLabelMap[role]}
+                        </SelectItem>
+                      ))}
+                      {newClientRole === 'admin' ? (
+                        <SelectItem value="admin" disabled>
+                          {roleLabelMap.admin}
+                        </SelectItem>
+                      ) : null}
                     </SelectContent>
                   </Select>
                 </div>
 
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Goal</label>
-                  <Input
-                    placeholder="e.g. Weight loss, muscle gain, or custom goal"
-                    value={newClientGoal}
-                    onChange={(e) => setNewClientGoal(e.target.value)}
-                  />
-                </div>
+                {newClientRole !== 'trainer' && (
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Goal</label>
+                    <Input
+                      placeholder="e.g. Weight loss, muscle gain, or custom goal"
+                      value={newClientGoal}
+                      onChange={(e) => setNewClientGoal(e.target.value)}
+                    />
+                  </div>
+                )}
 
                 {newClientRole === 'trainerManagedCustomer' && (
                   <div className="space-y-2">
