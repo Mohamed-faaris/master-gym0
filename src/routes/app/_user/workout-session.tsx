@@ -54,17 +54,127 @@ const cloneExercises = (exercises: Array<WorkoutExercise>) =>
     sets: exercise.sets.map((set) => ({ ...set })),
   }))
 
-const clearSupersetGroup = (
+const normalizeExerciseGroups = (
+  exercises: Array<WorkoutExercise>,
+) => {
+  const normalized = cloneExercises(exercises)
+  let index = 0
+
+  while (index < normalized.length) {
+    const groupId = normalized[index].supersetGroupId
+    if (!groupId) {
+      normalized[index].supersetGroupId = undefined
+      index += 1
+      continue
+    }
+
+    let endIndex = index + 1
+    while (
+      endIndex < normalized.length &&
+      normalized[endIndex].supersetGroupId === groupId
+    ) {
+      endIndex += 1
+    }
+
+    if (endIndex - index < 2) {
+      normalized[index].supersetGroupId = undefined
+      index = endIndex
+      continue
+    }
+
+    const normalizedGroupId = crypto.randomUUID()
+    for (let current = index; current < endIndex; current += 1) {
+      normalized[current].supersetGroupId = normalizedGroupId
+    }
+    index = endIndex
+  }
+
+  return normalized
+}
+
+const splitExerciseGroupAt = (
+  exercises: Array<WorkoutExercise>,
+  exerciseIndex: number,
+) => {
+  const updated = cloneExercises(exercises)
+  const sharedGroupId = updated[exerciseIndex].supersetGroupId
+  if (!sharedGroupId) return updated
+
+  let groupStart = exerciseIndex
+  while (
+    groupStart > 0 &&
+    updated[groupStart - 1].supersetGroupId === sharedGroupId
+  ) {
+    groupStart -= 1
+  }
+
+  let groupEnd = exerciseIndex + 1
+  while (
+    groupEnd < updated.length - 1 &&
+    updated[groupEnd + 1].supersetGroupId === sharedGroupId
+  ) {
+    groupEnd += 1
+  }
+
+  const leftSize = exerciseIndex - groupStart + 1
+  const rightSize = groupEnd - exerciseIndex
+  const leftGroupId = leftSize >= 2 ? crypto.randomUUID() : undefined
+  const rightGroupId = rightSize >= 2 ? crypto.randomUUID() : undefined
+
+  for (let current = groupStart; current <= exerciseIndex; current += 1) {
+    updated[current].supersetGroupId = leftGroupId
+  }
+  for (let current = exerciseIndex + 1; current <= groupEnd; current += 1) {
+    updated[current].supersetGroupId = rightGroupId
+  }
+
+  return updated
+}
+
+const mergeExerciseGroupsAt = (
+  exercises: Array<WorkoutExercise>,
+  exerciseIndex: number,
+) => {
+  const updated = cloneExercises(exercises)
+  const leftGroupId = updated[exerciseIndex].supersetGroupId
+  const rightGroupId = updated[exerciseIndex + 1].supersetGroupId
+  const mergedGroupId = leftGroupId ?? rightGroupId ?? crypto.randomUUID()
+
+  if (leftGroupId) {
+    for (const exercise of updated) {
+      if (exercise.supersetGroupId === leftGroupId) {
+        exercise.supersetGroupId = mergedGroupId
+      }
+    }
+  }
+
+  if (rightGroupId) {
+    for (const exercise of updated) {
+      if (exercise.supersetGroupId === rightGroupId) {
+        exercise.supersetGroupId = mergedGroupId
+      }
+    }
+  }
+
+  updated[exerciseIndex].supersetGroupId = mergedGroupId
+  updated[exerciseIndex + 1].supersetGroupId = mergedGroupId
+  return normalizeExerciseGroups(updated)
+}
+
+const hasGroupedNeighbor = (
+  exercises: Array<WorkoutExercise>,
+  exerciseIndex: number,
+) =>
+  exerciseIndex < exercises.length - 1 &&
+  !!exercises[exerciseIndex].supersetGroupId &&
+  exercises[exerciseIndex].supersetGroupId ===
+    exercises[exerciseIndex + 1]?.supersetGroupId
+
+const getGroupedExerciseCount = (
   exercises: Array<WorkoutExercise>,
   groupId?: string,
-) => {
-  if (!groupId) return exercises
-  return exercises.map((exercise) =>
-    exercise.supersetGroupId === groupId
-      ? { ...exercise, supersetGroupId: undefined }
-      : exercise,
-  )
-}
+) => exercises.filter((exercise) => exercise.supersetGroupId === groupId).length
+ 
 
 export function WorkoutSessionRouteComponent() {
   const navigate = useNavigate()
@@ -193,8 +303,9 @@ export function WorkoutSessionRouteComponent() {
     const updated = cloneExercises(localExercises)
     const [movedExercise] = updated.splice(exerciseIndex, 1)
     updated.splice(targetIndex, 0, movedExercise)
-    setLocalExercises(updated)
-    syncToDb(updated)
+    const normalized = normalizeExerciseGroups(updated)
+    setLocalExercises(normalized)
+    syncToDb(normalized)
   }
 
   const toggleSuperset = (exerciseIndex: number) => {
@@ -203,35 +314,17 @@ export function WorkoutSessionRouteComponent() {
       return
     }
 
-    const currentExercise = localExercises[exerciseIndex]
-    const nextExercise = localExercises[exerciseIndex + 1]
-    let updated = cloneExercises(localExercises)
+    const updated = hasGroupedNeighbor(localExercises, exerciseIndex)
+      ? splitExerciseGroupAt(localExercises, exerciseIndex)
+      : mergeExerciseGroupsAt(localExercises, exerciseIndex)
 
-    if (
-      currentExercise.supersetGroupId &&
-      currentExercise.supersetGroupId === nextExercise.supersetGroupId
-    ) {
-      updated = clearSupersetGroup(updated, currentExercise.supersetGroupId)
-      setLocalExercises(updated)
-      syncToDb(updated)
-      toast.success('Superset removed')
-      return
-    }
-
-    updated = clearSupersetGroup(updated, currentExercise.supersetGroupId)
-    updated = clearSupersetGroup(updated, nextExercise.supersetGroupId)
-    const groupId = crypto.randomUUID()
-    updated[exerciseIndex] = {
-      ...updated[exerciseIndex],
-      supersetGroupId: groupId,
-    }
-    updated[exerciseIndex + 1] = {
-      ...updated[exerciseIndex + 1],
-      supersetGroupId: groupId,
-    }
     setLocalExercises(updated)
     syncToDb(updated)
-    toast.success('Superset saved')
+    toast.success(
+      hasGroupedNeighbor(localExercises, exerciseIndex)
+        ? 'Superset updated'
+        : 'Superset saved',
+    )
   }
 
   const handleStartSession = async () => {
@@ -357,7 +450,7 @@ export function WorkoutSessionRouteComponent() {
                   <div className="font-semibold text-lg">{exercise.exerciseName}</div>
                   {exercise.supersetGroupId && (
                     <div className="text-xs font-medium text-primary">
-                      Superset
+                      Superset ({getGroupedExerciseCount(localExercises, exercise.supersetGroupId)})
                     </div>
                   )}
                 </div>
@@ -401,16 +494,12 @@ export function WorkoutSessionRouteComponent() {
                     onClick={() => toggleSuperset(exerciseIndex)}
                     disabled={exerciseIndex === localExercises.length - 1}
                     aria-label={
-                      exercise.supersetGroupId &&
-                      exercise.supersetGroupId ===
-                        localExercises[exerciseIndex + 1]?.supersetGroupId
-                        ? 'Remove superset'
+                      hasGroupedNeighbor(localExercises, exerciseIndex)
+                        ? 'Split superset here'
                         : 'Create superset with next exercise'
                     }
                   >
-                    {exercise.supersetGroupId &&
-                    exercise.supersetGroupId ===
-                      localExercises[exerciseIndex + 1]?.supersetGroupId ? (
+                    {hasGroupedNeighbor(localExercises, exerciseIndex) ? (
                       <Unlink2 className="h-4 w-4" />
                     ) : (
                       <Link2 className="h-4 w-4" />
