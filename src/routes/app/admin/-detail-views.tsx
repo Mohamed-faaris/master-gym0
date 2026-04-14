@@ -2,6 +2,7 @@ import { Link } from '@tanstack/react-router'
 import {
   BarChart3,
   ChevronRight,
+  ClipboardList,
   Dumbbell,
   Edit2,
   Lock,
@@ -201,6 +202,12 @@ export function ClientDetailView({
             <Link to="/app/admin/list/view-work/$clientId" params={{ clientId: client._id }}>
               <Dumbbell className="w-4 h-4 mr-2" />
               View Workout Sessions
+            </Link>
+          </Button>
+          <Button asChild variant="outline" className="h-11 w-full">
+            <Link to="/app/management/clients/$clientId/logs/workout" params={{ clientId: client._id }}>
+              <ClipboardList className="w-4 h-4 mr-2" />
+              Manage Routines
             </Link>
           </Button>
           <Button asChild variant="outline" className="h-11 w-full">

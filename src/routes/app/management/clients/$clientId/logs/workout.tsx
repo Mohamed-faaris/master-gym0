@@ -53,15 +53,14 @@ function WorkoutLogsRoute() {
     clientId ? { userId: clientId as Id<'users'> } : 'skip',
   )
 
-  // Fetch templates created by the trainer
   const templates = useQuery(
-    api.routines.getRoutinesByAuthor,
+    api.routines.getReusableRoutinesByAuthor,
     user ? { authorId: user._id } : 'skip'
   )
-  const availableTemplates = templates?.filter(t => t.type === 'trainer') || []
+  const availableTemplates = templates || []
 
   const createRoutine = useMutation(api.routines.createRoutine)
-  const copyRoutine = useMutation(api.routines.copyRoutineFromTrainer)
+  const copyRoutine = useMutation(api.routines.copyRoutineToUser)
 
   const handleCreateRoutine = async () => {
     if (!user || !clientId) return
@@ -69,6 +68,7 @@ function WorkoutLogsRoute() {
       const routineId = await createRoutine({
         name: 'New Client Routine ' + new Date().toLocaleDateString(),
         type: 'custom',
+        scope: 'single_client',
         authorId: user._id,
         userId: clientId as Id<'users'>,
         exercises: [],
@@ -80,12 +80,13 @@ function WorkoutLogsRoute() {
   }
 
   const handleCopyTemplate = async (templateId: Id<'routines'>) => {
-    if (!clientId) return
+    if (!clientId || !user) return
     setIsCopying(true)
     try {
       await copyRoutine({
         routineId: templateId,
-        userId: clientId as Id<'users'>,
+        targetUserId: clientId as Id<'users'>,
+        authorId: user._id,
       })
       setIsTemplateDrawerOpen(false)
     } catch (error) {

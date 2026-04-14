@@ -16,17 +16,19 @@ function ManagementRoutinesIndexComponent() {
   const createRoutine = useMutation(api.routines.createRoutine)
 
   const routines = useQuery(
-    api.routines.getRoutinesByAuthor,
+    api.routines.getReusableRoutinesByAuthor,
     user ? { authorId: user._id } : 'skip'
   )
+
+  const isAdmin = user?.role === 'admin'
 
   const handleCreateRoutine = async () => {
     if (!user) return
     try {
-      // By omitting userId and creating it as type 'trainer', it becomes a template
       const routineId = await createRoutine({
-        name: 'New Template ' + new Date().toLocaleDateString(),
+        name: 'New Premade ' + new Date().toLocaleDateString(),
         type: 'trainer',
+        scope: isAdmin ? 'all' : 'trainer_clients',
         authorId: user._id,
         exercises: [],
       })
@@ -40,9 +42,13 @@ function ManagementRoutinesIndexComponent() {
     <div className="p-4 space-y-6 pb-24 max-w-2xl mx-auto">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Routine Templates</h1>
+          <h1 className="text-2xl font-bold">
+            {isAdmin ? 'Global Premade Routines' : 'Routine Library'}
+          </h1>
           <p className="text-muted-foreground text-sm">
-            Manage your reusable workout routines for clients.
+            {isAdmin
+              ? 'Manage premade routines available across the app.'
+              : 'Manage reusable routines for all of your clients.'}
           </p>
         </div>
         <Button onClick={handleCreateRoutine} className="gap-2">
@@ -86,10 +92,10 @@ function ManagementRoutinesIndexComponent() {
           <div className="text-center py-12 border rounded-lg bg-muted/10">
             <h3 className="text-lg font-medium">No templates yet</h3>
             <p className="text-sm text-muted-foreground mt-1 mb-4">
-              Create your first workout routine template.
+              Create your first reusable routine.
             </p>
             <Button onClick={handleCreateRoutine} variant="outline" className="gap-2">
-              <Plus className="w-4 h-4" /> Create Template
+              <Plus className="w-4 h-4" /> Create Premade
             </Button>
           </div>
         )}

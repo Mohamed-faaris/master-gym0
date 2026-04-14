@@ -40,7 +40,6 @@ import { Route as AppManagementRoutinesIndexRouteImport } from './routes/app/man
 import { Route as AppManagementDietPlansIndexRouteImport } from './routes/app/management/diet-plans/index'
 import { Route as AppManagementClientsIndexRouteImport } from './routes/app/management/clients/index'
 import { Route as AppAdminListIndexRouteImport } from './routes/app/admin/list/index'
-import { Route as AppUserRoutinesIndexRouteImport } from './routes/app/_user/routines/index'
 import { Route as AppManagementRoutinesRoutineIdRouteImport } from './routes/app/management/routines/$routineId'
 import { Route as AppManagementDietPlansNewRouteImport } from './routes/app/management/diet-plans/new'
 import { Route as AppManagementDietPlansPlanIdRouteImport } from './routes/app/management/diet-plans/$planId'
@@ -224,11 +223,6 @@ const AppAdminListIndexRoute = AppAdminListIndexRouteImport.update({
   path: '/list/',
   getParentRoute: () => AppAdminRouteRoute,
 } as any)
-const AppUserRoutinesIndexRoute = AppUserRoutinesIndexRouteImport.update({
-  id: '/routines/',
-  path: '/routines/',
-  getParentRoute: () => AppUserRoute,
-} as any)
 const AppManagementRoutinesRoutineIdRoute =
   AppManagementRoutinesRoutineIdRouteImport.update({
     id: '/routines/$routineId',
@@ -401,7 +395,6 @@ export interface FileRoutesByFullPath {
   '/app/management/diet-plans/$planId': typeof AppManagementDietPlansPlanIdRoute
   '/app/management/diet-plans/new': typeof AppManagementDietPlansNewRoute
   '/app/management/routines/$routineId': typeof AppManagementRoutinesRoutineIdRoute
-  '/app/routines/': typeof AppUserRoutinesIndexRoute
   '/app/admin/list/': typeof AppAdminListIndexRoute
   '/app/management/clients/': typeof AppManagementClientsIndexRoute
   '/app/management/diet-plans/': typeof AppManagementDietPlansIndexRoute
@@ -455,7 +448,6 @@ export interface FileRoutesByTo {
   '/app/management/diet-plans/$planId': typeof AppManagementDietPlansPlanIdRoute
   '/app/management/diet-plans/new': typeof AppManagementDietPlansNewRoute
   '/app/management/routines/$routineId': typeof AppManagementRoutinesRoutineIdRoute
-  '/app/routines': typeof AppUserRoutinesIndexRoute
   '/app/admin/list': typeof AppAdminListIndexRoute
   '/app/management/clients': typeof AppManagementClientsIndexRoute
   '/app/management/diet-plans': typeof AppManagementDietPlansIndexRoute
@@ -513,7 +505,6 @@ export interface FileRoutesById {
   '/app/management/diet-plans/$planId': typeof AppManagementDietPlansPlanIdRoute
   '/app/management/diet-plans/new': typeof AppManagementDietPlansNewRoute
   '/app/management/routines/$routineId': typeof AppManagementRoutinesRoutineIdRoute
-  '/app/_user/routines/': typeof AppUserRoutinesIndexRoute
   '/app/admin/list/': typeof AppAdminListIndexRoute
   '/app/management/clients/': typeof AppManagementClientsIndexRoute
   '/app/management/diet-plans/': typeof AppManagementDietPlansIndexRoute
@@ -572,7 +563,6 @@ export interface FileRouteTypes {
     | '/app/management/diet-plans/$planId'
     | '/app/management/diet-plans/new'
     | '/app/management/routines/$routineId'
-    | '/app/routines/'
     | '/app/admin/list/'
     | '/app/management/clients/'
     | '/app/management/diet-plans/'
@@ -626,7 +616,6 @@ export interface FileRouteTypes {
     | '/app/management/diet-plans/$planId'
     | '/app/management/diet-plans/new'
     | '/app/management/routines/$routineId'
-    | '/app/routines'
     | '/app/admin/list'
     | '/app/management/clients'
     | '/app/management/diet-plans'
@@ -683,7 +672,6 @@ export interface FileRouteTypes {
     | '/app/management/diet-plans/$planId'
     | '/app/management/diet-plans/new'
     | '/app/management/routines/$routineId'
-    | '/app/_user/routines/'
     | '/app/admin/list/'
     | '/app/management/clients/'
     | '/app/management/diet-plans/'
@@ -931,13 +919,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/app/admin/list/'
       preLoaderRoute: typeof AppAdminListIndexRouteImport
       parentRoute: typeof AppAdminRouteRoute
-    }
-    '/app/_user/routines/': {
-      id: '/app/_user/routines/'
-      path: '/routines'
-      fullPath: '/app/routines/'
-      preLoaderRoute: typeof AppUserRoutinesIndexRouteImport
-      parentRoute: typeof AppUserRoute
     }
     '/app/management/routines/$routineId': {
       id: '/app/management/routines/$routineId'
@@ -1214,7 +1195,6 @@ interface AppUserRouteChildren {
   AppUserWorkoutsRoute: typeof AppUserWorkoutsRoute
   AppUserIndexRoute: typeof AppUserIndexRoute
   AppUserRoutinesRoutineIdRoute: typeof AppUserRoutinesRoutineIdRoute
-  AppUserRoutinesIndexRoute: typeof AppUserRoutinesIndexRoute
 }
 
 const AppUserRouteChildren: AppUserRouteChildren = {
@@ -1232,7 +1212,6 @@ const AppUserRouteChildren: AppUserRouteChildren = {
   AppUserWorkoutsRoute: AppUserWorkoutsRoute,
   AppUserIndexRoute: AppUserIndexRoute,
   AppUserRoutinesRoutineIdRoute: AppUserRoutinesRoutineIdRoute,
-  AppUserRoutinesIndexRoute: AppUserRoutinesIndexRoute,
 }
 
 const AppUserRouteWithChildren =

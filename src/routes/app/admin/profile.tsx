@@ -25,9 +25,15 @@ function ProfilePage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Content Management</CardTitle>
+        <CardTitle>Content Management</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-wrap gap-2">
+          <Button asChild variant="outline">
+            <Link to="/app/management/routines">
+              <Dumbbell className="mr-2 h-4 w-4" />
+              All Premade Routines
+            </Link>
+          </Button>
           <Button asChild variant="outline">
             <Link to="/app/admin/profile-about">
               <BookOpenText className="mr-2 h-4 w-4" />

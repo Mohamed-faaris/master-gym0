@@ -1,19 +1,23 @@
-import { Link, createFileRoute } from '@tanstack/react-router'
-import { useState } from 'react'
+import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
+import { useState, type ReactNode } from 'react'
 import {
   Calendar,
   CheckCircle2,
-  ClipboardList,
+  ClipboardPlus,
   Clock,
+  Copy,
   Dumbbell,
   Flame,
-  Plus,
+  Play,
+  Sparkles,
 } from 'lucide-react'
 import { useMutation, useQuery } from 'convex/react'
 import { toast } from 'sonner'
 import { api } from '@convex/_generated/api'
 
-import type {ExerciseData} from '@/components/add-exercise-drawer';
+import type { Id } from '@convex/_generated/dataModel'
+import { useAuth } from '@/components/auth/useAuth'
+import { Button } from '@/components/ui/button'
 import {
   Card,
   CardContent,
@@ -21,13 +25,101 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { useAuth } from '@/components/auth/useAuth'
-
 import {
-  AddExerciseDrawer
-  
-} from '@/components/add-exercise-drawer'
+  Drawer,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+} from '@/components/ui/drawer'
+import { Input } from '@/components/ui/input'
+
+const dayLabels: Record<string, string> = {
+  mon: 'Monday',
+  tue: 'Tuesday',
+  wed: 'Wednesday',
+  thu: 'Thursday',
+  fri: 'Friday',
+  sat: 'Saturday',
+  sun: 'Sunday',
+}
+
+type RoutineCardProps = {
+  routine: any
+  isToday?: boolean
+  primaryAction: ReactNode
+  secondaryAction?: ReactNode
+  accent?: 'assigned' | 'premade'
+}
+
+function RoutineCard({
+  routine,
+  isToday = false,
+  primaryAction,
+  secondaryAction,
+  accent = 'assigned',
+}: RoutineCardProps) {
+  return (
+    <Card
+      className={
+        accent === 'premade'
+          ? 'border-chart-2/30 bg-chart-2/5'
+          : isToday
+            ? 'border-primary/50 bg-primary/5'
+            : ''
+      }
+    >
+      <CardHeader className="pb-3">
+        <div className="flex items-start justify-between gap-3">
+          <div className="space-y-2">
+            <CardTitle className="text-lg">{routine.name}</CardTitle>
+            {(routine.dayOfWeek || routine.focus) && (
+              <CardDescription className="flex flex-wrap items-center gap-2">
+                {routine.dayOfWeek ? (
+                  <span className="font-medium text-primary">
+                    {dayLabels[routine.dayOfWeek as string]}
+                  </span>
+                ) : null}
+                {routine.dayOfWeek && routine.focus ? <span>•</span> : null}
+                {routine.focus ? <span>{routine.focus}</span> : null}
+              </CardDescription>
+            )}
+          </div>
+          {isToday ? (
+            <div className="rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
+              Today
+            </div>
+          ) : null}
+          {accent === 'premade' && !isToday ? (
+            <div className="rounded-full border border-chart-2/30 bg-chart-2/10 px-3 py-1 text-xs font-semibold text-chart-2">
+              Premade
+            </div>
+          ) : null}
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <Dumbbell className="h-4 w-4" />
+          <span>{routine.exercises.length} exercises</span>
+        </div>
+        <div className="text-sm font-medium">
+          {routine.exercises.length > 0
+            ? routine.exercises
+                .slice(0, 3)
+                .map((exercise: any) => exercise.exerciseName)
+                .join(', ')
+            : 'No exercises added yet'}
+          {routine.exercises.length > 3 ? '...' : ''}
+        </div>
+        <div className="flex gap-2">
+          <div className="flex-1">{primaryAction}</div>
+          {secondaryAction ? <div className="flex-1">{secondaryAction}</div> : null}
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
 
 export const Route = createFileRoute('/app/_user/workouts')({
   component: RouteComponent,
@@ -36,17 +128,14 @@ export const Route = createFileRoute('/app/_user/workouts')({
 function RouteComponent() {
   const today = new Date()
   const { user } = useAuth()
-  const isSelfManaged = user?.role === 'selfManagedCustomer'
-  const [isAddExerciseDrawerOpen, setIsAddExerciseDrawerOpen] = useState(false)
-  const addSelfManagedExercise = useMutation(
-    api.workoutSessions.addSelfManagedExerciseToToday,
-  )
+  const navigate = useNavigate()
+  const [isCreateRoutineOpen, setIsCreateRoutineOpen] = useState(false)
+  const [newRoutineName, setNewRoutineName] = useState('')
+  const [isCreatingRoutine, setIsCreatingRoutine] = useState(false)
+  const [copyingRoutineId, setCopyingRoutineId] = useState<string | null>(null)
 
-  // We'll fetch all routines assigned to the user, and display them for selection.
-  const routines = useQuery(
-    api.routines.getRoutinesByUser,
-    user ? { userId: user._id } : 'skip',
-  )
+  const createRoutine = useMutation(api.routines.createRoutine)
+  const copyRoutineToUser = useMutation(api.routines.copyRoutineToUser)
 
   const dayOfWeek = (
     ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'] as const
@@ -56,23 +145,30 @@ function RouteComponent() {
   const dayEnd = new Date(today)
   dayEnd.setHours(23, 59, 59, 999)
 
-  const todaysSession = useQuery(
-    api.workoutSessions.getLatestSessionForDay,
-    user
-      ? {
-          userId: user._id,
-          dayOfWeek,
-          dayStart: dayStart.getTime(),
-          dayEnd: dayEnd.getTime(),
-        }
-      : 'skip',
+  const assignedRoutines = useQuery(
+    api.routines.getRoutinesByUser,
+    user ? { userId: user._id } : 'skip',
   )
-
-  // Fetch today's ongoing session for stats
+  const premadeRoutines = useQuery(
+    api.routines.getPremadeRoutinesForUser,
+    user ? { userId: user._id } : 'skip',
+  )
   const todaySession = useQuery(
     api.workoutSessions.getOngoingSession,
     user ? { userId: user._id } : 'skip',
   )
+
+  const sortedAssignedRoutines = assignedRoutines
+    ? [...assignedRoutines].sort((left, right) => {
+        const leftPriority = left.dayOfWeek === dayOfWeek ? 0 : 1
+        const rightPriority = right.dayOfWeek === dayOfWeek ? 0 : 1
+        if (leftPriority !== rightPriority) {
+          return leftPriority - rightPriority
+        }
+
+        return (right.updatedAt ?? right.createdAt) - (left.updatedAt ?? left.createdAt)
+      })
+    : []
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60)
@@ -80,7 +176,7 @@ function RouteComponent() {
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
   }
 
-  const getTodayStats = () => {
+  const todayStats = (() => {
     let totalTime = 0
     let totalCalories = 0
     let completedSets = 0
@@ -88,51 +184,72 @@ function RouteComponent() {
     if (todaySession) {
       totalTime = todaySession.totalTime || 0
       totalCalories = todaySession.totalCaloriesBurned || 0
-      completedSets = todaySession.exercises.reduce((sum, ex) => {
-        return sum + ex.sets.filter((s) => s.completed).length
+      completedSets = todaySession.exercises.reduce((sum, exercise) => {
+        return sum + exercise.sets.filter((set) => set.completed).length
       }, 0)
     }
 
     return { totalTime, totalCalories, completedSets }
+  })()
+
+  const handleCreateRoutine = async () => {
+    if (!user) return
+    const trimmedName = newRoutineName.trim()
+
+    if (!trimmedName) {
+      toast.error('Routine name is required')
+      return
+    }
+
+    setIsCreatingRoutine(true)
+    try {
+      const routineId = await createRoutine({
+        name: trimmedName,
+        type: 'custom',
+        scope: 'single_client',
+        authorId: user._id,
+        userId: user._id,
+        exercises: [],
+      })
+      setIsCreateRoutineOpen(false)
+      setNewRoutineName('')
+      navigate({ to: `/app/routines/${routineId}` })
+    } catch (error) {
+      console.error('Failed to create routine', error)
+      toast.error('Failed to create routine')
+    } finally {
+      setIsCreatingRoutine(false)
+    }
   }
 
-  const todayStats = getTodayStats()
+  const handleCopyPremade = async (routineId: Id<'routines'>) => {
+    if (!user) return
 
-  // Since routines don't have strict scheduling days by default in the new schema,
-  // we'll just show the routine exercises directly.
-  // The 'add self-managed exercise' still works on a per-day basis as a diary.
-
-  const handleAddExercise = async (data: ExerciseData) => {
-    if (!user || !isSelfManaged) return
-
+    setCopyingRoutineId(routineId)
     try {
-      await addSelfManagedExercise({
-        userId: user._id,
-        dayOfWeek,
-        dayStart: dayStart.getTime(),
-        dayEnd: dayEnd.getTime(),
-        exerciseName: data.exerciseName,
-        sets: data.sets,
+      const newRoutineId = await copyRoutineToUser({
+        routineId,
+        targetUserId: user._id,
+        authorId: user._id,
       })
-      toast.success("Exercise added to today's session")
+      toast.success('Routine copied to your saved routines')
+      navigate({ to: `/app/routines/${newRoutineId}` })
     } catch (error) {
-      if (error instanceof Error) {
-        toast.error(error.message)
-      } else {
-        toast.error('Failed to add exercise')
-      }
+      console.error('Failed to copy routine', error)
+      toast.error('Failed to copy routine')
+    } finally {
+      setCopyingRoutineId(null)
     }
   }
 
   return (
-    <div className="space-y-4 pb-24">
-      {/* Header with date and day */}
-      <div className="sticky top-0 z-10 bg-background p-4 border-b">
-        <div className="flex items-center justify-between">
+    <div className="space-y-6 pb-24">
+      <div className="sticky top-0 z-10 border-b bg-background/95 p-4 backdrop-blur">
+        <div>
           <div>
             <h1 className="text-2xl font-bold">Workouts</h1>
-            <div className="flex items-center gap-2 text-muted-foreground text-sm mt-1">
-              <Calendar className="w-4 h-4" />
+            <div className="mt-1 flex items-center gap-2 text-sm text-muted-foreground">
+              <Calendar className="h-4 w-4" />
               <span>
                 {today.toLocaleDateString('en-US', {
                   weekday: 'long',
@@ -142,229 +259,248 @@ function RouteComponent() {
               </span>
             </div>
           </div>
-          {isSelfManaged && routines?.length === 0 && (
-            <Button
-              variant="outline"
-              size="icon"
-              aria-label="Add workout exercise"
-              onClick={() => setIsAddExerciseDrawerOpen(true)}
-            >
-              <Plus className="h-4 w-4" />
-            </Button>
-          )}
         </div>
       </div>
 
-      <div className="px-4 pt-4">
-        <Link to="/app/routines" className="block">
-          <Button variant="outline" className="w-full h-12 shadow-sm border-primary/20 bg-primary/5 text-primary hover:bg-primary/10">
-            <ClipboardList className="w-5 h-5 mr-3" />
-            My Routines
-          </Button>
-        </Link>
-      </div>
-
-      {/* Main Content */}
-      <div className="p-4 space-y-4">
-        {!user && (
-          <div className="text-center py-12">
-            <p className="text-muted-foreground">
-              Please sign in to view workouts
-            </p>
-          </div>
-        )}
-
-        {user && (
-          <>
-            {/* Today's Stats Card */}
-            {todayStats.totalTime > 0 && (
-              <Card className="border-primary/50 bg-primary/5">
-                <CardHeader>
-                  <CardTitle className="text-lg">Today's Workout</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-3 gap-4">
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2 text-muted-foreground">
-                        <Clock className="h-4 w-4" />
-                        <span className="text-xs">Total Time</span>
-                      </div>
-                      <div className="text-2xl font-bold">
-                        {formatTime(todayStats.totalTime)}
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2 text-muted-foreground">
-                        <Flame className="h-4 w-4" />
-                        <span className="text-xs">Calories</span>
-                      </div>
-                      <div className="text-2xl font-bold">
-                        {todayStats.totalCalories}
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2 text-muted-foreground">
-                        <CheckCircle2 className="h-4 w-4" />
-                        <span className="text-xs">Sets Done</span>
-                      </div>
-                      <div className="text-2xl font-bold">
-                        {todayStats.completedSets}
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-          </>
-        )}
-
-        {user && routines?.length === 0 && !isSelfManaged && (
-          <Card>
+      <div className="space-y-6 px-4">
+        {todayStats.totalTime > 0 ? (
+          <Card className="border-primary/40 bg-primary/5">
             <CardHeader>
-              <CardTitle>No Training Program Assigned</CardTitle>
-              <CardDescription>
-                Contact your trainer to get a workout program
-              </CardDescription>
+              <CardTitle className="text-lg">Today&apos;s progress</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-center py-12 space-y-4">
-                <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
-                  <ClipboardList className="h-8 w-8 text-primary" />
+              <div className="grid grid-cols-3 gap-3">
+                <div className="rounded-xl border border-primary/10 bg-background/80 p-3">
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <Clock className="h-4 w-4" />
+                    <span>Total time</span>
+                  </div>
+                  <div className="mt-2 text-2xl font-bold">
+                    {formatTime(todayStats.totalTime)}
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  <h3 className="font-semibold">No Program Yet</h3>
-                  <p className="text-sm text-muted-foreground max-w-sm mx-auto">
-                    Your trainer will assign you a personalized training
-                    program.
-                  </p>
+                <div className="rounded-xl border border-primary/10 bg-background/80 p-3">
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <Flame className="h-4 w-4" />
+                    <span>Calories</span>
+                  </div>
+                  <div className="mt-2 text-2xl font-bold">
+                    {todayStats.totalCalories}
+                  </div>
+                </div>
+                <div className="rounded-xl border border-primary/10 bg-background/80 p-3">
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                    <CheckCircle2 className="h-4 w-4" />
+                    <span>Sets done</span>
+                  </div>
+                  <div className="mt-2 text-2xl font-bold">
+                    {todayStats.completedSets}
+                  </div>
                 </div>
               </div>
             </CardContent>
           </Card>
-        )}
+        ) : null}
 
-        {user && routines?.length === 0 && isSelfManaged && (
-          <Card>
+        <div className="grid gap-3 md:grid-cols-2">
+          <Card className="border-primary/40 bg-primary text-primary-foreground">
             <CardHeader>
-              <CardTitle>Today's Session</CardTitle>
-              <CardDescription>
-                Add and track today&apos;s self-managed exercises
+              <CardTitle className="text-lg">Start a blank session</CardTitle>
+              <CardDescription className="text-primary-foreground/80">
+                Nothing is saved as a routine. This only creates workout logs.
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-3">
-              {todaysSession?.exercises.length ? (
-                todaysSession.exercises.map((exercise, exIndex) => (
-                  <div
-                    key={exIndex}
-                    className="border rounded-lg p-4 space-y-2"
-                  >
-                    <h4 className="font-medium">{exercise.exerciseName}</h4>
-                    <div className="text-sm text-muted-foreground">
-                      {exercise.sets?.length || 0} sets
-                    </div>
-                    <div className="space-y-1">
-                      {exercise.sets.map((set, setIndex) => (
-                        <div
-                          key={setIndex}
-                          className="text-sm flex items-center gap-2"
-                        >
-                          <span className="text-muted-foreground">
-                            Set {setIndex + 1}:
-                          </span>
-                          <span>{set.reps} reps</span>
-                          {set.weight !== undefined && (
-                            <span>@ {set.weight}kg</span>
-                          )}
-                          <span
-                            className={
-                              set.completed
-                                ? 'text-green-600 text-xs'
-                                : 'text-muted-foreground text-xs'
-                            }
-                          >
-                            {set.completed ? 'Completed' : 'Pending'}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <p className="text-sm text-muted-foreground">
-                  No exercises added for today yet. Use the + button to add one.
-                </p>
-              )}
+            <CardContent>
+              <Link to="/app/workout-session" className="block">
+                <Button
+                  className="h-12 w-full gap-2 bg-background text-foreground hover:bg-background/90"
+                >
+                  <Play className="h-4 w-4" />
+                  Start blank workout
+                </Button>
+              </Link>
             </CardContent>
           </Card>
-        )}
 
-        {user && routines && routines.length > 0 && (
-          <div className="space-y-4">
-            <h2 className="text-xl font-bold mt-8 mb-4">Your Routines</h2>
-            {routines.map(routine => (
-              <Card key={routine._id}>
-                <CardHeader>
-                  <CardTitle>{routine.name}</CardTitle>
-                  {(routine.focus || routine.dayOfWeek) && (
-                    <CardDescription className="flex items-center gap-2">
-                      {routine.dayOfWeek && (
-                        <span className="font-medium text-primary">
-                          {{ mon: 'Monday', tue: 'Tuesday', wed: 'Wednesday', thu: 'Thursday', fri: 'Friday', sat: 'Saturday', sun: 'Sunday' }[routine.dayOfWeek as string]}
-                        </span>
-                      )}
-                      {routine.dayOfWeek && routine.focus && <span>•</span>}
-                      {routine.focus && <span>{routine.focus}</span>}
-                    </CardDescription>
-                  )}
-                </CardHeader>
-                <CardContent>
-                  <div className="flex items-center gap-4 text-sm mb-6">
-                    <div className="flex items-center gap-2">
-                      <Dumbbell className="h-4 w-4" />
-                      <span>{routine.exercises.length} Exercises total</span>
-                    </div>
+          <Card className="border-chart-2/40 bg-chart-2/5">
+            <CardHeader>
+              <CardTitle className="text-lg">Build a saved routine</CardTitle>
+              <CardDescription>
+                Name it first, then add exercises in the editor.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button
+                variant="outline"
+                className="h-12 w-full gap-2"
+                onClick={() => setIsCreateRoutineOpen(true)}
+              >
+                <Sparkles className="h-4 w-4" />
+                Create named routine
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+
+        <section className="space-y-4">
+          <div className="space-y-1">
+            <h2 className="text-xl font-semibold">Your saved routines</h2>
+            <p className="text-sm text-muted-foreground">
+              Today&apos;s matching routine is pinned to the top.
+            </p>
+          </div>
+
+          {!assignedRoutines ? (
+            <Card>
+              <CardContent className="py-10 text-center text-muted-foreground">
+                Loading your routines...
+              </CardContent>
+            </Card>
+          ) : sortedAssignedRoutines.length === 0 ? (
+            <Card>
+              <CardContent className="py-10 text-center">
+                <div className="mx-auto max-w-sm space-y-3">
+                  <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
+                    <Dumbbell className="h-7 w-7 text-primary" />
                   </div>
-
-                  <div className="space-y-4">
-                    <div className="text-sm font-medium">
-                      {routine.exercises.slice(0, 3).map((ex: any) => ex.exerciseName).join(', ')}
-                      {routine.exercises.length > 3 && '...'}
-                    </div>
-                    
-                    <Link to="/app/workout-session" search={{ routineId: routine._id }} className="block pt-2">
-                      <Button className="w-full" variant="secondary">
-                        Start Routine
+                  <div>
+                    <p className="font-semibold">No saved routines yet</p>
+                    <p className="text-sm text-muted-foreground">
+                      Start with a blank session or create a named routine you can reuse later.
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="space-y-4">
+              {sortedAssignedRoutines.map((routine) => (
+                <RoutineCard
+                  key={routine._id}
+                  routine={routine}
+                  isToday={routine.dayOfWeek === dayOfWeek}
+                  primaryAction={
+                    <Link
+                      to="/app/workout-session"
+                      search={{ routineId: routine._id }}
+                      className="block"
+                    >
+                      <Button className="w-full gap-2">
+                        <Play className="h-4 w-4" />
+                        Start workout
                       </Button>
                     </Link>
-                  </div>
+                  }
+                  secondaryAction={
+                    <Link to="/app/routines/$routineId" params={{ routineId: routine._id }} className="block">
+                      <Button variant="outline" className="w-full">
+                        Edit routine
+                      </Button>
+                    </Link>
+                  }
+                />
+              ))}
+            </div>
+          )}
+        </section>
+
+        {user?.role === 'trainerManagedCustomer' ? (
+          <section className="space-y-4">
+            <div className="space-y-1">
+              <h2 className="text-xl font-semibold">Premade by trainers</h2>
+              <p className="text-sm text-muted-foreground">
+                Start from a premade routine instantly or copy one into your saved list.
+              </p>
+            </div>
+
+            {!premadeRoutines ? (
+              <Card>
+                <CardContent className="py-10 text-center text-muted-foreground">
+                  Loading premade routines...
                 </CardContent>
               </Card>
-            ))}
-          </div>
-        )}
+            ) : premadeRoutines.length === 0 ? (
+              <Card>
+                <CardContent className="py-10 text-center text-muted-foreground">
+                  No premade routines are available for you yet.
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="space-y-4">
+                {premadeRoutines.map((routine) => (
+                  <RoutineCard
+                    key={routine._id}
+                    routine={routine}
+                    accent="premade"
+                    primaryAction={
+                      <Link
+                        to="/app/workout-session"
+                        search={{ routineId: routine._id }}
+                        className="block"
+                      >
+                        <Button className="w-full gap-2">
+                          <Play className="h-4 w-4" />
+                          Start now
+                        </Button>
+                      </Link>
+                    }
+                    secondaryAction={
+                      <Button
+                        variant="outline"
+                        className="w-full gap-2"
+                        disabled={copyingRoutineId === routine._id}
+                        onClick={() => handleCopyPremade(routine._id)}
+                      >
+                        <Copy className="h-4 w-4" />
+                        {copyingRoutineId === routine._id ? 'Copying...' : 'Copy & edit'}
+                      </Button>
+                    }
+                  />
+                ))}
+              </div>
+            )}
+          </section>
+        ) : null}
       </div>
 
-      {user && (
-        <div 
-          className="fixed left-0 right-0 z-30 bg-background/95 backdrop-blur border-t p-4"
-          style={{ bottom: 'calc(4rem + var(--safe-bottom))', paddingBottom: 'calc(1rem + var(--safe-bottom))' }}
-        >
-          <div className="max-w-screen-sm mx-auto">
-            <Link to="/app/workout-session">
-              <Button className="h-14 w-full rounded-full shadow-lg text-lg font-semibold">
-                <Plus className="w-5 h-5 mr-2" />
-                Start Blank Workout
-              </Button>
-            </Link>
+      <Drawer open={isCreateRoutineOpen} onOpenChange={setIsCreateRoutineOpen}>
+        <DrawerContent>
+          <DrawerHeader>
+            <DrawerTitle>Create routine</DrawerTitle>
+            <DrawerDescription>
+              Give this routine a name before opening the editor.
+            </DrawerDescription>
+          </DrawerHeader>
+          <div className="px-4 pb-2">
+            <Input
+              autoFocus
+              value={newRoutineName}
+              onChange={(event) => setNewRoutineName(event.target.value)}
+              placeholder="Push day, Upper body, Saturday session..."
+              onKeyDown={(event) => {
+                if (event.key === 'Enter') {
+                  event.preventDefault()
+                  void handleCreateRoutine()
+                }
+              }}
+            />
           </div>
-        </div>
-      )}
-
-      <AddExerciseDrawer
-        open={isAddExerciseDrawerOpen}
-        onOpenChange={setIsAddExerciseDrawerOpen}
-        onSave={handleAddExercise}
-      />
+          <DrawerFooter>
+            <Button onClick={() => void handleCreateRoutine()} disabled={isCreatingRoutine}>
+              {isCreatingRoutine ? 'Creating...' : 'Create routine'}
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setIsCreateRoutineOpen(false)
+                setNewRoutineName('')
+              }}
+            >
+              Cancel
+            </Button>
+          </DrawerFooter>
+        </DrawerContent>
+      </Drawer>
     </div>
   )
 }

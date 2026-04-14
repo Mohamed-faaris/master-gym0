@@ -14,6 +14,7 @@ const ROLES = [
 
 const WORKOUT_STATUSES = ['ongoing', 'completed', 'cancelled'] as const
 const ROUTINE_TYPES = ['custom', 'trainer'] as const
+const ROUTINE_SCOPES = ['all', 'trainer_clients', 'single_client'] as const
 
 export const MEAL_TYPES = [
   'breakfast',
@@ -50,6 +51,7 @@ function enumToValidator<T extends ReadonlyArray<string>>(values: T) {
 const RoleValidator = enumToValidator(ROLES)
 const WorkoutStatusValidator = enumToValidator(WORKOUT_STATUSES)
 const RoutineTypeValidator = enumToValidator(ROUTINE_TYPES)
+const RoutineScopeValidator = enumToValidator(ROUTINE_SCOPES)
 const MealTypeValidator = enumToValidator(MEAL_TYPES)
 const GalleryStatusValidator = enumToValidator(GALLERY_STATUSES)
 const GalleryAccessValidator = enumToValidator(GALLERY_ACCESS)
@@ -150,6 +152,7 @@ const routines = defineTable({
   userId: v.optional(v.id('users')), // null if global/app routine
   authorId: v.id('users'), // Who created it
   type: RoutineTypeValidator, // 'custom' | 'trainer'
+  scope: v.optional(RoutineScopeValidator),
 
   dayOfWeek: v.optional(DayOfWeekValidator),
   focus: v.optional(v.string()),
@@ -175,6 +178,8 @@ const routines = defineTable({
   .index('by_user', ['userId'])
   .index('by_author', ['authorId'])
   .index('by_type', ['type'])
+  .index('by_scope', ['scope'])
+  .index('by_scope_author', ['scope', 'authorId'])
 
 export const dietPlans = defineTable({
   name: v.string(),

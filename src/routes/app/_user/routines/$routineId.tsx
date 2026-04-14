@@ -227,7 +227,7 @@ function RoutineEditorComponent() {
         exercises,
       })
       toast.success('Routine saved!')
-      navigate({ to: '/app/routines' })
+      navigate({ to: '/app/workouts' })
     } catch (error) {
       console.error(error)
       toast.error('Failed to save routine')
@@ -241,7 +241,7 @@ function RoutineEditorComponent() {
       try {
         await deleteRoutine({ routineId: routineId as Id<'routines'> })
         toast.success('Routine deleted')
-        navigate({ to: '/app/routines' })
+        navigate({ to: '/app/workouts' })
       } catch (error) {
         toast.error('Failed to delete')
       }
@@ -324,7 +324,7 @@ function RoutineEditorComponent() {
     <div className="space-y-4 pb-32">
       <div className="sticky top-0 z-10 bg-background/95 backdrop-blur p-4 border-b flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon" onClick={() => navigate({ to: '/app/routines' })}>
+          <Button variant="ghost" size="icon" onClick={() => navigate({ to: '/app/workouts' })}>
             <ChevronLeft className="w-5 h-5" />
           </Button>
           <h1 className="text-xl font-bold">Edit Routine</h1>
