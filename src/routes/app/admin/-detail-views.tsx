@@ -204,10 +204,16 @@ export function ClientDetailView({
               View Workout Sessions
             </Link>
           </Button>
+          <Button asChild className="h-11 w-full">
+            <Link to="/app/management/clients/$clientId/logs/workout" params={{ clientId: client._id }}>
+              <ClipboardList className="w-4 h-4 mr-2" />
+              Create User Routine
+            </Link>
+          </Button>
           <Button asChild variant="outline" className="h-11 w-full">
             <Link to="/app/management/clients/$clientId/logs/workout" params={{ clientId: client._id }}>
               <ClipboardList className="w-4 h-4 mr-2" />
-              Manage Routines
+              Manage User Routines
             </Link>
           </Button>
           <Button asChild variant="outline" className="h-11 w-full">
