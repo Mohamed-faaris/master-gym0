@@ -352,6 +352,7 @@ function TrainerWorkoutSessionRoute() {
         dayOfWeek,
         dayStart: dayStart.getTime(),
         dayEnd: dayEnd.getTime(),
+        exercises: localExercises,
       })
       setSessionId(session)
       toast.success('Client workout session started')

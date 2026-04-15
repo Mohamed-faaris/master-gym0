@@ -4,12 +4,13 @@ import {
   ArrowLeft,
   BarChart3,
   Dumbbell,
+  Phone,
   UtensilsCrossed,
 } from 'lucide-react'
 import { useQuery } from 'convex/react'
 
 import { api } from '@convex/_generated/api'
-import type {DateScope} from '@/components/date-context-selector';
+import type { DateScope } from '@/components/date-context-selector'
 import { useAuth } from '@/components/auth/useAuth'
 import { Button } from '@/components/ui/button'
 import {
@@ -19,10 +20,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-import {
-  DateContextSelector
-  
-} from '@/components/date-context-selector'
+import { DateContextSelector } from '@/components/date-context-selector'
 import { ActivityWeekCard } from '@/components/activity-week-card'
 import {
   filterByDateScope,
@@ -171,6 +169,9 @@ function ClientDetailRoute() {
         weightLogsInScope.length
       : null
 
+  const clientRoleLabel =
+    client.role === 'trainerManagedCustomer' ? 'Trainer Managed' : 'Self Managed'
+
   const scopeLabel =
     dateScope === 'this-week'
       ? 'This Week'
@@ -244,11 +245,144 @@ function ClientDetailRoute() {
       {dateScope === 'today' ? (
         <>
           {/* TODAY MODE: Action-First Layout */}
-
-          {/* Client Info */}
+          {/* <Card>
+            <CardHeader>
+              <CardTitle className="text-base">Client Information</CardTitle>
+              <CardDescription>Current profile and status.</CardDescription>
+            </CardHeader>
+            <CardContent className="pt-6">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div>
+                  <p className="text-xs font-medium text-muted-foreground mb-1">
+                    Full Name
+                  </p>
+                  <p className="text-sm font-medium">{client.name}</p>
+                </div>
+                <div>
+                  <p className="text-xs font-medium text-muted-foreground mb-1 flex items-center gap-2">
+                    <Phone className="h-3 w-3" />
+                    Phone Number
+                  </p>
+                  <p className="text-sm font-medium">
+                    {client.phoneNumber || 'Not set'}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs font-medium text-muted-foreground mb-1">
+                    Role
+                  </p>
+                  <p className="text-sm font-medium capitalize">
+                    {clientRoleLabel}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs font-medium text-muted-foreground mb-1">
+                    Goal
+                  </p>
+                  <p className="text-sm font-medium">{client.goal || 'Not set'}</p>
+                </div>
+                {client.meta?.age !== undefined && (
+                  <div>
+                    <p className="text-xs font-medium text-muted-foreground mb-1">
+                      Age
+                    </p>
+                    <p className="text-sm font-medium">{client.meta.age}</p>
+                  </div>
+                )}
+                {client.meta?.currentWeight !== undefined && (
+                  <div>
+                    <p className="text-xs font-medium text-muted-foreground mb-1">
+                      Current Weight
+                    </p>
+                    <p className="text-sm font-medium">
+                      {client.meta.currentWeight} kg
+                    </p>
+                  </div>
+                )}
+                {client.meta?.targetWeight !== undefined && (
+                  <div>
+                    <p className="text-xs font-medium text-muted-foreground mb-1">
+                      Target Weight
+                    </p>
+                    <p className="text-sm font-medium">
+                      {client.meta.targetWeight} kg
+                    </p>
+                  </div>
+                )}
+                <div>
+                  <p className="text-xs font-medium text-muted-foreground mb-1">
+                    Member Since
+                  </p>
+                  <p className="text-sm font-medium">
+                    {new Date(client.createdAt).toLocaleDateString()}
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card> */}
 
           <Card>
-            <CardContent className="pt-6">
+            <CardHeader>
+              <CardTitle className="text-base">Quick View</CardTitle>
+              <CardDescription>Most-used client actions.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <Button
+                onClick={() =>
+                  navigate({
+                    to: `/app/management/clients/${clientId}/view-work`,
+                  })
+                }
+                variant="outline"
+                className="h-11 w-full"
+              >
+                <Dumbbell className="w-4 h-4 mr-2" />
+                View Workout Sessions
+              </Button>
+              <Button
+                onClick={() =>
+                  navigate({
+                    to: `/app/management/clients/${clientId}/logs/workout`,
+                  })
+                }
+                className="h-11 w-full"
+              >
+                <Dumbbell className="w-4 h-4 mr-2" />
+                Manage Routines
+              </Button>
+              <Button
+                onClick={() =>
+                  navigate({
+                    to: `/app/management/clients/${clientId}/logs/diet`,
+                  })
+                }
+                variant="outline"
+                className="h-11 w-full"
+              >
+                <UtensilsCrossed className="w-4 h-4 mr-2" />
+                View Diet Entry
+              </Button>
+              <Button
+                onClick={() =>
+                  navigate({
+                    to: `/app/management/clients/${clientId}/logs/weight`,
+                  })
+                }
+                variant="outline"
+                className="h-11 w-full"
+              >
+                <BarChart3 className="w-4 h-4 mr-2" />
+                View Weight
+              </Button>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">Today at a Glance</CardTitle>
+              <CardDescription>Daily progress snapshot.</CardDescription>
+            </CardHeader>
+            <CardContent>
               <div className="grid grid-cols-1 gap-3 text-center min-[430px]:grid-cols-3">
                 <div className="min-w-0 rounded-lg border border-border/60 p-3">
                   <p className="text-xs text-muted-foreground">
@@ -273,60 +407,6 @@ function ClientDetailRoute() {
               </div>
             </CardContent>
           </Card>
-
-          {/* Action Buttons */}
-          <div className="space-y-3">
-            <Button
-              onClick={() =>
-                navigate({
-                  to: `/app/management/clients/${clientId}/logs/workout`,
-                })
-              }
-              className="w-full h-12"
-            >
-              <Dumbbell className="w-4 h-4 mr-2" />
-              Log Workout Session
-            </Button>
-
-            <Button
-              onClick={() =>
-                navigate({
-                  to: `/app/management/clients/${clientId}/logs/workout`,
-                })
-              }
-              variant="outline"
-              className="h-12 w-full"
-            >
-              <Dumbbell className="w-4 h-4 mr-2" />
-              View Routines & Workouts
-            </Button>
-
-            <Button
-              onClick={() =>
-                navigate({
-                  to: `/app/management/clients/${clientId}/logs/diet`,
-                })
-              }
-              variant="outline"
-              className="h-12 w-full"
-            >
-              <UtensilsCrossed className="w-4 h-4 mr-2" />
-              View Diet Entry
-            </Button>
-
-            <Button
-              onClick={() =>
-                navigate({
-                  to: `/app/management/clients/${clientId}/logs/weight`,
-                })
-              }
-              variant="outline"
-              className="h-12 w-full"
-            >
-              <BarChart3 className="w-4 h-4 mr-2" />
-              View Weight
-            </Button>
-          </div>
         </>
       ) : (
         <>

@@ -59,7 +59,7 @@ export const startSession = mutation({
       return existingSession._id
     }
 
-    let exercises = args.exercises
+    let exercises = args.exercises ?? []
 
     if (args.routineId) {
       const routine = await ctx.db.get(args.routineId)
@@ -76,10 +76,6 @@ export const startSession = mutation({
           })),
         }))
       }
-    }
-
-    if (!exercises) {
-      throw new Error('Workout session requires exercises or a valid routine')
     }
 
     const sessionId = await ctx.db.insert('workoutSessions', {

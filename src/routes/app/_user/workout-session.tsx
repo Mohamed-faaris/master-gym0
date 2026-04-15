@@ -337,6 +337,7 @@ export function WorkoutSessionRouteComponent() {
         dayOfWeek,
         dayStart: dayStart.getTime(),
         dayEnd: dayEnd.getTime(),
+        exercises: localExercises,
       })
       setSessionId(session)
       toast.success('Workout session started')

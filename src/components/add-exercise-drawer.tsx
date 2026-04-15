@@ -111,13 +111,15 @@ export function AddExerciseDrawer({
     setExerciseName('')
   }, [initialData])
 
-  const handleSave = async () => {
-    if (!exerciseName.trim()) {
+  const handleSave = async (nextExerciseName?: string) => {
+    const resolvedExerciseName = (nextExerciseName ?? exerciseName).trim()
+
+    if (!resolvedExerciseName) {
       throw new Error('Exercise name is required')
     }
 
     const data: ExerciseData = {
-      exerciseName,
+      exerciseName: resolvedExerciseName,
       sets: initialData?.sets.length
         ? initialData.sets.map((set) => ({
             reps: set.reps ?? 8,
@@ -185,7 +187,11 @@ export function AddExerciseDrawer({
                     key={name}
                     type="button"
                     className="flex w-full items-center justify-between px-3 py-3 text-left text-sm transition-colors hover:bg-accent"
-                    onClick={() => setExerciseName(name)}
+                    disabled={isSaving}
+                    onClick={() => {
+                      setExerciseName(name)
+                      void handleSave(name)
+                    }}
                   >
                     <span>{name}</span>
                     {name.toLowerCase() === exerciseName.trim().toLowerCase() && (
