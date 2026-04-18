@@ -2,7 +2,6 @@
   "name": "master-gym0",
   "private": true,
   "type": "module",
-  "packageManager": "npm@10.0",
   "scripts": {
     "dev": "concurrently \"vite dev --port 3000\" \"convex dev --tail-logs\"",
     "build": "vite build",
