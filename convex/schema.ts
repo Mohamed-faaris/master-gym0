@@ -181,6 +181,44 @@ const routines = defineTable({
   .index('by_scope', ['scope'])
   .index('by_scope_author', ['scope', 'authorId'])
 
+const workoutWeekPlans = defineTable({
+  name: v.string(),
+  userId: v.optional(v.id('users')),
+  authorId: v.id('users'),
+  scope: v.optional(RoutineScopeValidator),
+
+  goal: v.optional(v.string()),
+  notes: v.optional(v.string()),
+  activeDays: v.array(DayOfWeekValidator),
+  dayPlans: v.array(
+    v.object({
+      day: DayOfWeekValidator,
+      focus: v.optional(v.string()),
+      exercises: v.array(
+        v.object({
+          exerciseId: v.optional(v.id('exercises')),
+          exerciseName: v.string(),
+          supersetGroupId: v.optional(v.string()),
+          sets: v.array(
+            v.object({
+              reps: v.optional(v.number()),
+              weight: v.optional(v.number()),
+              restTime: v.optional(v.number()),
+            }),
+          ),
+        }),
+      ),
+    }),
+  ),
+
+  createdAt: v.number(),
+  updatedAt: v.number(),
+})
+  .index('by_user', ['userId'])
+  .index('by_author', ['authorId'])
+  .index('by_scope', ['scope'])
+  .index('by_scope_author', ['scope', 'authorId'])
+
 export const dietPlans = defineTable({
   name: v.string(),
   description: v.string(),
@@ -332,6 +370,7 @@ export default defineSchema({
   dietLogs,
   weightLogs,
   routines,
+  workoutWeekPlans,
   dietPlans,
   workoutSessions,
   gallery,

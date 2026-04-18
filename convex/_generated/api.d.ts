@@ -25,6 +25,7 @@ import type * as transformationImages from "../transformationImages.js";
 import type * as users from "../users.js";
 import type * as weightLogs from "../weightLogs.js";
 import type * as workoutSessions from "../workoutSessions.js";
+import type * as workoutWeekPlans from "../workoutWeekPlans.js";
 
 import type {
   ApiFromModules,
@@ -50,6 +51,7 @@ declare const fullApi: ApiFromModules<{
   users: typeof users;
   weightLogs: typeof weightLogs;
   workoutSessions: typeof workoutSessions;
+  workoutWeekPlans: typeof workoutWeekPlans;
 }>;
 
 /**
