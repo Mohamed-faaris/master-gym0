@@ -31,13 +31,13 @@ const config = defineConfig({
     }),
     tailwindcss(),
     tanstackStart({
-      spa: {
-        enabled: true,
-        prerender: {
-          crawlLinks: true,
-          outputPath: 'index.html',
-        },
-      },
+      // spa: {
+      //   enabled: true,
+      //   prerender: {
+      //     crawlLinks: true,
+      //     outputPath: 'index.html',
+      //   },
+      // },
     }),
     viteReact({
       babel: {

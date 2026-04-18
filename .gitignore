@@ -18,3 +18,4 @@ mcp-todos.json
 .netlify
 *.keystore
 master-gym.keystore
+.env*.local
