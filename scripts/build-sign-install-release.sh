@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# Build, Sign and Install RELEASE APK
-# Usage: ./scripts/build-sign-install-release.sh
+# Dairy Ledger - Build and Install Release APK
+# Usage: ./scripts/build-and-install-release.sh
 
 set -e
 
@@ -11,24 +11,16 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m'
 
-KEYSTORE_FILE="master-gym.keystore"
-KEY_ALIAS="mastergym"
-STOREPASS="mastergym123"
-UNSIGNED_APK="android/app/build/outputs/apk/release/app-release-unsigned.apk"
-SIGNED_APK="android/app/build/outputs/apk/release/app-release-signed.apk"
+PROJECT="master-gym"
+DATE=$(date +%Y%m%d)
+BUILD_DIR="$HOME/Downloads/app-build"
+APK_SOURCE="android/app/build/outputs/apk/release/app-release-unsigned.apk"
 
-echo -e "${BLUE}🔨 Building & Signing RELEASE APK...${NC}"
+echo -e "${BLUE}🔨 Building RELEASE APK...${NC}"
 echo ""
 
-# Check if keystore exists
-if [ ! -f "$KEYSTORE_FILE" ]; then
-    echo -e "${RED}❌ Keystore not found!${NC}"
-    echo -e "${YELLOW}   Run: ./scripts/generate-keystore.sh${NC}"
-    exit 1
-fi
-
 echo -e "${YELLOW}Building web...${NC}"
-pnpm run build
+npm run build
 
 echo -e "${YELLOW}Syncing Capacitor...${NC}"
 npx cap sync
@@ -38,27 +30,29 @@ cd android
 ./gradlew assembleRelease
 cd ..
 
-if [ ! -f "$UNSIGNED_APK" ]; then
+if [ ! -f "$APK_SOURCE" ]; then
     echo -e "${RED}❌ Build failed!${NC}"
     exit 1
 fi
 
-echo -e "${YELLOW}Signing APK with apksigner...${NC}"
-apksigner sign \
-    --ks "$KEYSTORE_FILE" \
-    --ks-key-alias "$KEY_ALIAS" \
-    --ks-pass pass:$STOREPASS \
-    --key-pass pass:$STOREPASS \
-    --out "$SIGNED_APK" \
-    "$UNSIGNED_APK"
+# Create build directory and determine count
+mkdir -p "$BUILD_DIR"
+COUNT=$(ls -1 "$BUILD_DIR"/${PROJECT}-${DATE}-*.apk 2>/dev/null | wc -l)
+COUNT=$((COUNT + 1))
+APK_DEST="$BUILD_DIR/${PROJECT}-${DATE}-${COUNT}.apk"
 
-echo -e "${GREEN}✅ APK signed!${NC}"
+# Copy APK
+echo -e "${YELLOW}📦 Copying APK to $APK_DEST...${NC}"
+cp "$APK_SOURCE" "$APK_DEST"
+
 echo -e "${YELLOW}Installing...${NC}"
-adb install -r "$SIGNED_APK"
+adb install -r "$APK_SOURCE"
 
 echo -e "${YELLOW}Launching...${NC}"
-adb shell monkey -p com.yourcompany.mastergym 1
+adb shell monkey -p com.yourcompany.dairy 1
 
+echo -e "${GREEN}✅ Release build installed!${NC}"
+echo -e "${GREEN}📁 APK saved: $APK_DEST${NC}"
 echo ""
-echo -e "${GREEN}✅ Signed release APK installed and running!${NC}"
-echo -e "${BLUE}APK:${NC} $SIGNED_APK"
+echo -e "${YELLOW}⚠️  Note: This is an unsigned release APK.${NC}"
+echo -e "${YELLOW}   For Play Store, you need to sign it first.${NC}"

@@ -11,7 +11,7 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m'
 
-APK_PATH="android/app/build/outputs/apk/release/app-release-unsigned.apk"
+APK_PATH="android/app/build/outputs/apk/release/app-release.apk"
 
 echo -e "${BLUE}🔨 Building RELEASE APK...${NC}"
 echo ""
