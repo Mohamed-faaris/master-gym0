@@ -2,11 +2,12 @@ import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useState, type ReactNode } from 'react'
 import {
   Calendar,
+  CalendarDays,
   CheckCircle2,
-  ClipboardPlus,
   Clock,
   Copy,
   Dumbbell,
+  Eye,
   Flame,
   Play,
   Sparkles,
@@ -51,6 +52,53 @@ type RoutineCardProps = {
   primaryAction: ReactNode
   secondaryAction?: ReactNode
   accent?: 'assigned' | 'premade'
+}
+
+type WeekPlanCardProps = {
+  plan: any
+  primaryAction: ReactNode
+  accent?: 'saved' | 'premade'
+}
+
+function WeekPlanCard({
+  plan,
+  primaryAction,
+  accent = 'saved',
+}: WeekPlanCardProps) {
+  return (
+    <Card className={accent === 'premade' ? 'border-chart-2/30 bg-chart-2/5' : ''}>
+      <CardHeader className="pb-3">
+        <div className="flex items-start justify-between gap-3">
+          <div className="space-y-2">
+            <CardTitle className="text-lg">{plan.name}</CardTitle>
+            {plan.goal ? <CardDescription>{plan.goal}</CardDescription> : null}
+          </div>
+          {accent === 'premade' ? (
+            <div className="rounded-full border border-chart-2/30 bg-chart-2/10 px-3 py-1 text-xs font-semibold text-chart-2">
+              Premade
+            </div>
+          ) : null}
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <CalendarDays className="h-4 w-4" />
+          <span>{plan.activeDays.length} active days</span>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {plan.activeDays.map((day: string) => (
+            <span
+              key={`${plan._id}-${day}`}
+              className="rounded-full border px-2 py-1 text-xs text-muted-foreground"
+            >
+              {dayLabels[day] || day}
+            </span>
+          ))}
+        </div>
+        <div>{primaryAction}</div>
+      </CardContent>
+    </Card>
+  )
 }
 
 function RoutineCard({
@@ -151,6 +199,14 @@ function RouteComponent() {
   )
   const premadeRoutines = useQuery(
     api.routines.getPremadeRoutinesForUser,
+    user ? { userId: user._id } : 'skip',
+  )
+  const savedWeekPlans = useQuery(
+    api.workoutWeekPlans.getWorkoutWeekPlansByUser,
+    user ? { userId: user._id } : 'skip',
+  )
+  const premadeWeekPlans = useQuery(
+    api.workoutWeekPlans.getPremadeWorkoutWeekPlansForUser,
     user ? { userId: user._id } : 'skip',
   )
   const todaySession = useQuery(
@@ -404,62 +460,153 @@ function RouteComponent() {
           )}
         </section>
 
-        {user?.role === 'trainerManagedCustomer' ? (
-          <section className="space-y-4">
-            <div className="space-y-1">
-              <h2 className="text-xl font-semibold">Premade by trainers</h2>
-              <p className="text-sm text-muted-foreground">
-                Start from a premade routine instantly or copy one into your saved list.
-              </p>
-            </div>
+        <section className="space-y-4">
+          <div className="space-y-1">
+            <h2 className="text-xl font-semibold">Your workout plans</h2>
+            <p className="text-sm text-muted-foreground">
+              Weekly workout plans saved to your profile.
+            </p>
+          </div>
 
-            {!premadeRoutines ? (
-              <Card>
-                <CardContent className="py-10 text-center text-muted-foreground">
-                  Loading premade routines...
-                </CardContent>
-              </Card>
-            ) : premadeRoutines.length === 0 ? (
-              <Card>
-                <CardContent className="py-10 text-center text-muted-foreground">
-                  No premade routines are available for you yet.
-                </CardContent>
-              </Card>
-            ) : (
-              <div className="space-y-4">
-                {premadeRoutines.map((routine) => (
-                  <RoutineCard
-                    key={routine._id}
-                    routine={routine}
-                    accent="premade"
-                    primaryAction={
-                      <Link
-                        to="/app/workout-session"
-                        search={{ routineId: routine._id }}
-                        className="block"
-                      >
-                        <Button className="w-full gap-2">
-                          <Play className="h-4 w-4" />
-                          Start now
-                        </Button>
-                      </Link>
-                    }
-                    secondaryAction={
-                      <Button
-                        variant="outline"
-                        className="w-full gap-2"
-                        disabled={copyingRoutineId === routine._id}
-                        onClick={() => handleCopyPremade(routine._id)}
-                      >
-                        <Copy className="h-4 w-4" />
-                        {copyingRoutineId === routine._id ? 'Copying...' : 'Copy & edit'}
+          {!savedWeekPlans ? (
+            <Card>
+              <CardContent className="py-10 text-center text-muted-foreground">
+                Loading your workout plans...
+              </CardContent>
+            </Card>
+          ) : savedWeekPlans.length === 0 ? (
+            <Card>
+              <CardContent className="py-10 text-center text-muted-foreground">
+                No workout plans yet.
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="space-y-4">
+              {savedWeekPlans.map((plan) => (
+                <WeekPlanCard
+                  key={plan._id}
+                  plan={plan}
+                  primaryAction={
+                    <Link
+                      to="/app/workout-week-plans/$planId"
+                      params={{ planId: plan._id }}
+                      className="block"
+                    >
+                      <Button className="w-full gap-2">
+                        <Eye className="h-4 w-4" />
+                        View workout plan
                       </Button>
-                    }
-                  />
-                ))}
+                    </Link>
+                  }
+                />
+              ))}
+            </div>
+          )}
+        </section>
+
+        {user?.role === 'trainerManagedCustomer' ? (
+          <>
+            <section className="space-y-4">
+              <div className="space-y-1">
+                <h2 className="text-xl font-semibold">Premade by trainers</h2>
+                <p className="text-sm text-muted-foreground">
+                  Start from a premade routine instantly or copy one into your saved list.
+                </p>
               </div>
-            )}
-          </section>
+
+              {!premadeRoutines ? (
+                <Card>
+                  <CardContent className="py-10 text-center text-muted-foreground">
+                    Loading premade routines...
+                  </CardContent>
+                </Card>
+              ) : premadeRoutines.length === 0 ? (
+                <Card>
+                  <CardContent className="py-10 text-center text-muted-foreground">
+                    No premade routines are available for you yet.
+                  </CardContent>
+                </Card>
+              ) : (
+                <div className="space-y-4">
+                  {premadeRoutines.map((routine) => (
+                    <RoutineCard
+                      key={routine._id}
+                      routine={routine}
+                      accent="premade"
+                      primaryAction={
+                        <Link
+                          to="/app/workout-session"
+                          search={{ routineId: routine._id }}
+                          className="block"
+                        >
+                          <Button className="w-full gap-2">
+                            <Play className="h-4 w-4" />
+                            Start now
+                          </Button>
+                        </Link>
+                      }
+                      secondaryAction={
+                        <Button
+                          variant="outline"
+                          className="w-full gap-2"
+                          disabled={copyingRoutineId === routine._id}
+                          onClick={() => handleCopyPremade(routine._id)}
+                        >
+                          <Copy className="h-4 w-4" />
+                          {copyingRoutineId === routine._id ? 'Copying...' : 'Copy & edit'}
+                        </Button>
+                      }
+                    />
+                  ))}
+                </div>
+              )}
+            </section>
+
+            <section className="space-y-4">
+              <div className="space-y-1">
+                <h2 className="text-xl font-semibold">Premade workout plans</h2>
+                <p className="text-sm text-muted-foreground">
+                  Weekly workout plans from your trainer.
+                </p>
+              </div>
+
+              {!premadeWeekPlans ? (
+                <Card>
+                  <CardContent className="py-10 text-center text-muted-foreground">
+                    Loading premade workout plans...
+                  </CardContent>
+                </Card>
+              ) : premadeWeekPlans.length === 0 ? (
+                <Card>
+                  <CardContent className="py-10 text-center text-muted-foreground">
+                    No premade workout plans are available for you yet.
+                  </CardContent>
+                </Card>
+              ) : (
+                <div className="space-y-4">
+                  {premadeWeekPlans.map((plan) => (
+                    <WeekPlanCard
+                      key={plan._id}
+                      plan={plan}
+                      accent="premade"
+                      primaryAction={
+                        <Link
+                          to="/app/workout-week-plans/$planId"
+                          params={{ planId: plan._id }}
+                          className="block"
+                        >
+                          <Button variant="outline" className="w-full gap-2">
+                            <Eye className="h-4 w-4" />
+                            View plan
+                          </Button>
+                        </Link>
+                      }
+                    />
+                  ))}
+                </div>
+              )}
+            </section>
+          </>
         ) : null}
       </div>
 

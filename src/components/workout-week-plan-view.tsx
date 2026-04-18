@@ -14,7 +14,6 @@ import { DAYS_OF_WEEK } from '@/lib/workout-plan-helpers'
 
 type WorkoutWeekPlanViewProps = {
   title: string
-  backLabel?: string
   backTo: string
   backParams?: Record<string, string>
   plan: {
@@ -39,7 +38,6 @@ type WorkoutWeekPlanViewProps = {
 
 export function WorkoutWeekPlanView({
   title,
-  backLabel = 'Back',
   backTo,
   backParams,
   plan,

@@ -31,7 +31,6 @@ function UserWorkoutWeekPlanRoute() {
   return (
     <WorkoutWeekPlanView
       title="Workout Plan"
-      backLabel="Back to workouts"
       backTo="/app/workouts"
       plan={plan as any}
     />
