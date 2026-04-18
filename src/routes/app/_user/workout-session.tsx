@@ -12,6 +12,7 @@ import {
   Play,
   Plus,
   RefreshCcw,
+  Trash2,
   Unlink2,
 } from 'lucide-react'
 import { toast } from 'sonner'
@@ -31,6 +32,12 @@ import { RestTimer } from '@/components/rest-timer'
 const daysOfWeek = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'] as const
 
 export const Route = createFileRoute('/app/_user/workout-session')({
+  validateSearch: (search: Record<string, unknown>) => ({
+    routineId: typeof search.routineId === 'string' ? search.routineId : undefined,
+    weekPlanId:
+      typeof search.weekPlanId === 'string' ? search.weekPlanId : undefined,
+    day: typeof search.day === 'string' ? search.day : undefined,
+  }),
   component: WorkoutSessionRouteComponent,
 })
 
@@ -187,7 +194,13 @@ export function WorkoutSessionRouteComponent() {
 
   const routineQuery = useQuery(
     api.routines.getRoutineById,
-    search.routineId ? { routineId: search.routineId } : 'skip'
+    search.routineId
+      ? { routineId: search.routineId as Id<'routines'> }
+      : 'skip'
+  )
+  const weekPlanQuery = useQuery(
+    api.workoutWeekPlans.getWorkoutWeekPlanById,
+    search.weekPlanId ? { planId: search.weekPlanId as Id<'workoutWeekPlans'> } : 'skip',
   )
   const todaysWorkout = routineQuery
 
@@ -201,7 +214,14 @@ export function WorkoutSessionRouteComponent() {
   const [restTimerSeconds, setRestTimerSeconds] = React.useState(90)
 
   const today = new Date()
-  const dayOfWeek = daysOfWeek[today.getDay()]
+  const currentDayOfWeek = daysOfWeek[today.getDay()]
+  const dayOfWeek =
+    search.day &&
+    (['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'] as const).includes(
+      search.day as any,
+    )
+      ? (search.day as (typeof daysOfWeek)[number])
+      : currentDayOfWeek
   const dayStart = new Date(today)
   dayStart.setHours(0, 0, 0, 0)
   const dayEnd = new Date(today)
@@ -239,8 +259,21 @@ export function WorkoutSessionRouteComponent() {
         sets: ex.sets.map((s: any) => ({ ...s, completed: false }))
       }))
       setLocalExercises(initial)
+    } else if (weekPlanQuery && localExercises.length === 0) {
+      const selectedDayPlan = weekPlanQuery.dayPlans.find(
+        (entry: any) => entry.day === dayOfWeek,
+      )
+      if (selectedDayPlan) {
+        const initial = selectedDayPlan.exercises.map((ex: any) => ({
+          exerciseId: ex.exerciseId,
+          exerciseName: ex.exerciseName,
+          supersetGroupId: undefined,
+          sets: ex.sets.map((s: any) => ({ ...s, completed: false })),
+        }))
+        setLocalExercises(initial)
+      }
     }
-  }, [existingSession, todaysWorkout])
+  }, [existingSession, todaysWorkout, weekPlanQuery, dayOfWeek])
 
   React.useEffect(() => {
     let timer: NodeJS.Timeout | undefined
@@ -292,6 +325,13 @@ export function WorkoutSessionRouteComponent() {
     const updated = cloneExercises(localExercises)
     const lastSet = updated[exIndex].sets.slice(-1)[0] || { reps: 8, weight: 0, restTime: 90, completed: false }
     updated[exIndex].sets.push({ ...lastSet, completed: false })
+    setLocalExercises(updated)
+    syncToDb(updated)
+  }
+
+  const removeSet = (exIndex: number, setIndex: number) => {
+    const updated = cloneExercises(localExercises)
+    updated[exIndex].sets.splice(setIndex, 1)
     setLocalExercises(updated)
     syncToDb(updated)
   }
@@ -416,7 +456,10 @@ export function WorkoutSessionRouteComponent() {
       <header className="flex items-start justify-between gap-3">
         <div className="space-y-2">
           <h1 className="text-2xl font-semibold">
-            {todaysWorkout?.name ?? 'Workout Session'}
+            {todaysWorkout?.name ??
+              (weekPlanQuery
+                ? `${weekPlanQuery.name} · ${dayOfWeek.toUpperCase()}`
+                : 'Workout Session')}
           </h1>
         </div>
         <Button
@@ -517,6 +560,7 @@ export function WorkoutSessionRouteComponent() {
                     <th className="py-2 text-center">kg</th>
                     <th className="py-2 text-center">Reps</th>
                     <th className="py-2 pr-4 text-center w-16">Done</th>
+                    <th className="py-2 pr-4 text-center w-12"></th>
                   </tr>
                 </thead>
                 <tbody>
@@ -555,6 +599,18 @@ export function WorkoutSessionRouteComponent() {
                           >
                             <CheckboxIndicator className="size-4" />
                           </Checkbox>
+                        </td>
+                        <td className="py-2 pr-4 text-center align-middle">
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                            onClick={() => removeSet(exerciseIndex, setIndex)}
+                            aria-label="Delete set"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
                         </td>
                       </tr>
                     )

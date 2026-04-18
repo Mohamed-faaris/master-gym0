@@ -7,7 +7,6 @@ import {
   Clock,
   Copy,
   Dumbbell,
-  Eye,
   Flame,
   Play,
   Sparkles,
@@ -58,46 +57,63 @@ type WeekPlanCardProps = {
   plan: any
   primaryAction: ReactNode
   accent?: 'saved' | 'premade'
+  onView: () => void
 }
 
 function WeekPlanCard({
   plan,
   primaryAction,
   accent = 'saved',
+  onView,
 }: WeekPlanCardProps) {
   return (
-    <Card className={accent === 'premade' ? 'border-chart-2/30 bg-chart-2/5' : ''}>
-      <CardHeader className="pb-3">
-        <div className="flex items-start justify-between gap-3">
-          <div className="space-y-2">
-            <CardTitle className="text-lg">{plan.name}</CardTitle>
-            {plan.goal ? <CardDescription>{plan.goal}</CardDescription> : null}
-          </div>
-          {accent === 'premade' ? (
-            <div className="rounded-full border border-chart-2/30 bg-chart-2/10 px-3 py-1 text-xs font-semibold text-chart-2">
-              Premade
+    <div className="space-y-3">
+      <Card
+        role="button"
+        tabIndex={0}
+        onClick={onView}
+        onKeyDown={(event) => {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault()
+            onView()
+          }
+        }}
+        className={`cursor-pointer transition-colors hover:border-primary/50 ${
+          accent === 'premade' ? 'border-chart-2/30 bg-chart-2/5' : ''
+        }`}
+      >
+        <CardHeader className="pb-3">
+          <div className="flex items-start justify-between gap-3">
+            <div className="space-y-2">
+              <CardTitle className="text-lg">{plan.name}</CardTitle>
+              {plan.goal ? <CardDescription>{plan.goal}</CardDescription> : null}
             </div>
-          ) : null}
-        </div>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <CalendarDays className="h-4 w-4" />
-          <span>{plan.activeDays.length} active days</span>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          {plan.activeDays.map((day: string) => (
-            <span
-              key={`${plan._id}-${day}`}
-              className="rounded-full border px-2 py-1 text-xs text-muted-foreground"
-            >
-              {dayLabels[day] || day}
-            </span>
-          ))}
-        </div>
-        <div>{primaryAction}</div>
-      </CardContent>
-    </Card>
+            {accent === 'premade' ? (
+              <div className="rounded-full border border-chart-2/30 bg-chart-2/10 px-3 py-1 text-xs font-semibold text-chart-2">
+                Premade
+              </div>
+            ) : null}
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <CalendarDays className="h-4 w-4" />
+            <span>{plan.activeDays.length} active days</span>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {plan.activeDays.map((day: string) => (
+              <span
+                key={`${plan._id}-${day}`}
+                className="rounded-full border px-2 py-1 text-xs text-muted-foreground"
+              >
+                {dayLabels[day] || day}
+              </span>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+      <div>{primaryAction}</div>
+    </div>
   )
 }
 
@@ -225,6 +241,9 @@ function RouteComponent() {
         return (right.updatedAt ?? right.createdAt) - (left.updatedAt ?? left.createdAt)
       })
     : []
+
+  const getWeekPlanStartDay = (plan: { activeDays: string[] }) =>
+    plan.activeDays.includes(dayOfWeek) ? dayOfWeek : plan.activeDays[0]
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60)
@@ -367,7 +386,15 @@ function RouteComponent() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Link to="/app/workout-session" className="block">
+              <Link
+                to="/app/workout-session"
+                search={{
+                  routineId: undefined,
+                  weekPlanId: undefined,
+                  day: undefined,
+                }}
+                className="block"
+              >
                 <Button
                   className="h-12 w-full gap-2 bg-background text-foreground hover:bg-background/90"
                 >
@@ -438,7 +465,11 @@ function RouteComponent() {
                   primaryAction={
                     <Link
                       to="/app/workout-session"
-                      search={{ routineId: routine._id }}
+                      search={{
+                        routineId: routine._id,
+                        weekPlanId: undefined,
+                        day: undefined,
+                      }}
                       className="block"
                     >
                       <Button className="w-full gap-2">
@@ -486,15 +517,25 @@ function RouteComponent() {
                 <WeekPlanCard
                   key={plan._id}
                   plan={plan}
+                  onView={() =>
+                    navigate({
+                      to: '/app/workout-week-plans/$planId',
+                      params: { planId: plan._id },
+                    })
+                  }
                   primaryAction={
                     <Link
-                      to="/app/workout-week-plans/$planId"
-                      params={{ planId: plan._id }}
+                      to="/app/workout-session"
+                      search={{
+                        routineId: undefined,
+                        weekPlanId: plan._id,
+                        day: getWeekPlanStartDay(plan),
+                      }}
                       className="block"
                     >
                       <Button className="w-full gap-2">
-                        <Eye className="h-4 w-4" />
-                        View workout plan
+                        <Play className="h-4 w-4" />
+                        Start workout
                       </Button>
                     </Link>
                   }
@@ -536,7 +577,11 @@ function RouteComponent() {
                       primaryAction={
                         <Link
                           to="/app/workout-session"
-                          search={{ routineId: routine._id }}
+                          search={{
+                            routineId: routine._id,
+                            weekPlanId: undefined,
+                            day: undefined,
+                          }}
                           className="block"
                         >
                           <Button className="w-full gap-2">
@@ -589,15 +634,25 @@ function RouteComponent() {
                       key={plan._id}
                       plan={plan}
                       accent="premade"
+                      onView={() =>
+                        navigate({
+                          to: '/app/workout-week-plans/$planId',
+                          params: { planId: plan._id },
+                        })
+                      }
                       primaryAction={
                         <Link
-                          to="/app/workout-week-plans/$planId"
-                          params={{ planId: plan._id }}
+                          to="/app/workout-session"
+                          search={{
+                            routineId: undefined,
+                            weekPlanId: plan._id,
+                            day: getWeekPlanStartDay(plan),
+                          }}
                           className="block"
                         >
-                          <Button variant="outline" className="w-full gap-2">
-                            <Eye className="h-4 w-4" />
-                            View plan
+                          <Button className="w-full gap-2">
+                            <Play className="h-4 w-4" />
+                            Start workout
                           </Button>
                         </Link>
                       }

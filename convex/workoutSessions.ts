@@ -242,6 +242,16 @@ export const cancelSession = mutation({
   },
 })
 
+export const deleteSession = mutation({
+  args: {
+    sessionId: v.id('workoutSessions'),
+  },
+  handler: async (ctx, args) => {
+    await ctx.db.delete(args.sessionId)
+    return { success: true }
+  },
+})
+
 /**
  * Get current ongoing workout session for user
  */

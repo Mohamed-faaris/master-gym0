@@ -1,5 +1,5 @@
 import { Link } from '@tanstack/react-router'
-import { CalendarDays, ChevronLeft, Target } from 'lucide-react'
+import { CalendarDays, ChevronLeft, Play, Target } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -17,6 +17,7 @@ type WorkoutWeekPlanViewProps = {
   backTo: string
   backParams?: Record<string, string>
   plan: {
+    _id: string
     name: string
     goal?: string
     notes?: string
@@ -117,6 +118,21 @@ export function WorkoutWeekPlanView({
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
+                    <Link
+                      to="/app/workout-session"
+                      search={{
+                        routineId: undefined,
+                        weekPlanId: plan._id,
+                        day: dayPlan.day,
+                      }}
+                      className="block"
+                    >
+                      <Button className="w-full gap-2">
+                        <Play className="h-4 w-4" />
+                        Start workout
+                      </Button>
+                    </Link>
+
                     {dayPlan.focus ? (
                       <div className="text-sm">
                         <p className="font-medium">Focus</p>
