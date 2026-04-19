@@ -14,7 +14,8 @@ NC='\033[0m'
 PROJECT="master-gym"
 DATE=$(date +%Y%m%d)
 BUILD_DIR="$HOME/Downloads/app-build"
-APK_SOURCE="android/app/build/outputs/apk/release/app-release-unsigned.apk"
+APK_SOURCE="android/app/build/outputs/apk/release/app-release.apk"
+APP_ID="com.yourcompany.mastergym"
 
 echo -e "${BLUE}🔨 Building RELEASE APK...${NC}"
 echo ""
@@ -49,10 +50,8 @@ echo -e "${YELLOW}Installing...${NC}"
 adb install -r "$APK_SOURCE"
 
 echo -e "${YELLOW}Launching...${NC}"
-adb shell monkey -p com.yourcompany.dairy 1
+adb shell monkey -p "$APP_ID" 1
 
 echo -e "${GREEN}✅ Release build installed!${NC}"
 echo -e "${GREEN}📁 APK saved: $APK_DEST${NC}"
 echo ""
-echo -e "${YELLOW}⚠️  Note: This is an unsigned release APK.${NC}"
-echo -e "${YELLOW}   For Play Store, you need to sign it first.${NC}"

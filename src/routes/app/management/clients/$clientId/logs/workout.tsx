@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react'
-import { Id } from '@convex/_generated/dataModel'
 import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
 import {
   ArrowLeft,
@@ -13,9 +12,10 @@ import {
   Play,
   Plus,
 } from 'lucide-react'
-import { useQuery, useMutation } from 'convex/react'
+import { useMutation, useQuery } from 'convex/react'
 
 import { api } from '@convex/_generated/api'
+import type { Id } from '@convex/_generated/dataModel'
 import { useAuth } from '@/components/auth/useAuth'
 import {
   Card,
@@ -37,6 +37,7 @@ import {
 import { DAYS_OF_WEEK } from '@/lib/workout-plan-helpers'
 
 const privilegedRoles = new Set(['trainer', 'admin'])
+const daysOfWeek = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'] as const
 
 export const Route = createFileRoute(
   '/app/management/clients/$clientId/logs/workout',
@@ -77,6 +78,11 @@ function WorkoutLogsRoute() {
   const copyWorkoutWeekPlan = useMutation(
     api.workoutWeekPlans.copyWorkoutWeekPlanToUser,
   )
+
+  const today = new Date()
+  const currentDayOfWeek = daysOfWeek[today.getDay()]
+  const getWeekPlanStartDay = (plan: { activeDays: Array<string> }) =>
+    plan.activeDays.includes(currentDayOfWeek) ? currentDayOfWeek : plan.activeDays[0]
 
   useEffect(() => {
     if (isLoading) return
@@ -184,20 +190,6 @@ function WorkoutLogsRoute() {
                 navigate({
                   to: '/app/management/clients/$clientId/routines/new',
                   params: { clientId },
-                  search: { mode: 'routine' },
-                })
-              }
-              size="sm"
-              variant="outline"
-              className="gap-2"
-            >
-              <Plus className="w-4 h-4" /> New Routine
-            </Button>
-            <Button
-              onClick={() =>
-                navigate({
-                  to: '/app/management/clients/$clientId/routines/new',
-                  params: { clientId },
                   search: { mode: 'weekPlan' },
                 })
               }
@@ -263,13 +255,7 @@ function WorkoutLogsRoute() {
               </Card>
             ))}
           </div>
-        ) : (
-          <Card>
-            <CardContent className="pt-6 text-center text-muted-foreground">
-              This client does not have any assigned routines.
-            </CardContent>
-          </Card>
-        )}
+        ) : null}
 
         <div className="pt-2">
           <h3 className="text-lg font-semibold">Saved Week Plans</h3>
@@ -278,40 +264,68 @@ function WorkoutLogsRoute() {
         {weekPlans && weekPlans.length > 0 ? (
           <div className="space-y-4">
             {weekPlans.map((plan) => (
-              <Card key={plan._id}>
-                <CardHeader>
-                  <CardTitle>{plan.name}</CardTitle>
-                  {plan.goal && <CardDescription>{plan.goal}</CardDescription>}
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <CalendarDays className="h-4 w-4" />
-                    <span>{plan.activeDays.length} active days</span>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    {plan.activeDays.map((day) => (
-                      <span
-                        key={day}
-                        className="rounded-full border px-2 py-1 text-xs text-muted-foreground"
-                      >
-                        {DAYS_OF_WEEK.find((entry) => entry.value === day)?.label}
-                      </span>
-                    ))}
-                  </div>
-                  <Button
-                    variant="outline"
-                    className="w-full gap-2"
-                    onClick={() =>
+              <div key={plan._id} className="space-y-3">
+                <Card
+                  role="button"
+                  tabIndex={0}
+                  onClick={() =>
+                    navigate({
+                      to: '/app/management/clients/$clientId/routines/week-plans/$planId',
+                      params: { clientId, planId: plan._id },
+                    })
+                  }
+                  onKeyDown={(event) => {
+                    if (event.key === 'Enter' || event.key === ' ') {
+                      event.preventDefault()
                       navigate({
                         to: '/app/management/clients/$clientId/routines/week-plans/$planId',
                         params: { clientId, planId: plan._id },
                       })
                     }
-                  >
-                    <Edit className="w-4 h-4" /> Edit Week Plan
+                  }}
+                  className="cursor-pointer transition-colors hover:border-primary/50"
+                >
+                  <CardHeader>
+                    <CardTitle>{plan.name}</CardTitle>
+                    {plan.goal && <CardDescription>{plan.goal}</CardDescription>}
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <CalendarDays className="h-4 w-4" />
+                      <span>{plan.activeDays.length} active days</span>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {plan.activeDays.map((day) => (
+                        <span
+                          key={day}
+                          className={`rounded-full border px-2 py-1 text-xs ${
+                            day === currentDayOfWeek
+                              ? 'border-primary bg-primary/10 font-medium text-primary'
+                              : 'text-muted-foreground'
+                          }`}
+                        >
+                          {DAYS_OF_WEEK.find((entry) => entry.value === day)?.label}
+                        </span>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+                <Link
+                  to="/app/management/clients/$clientId/workout-session"
+                  params={{ clientId }}
+                  search={{
+                    routineId: undefined,
+                    weekPlanId: plan._id,
+                    day: getWeekPlanStartDay(plan),
+                  }}
+                  className="block"
+                >
+                  <Button className="w-full gap-2">
+                    <Play className="w-4 h-4" />
+                    Start workout
                   </Button>
-                </CardContent>
-              </Card>
+                </Link>
+              </div>
             ))}
           </div>
         ) : (
@@ -374,7 +388,7 @@ function WorkoutLogsRoute() {
                     </div>
                   </div>
 
-                  {session.exercises && session.exercises.length > 0 && (
+                  {session.exercises.length > 0 && (
                     <div className="space-y-2">
                       <p className="text-sm font-medium text-muted-foreground">
                         {session.exercises.length} exercise
@@ -391,7 +405,7 @@ function WorkoutLogsRoute() {
                               {exercise.exerciseName || 'Exercise'}
                             </span>
                             <span className="text-muted-foreground">
-                              {exercise.sets?.length || 0} sets
+                              {exercise.sets.length} sets
                             </span>
                           </div>
                         ))}

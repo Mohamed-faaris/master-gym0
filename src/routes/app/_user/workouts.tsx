@@ -1,5 +1,5 @@
 import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
-import { useState, type ReactNode } from 'react'
+import { useState } from 'react'
 import {
   Calendar,
   CalendarDays,
@@ -14,6 +14,7 @@ import {
 import { useMutation, useQuery } from 'convex/react'
 import { toast } from 'sonner'
 import { api } from '@convex/_generated/api'
+import type { ReactNode } from 'react'
 
 import type { Id } from '@convex/_generated/dataModel'
 import { useAuth } from '@/components/auth/useAuth'
@@ -45,6 +46,8 @@ const dayLabels: Record<string, string> = {
   sun: 'Sunday',
 }
 
+const dayOrder = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'] as const
+
 type RoutineCardProps = {
   routine: any
   isToday?: boolean
@@ -66,6 +69,8 @@ function WeekPlanCard({
   accent = 'saved',
   onView,
 }: WeekPlanCardProps) {
+  const currentDayOfWeek = dayOrder[new Date().getDay()]
+
   return (
     <div className="space-y-3">
       <Card
@@ -104,7 +109,11 @@ function WeekPlanCard({
             {plan.activeDays.map((day: string) => (
               <span
                 key={`${plan._id}-${day}`}
-                className="rounded-full border px-2 py-1 text-xs text-muted-foreground"
+                className={`rounded-full border px-2 py-1 text-xs ${
+                  day === currentDayOfWeek
+                    ? 'border-primary bg-primary/10 font-medium text-primary'
+                    : 'text-muted-foreground'
+                }`}
               >
                 {dayLabels[day] || day}
               </span>
@@ -238,11 +247,11 @@ function RouteComponent() {
           return leftPriority - rightPriority
         }
 
-        return (right.updatedAt ?? right.createdAt) - (left.updatedAt ?? left.createdAt)
+        return right.updatedAt - left.updatedAt
       })
     : []
 
-  const getWeekPlanStartDay = (plan: { activeDays: string[] }) =>
+  const getWeekPlanStartDay = (plan: { activeDays: Array<string> }) =>
     plan.activeDays.includes(dayOfWeek) ? dayOfWeek : plan.activeDays[0]
 
   const formatTime = (seconds: number) => {

@@ -1,6 +1,6 @@
-import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { Link, createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useQuery } from 'convex/react'
-import { CalendarDays, Dumbbell, Plus } from 'lucide-react'
+import { CalendarDays, Dumbbell, Play, Plus } from 'lucide-react'
 
 import { api } from '@convex/_generated/api'
 import { useAuth } from '@/components/auth/useAuth'
@@ -21,6 +21,7 @@ export const Route = createFileRoute('/app/management/routines/')({
 function ManagementRoutinesIndexComponent() {
   const navigate = useNavigate()
   const { user } = useAuth()
+  const today = new Date()
 
   const routines = useQuery(
     api.routines.getReusableRoutinesByAuthor,
@@ -32,6 +33,11 @@ function ManagementRoutinesIndexComponent() {
   )
 
   const isAdmin = user?.role === 'admin'
+  const currentDayOfWeek = (
+    ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'] as const
+  )[today.getDay()]
+  const getWeekPlanStartDay = (plan: { activeDays: Array<string> }) =>
+    plan.activeDays.includes(currentDayOfWeek) ? currentDayOfWeek : plan.activeDays[0]
 
   return (
     <div className="p-4 space-y-6 pb-24 max-w-4xl mx-auto">
@@ -47,18 +53,6 @@ function ManagementRoutinesIndexComponent() {
           </p>
         </div>
         <div className="flex gap-2">
-          <Button
-            variant="outline"
-            className="gap-2"
-            onClick={() =>
-              navigate({
-                to: '/app/management/routines/new',
-                search: { mode: 'routine' },
-              })
-            }
-          >
-            <Plus className="w-4 h-4" /> New Routine
-          </Button>
           <Button
             className="gap-2"
             onClick={() =>
@@ -142,37 +136,67 @@ function ManagementRoutinesIndexComponent() {
 
         {weekPlans?.length ? (
           weekPlans.map((plan) => (
-            <Card
-              key={plan._id}
-              className="cursor-pointer hover:border-primary/50 transition-colors"
-              onClick={() =>
-                navigate({
-                  to: '/app/management/routines/week-plans/$planId',
-                  params: { planId: plan._id },
-                })
-              }
-            >
-              <CardHeader className="pb-2">
-                <CardTitle>{plan.name}</CardTitle>
-                {plan.goal && <CardDescription>{plan.goal}</CardDescription>}
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="text-sm text-muted-foreground flex items-center gap-2">
-                  <CalendarDays className="w-4 h-4" />
-                  <span>{plan.activeDays.length} active days</span>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {plan.activeDays.map((day) => (
-                    <span
-                      key={day}
-                      className="rounded-full border px-2 py-1 text-xs text-muted-foreground"
-                    >
-                      {DAYS_OF_WEEK.find((entry) => entry.value === day)?.label}
-                    </span>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+            <div key={plan._id} className="space-y-3">
+              <Card
+                role="button"
+                tabIndex={0}
+                className="cursor-pointer transition-colors hover:border-primary/50"
+                onClick={() =>
+                  navigate({
+                    to: '/app/management/routines/week-plans/$planId',
+                    params: { planId: plan._id },
+                  })
+                }
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault()
+                    navigate({
+                      to: '/app/management/routines/week-plans/$planId',
+                      params: { planId: plan._id },
+                    })
+                  }
+                }}
+              >
+                <CardHeader className="pb-2">
+                  <CardTitle>{plan.name}</CardTitle>
+                  {plan.goal && <CardDescription>{plan.goal}</CardDescription>}
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="text-sm text-muted-foreground flex items-center gap-2">
+                    <CalendarDays className="w-4 h-4" />
+                    <span>{plan.activeDays.length} active days</span>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {plan.activeDays.map((day) => (
+                      <span
+                        key={day}
+                        className={`rounded-full border px-2 py-1 text-xs ${
+                          day === currentDayOfWeek
+                            ? 'border-primary bg-primary/10 font-medium text-primary'
+                            : 'text-muted-foreground'
+                        }`}
+                      >
+                        {DAYS_OF_WEEK.find((entry) => entry.value === day)?.label}
+                      </span>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+              <Link
+                to="/app/workout-session"
+                search={{
+                  routineId: undefined,
+                  weekPlanId: plan._id,
+                  day: getWeekPlanStartDay(plan),
+                }}
+                className="block"
+              >
+                <Button className="w-full gap-2">
+                  <Play className="w-4 h-4" />
+                  Start workout
+                </Button>
+              </Link>
+            </div>
           ))
         ) : (
           <div className="text-center py-12 border rounded-lg bg-muted/10 text-muted-foreground">

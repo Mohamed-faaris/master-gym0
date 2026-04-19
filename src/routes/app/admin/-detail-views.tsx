@@ -133,6 +133,83 @@ export function ClientDetailView({
               <p className="text-sm font-medium">{client.goal || 'Not set'}</p>
             </div>
 
+            {/* Measurements - Only for Trainer Managed Clients */}
+            {client.role === 'trainerManagedCustomer' && (
+              <div className="rounded-lg border border-dashed bg-muted/20 p-4">
+                <p className="text-xs font-medium text-muted-foreground mb-3">
+                  Measurements
+                </p>
+                {client.measurements ? (
+                  <div className="space-y-3">
+                    <div className="grid grid-cols-2 gap-3 text-sm">
+                      {client.measurements.chest && (
+                        <div>
+                          <p className="text-xs text-muted-foreground">Chest</p>
+                          <p className="font-medium">
+                            {client.measurements.chest} cm
+                          </p>
+                        </div>
+                      )}
+                      {client.measurements.shoulder && (
+                        <div>
+                          <p className="text-xs text-muted-foreground">
+                            Shoulder
+                          </p>
+                          <p className="font-medium">
+                            {client.measurements.shoulder} cm
+                          </p>
+                        </div>
+                      )}
+                      {client.measurements.hip && (
+                        <div>
+                          <p className="text-xs text-muted-foreground">Hip</p>
+                          <p className="font-medium">
+                            {client.measurements.hip} cm
+                          </p>
+                        </div>
+                      )}
+                      {client.measurements.arms && (
+                        <div>
+                          <p className="text-xs text-muted-foreground">Arms</p>
+                          <p className="font-medium">
+                            {client.measurements.arms} cm
+                          </p>
+                        </div>
+                      )}
+                      {client.measurements.legs && (
+                        <div>
+                          <p className="text-xs text-muted-foreground">Legs</p>
+                          <p className="font-medium">
+                            {client.measurements.legs} cm
+                          </p>
+                        </div>
+                      )}
+                      {client.measurements.timeSpanDays && (
+                        <div>
+                          <p className="text-xs text-muted-foreground">
+                            Time Span
+                          </p>
+                          <p className="font-medium">
+                            {client.measurements.timeSpanDays} days
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                    {client.measurements.updatedAt && (
+                      <p className="text-xs text-muted-foreground">
+                        Last updated:{' '}
+                        {new Date(client.measurements.updatedAt).toLocaleDateString()}
+                      </p>
+                    )}
+                  </div>
+                ) : (
+                  <p className="text-sm text-muted-foreground">
+                    No measurements recorded yet.
+                  </p>
+                )}
+              </div>
+            )}
+
             {/* Trainer */}
             {client.trainerId && (
               <div>
@@ -230,83 +307,6 @@ export function ClientDetailView({
           </Button>
         </CardContent>
       </Card>
-
-      {/* Measurements - Only for Trainer Managed Clients */}
-      {client.role === 'trainerManagedCustomer' && (
-        <Card className="border-dashed">
-          <CardHeader>
-            <CardTitle className="text-base">Measurements</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {client.measurements ? (
-              <div className="space-y-3">
-                <div className="grid grid-cols-2 gap-3 text-sm">
-                  {client.measurements.chest && (
-                    <div>
-                      <p className="text-xs text-muted-foreground">Chest</p>
-                      <p className="font-medium">
-                        {client.measurements.chest} cm
-                      </p>
-                    </div>
-                  )}
-                  {client.measurements.shoulder && (
-                    <div>
-                      <p className="text-xs text-muted-foreground">Shoulder</p>
-                      <p className="font-medium">
-                        {client.measurements.shoulder} cm
-                      </p>
-                    </div>
-                  )}
-                  {client.measurements.hip && (
-                    <div>
-                      <p className="text-xs text-muted-foreground">Hip</p>
-                      <p className="font-medium">
-                        {client.measurements.hip} cm
-                      </p>
-                    </div>
-                  )}
-                  {client.measurements.arms && (
-                    <div>
-                      <p className="text-xs text-muted-foreground">Arms</p>
-                      <p className="font-medium">
-                        {client.measurements.arms} cm
-                      </p>
-                    </div>
-                  )}
-                  {client.measurements.legs && (
-                    <div>
-                      <p className="text-xs text-muted-foreground">Legs</p>
-                      <p className="font-medium">
-                        {client.measurements.legs} cm
-                      </p>
-                    </div>
-                  )}
-                  {client.measurements.timeSpanDays && (
-                    <div>
-                      <p className="text-xs text-muted-foreground">Time Span</p>
-                      <p className="font-medium">
-                        {client.measurements.timeSpanDays} days
-                      </p>
-                    </div>
-                  )}
-                </div>
-                {client.measurements.updatedAt && (
-                  <p className="text-xs text-muted-foreground">
-                    Last updated:{' '}
-                    {new Date(
-                      client.measurements.updatedAt,
-                    ).toLocaleDateString()}
-                  </p>
-                )}
-              </div>
-            ) : (
-              <p className="text-sm text-muted-foreground">
-                No measurements recorded yet.
-              </p>
-            )}
-          </CardContent>
-        </Card>
-      )}
     </div>
   )
 }
