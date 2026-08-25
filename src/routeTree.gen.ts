@@ -11,62 +11,62 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiIndexRouteImport } from './routes/api/index'
-import { Route as AppSignInRouteImport } from './routes/app/sign-in'
 import { Route as AppUserRouteImport } from './routes/app/_user'
-import { Route as AppManagementRouteRouteImport } from './routes/app/management/route'
 import { Route as AppAdminRouteRouteImport } from './routes/app/admin/route'
-import { Route as AppManagementIndexRouteImport } from './routes/app/management/index'
-import { Route as AppAdminIndexRouteImport } from './routes/app/admin/index'
+import { Route as AppManagementRouteRouteImport } from './routes/app/management/route'
+import { Route as AppSignInRouteImport } from './routes/app/sign-in'
 import { Route as AppUserIndexRouteImport } from './routes/app/_user/index'
-import { Route as AppManagementProfileRouteImport } from './routes/app/management/profile'
-import { Route as AppAdminProfileStoriesRouteImport } from './routes/app/admin/profile-stories'
-import { Route as AppAdminProfileImagesRouteImport } from './routes/app/admin/profile-images'
-import { Route as AppAdminProfileExercisesRouteImport } from './routes/app/admin/profile-exercises'
-import { Route as AppAdminProfileAboutRouteImport } from './routes/app/admin/profile-about'
-import { Route as AppAdminProfileRouteImport } from './routes/app/admin/profile'
-import { Route as AppUserWorkoutsRouteImport } from './routes/app/_user/workouts'
-import { Route as AppUserWorkoutSessionRouteImport } from './routes/app/_user/workout-session'
-import { Route as AppUserWeightRouteImport } from './routes/app/_user/weight'
-import { Route as AppUserSuccessStoryRouteImport } from './routes/app/_user/success-story'
-import { Route as AppUserSessionsRouteImport } from './routes/app/_user/sessions'
-import { Route as AppUserLogsRouteImport } from './routes/app/_user/logs'
-import { Route as AppUserGalleryRouteImport } from './routes/app/_user/gallery'
-import { Route as AppUserDietPlanRouteImport } from './routes/app/_user/diet-plan'
-import { Route as AppUserDietLogsRouteImport } from './routes/app/_user/diet-logs'
-import { Route as AppUserDietHistoryRouteImport } from './routes/app/_user/diet-history'
-import { Route as AppUserDashboardRouteImport } from './routes/app/_user/dashboard'
 import { Route as AppUserAccountRouteImport } from './routes/app/_user/account'
-import { Route as AppManagementRoutinesIndexRouteImport } from './routes/app/management/routines/index'
-import { Route as AppManagementDietPlansIndexRouteImport } from './routes/app/management/diet-plans/index'
-import { Route as AppManagementClientsIndexRouteImport } from './routes/app/management/clients/index'
-import { Route as AppAdminListIndexRouteImport } from './routes/app/admin/list/index'
-import { Route as AppManagementRoutinesNewRouteImport } from './routes/app/management/routines/new'
-import { Route as AppManagementRoutinesRoutineIdRouteImport } from './routes/app/management/routines/$routineId'
-import { Route as AppManagementDietPlansNewRouteImport } from './routes/app/management/diet-plans/new'
-import { Route as AppManagementDietPlansPlanIdRouteImport } from './routes/app/management/diet-plans/$planId'
-import { Route as AppAdminProfileStoryNewRouteImport } from './routes/app/admin/profile-story/new'
-import { Route as AppAdminListTrainersRouteImport } from './routes/app/admin/list/trainers'
-import { Route as AppAdminListTrainerManagedRouteImport } from './routes/app/admin/list/trainer-managed'
-import { Route as AppAdminListSelfManagedRouteImport } from './routes/app/admin/list/self-managed'
-import { Route as AppAdminListClientIdRouteImport } from './routes/app/admin/list/$clientId'
-import { Route as AppUserWorkoutWeekPlansPlanIdRouteImport } from './routes/app/_user/workout-week-plans/$planId'
+import { Route as AppUserDashboardRouteImport } from './routes/app/_user/dashboard'
+import { Route as AppUserDietHistoryRouteImport } from './routes/app/_user/diet-history'
+import { Route as AppUserDietLogsRouteImport } from './routes/app/_user/diet-logs'
+import { Route as AppUserDietPlanRouteImport } from './routes/app/_user/diet-plan'
+import { Route as AppUserGalleryRouteImport } from './routes/app/_user/gallery'
+import { Route as AppUserLogsRouteImport } from './routes/app/_user/logs'
+import { Route as AppUserSessionsRouteImport } from './routes/app/_user/sessions'
+import { Route as AppUserSuccessStoryRouteImport } from './routes/app/_user/success-story'
+import { Route as AppUserWeightRouteImport } from './routes/app/_user/weight'
+import { Route as AppUserWorkoutSessionRouteImport } from './routes/app/_user/workout-session'
+import { Route as AppUserWorkoutsRouteImport } from './routes/app/_user/workouts'
+import { Route as AppAdminIndexRouteImport } from './routes/app/admin/index'
+import { Route as AppAdminProfileRouteImport } from './routes/app/admin/profile'
+import { Route as AppAdminProfileAboutRouteImport } from './routes/app/admin/profile-about'
+import { Route as AppAdminProfileExercisesRouteImport } from './routes/app/admin/profile-exercises'
+import { Route as AppAdminProfileImagesRouteImport } from './routes/app/admin/profile-images'
+import { Route as AppAdminProfileStoriesRouteImport } from './routes/app/admin/profile-stories'
+import { Route as AppManagementIndexRouteImport } from './routes/app/management/index'
+import { Route as AppManagementProfileRouteImport } from './routes/app/management/profile'
 import { Route as AppUserRoutinesRoutineIdRouteImport } from './routes/app/_user/routines/$routineId'
-import { Route as AppManagementClientsClientIdIndexRouteImport } from './routes/app/management/clients/$clientId/index'
-import { Route as AppManagementRoutinesWeekPlansPlanIdRouteImport } from './routes/app/management/routines/week-plans/$planId'
-import { Route as AppManagementClientsClientIdWorkoutSessionRouteImport } from './routes/app/management/clients/$clientId/workout-session'
-import { Route as AppManagementClientsClientIdViewWorkRouteImport } from './routes/app/management/clients/$clientId/view-work'
-import { Route as AppManagementClientsClientIdPatternRouteImport } from './routes/app/management/clients/$clientId/pattern'
-import { Route as AppManagementClientsClientIdCheckRouteImport } from './routes/app/management/clients/$clientId/check'
-import { Route as AppAdminProfileStoryStoryIdEditRouteImport } from './routes/app/admin/profile-story/$storyId.edit'
-import { Route as AppAdminListViewWorkClientIdRouteImport } from './routes/app/admin/list/view-work/$clientId'
+import { Route as AppUserWorkoutWeekPlansPlanIdRouteImport } from './routes/app/_user/workout-week-plans/$planId'
+import { Route as AppAdminListIndexRouteImport } from './routes/app/admin/list/index'
+import { Route as AppAdminListClientIdRouteImport } from './routes/app/admin/list/$clientId'
+import { Route as AppAdminListSelfManagedRouteImport } from './routes/app/admin/list/self-managed'
+import { Route as AppAdminListTrainerManagedRouteImport } from './routes/app/admin/list/trainer-managed'
+import { Route as AppAdminListTrainersRouteImport } from './routes/app/admin/list/trainers'
+import { Route as AppAdminProfileStoryNewRouteImport } from './routes/app/admin/profile-story/new'
+import { Route as AppManagementClientsIndexRouteImport } from './routes/app/management/clients/index'
+import { Route as AppManagementDietPlansIndexRouteImport } from './routes/app/management/diet-plans/index'
+import { Route as AppManagementDietPlansPlanIdRouteImport } from './routes/app/management/diet-plans/$planId'
+import { Route as AppManagementDietPlansNewRouteImport } from './routes/app/management/diet-plans/new'
+import { Route as AppManagementRoutinesIndexRouteImport } from './routes/app/management/routines/index'
+import { Route as AppManagementRoutinesRoutineIdRouteImport } from './routes/app/management/routines/$routineId'
+import { Route as AppManagementRoutinesNewRouteImport } from './routes/app/management/routines/new'
 import { Route as AppAdminListPatternClientIdRouteImport } from './routes/app/admin/list/pattern/$clientId'
-import { Route as AppManagementClientsClientIdRoutinesNewRouteImport } from './routes/app/management/clients/$clientId/routines/new'
-import { Route as AppManagementClientsClientIdRoutinesRoutineIdRouteImport } from './routes/app/management/clients/$clientId/routines/$routineId'
-import { Route as AppManagementClientsClientIdLogsWorkoutRouteImport } from './routes/app/management/clients/$clientId/logs/workout'
-import { Route as AppManagementClientsClientIdLogsWeightRouteImport } from './routes/app/management/clients/$clientId/logs/weight'
-import { Route as AppManagementClientsClientIdLogsDietRouteImport } from './routes/app/management/clients/$clientId/logs/diet'
-import { Route as AppAdminListLogsWeightClientIdRouteImport } from './routes/app/admin/list/logs/weight/$clientId'
+import { Route as AppAdminListViewWorkClientIdRouteImport } from './routes/app/admin/list/view-work/$clientId'
+import { Route as AppAdminProfileStoryStoryIdEditRouteImport } from './routes/app/admin/profile-story/$storyId.edit'
+import { Route as AppManagementClientsClientIdIndexRouteImport } from './routes/app/management/clients/$clientId/index'
+import { Route as AppManagementClientsClientIdCheckRouteImport } from './routes/app/management/clients/$clientId/check'
+import { Route as AppManagementClientsClientIdPatternRouteImport } from './routes/app/management/clients/$clientId/pattern'
+import { Route as AppManagementClientsClientIdViewWorkRouteImport } from './routes/app/management/clients/$clientId/view-work'
+import { Route as AppManagementClientsClientIdWorkoutSessionRouteImport } from './routes/app/management/clients/$clientId/workout-session'
+import { Route as AppManagementRoutinesWeekPlansPlanIdRouteImport } from './routes/app/management/routines/week-plans/$planId'
 import { Route as AppAdminListLogsDietClientIdRouteImport } from './routes/app/admin/list/logs/diet/$clientId'
+import { Route as AppAdminListLogsWeightClientIdRouteImport } from './routes/app/admin/list/logs/weight/$clientId'
+import { Route as AppManagementClientsClientIdLogsDietRouteImport } from './routes/app/management/clients/$clientId/logs/diet'
+import { Route as AppManagementClientsClientIdLogsWeightRouteImport } from './routes/app/management/clients/$clientId/logs/weight'
+import { Route as AppManagementClientsClientIdLogsWorkoutRouteImport } from './routes/app/management/clients/$clientId/logs/workout'
+import { Route as AppManagementClientsClientIdRoutinesRoutineIdRouteImport } from './routes/app/management/clients/$clientId/routines/$routineId'
+import { Route as AppManagementClientsClientIdRoutinesNewRouteImport } from './routes/app/management/clients/$clientId/routines/new'
 import { Route as AppManagementClientsClientIdRoutinesWeekPlansPlanIdRouteImport } from './routes/app/management/clients/$clientId/routines/week-plans/$planId'
 
 const IndexRoute = IndexRouteImport.update({
@@ -79,19 +79,9 @@ const ApiIndexRoute = ApiIndexRouteImport.update({
   path: '/api/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AppSignInRoute = AppSignInRouteImport.update({
-  id: '/app/sign-in',
-  path: '/app/sign-in',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const AppUserRoute = AppUserRouteImport.update({
   id: '/app/_user',
   path: '/app',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AppManagementRouteRoute = AppManagementRouteRouteImport.update({
-  id: '/app/management',
-  path: '/app/management',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AppAdminRouteRoute = AppAdminRouteRouteImport.update({
@@ -99,34 +89,94 @@ const AppAdminRouteRoute = AppAdminRouteRouteImport.update({
   path: '/app/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AppManagementIndexRoute = AppManagementIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => AppManagementRouteRoute,
+const AppManagementRouteRoute = AppManagementRouteRouteImport.update({
+  id: '/app/management',
+  path: '/app/management',
+  getParentRoute: () => rootRouteImport,
 } as any)
-const AppAdminIndexRoute = AppAdminIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => AppAdminRouteRoute,
+const AppSignInRoute = AppSignInRouteImport.update({
+  id: '/app/sign-in',
+  path: '/app/sign-in',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AppUserIndexRoute = AppUserIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AppUserRoute,
 } as any)
-const AppManagementProfileRoute = AppManagementProfileRouteImport.update({
-  id: '/profile',
-  path: '/profile',
-  getParentRoute: () => AppManagementRouteRoute,
+const AppUserAccountRoute = AppUserAccountRouteImport.update({
+  id: '/account',
+  path: '/account',
+  getParentRoute: () => AppUserRoute,
 } as any)
-const AppAdminProfileStoriesRoute = AppAdminProfileStoriesRouteImport.update({
-  id: '/profile-stories',
-  path: '/profile-stories',
+const AppUserDashboardRoute = AppUserDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => AppUserRoute,
+} as any)
+const AppUserDietHistoryRoute = AppUserDietHistoryRouteImport.update({
+  id: '/diet-history',
+  path: '/diet-history',
+  getParentRoute: () => AppUserRoute,
+} as any)
+const AppUserDietLogsRoute = AppUserDietLogsRouteImport.update({
+  id: '/diet-logs',
+  path: '/diet-logs',
+  getParentRoute: () => AppUserRoute,
+} as any)
+const AppUserDietPlanRoute = AppUserDietPlanRouteImport.update({
+  id: '/diet-plan',
+  path: '/diet-plan',
+  getParentRoute: () => AppUserRoute,
+} as any)
+const AppUserGalleryRoute = AppUserGalleryRouteImport.update({
+  id: '/gallery',
+  path: '/gallery',
+  getParentRoute: () => AppUserRoute,
+} as any)
+const AppUserLogsRoute = AppUserLogsRouteImport.update({
+  id: '/logs',
+  path: '/logs',
+  getParentRoute: () => AppUserRoute,
+} as any)
+const AppUserSessionsRoute = AppUserSessionsRouteImport.update({
+  id: '/sessions',
+  path: '/sessions',
+  getParentRoute: () => AppUserRoute,
+} as any)
+const AppUserSuccessStoryRoute = AppUserSuccessStoryRouteImport.update({
+  id: '/success-story',
+  path: '/success-story',
+  getParentRoute: () => AppUserRoute,
+} as any)
+const AppUserWeightRoute = AppUserWeightRouteImport.update({
+  id: '/weight',
+  path: '/weight',
+  getParentRoute: () => AppUserRoute,
+} as any)
+const AppUserWorkoutSessionRoute = AppUserWorkoutSessionRouteImport.update({
+  id: '/workout-session',
+  path: '/workout-session',
+  getParentRoute: () => AppUserRoute,
+} as any)
+const AppUserWorkoutsRoute = AppUserWorkoutsRouteImport.update({
+  id: '/workouts',
+  path: '/workouts',
+  getParentRoute: () => AppUserRoute,
+} as any)
+const AppAdminIndexRoute = AppAdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => AppAdminRouteRoute,
 } as any)
-const AppAdminProfileImagesRoute = AppAdminProfileImagesRouteImport.update({
-  id: '/profile-images',
-  path: '/profile-images',
+const AppAdminProfileRoute = AppAdminProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => AppAdminRouteRoute,
+} as any)
+const AppAdminProfileAboutRoute = AppAdminProfileAboutRouteImport.update({
+  id: '/profile-about',
+  path: '/profile-about',
   getParentRoute: () => AppAdminRouteRoute,
 } as any)
 const AppAdminProfileExercisesRoute =
@@ -135,131 +185,51 @@ const AppAdminProfileExercisesRoute =
     path: '/profile-exercises',
     getParentRoute: () => AppAdminRouteRoute,
   } as any)
-const AppAdminProfileAboutRoute = AppAdminProfileAboutRouteImport.update({
-  id: '/profile-about',
-  path: '/profile-about',
+const AppAdminProfileImagesRoute = AppAdminProfileImagesRouteImport.update({
+  id: '/profile-images',
+  path: '/profile-images',
   getParentRoute: () => AppAdminRouteRoute,
 } as any)
-const AppAdminProfileRoute = AppAdminProfileRouteImport.update({
+const AppAdminProfileStoriesRoute = AppAdminProfileStoriesRouteImport.update({
+  id: '/profile-stories',
+  path: '/profile-stories',
+  getParentRoute: () => AppAdminRouteRoute,
+} as any)
+const AppManagementIndexRoute = AppManagementIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppManagementRouteRoute,
+} as any)
+const AppManagementProfileRoute = AppManagementProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
-  getParentRoute: () => AppAdminRouteRoute,
+  getParentRoute: () => AppManagementRouteRoute,
 } as any)
-const AppUserWorkoutsRoute = AppUserWorkoutsRouteImport.update({
-  id: '/workouts',
-  path: '/workouts',
-  getParentRoute: () => AppUserRoute,
-} as any)
-const AppUserWorkoutSessionRoute = AppUserWorkoutSessionRouteImport.update({
-  id: '/workout-session',
-  path: '/workout-session',
-  getParentRoute: () => AppUserRoute,
-} as any)
-const AppUserWeightRoute = AppUserWeightRouteImport.update({
-  id: '/weight',
-  path: '/weight',
-  getParentRoute: () => AppUserRoute,
-} as any)
-const AppUserSuccessStoryRoute = AppUserSuccessStoryRouteImport.update({
-  id: '/success-story',
-  path: '/success-story',
-  getParentRoute: () => AppUserRoute,
-} as any)
-const AppUserSessionsRoute = AppUserSessionsRouteImport.update({
-  id: '/sessions',
-  path: '/sessions',
-  getParentRoute: () => AppUserRoute,
-} as any)
-const AppUserLogsRoute = AppUserLogsRouteImport.update({
-  id: '/logs',
-  path: '/logs',
-  getParentRoute: () => AppUserRoute,
-} as any)
-const AppUserGalleryRoute = AppUserGalleryRouteImport.update({
-  id: '/gallery',
-  path: '/gallery',
-  getParentRoute: () => AppUserRoute,
-} as any)
-const AppUserDietPlanRoute = AppUserDietPlanRouteImport.update({
-  id: '/diet-plan',
-  path: '/diet-plan',
-  getParentRoute: () => AppUserRoute,
-} as any)
-const AppUserDietLogsRoute = AppUserDietLogsRouteImport.update({
-  id: '/diet-logs',
-  path: '/diet-logs',
-  getParentRoute: () => AppUserRoute,
-} as any)
-const AppUserDietHistoryRoute = AppUserDietHistoryRouteImport.update({
-  id: '/diet-history',
-  path: '/diet-history',
-  getParentRoute: () => AppUserRoute,
-} as any)
-const AppUserDashboardRoute = AppUserDashboardRouteImport.update({
-  id: '/dashboard',
-  path: '/dashboard',
-  getParentRoute: () => AppUserRoute,
-} as any)
-const AppUserAccountRoute = AppUserAccountRouteImport.update({
-  id: '/account',
-  path: '/account',
-  getParentRoute: () => AppUserRoute,
-} as any)
-const AppManagementRoutinesIndexRoute =
-  AppManagementRoutinesIndexRouteImport.update({
-    id: '/routines/',
-    path: '/routines/',
-    getParentRoute: () => AppManagementRouteRoute,
+const AppUserRoutinesRoutineIdRoute =
+  AppUserRoutinesRoutineIdRouteImport.update({
+    id: '/routines/$routineId',
+    path: '/routines/$routineId',
+    getParentRoute: () => AppUserRoute,
   } as any)
-const AppManagementDietPlansIndexRoute =
-  AppManagementDietPlansIndexRouteImport.update({
-    id: '/diet-plans/',
-    path: '/diet-plans/',
-    getParentRoute: () => AppManagementRouteRoute,
-  } as any)
-const AppManagementClientsIndexRoute =
-  AppManagementClientsIndexRouteImport.update({
-    id: '/clients/',
-    path: '/clients/',
-    getParentRoute: () => AppManagementRouteRoute,
+const AppUserWorkoutWeekPlansPlanIdRoute =
+  AppUserWorkoutWeekPlansPlanIdRouteImport.update({
+    id: '/workout-week-plans/$planId',
+    path: '/workout-week-plans/$planId',
+    getParentRoute: () => AppUserRoute,
   } as any)
 const AppAdminListIndexRoute = AppAdminListIndexRouteImport.update({
   id: '/list/',
   path: '/list/',
   getParentRoute: () => AppAdminRouteRoute,
 } as any)
-const AppManagementRoutinesNewRoute =
-  AppManagementRoutinesNewRouteImport.update({
-    id: '/routines/new',
-    path: '/routines/new',
-    getParentRoute: () => AppManagementRouteRoute,
-  } as any)
-const AppManagementRoutinesRoutineIdRoute =
-  AppManagementRoutinesRoutineIdRouteImport.update({
-    id: '/routines/$routineId',
-    path: '/routines/$routineId',
-    getParentRoute: () => AppManagementRouteRoute,
-  } as any)
-const AppManagementDietPlansNewRoute =
-  AppManagementDietPlansNewRouteImport.update({
-    id: '/diet-plans/new',
-    path: '/diet-plans/new',
-    getParentRoute: () => AppManagementRouteRoute,
-  } as any)
-const AppManagementDietPlansPlanIdRoute =
-  AppManagementDietPlansPlanIdRouteImport.update({
-    id: '/diet-plans/$planId',
-    path: '/diet-plans/$planId',
-    getParentRoute: () => AppManagementRouteRoute,
-  } as any)
-const AppAdminProfileStoryNewRoute = AppAdminProfileStoryNewRouteImport.update({
-  id: '/profile-story/new',
-  path: '/profile-story/new',
+const AppAdminListClientIdRoute = AppAdminListClientIdRouteImport.update({
+  id: '/list/$clientId',
+  path: '/list/$clientId',
   getParentRoute: () => AppAdminRouteRoute,
 } as any)
-const AppAdminListTrainersRoute = AppAdminListTrainersRouteImport.update({
-  id: '/list/trainers',
-  path: '/list/trainers',
+const AppAdminListSelfManagedRoute = AppAdminListSelfManagedRouteImport.update({
+  id: '/list/self-managed',
+  path: '/list/self-managed',
   getParentRoute: () => AppAdminRouteRoute,
 } as any)
 const AppAdminListTrainerManagedRoute =
@@ -268,68 +238,62 @@ const AppAdminListTrainerManagedRoute =
     path: '/list/trainer-managed',
     getParentRoute: () => AppAdminRouteRoute,
   } as any)
-const AppAdminListSelfManagedRoute = AppAdminListSelfManagedRouteImport.update({
-  id: '/list/self-managed',
-  path: '/list/self-managed',
+const AppAdminListTrainersRoute = AppAdminListTrainersRouteImport.update({
+  id: '/list/trainers',
+  path: '/list/trainers',
   getParentRoute: () => AppAdminRouteRoute,
 } as any)
-const AppAdminListClientIdRoute = AppAdminListClientIdRouteImport.update({
-  id: '/list/$clientId',
-  path: '/list/$clientId',
+const AppAdminProfileStoryNewRoute = AppAdminProfileStoryNewRouteImport.update({
+  id: '/profile-story/new',
+  path: '/profile-story/new',
   getParentRoute: () => AppAdminRouteRoute,
 } as any)
-const AppUserWorkoutWeekPlansPlanIdRoute =
-  AppUserWorkoutWeekPlansPlanIdRouteImport.update({
-    id: '/workout-week-plans/$planId',
-    path: '/workout-week-plans/$planId',
-    getParentRoute: () => AppUserRoute,
+const AppManagementClientsIndexRoute =
+  AppManagementClientsIndexRouteImport.update({
+    id: '/clients/',
+    path: '/clients/',
+    getParentRoute: () => AppManagementRouteRoute,
   } as any)
-const AppUserRoutinesRoutineIdRoute =
-  AppUserRoutinesRoutineIdRouteImport.update({
+const AppManagementDietPlansIndexRoute =
+  AppManagementDietPlansIndexRouteImport.update({
+    id: '/diet-plans/',
+    path: '/diet-plans/',
+    getParentRoute: () => AppManagementRouteRoute,
+  } as any)
+const AppManagementDietPlansPlanIdRoute =
+  AppManagementDietPlansPlanIdRouteImport.update({
+    id: '/diet-plans/$planId',
+    path: '/diet-plans/$planId',
+    getParentRoute: () => AppManagementRouteRoute,
+  } as any)
+const AppManagementDietPlansNewRoute =
+  AppManagementDietPlansNewRouteImport.update({
+    id: '/diet-plans/new',
+    path: '/diet-plans/new',
+    getParentRoute: () => AppManagementRouteRoute,
+  } as any)
+const AppManagementRoutinesIndexRoute =
+  AppManagementRoutinesIndexRouteImport.update({
+    id: '/routines/',
+    path: '/routines/',
+    getParentRoute: () => AppManagementRouteRoute,
+  } as any)
+const AppManagementRoutinesRoutineIdRoute =
+  AppManagementRoutinesRoutineIdRouteImport.update({
     id: '/routines/$routineId',
     path: '/routines/$routineId',
-    getParentRoute: () => AppUserRoute,
-  } as any)
-const AppManagementClientsClientIdIndexRoute =
-  AppManagementClientsClientIdIndexRouteImport.update({
-    id: '/clients/$clientId/',
-    path: '/clients/$clientId/',
     getParentRoute: () => AppManagementRouteRoute,
   } as any)
-const AppManagementRoutinesWeekPlansPlanIdRoute =
-  AppManagementRoutinesWeekPlansPlanIdRouteImport.update({
-    id: '/routines/week-plans/$planId',
-    path: '/routines/week-plans/$planId',
+const AppManagementRoutinesNewRoute =
+  AppManagementRoutinesNewRouteImport.update({
+    id: '/routines/new',
+    path: '/routines/new',
     getParentRoute: () => AppManagementRouteRoute,
   } as any)
-const AppManagementClientsClientIdWorkoutSessionRoute =
-  AppManagementClientsClientIdWorkoutSessionRouteImport.update({
-    id: '/clients/$clientId/workout-session',
-    path: '/clients/$clientId/workout-session',
-    getParentRoute: () => AppManagementRouteRoute,
-  } as any)
-const AppManagementClientsClientIdViewWorkRoute =
-  AppManagementClientsClientIdViewWorkRouteImport.update({
-    id: '/clients/$clientId/view-work',
-    path: '/clients/$clientId/view-work',
-    getParentRoute: () => AppManagementRouteRoute,
-  } as any)
-const AppManagementClientsClientIdPatternRoute =
-  AppManagementClientsClientIdPatternRouteImport.update({
-    id: '/clients/$clientId/pattern',
-    path: '/clients/$clientId/pattern',
-    getParentRoute: () => AppManagementRouteRoute,
-  } as any)
-const AppManagementClientsClientIdCheckRoute =
-  AppManagementClientsClientIdCheckRouteImport.update({
-    id: '/clients/$clientId/check',
-    path: '/clients/$clientId/check',
-    getParentRoute: () => AppManagementRouteRoute,
-  } as any)
-const AppAdminProfileStoryStoryIdEditRoute =
-  AppAdminProfileStoryStoryIdEditRouteImport.update({
-    id: '/profile-story/$storyId/edit',
-    path: '/profile-story/$storyId/edit',
+const AppAdminListPatternClientIdRoute =
+  AppAdminListPatternClientIdRouteImport.update({
+    id: '/list/pattern/$clientId',
+    path: '/list/pattern/$clientId',
     getParentRoute: () => AppAdminRouteRoute,
   } as any)
 const AppAdminListViewWorkClientIdRoute =
@@ -338,28 +302,64 @@ const AppAdminListViewWorkClientIdRoute =
     path: '/list/view-work/$clientId',
     getParentRoute: () => AppAdminRouteRoute,
   } as any)
-const AppAdminListPatternClientIdRoute =
-  AppAdminListPatternClientIdRouteImport.update({
-    id: '/list/pattern/$clientId',
-    path: '/list/pattern/$clientId',
+const AppAdminProfileStoryStoryIdEditRoute =
+  AppAdminProfileStoryStoryIdEditRouteImport.update({
+    id: '/profile-story/$storyId/edit',
+    path: '/profile-story/$storyId/edit',
     getParentRoute: () => AppAdminRouteRoute,
   } as any)
-const AppManagementClientsClientIdRoutinesNewRoute =
-  AppManagementClientsClientIdRoutinesNewRouteImport.update({
-    id: '/clients/$clientId/routines/new',
-    path: '/clients/$clientId/routines/new',
+const AppManagementClientsClientIdIndexRoute =
+  AppManagementClientsClientIdIndexRouteImport.update({
+    id: '/clients/$clientId/',
+    path: '/clients/$clientId/',
     getParentRoute: () => AppManagementRouteRoute,
   } as any)
-const AppManagementClientsClientIdRoutinesRoutineIdRoute =
-  AppManagementClientsClientIdRoutinesRoutineIdRouteImport.update({
-    id: '/clients/$clientId/routines/$routineId',
-    path: '/clients/$clientId/routines/$routineId',
+const AppManagementClientsClientIdCheckRoute =
+  AppManagementClientsClientIdCheckRouteImport.update({
+    id: '/clients/$clientId/check',
+    path: '/clients/$clientId/check',
     getParentRoute: () => AppManagementRouteRoute,
   } as any)
-const AppManagementClientsClientIdLogsWorkoutRoute =
-  AppManagementClientsClientIdLogsWorkoutRouteImport.update({
-    id: '/clients/$clientId/logs/workout',
-    path: '/clients/$clientId/logs/workout',
+const AppManagementClientsClientIdPatternRoute =
+  AppManagementClientsClientIdPatternRouteImport.update({
+    id: '/clients/$clientId/pattern',
+    path: '/clients/$clientId/pattern',
+    getParentRoute: () => AppManagementRouteRoute,
+  } as any)
+const AppManagementClientsClientIdViewWorkRoute =
+  AppManagementClientsClientIdViewWorkRouteImport.update({
+    id: '/clients/$clientId/view-work',
+    path: '/clients/$clientId/view-work',
+    getParentRoute: () => AppManagementRouteRoute,
+  } as any)
+const AppManagementClientsClientIdWorkoutSessionRoute =
+  AppManagementClientsClientIdWorkoutSessionRouteImport.update({
+    id: '/clients/$clientId/workout-session',
+    path: '/clients/$clientId/workout-session',
+    getParentRoute: () => AppManagementRouteRoute,
+  } as any)
+const AppManagementRoutinesWeekPlansPlanIdRoute =
+  AppManagementRoutinesWeekPlansPlanIdRouteImport.update({
+    id: '/routines/week-plans/$planId',
+    path: '/routines/week-plans/$planId',
+    getParentRoute: () => AppManagementRouteRoute,
+  } as any)
+const AppAdminListLogsDietClientIdRoute =
+  AppAdminListLogsDietClientIdRouteImport.update({
+    id: '/list/logs/diet/$clientId',
+    path: '/list/logs/diet/$clientId',
+    getParentRoute: () => AppAdminRouteRoute,
+  } as any)
+const AppAdminListLogsWeightClientIdRoute =
+  AppAdminListLogsWeightClientIdRouteImport.update({
+    id: '/list/logs/weight/$clientId',
+    path: '/list/logs/weight/$clientId',
+    getParentRoute: () => AppAdminRouteRoute,
+  } as any)
+const AppManagementClientsClientIdLogsDietRoute =
+  AppManagementClientsClientIdLogsDietRouteImport.update({
+    id: '/clients/$clientId/logs/diet',
+    path: '/clients/$clientId/logs/diet',
     getParentRoute: () => AppManagementRouteRoute,
   } as any)
 const AppManagementClientsClientIdLogsWeightRoute =
@@ -368,23 +368,23 @@ const AppManagementClientsClientIdLogsWeightRoute =
     path: '/clients/$clientId/logs/weight',
     getParentRoute: () => AppManagementRouteRoute,
   } as any)
-const AppManagementClientsClientIdLogsDietRoute =
-  AppManagementClientsClientIdLogsDietRouteImport.update({
-    id: '/clients/$clientId/logs/diet',
-    path: '/clients/$clientId/logs/diet',
+const AppManagementClientsClientIdLogsWorkoutRoute =
+  AppManagementClientsClientIdLogsWorkoutRouteImport.update({
+    id: '/clients/$clientId/logs/workout',
+    path: '/clients/$clientId/logs/workout',
     getParentRoute: () => AppManagementRouteRoute,
   } as any)
-const AppAdminListLogsWeightClientIdRoute =
-  AppAdminListLogsWeightClientIdRouteImport.update({
-    id: '/list/logs/weight/$clientId',
-    path: '/list/logs/weight/$clientId',
-    getParentRoute: () => AppAdminRouteRoute,
+const AppManagementClientsClientIdRoutinesRoutineIdRoute =
+  AppManagementClientsClientIdRoutinesRoutineIdRouteImport.update({
+    id: '/clients/$clientId/routines/$routineId',
+    path: '/clients/$clientId/routines/$routineId',
+    getParentRoute: () => AppManagementRouteRoute,
   } as any)
-const AppAdminListLogsDietClientIdRoute =
-  AppAdminListLogsDietClientIdRouteImport.update({
-    id: '/list/logs/diet/$clientId',
-    path: '/list/logs/diet/$clientId',
-    getParentRoute: () => AppAdminRouteRoute,
+const AppManagementClientsClientIdRoutinesNewRoute =
+  AppManagementClientsClientIdRoutinesNewRouteImport.update({
+    id: '/clients/$clientId/routines/new',
+    path: '/clients/$clientId/routines/new',
+    getParentRoute: () => AppManagementRouteRoute,
   } as any)
 const AppManagementClientsClientIdRoutinesWeekPlansPlanIdRoute =
   AppManagementClientsClientIdRoutinesWeekPlansPlanIdRouteImport.update({
@@ -782,25 +782,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/app/sign-in': {
-      id: '/app/sign-in'
-      path: '/app/sign-in'
-      fullPath: '/app/sign-in'
-      preLoaderRoute: typeof AppSignInRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/app/_user': {
       id: '/app/_user'
       path: '/app'
       fullPath: '/app'
       preLoaderRoute: typeof AppUserRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/app/management': {
-      id: '/app/management'
-      path: '/app/management'
-      fullPath: '/app/management'
-      preLoaderRoute: typeof AppManagementRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/app/admin': {
@@ -810,144 +796,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAdminRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/app/management/': {
-      id: '/app/management/'
-      path: '/'
-      fullPath: '/app/management/'
-      preLoaderRoute: typeof AppManagementIndexRouteImport
-      parentRoute: typeof AppManagementRouteRoute
+    '/app/management': {
+      id: '/app/management'
+      path: '/app/management'
+      fullPath: '/app/management'
+      preLoaderRoute: typeof AppManagementRouteRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/app/admin/': {
-      id: '/app/admin/'
-      path: '/'
-      fullPath: '/app/admin/'
-      preLoaderRoute: typeof AppAdminIndexRouteImport
-      parentRoute: typeof AppAdminRouteRoute
+    '/app/sign-in': {
+      id: '/app/sign-in'
+      path: '/app/sign-in'
+      fullPath: '/app/sign-in'
+      preLoaderRoute: typeof AppSignInRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/app/_user/': {
       id: '/app/_user/'
       path: '/'
       fullPath: '/app/'
       preLoaderRoute: typeof AppUserIndexRouteImport
-      parentRoute: typeof AppUserRoute
-    }
-    '/app/management/profile': {
-      id: '/app/management/profile'
-      path: '/profile'
-      fullPath: '/app/management/profile'
-      preLoaderRoute: typeof AppManagementProfileRouteImport
-      parentRoute: typeof AppManagementRouteRoute
-    }
-    '/app/admin/profile-stories': {
-      id: '/app/admin/profile-stories'
-      path: '/profile-stories'
-      fullPath: '/app/admin/profile-stories'
-      preLoaderRoute: typeof AppAdminProfileStoriesRouteImport
-      parentRoute: typeof AppAdminRouteRoute
-    }
-    '/app/admin/profile-images': {
-      id: '/app/admin/profile-images'
-      path: '/profile-images'
-      fullPath: '/app/admin/profile-images'
-      preLoaderRoute: typeof AppAdminProfileImagesRouteImport
-      parentRoute: typeof AppAdminRouteRoute
-    }
-    '/app/admin/profile-exercises': {
-      id: '/app/admin/profile-exercises'
-      path: '/profile-exercises'
-      fullPath: '/app/admin/profile-exercises'
-      preLoaderRoute: typeof AppAdminProfileExercisesRouteImport
-      parentRoute: typeof AppAdminRouteRoute
-    }
-    '/app/admin/profile-about': {
-      id: '/app/admin/profile-about'
-      path: '/profile-about'
-      fullPath: '/app/admin/profile-about'
-      preLoaderRoute: typeof AppAdminProfileAboutRouteImport
-      parentRoute: typeof AppAdminRouteRoute
-    }
-    '/app/admin/profile': {
-      id: '/app/admin/profile'
-      path: '/profile'
-      fullPath: '/app/admin/profile'
-      preLoaderRoute: typeof AppAdminProfileRouteImport
-      parentRoute: typeof AppAdminRouteRoute
-    }
-    '/app/_user/workouts': {
-      id: '/app/_user/workouts'
-      path: '/workouts'
-      fullPath: '/app/workouts'
-      preLoaderRoute: typeof AppUserWorkoutsRouteImport
-      parentRoute: typeof AppUserRoute
-    }
-    '/app/_user/workout-session': {
-      id: '/app/_user/workout-session'
-      path: '/workout-session'
-      fullPath: '/app/workout-session'
-      preLoaderRoute: typeof AppUserWorkoutSessionRouteImport
-      parentRoute: typeof AppUserRoute
-    }
-    '/app/_user/weight': {
-      id: '/app/_user/weight'
-      path: '/weight'
-      fullPath: '/app/weight'
-      preLoaderRoute: typeof AppUserWeightRouteImport
-      parentRoute: typeof AppUserRoute
-    }
-    '/app/_user/success-story': {
-      id: '/app/_user/success-story'
-      path: '/success-story'
-      fullPath: '/app/success-story'
-      preLoaderRoute: typeof AppUserSuccessStoryRouteImport
-      parentRoute: typeof AppUserRoute
-    }
-    '/app/_user/sessions': {
-      id: '/app/_user/sessions'
-      path: '/sessions'
-      fullPath: '/app/sessions'
-      preLoaderRoute: typeof AppUserSessionsRouteImport
-      parentRoute: typeof AppUserRoute
-    }
-    '/app/_user/logs': {
-      id: '/app/_user/logs'
-      path: '/logs'
-      fullPath: '/app/logs'
-      preLoaderRoute: typeof AppUserLogsRouteImport
-      parentRoute: typeof AppUserRoute
-    }
-    '/app/_user/gallery': {
-      id: '/app/_user/gallery'
-      path: '/gallery'
-      fullPath: '/app/gallery'
-      preLoaderRoute: typeof AppUserGalleryRouteImport
-      parentRoute: typeof AppUserRoute
-    }
-    '/app/_user/diet-plan': {
-      id: '/app/_user/diet-plan'
-      path: '/diet-plan'
-      fullPath: '/app/diet-plan'
-      preLoaderRoute: typeof AppUserDietPlanRouteImport
-      parentRoute: typeof AppUserRoute
-    }
-    '/app/_user/diet-logs': {
-      id: '/app/_user/diet-logs'
-      path: '/diet-logs'
-      fullPath: '/app/diet-logs'
-      preLoaderRoute: typeof AppUserDietLogsRouteImport
-      parentRoute: typeof AppUserRoute
-    }
-    '/app/_user/diet-history': {
-      id: '/app/_user/diet-history'
-      path: '/diet-history'
-      fullPath: '/app/diet-history'
-      preLoaderRoute: typeof AppUserDietHistoryRouteImport
-      parentRoute: typeof AppUserRoute
-    }
-    '/app/_user/dashboard': {
-      id: '/app/_user/dashboard'
-      path: '/dashboard'
-      fullPath: '/app/dashboard'
-      preLoaderRoute: typeof AppUserDashboardRouteImport
       parentRoute: typeof AppUserRoute
     }
     '/app/_user/account': {
@@ -957,88 +824,158 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppUserAccountRouteImport
       parentRoute: typeof AppUserRoute
     }
-    '/app/management/routines/': {
-      id: '/app/management/routines/'
-      path: '/routines'
-      fullPath: '/app/management/routines/'
-      preLoaderRoute: typeof AppManagementRoutinesIndexRouteImport
+    '/app/_user/dashboard': {
+      id: '/app/_user/dashboard'
+      path: '/dashboard'
+      fullPath: '/app/dashboard'
+      preLoaderRoute: typeof AppUserDashboardRouteImport
+      parentRoute: typeof AppUserRoute
+    }
+    '/app/_user/diet-history': {
+      id: '/app/_user/diet-history'
+      path: '/diet-history'
+      fullPath: '/app/diet-history'
+      preLoaderRoute: typeof AppUserDietHistoryRouteImport
+      parentRoute: typeof AppUserRoute
+    }
+    '/app/_user/diet-logs': {
+      id: '/app/_user/diet-logs'
+      path: '/diet-logs'
+      fullPath: '/app/diet-logs'
+      preLoaderRoute: typeof AppUserDietLogsRouteImport
+      parentRoute: typeof AppUserRoute
+    }
+    '/app/_user/diet-plan': {
+      id: '/app/_user/diet-plan'
+      path: '/diet-plan'
+      fullPath: '/app/diet-plan'
+      preLoaderRoute: typeof AppUserDietPlanRouteImport
+      parentRoute: typeof AppUserRoute
+    }
+    '/app/_user/gallery': {
+      id: '/app/_user/gallery'
+      path: '/gallery'
+      fullPath: '/app/gallery'
+      preLoaderRoute: typeof AppUserGalleryRouteImport
+      parentRoute: typeof AppUserRoute
+    }
+    '/app/_user/logs': {
+      id: '/app/_user/logs'
+      path: '/logs'
+      fullPath: '/app/logs'
+      preLoaderRoute: typeof AppUserLogsRouteImport
+      parentRoute: typeof AppUserRoute
+    }
+    '/app/_user/sessions': {
+      id: '/app/_user/sessions'
+      path: '/sessions'
+      fullPath: '/app/sessions'
+      preLoaderRoute: typeof AppUserSessionsRouteImport
+      parentRoute: typeof AppUserRoute
+    }
+    '/app/_user/success-story': {
+      id: '/app/_user/success-story'
+      path: '/success-story'
+      fullPath: '/app/success-story'
+      preLoaderRoute: typeof AppUserSuccessStoryRouteImport
+      parentRoute: typeof AppUserRoute
+    }
+    '/app/_user/weight': {
+      id: '/app/_user/weight'
+      path: '/weight'
+      fullPath: '/app/weight'
+      preLoaderRoute: typeof AppUserWeightRouteImport
+      parentRoute: typeof AppUserRoute
+    }
+    '/app/_user/workout-session': {
+      id: '/app/_user/workout-session'
+      path: '/workout-session'
+      fullPath: '/app/workout-session'
+      preLoaderRoute: typeof AppUserWorkoutSessionRouteImport
+      parentRoute: typeof AppUserRoute
+    }
+    '/app/_user/workouts': {
+      id: '/app/_user/workouts'
+      path: '/workouts'
+      fullPath: '/app/workouts'
+      preLoaderRoute: typeof AppUserWorkoutsRouteImport
+      parentRoute: typeof AppUserRoute
+    }
+    '/app/admin/': {
+      id: '/app/admin/'
+      path: '/'
+      fullPath: '/app/admin/'
+      preLoaderRoute: typeof AppAdminIndexRouteImport
+      parentRoute: typeof AppAdminRouteRoute
+    }
+    '/app/admin/profile': {
+      id: '/app/admin/profile'
+      path: '/profile'
+      fullPath: '/app/admin/profile'
+      preLoaderRoute: typeof AppAdminProfileRouteImport
+      parentRoute: typeof AppAdminRouteRoute
+    }
+    '/app/admin/profile-about': {
+      id: '/app/admin/profile-about'
+      path: '/profile-about'
+      fullPath: '/app/admin/profile-about'
+      preLoaderRoute: typeof AppAdminProfileAboutRouteImport
+      parentRoute: typeof AppAdminRouteRoute
+    }
+    '/app/admin/profile-exercises': {
+      id: '/app/admin/profile-exercises'
+      path: '/profile-exercises'
+      fullPath: '/app/admin/profile-exercises'
+      preLoaderRoute: typeof AppAdminProfileExercisesRouteImport
+      parentRoute: typeof AppAdminRouteRoute
+    }
+    '/app/admin/profile-images': {
+      id: '/app/admin/profile-images'
+      path: '/profile-images'
+      fullPath: '/app/admin/profile-images'
+      preLoaderRoute: typeof AppAdminProfileImagesRouteImport
+      parentRoute: typeof AppAdminRouteRoute
+    }
+    '/app/admin/profile-stories': {
+      id: '/app/admin/profile-stories'
+      path: '/profile-stories'
+      fullPath: '/app/admin/profile-stories'
+      preLoaderRoute: typeof AppAdminProfileStoriesRouteImport
+      parentRoute: typeof AppAdminRouteRoute
+    }
+    '/app/management/': {
+      id: '/app/management/'
+      path: '/'
+      fullPath: '/app/management/'
+      preLoaderRoute: typeof AppManagementIndexRouteImport
       parentRoute: typeof AppManagementRouteRoute
     }
-    '/app/management/diet-plans/': {
-      id: '/app/management/diet-plans/'
-      path: '/diet-plans'
-      fullPath: '/app/management/diet-plans/'
-      preLoaderRoute: typeof AppManagementDietPlansIndexRouteImport
+    '/app/management/profile': {
+      id: '/app/management/profile'
+      path: '/profile'
+      fullPath: '/app/management/profile'
+      preLoaderRoute: typeof AppManagementProfileRouteImport
       parentRoute: typeof AppManagementRouteRoute
     }
-    '/app/management/clients/': {
-      id: '/app/management/clients/'
-      path: '/clients'
-      fullPath: '/app/management/clients/'
-      preLoaderRoute: typeof AppManagementClientsIndexRouteImport
-      parentRoute: typeof AppManagementRouteRoute
+    '/app/_user/routines/$routineId': {
+      id: '/app/_user/routines/$routineId'
+      path: '/routines/$routineId'
+      fullPath: '/app/routines/$routineId'
+      preLoaderRoute: typeof AppUserRoutinesRoutineIdRouteImport
+      parentRoute: typeof AppUserRoute
+    }
+    '/app/_user/workout-week-plans/$planId': {
+      id: '/app/_user/workout-week-plans/$planId'
+      path: '/workout-week-plans/$planId'
+      fullPath: '/app/workout-week-plans/$planId'
+      preLoaderRoute: typeof AppUserWorkoutWeekPlansPlanIdRouteImport
+      parentRoute: typeof AppUserRoute
     }
     '/app/admin/list/': {
       id: '/app/admin/list/'
       path: '/list'
       fullPath: '/app/admin/list/'
       preLoaderRoute: typeof AppAdminListIndexRouteImport
-      parentRoute: typeof AppAdminRouteRoute
-    }
-    '/app/management/routines/new': {
-      id: '/app/management/routines/new'
-      path: '/routines/new'
-      fullPath: '/app/management/routines/new'
-      preLoaderRoute: typeof AppManagementRoutinesNewRouteImport
-      parentRoute: typeof AppManagementRouteRoute
-    }
-    '/app/management/routines/$routineId': {
-      id: '/app/management/routines/$routineId'
-      path: '/routines/$routineId'
-      fullPath: '/app/management/routines/$routineId'
-      preLoaderRoute: typeof AppManagementRoutinesRoutineIdRouteImport
-      parentRoute: typeof AppManagementRouteRoute
-    }
-    '/app/management/diet-plans/new': {
-      id: '/app/management/diet-plans/new'
-      path: '/diet-plans/new'
-      fullPath: '/app/management/diet-plans/new'
-      preLoaderRoute: typeof AppManagementDietPlansNewRouteImport
-      parentRoute: typeof AppManagementRouteRoute
-    }
-    '/app/management/diet-plans/$planId': {
-      id: '/app/management/diet-plans/$planId'
-      path: '/diet-plans/$planId'
-      fullPath: '/app/management/diet-plans/$planId'
-      preLoaderRoute: typeof AppManagementDietPlansPlanIdRouteImport
-      parentRoute: typeof AppManagementRouteRoute
-    }
-    '/app/admin/profile-story/new': {
-      id: '/app/admin/profile-story/new'
-      path: '/profile-story/new'
-      fullPath: '/app/admin/profile-story/new'
-      preLoaderRoute: typeof AppAdminProfileStoryNewRouteImport
-      parentRoute: typeof AppAdminRouteRoute
-    }
-    '/app/admin/list/trainers': {
-      id: '/app/admin/list/trainers'
-      path: '/list/trainers'
-      fullPath: '/app/admin/list/trainers'
-      preLoaderRoute: typeof AppAdminListTrainersRouteImport
-      parentRoute: typeof AppAdminRouteRoute
-    }
-    '/app/admin/list/trainer-managed': {
-      id: '/app/admin/list/trainer-managed'
-      path: '/list/trainer-managed'
-      fullPath: '/app/admin/list/trainer-managed'
-      preLoaderRoute: typeof AppAdminListTrainerManagedRouteImport
-      parentRoute: typeof AppAdminRouteRoute
-    }
-    '/app/admin/list/self-managed': {
-      id: '/app/admin/list/self-managed'
-      path: '/list/self-managed'
-      fullPath: '/app/admin/list/self-managed'
-      preLoaderRoute: typeof AppAdminListSelfManagedRouteImport
       parentRoute: typeof AppAdminRouteRoute
     }
     '/app/admin/list/$clientId': {
@@ -1048,67 +985,88 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAdminListClientIdRouteImport
       parentRoute: typeof AppAdminRouteRoute
     }
-    '/app/_user/workout-week-plans/$planId': {
-      id: '/app/_user/workout-week-plans/$planId'
-      path: '/workout-week-plans/$planId'
-      fullPath: '/app/workout-week-plans/$planId'
-      preLoaderRoute: typeof AppUserWorkoutWeekPlansPlanIdRouteImport
-      parentRoute: typeof AppUserRoute
+    '/app/admin/list/self-managed': {
+      id: '/app/admin/list/self-managed'
+      path: '/list/self-managed'
+      fullPath: '/app/admin/list/self-managed'
+      preLoaderRoute: typeof AppAdminListSelfManagedRouteImport
+      parentRoute: typeof AppAdminRouteRoute
     }
-    '/app/_user/routines/$routineId': {
-      id: '/app/_user/routines/$routineId'
+    '/app/admin/list/trainer-managed': {
+      id: '/app/admin/list/trainer-managed'
+      path: '/list/trainer-managed'
+      fullPath: '/app/admin/list/trainer-managed'
+      preLoaderRoute: typeof AppAdminListTrainerManagedRouteImport
+      parentRoute: typeof AppAdminRouteRoute
+    }
+    '/app/admin/list/trainers': {
+      id: '/app/admin/list/trainers'
+      path: '/list/trainers'
+      fullPath: '/app/admin/list/trainers'
+      preLoaderRoute: typeof AppAdminListTrainersRouteImport
+      parentRoute: typeof AppAdminRouteRoute
+    }
+    '/app/admin/profile-story/new': {
+      id: '/app/admin/profile-story/new'
+      path: '/profile-story/new'
+      fullPath: '/app/admin/profile-story/new'
+      preLoaderRoute: typeof AppAdminProfileStoryNewRouteImport
+      parentRoute: typeof AppAdminRouteRoute
+    }
+    '/app/management/clients/': {
+      id: '/app/management/clients/'
+      path: '/clients'
+      fullPath: '/app/management/clients/'
+      preLoaderRoute: typeof AppManagementClientsIndexRouteImport
+      parentRoute: typeof AppManagementRouteRoute
+    }
+    '/app/management/diet-plans/': {
+      id: '/app/management/diet-plans/'
+      path: '/diet-plans'
+      fullPath: '/app/management/diet-plans/'
+      preLoaderRoute: typeof AppManagementDietPlansIndexRouteImport
+      parentRoute: typeof AppManagementRouteRoute
+    }
+    '/app/management/diet-plans/$planId': {
+      id: '/app/management/diet-plans/$planId'
+      path: '/diet-plans/$planId'
+      fullPath: '/app/management/diet-plans/$planId'
+      preLoaderRoute: typeof AppManagementDietPlansPlanIdRouteImport
+      parentRoute: typeof AppManagementRouteRoute
+    }
+    '/app/management/diet-plans/new': {
+      id: '/app/management/diet-plans/new'
+      path: '/diet-plans/new'
+      fullPath: '/app/management/diet-plans/new'
+      preLoaderRoute: typeof AppManagementDietPlansNewRouteImport
+      parentRoute: typeof AppManagementRouteRoute
+    }
+    '/app/management/routines/': {
+      id: '/app/management/routines/'
+      path: '/routines'
+      fullPath: '/app/management/routines/'
+      preLoaderRoute: typeof AppManagementRoutinesIndexRouteImport
+      parentRoute: typeof AppManagementRouteRoute
+    }
+    '/app/management/routines/$routineId': {
+      id: '/app/management/routines/$routineId'
       path: '/routines/$routineId'
-      fullPath: '/app/routines/$routineId'
-      preLoaderRoute: typeof AppUserRoutinesRoutineIdRouteImport
-      parentRoute: typeof AppUserRoute
-    }
-    '/app/management/clients/$clientId/': {
-      id: '/app/management/clients/$clientId/'
-      path: '/clients/$clientId'
-      fullPath: '/app/management/clients/$clientId/'
-      preLoaderRoute: typeof AppManagementClientsClientIdIndexRouteImport
+      fullPath: '/app/management/routines/$routineId'
+      preLoaderRoute: typeof AppManagementRoutinesRoutineIdRouteImport
       parentRoute: typeof AppManagementRouteRoute
     }
-    '/app/management/routines/week-plans/$planId': {
-      id: '/app/management/routines/week-plans/$planId'
-      path: '/routines/week-plans/$planId'
-      fullPath: '/app/management/routines/week-plans/$planId'
-      preLoaderRoute: typeof AppManagementRoutinesWeekPlansPlanIdRouteImport
+    '/app/management/routines/new': {
+      id: '/app/management/routines/new'
+      path: '/routines/new'
+      fullPath: '/app/management/routines/new'
+      preLoaderRoute: typeof AppManagementRoutinesNewRouteImport
       parentRoute: typeof AppManagementRouteRoute
     }
-    '/app/management/clients/$clientId/workout-session': {
-      id: '/app/management/clients/$clientId/workout-session'
-      path: '/clients/$clientId/workout-session'
-      fullPath: '/app/management/clients/$clientId/workout-session'
-      preLoaderRoute: typeof AppManagementClientsClientIdWorkoutSessionRouteImport
-      parentRoute: typeof AppManagementRouteRoute
-    }
-    '/app/management/clients/$clientId/view-work': {
-      id: '/app/management/clients/$clientId/view-work'
-      path: '/clients/$clientId/view-work'
-      fullPath: '/app/management/clients/$clientId/view-work'
-      preLoaderRoute: typeof AppManagementClientsClientIdViewWorkRouteImport
-      parentRoute: typeof AppManagementRouteRoute
-    }
-    '/app/management/clients/$clientId/pattern': {
-      id: '/app/management/clients/$clientId/pattern'
-      path: '/clients/$clientId/pattern'
-      fullPath: '/app/management/clients/$clientId/pattern'
-      preLoaderRoute: typeof AppManagementClientsClientIdPatternRouteImport
-      parentRoute: typeof AppManagementRouteRoute
-    }
-    '/app/management/clients/$clientId/check': {
-      id: '/app/management/clients/$clientId/check'
-      path: '/clients/$clientId/check'
-      fullPath: '/app/management/clients/$clientId/check'
-      preLoaderRoute: typeof AppManagementClientsClientIdCheckRouteImport
-      parentRoute: typeof AppManagementRouteRoute
-    }
-    '/app/admin/profile-story/$storyId/edit': {
-      id: '/app/admin/profile-story/$storyId/edit'
-      path: '/profile-story/$storyId/edit'
-      fullPath: '/app/admin/profile-story/$storyId/edit'
-      preLoaderRoute: typeof AppAdminProfileStoryStoryIdEditRouteImport
+    '/app/admin/list/pattern/$clientId': {
+      id: '/app/admin/list/pattern/$clientId'
+      path: '/list/pattern/$clientId'
+      fullPath: '/app/admin/list/pattern/$clientId'
+      preLoaderRoute: typeof AppAdminListPatternClientIdRouteImport
       parentRoute: typeof AppAdminRouteRoute
     }
     '/app/admin/list/view-work/$clientId': {
@@ -1118,32 +1076,74 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAdminListViewWorkClientIdRouteImport
       parentRoute: typeof AppAdminRouteRoute
     }
-    '/app/admin/list/pattern/$clientId': {
-      id: '/app/admin/list/pattern/$clientId'
-      path: '/list/pattern/$clientId'
-      fullPath: '/app/admin/list/pattern/$clientId'
-      preLoaderRoute: typeof AppAdminListPatternClientIdRouteImport
+    '/app/admin/profile-story/$storyId/edit': {
+      id: '/app/admin/profile-story/$storyId/edit'
+      path: '/profile-story/$storyId/edit'
+      fullPath: '/app/admin/profile-story/$storyId/edit'
+      preLoaderRoute: typeof AppAdminProfileStoryStoryIdEditRouteImport
       parentRoute: typeof AppAdminRouteRoute
     }
-    '/app/management/clients/$clientId/routines/new': {
-      id: '/app/management/clients/$clientId/routines/new'
-      path: '/clients/$clientId/routines/new'
-      fullPath: '/app/management/clients/$clientId/routines/new'
-      preLoaderRoute: typeof AppManagementClientsClientIdRoutinesNewRouteImport
+    '/app/management/clients/$clientId/': {
+      id: '/app/management/clients/$clientId/'
+      path: '/clients/$clientId'
+      fullPath: '/app/management/clients/$clientId/'
+      preLoaderRoute: typeof AppManagementClientsClientIdIndexRouteImport
       parentRoute: typeof AppManagementRouteRoute
     }
-    '/app/management/clients/$clientId/routines/$routineId': {
-      id: '/app/management/clients/$clientId/routines/$routineId'
-      path: '/clients/$clientId/routines/$routineId'
-      fullPath: '/app/management/clients/$clientId/routines/$routineId'
-      preLoaderRoute: typeof AppManagementClientsClientIdRoutinesRoutineIdRouteImport
+    '/app/management/clients/$clientId/check': {
+      id: '/app/management/clients/$clientId/check'
+      path: '/clients/$clientId/check'
+      fullPath: '/app/management/clients/$clientId/check'
+      preLoaderRoute: typeof AppManagementClientsClientIdCheckRouteImport
       parentRoute: typeof AppManagementRouteRoute
     }
-    '/app/management/clients/$clientId/logs/workout': {
-      id: '/app/management/clients/$clientId/logs/workout'
-      path: '/clients/$clientId/logs/workout'
-      fullPath: '/app/management/clients/$clientId/logs/workout'
-      preLoaderRoute: typeof AppManagementClientsClientIdLogsWorkoutRouteImport
+    '/app/management/clients/$clientId/pattern': {
+      id: '/app/management/clients/$clientId/pattern'
+      path: '/clients/$clientId/pattern'
+      fullPath: '/app/management/clients/$clientId/pattern'
+      preLoaderRoute: typeof AppManagementClientsClientIdPatternRouteImport
+      parentRoute: typeof AppManagementRouteRoute
+    }
+    '/app/management/clients/$clientId/view-work': {
+      id: '/app/management/clients/$clientId/view-work'
+      path: '/clients/$clientId/view-work'
+      fullPath: '/app/management/clients/$clientId/view-work'
+      preLoaderRoute: typeof AppManagementClientsClientIdViewWorkRouteImport
+      parentRoute: typeof AppManagementRouteRoute
+    }
+    '/app/management/clients/$clientId/workout-session': {
+      id: '/app/management/clients/$clientId/workout-session'
+      path: '/clients/$clientId/workout-session'
+      fullPath: '/app/management/clients/$clientId/workout-session'
+      preLoaderRoute: typeof AppManagementClientsClientIdWorkoutSessionRouteImport
+      parentRoute: typeof AppManagementRouteRoute
+    }
+    '/app/management/routines/week-plans/$planId': {
+      id: '/app/management/routines/week-plans/$planId'
+      path: '/routines/week-plans/$planId'
+      fullPath: '/app/management/routines/week-plans/$planId'
+      preLoaderRoute: typeof AppManagementRoutinesWeekPlansPlanIdRouteImport
+      parentRoute: typeof AppManagementRouteRoute
+    }
+    '/app/admin/list/logs/diet/$clientId': {
+      id: '/app/admin/list/logs/diet/$clientId'
+      path: '/list/logs/diet/$clientId'
+      fullPath: '/app/admin/list/logs/diet/$clientId'
+      preLoaderRoute: typeof AppAdminListLogsDietClientIdRouteImport
+      parentRoute: typeof AppAdminRouteRoute
+    }
+    '/app/admin/list/logs/weight/$clientId': {
+      id: '/app/admin/list/logs/weight/$clientId'
+      path: '/list/logs/weight/$clientId'
+      fullPath: '/app/admin/list/logs/weight/$clientId'
+      preLoaderRoute: typeof AppAdminListLogsWeightClientIdRouteImport
+      parentRoute: typeof AppAdminRouteRoute
+    }
+    '/app/management/clients/$clientId/logs/diet': {
+      id: '/app/management/clients/$clientId/logs/diet'
+      path: '/clients/$clientId/logs/diet'
+      fullPath: '/app/management/clients/$clientId/logs/diet'
+      preLoaderRoute: typeof AppManagementClientsClientIdLogsDietRouteImport
       parentRoute: typeof AppManagementRouteRoute
     }
     '/app/management/clients/$clientId/logs/weight': {
@@ -1153,26 +1153,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppManagementClientsClientIdLogsWeightRouteImport
       parentRoute: typeof AppManagementRouteRoute
     }
-    '/app/management/clients/$clientId/logs/diet': {
-      id: '/app/management/clients/$clientId/logs/diet'
-      path: '/clients/$clientId/logs/diet'
-      fullPath: '/app/management/clients/$clientId/logs/diet'
-      preLoaderRoute: typeof AppManagementClientsClientIdLogsDietRouteImport
+    '/app/management/clients/$clientId/logs/workout': {
+      id: '/app/management/clients/$clientId/logs/workout'
+      path: '/clients/$clientId/logs/workout'
+      fullPath: '/app/management/clients/$clientId/logs/workout'
+      preLoaderRoute: typeof AppManagementClientsClientIdLogsWorkoutRouteImport
       parentRoute: typeof AppManagementRouteRoute
     }
-    '/app/admin/list/logs/weight/$clientId': {
-      id: '/app/admin/list/logs/weight/$clientId'
-      path: '/list/logs/weight/$clientId'
-      fullPath: '/app/admin/list/logs/weight/$clientId'
-      preLoaderRoute: typeof AppAdminListLogsWeightClientIdRouteImport
-      parentRoute: typeof AppAdminRouteRoute
+    '/app/management/clients/$clientId/routines/$routineId': {
+      id: '/app/management/clients/$clientId/routines/$routineId'
+      path: '/clients/$clientId/routines/$routineId'
+      fullPath: '/app/management/clients/$clientId/routines/$routineId'
+      preLoaderRoute: typeof AppManagementClientsClientIdRoutinesRoutineIdRouteImport
+      parentRoute: typeof AppManagementRouteRoute
     }
-    '/app/admin/list/logs/diet/$clientId': {
-      id: '/app/admin/list/logs/diet/$clientId'
-      path: '/list/logs/diet/$clientId'
-      fullPath: '/app/admin/list/logs/diet/$clientId'
-      preLoaderRoute: typeof AppAdminListLogsDietClientIdRouteImport
-      parentRoute: typeof AppAdminRouteRoute
+    '/app/management/clients/$clientId/routines/new': {
+      id: '/app/management/clients/$clientId/routines/new'
+      path: '/clients/$clientId/routines/new'
+      fullPath: '/app/management/clients/$clientId/routines/new'
+      preLoaderRoute: typeof AppManagementClientsClientIdRoutinesNewRouteImport
+      parentRoute: typeof AppManagementRouteRoute
     }
     '/app/management/clients/$clientId/routines/week-plans/$planId': {
       id: '/app/management/clients/$clientId/routines/week-plans/$planId'
